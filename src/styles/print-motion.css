@@ -1,0 +1,99 @@
+/* Reduced motion and A4-landscape print (always light, animations off, controls hidden). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media print {
+  :root,
+  :root[data-theme] {
+    --bg: #eef2f6;
+    --gridline: rgba(40, 64, 96, 0.075);
+    --glass: rgba(255, 255, 255, 0.62);
+    --glass-strong: rgba(255, 255, 255, 0.86);
+    --glass-border: rgba(255, 255, 255, 0.92);
+    --hair: rgba(17, 23, 34, 0.1);
+    --ink: #111722;
+    --ink-2: #4a5263;
+    --muted: #6a7282;
+    --grid: #dde3ea;
+    --axis: #b9c1cc;
+    --ring: #ffffff;
+    --halo: rgba(255, 255, 255, 0.85);
+    --card: rgba(255, 255, 255, 0.55);
+    --card-hover: rgba(255, 255, 255, 0.9);
+    --hover: #ffffff;
+    --tip-bg: rgba(255, 255, 255, 0.95);
+    --on-ink: #ffffff;
+    --track: rgba(17, 23, 34, 0.07);
+    --ring-line: rgba(17, 23, 34, 0.13);
+    --ring-flat: rgba(17, 23, 34, 0.28);
+    --spoke: rgba(17, 23, 34, 0.07);
+    --sweep-line: rgba(17, 23, 34, 0.55);
+    --sweep-fill: #111722;
+    --shadow:
+      0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 14px 34px -10px rgba(30, 50, 80, 0.2), 0 2px 6px rgba(30, 50, 80, 0.06);
+    color-scheme: light;
+  }
+  @page {
+    size: A4 landscape;
+    margin: 9mm;
+  }
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  html,
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background-attachment: scroll;
+  }
+  .page {
+    max-width: none;
+    padding: 0;
+  }
+  .no-print,
+  .grip,
+  .chip .x,
+  .add-form,
+  .lens-add,
+  .lens-tab .lx,
+  .watch-msg,
+  .switcher,
+  #sweep,
+  .key .hint,
+  .brief-actions,
+  .seg {
+    display: none !important;
+  }
+  .panel,
+  .glass {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--glass-strong);
+    box-shadow: none;
+    break-inside: avoid;
+    border-color: var(--hair);
+  }
+  .cols {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 10px;
+  }
+  .col {
+    gap: 10px;
+  }
+  .alerts {
+    max-height: none;
+    overflow: visible;
+  }
+  .big .num {
+    font-size: 40px;
+  }
+}

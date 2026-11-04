@@ -1,0 +1,64 @@
+/* Design tokens. Dark is the default; [data-theme="light"] overrides. Alert red/amber are reserved for alerts. */
+:root {
+  --bg: #0b1017;
+  --gridline: rgba(150, 180, 220, 0.055);
+  --glass: rgba(20, 28, 40, 0.62);
+  --glass-strong: rgba(28, 38, 54, 0.92);
+  --glass-border: rgba(160, 190, 230, 0.13);
+  --hair: rgba(190, 210, 240, 0.12);
+  --ink: #e7ecf3;
+  --ink-2: #adb7c6;
+  --muted: #8792a4;
+  --grid: #212b39;
+  --axis: #3b4759;
+  --ring: #141b26;
+  --halo: rgba(11, 16, 23, 0.85);
+  --card: rgba(255, 255, 255, 0.035);
+  --card-hover: rgba(255, 255, 255, 0.075);
+  --hover: rgba(255, 255, 255, 0.08);
+  --tip-bg: rgba(16, 23, 34, 0.96);
+  --on-ink: #0b1017;
+  --track: rgba(255, 255, 255, 0.08);
+  --ring-line: rgba(200, 220, 255, 0.12);
+  --ring-flat: rgba(200, 220, 255, 0.3);
+  --spoke: rgba(200, 220, 255, 0.06);
+  --sweep-line: rgba(160, 220, 255, 0.65);
+  --sweep-fill: #8fc4ff;
+  --shadow:
+    0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 18px 40px -14px rgba(0, 0, 0, 0.65), 0 2px 6px rgba(0, 0, 0, 0.3);
+  color-scheme: dark;
+  --alert: #d03b3b; /* alerts only */
+  --watch: #fab219; /* alerts only */
+  --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, 'Times New Roman', serif;
+  --mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+  --radius: 14px;
+}
+:root[data-theme='light'] {
+  --bg: #eef2f6;
+  --gridline: rgba(40, 64, 96, 0.075);
+  --glass: rgba(255, 255, 255, 0.62);
+  --glass-strong: rgba(255, 255, 255, 0.86);
+  --glass-border: rgba(255, 255, 255, 0.92);
+  --hair: rgba(17, 23, 34, 0.1);
+  --ink: #111722;
+  --ink-2: #4a5263;
+  --muted: #6a7282;
+  --grid: #dde3ea;
+  --axis: #b9c1cc;
+  --ring: #ffffff;
+  --halo: rgba(255, 255, 255, 0.85);
+  --card: rgba(255, 255, 255, 0.55);
+  --card-hover: rgba(255, 255, 255, 0.9);
+  --hover: #ffffff;
+  --tip-bg: rgba(255, 255, 255, 0.95);
+  --on-ink: #ffffff;
+  --track: rgba(17, 23, 34, 0.07);
+  --ring-line: rgba(17, 23, 34, 0.13);
+  --ring-flat: rgba(17, 23, 34, 0.28);
+  --spoke: rgba(17, 23, 34, 0.07);
+  --sweep-line: rgba(17, 23, 34, 0.55);
+  --sweep-fill: #111722;
+  --shadow:
+    0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 14px 34px -10px rgba(30, 50, 80, 0.2), 0 2px 6px rgba(30, 50, 80, 0.06);
+  color-scheme: light;
+}
