@@ -39,7 +39,7 @@ function boot(): void {
   ui.ghToken = !!githubToken();
   state.activeLens = lensById(prefs.activeLens) ? prefs.activeLens : state.lenses[0]?.id || null;
   state.selectedByLens = prefs.selectedByLens && typeof prefs.selectedByLens === 'object' ? prefs.selectedByLens : {};
-  state.storySrc = prefs.storySrc === 'forecasts' || prefs.storySrc === 'hn' ? prefs.storySrc : 'reading';
+  state.storySrc = ['news', 'forecasts', 'hn'].includes(prefs.storySrc) ? prefs.storySrc : 'reading';
   state.storyScope = prefs.storyScope === 'topic' ? 'topic' : 'lens';
   state.prevLook = store.get(LS.look, null);
 

@@ -115,6 +115,6 @@ export interface Prefs {
   selectedByLens: Record<string, string>;
   source: string;
   theme: 'dark' | 'light';
-  storySrc: 'reading' | 'forecasts' | 'hn';
+  storySrc: 'news' | 'reading' | 'forecasts' | 'hn';
   storyScope: 'topic' | 'lens';
 }

@@ -1,4 +1,4 @@
-// PRECOG / Trend Radar · The Guardian: articles per day naming the topic (English lenses).
+// PRECOG / Trend Radar · The Guardian: articles per day naming the topic, and the newest ones to read.
 // Needs a free developer key from https://open-platform.theguardian.com/access/ (about 500 calls a day,
 // one a second). The key lives only in this browser's storage, never in the page source.
 import { DAY, sleep, store } from '../core/config';
@@ -23,6 +23,21 @@ function throttled(url: string, signal: AbortSignal): Promise<any> {
   return run;
 }
 
+/** A Guardian article naming a topic, kept from the same requests that count coverage. */
+export interface GuardianArticle {
+  id: string;
+  title: string;
+  url: string;
+  section: string;
+  t: number;
+}
+const cacheKey = (q: string) => 'precog.guardian.v2.' + phrase(q).toLowerCase();
+/** The newest articles for a topic phrase, from today's cache (filled by the trend fetch). */
+export function guardianArticles(q: string): GuardianArticle[] {
+  const c = store.get<{ day: number; articles?: GuardianArticle[] } | null>(cacheKey(q), null);
+  return c && c.day === utcDay() ? c.articles || [] : [];
+}
+
 registerAdapter({
   id: 'guardian',
   label: 'The Guardian articles / day',
@@ -35,9 +50,10 @@ registerAdapter({
     const key = guardianKey();
     if (!key) return SKIP(topic, 'add a Guardian API key to include news');
     const q = phrase(query.q || topic);
-    const ck = 'precog.guardian.v1.' + q.toLowerCase();
+    const ck = cacheKey(query.q || topic);
     const c = store.get<{ day: number; points: { t: string; value: number }[] } | null>(ck, null);
     if (c && c.day === utcDay()) return { topic, points: c.points };
+    const articles: GuardianArticle[] = [];
 
     const days = 45,
       end = utcDay() + DAY,
@@ -61,12 +77,16 @@ registerAdapter({
       }
       pages = j.response?.pages || 1;
       (j.response?.results || []).forEach(a => {
-        const k = Math.floor((Date.parse(a.webPublicationDate) - (end - days * DAY)) / DAY);
+        const t = Date.parse(a.webPublicationDate);
+        const k = Math.floor((t - (end - days * DAY)) / DAY);
         if (k >= 0 && k < days) counts[k]++;
+        // Results come newest first: keep the first 20 to list in the News stream.
+        if (articles.length < 20 && a.type === 'article')
+          articles.push({ id: a.id, title: a.webTitle, url: a.webUrl, section: a.sectionName || '', t });
       });
     }
     const points = counts.map((value, k) => ({ t: iso(end - (days - k) * DAY), value }));
-    store.set(ck, { day: utcDay(), points });
+    store.set(ck, { day: utcDay(), points, articles });
     return { topic, points };
   },
 });

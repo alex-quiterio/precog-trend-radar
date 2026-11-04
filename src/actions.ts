@@ -212,6 +212,8 @@ export function editGuardianKey(): void {
   if (k == null || k.trim() === now) return;
   setGuardianKey(k);
   ui.guardian = !!guardianKey();
+  if (ui.guardian && !now) state.storySrc = 'news'; // show the articles straight away
+  savePrefs();
   startLive();
 }
 /** Follows a WordPress site in the Reading tab, after checking the browser may read it. */

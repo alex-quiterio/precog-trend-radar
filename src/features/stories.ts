@@ -1,5 +1,5 @@
-// PRECOG / Trend Radar · Signals: what you're reading (followed sites), what forecasters expect
-// (Manifold) and what's spreading among builders (Hacker News), each matched to your topics.
+// PRECOG / Trend Radar · Streams: the news (The Guardian), what you're reading (followed sites), what
+// forecasters expect (Manifold) and what's spreading among builders (Hacker News), matched to your topics.
 import type { Entry } from '../types';
 import { HOUR, LS, MIN, STORY_REFRESH_MS, store } from '../core/config';
 import { bump } from '../core/ui-store';
@@ -7,7 +7,9 @@ import type { Forecast } from '../sources/manifold';
 import { searchForecasts } from '../sources/manifold';
 import type { ReadingItem } from '../sources/reading';
 import { loadReading, readingScore } from '../sources/reading';
-import { getJSON, phrase, pool, queryOf, topicRegex } from '../sources/registry';
+import type { GuardianArticle } from '../sources/guardian';
+import { guardianArticles, guardianKey } from '../sources/guardian';
+import { ADAPTERS, getJSON, phrase, pool, queryOf, topicRegex } from '../sources/registry';
 import { activeChannel } from '../channels';
 import { activeLens, entriesOf, selectedEntry, state } from '../state';
 
@@ -33,19 +35,24 @@ export interface ReadingMatch extends ReadingItem {
   topics: string[];
   score: number;
 }
+/** A Guardian article naming topics in scope. */
+export interface NewsMatch extends GuardianArticle {
+  topics: string[];
+}
 /** An open prediction market on a topic in scope. */
 export interface ForecastMatch extends Forecast {
   topics: string[];
 }
-export type StorySrc = 'reading' | 'forecasts' | 'hn';
+export type StorySrc = 'news' | 'reading' | 'forecasts' | 'hn';
 export const stories = {
   hn: new Map<string, HNStory>(),
   forecasts: new Map<string, ForecastMatch>(),
+  news: new Map<string, NewsMatch>(),
   reading: new Map<string, ReadingMatch>(),
   readingCount: 0,
-  loading: { hn: false, forecasts: false, reading: false },
-  errors: { hn: null, forecasts: null, reading: null },
-  at: { hn: 0, forecasts: 0, reading: 0 },
+  loading: { hn: false, forecasts: false, reading: false, news: false },
+  errors: { hn: null, forecasts: null, reading: null, news: null },
+  at: { hn: 0, forecasts: 0, reading: 0, news: 0 },
 };
 export let storyTimer = null,
   storyAbort = null;
@@ -165,10 +172,30 @@ export async function loadForecastStories(entries: Entry[], signal: AbortSignal)
   });
   stories.forecasts = found;
 }
+/**
+ * Guardian articles for the topics in scope. Reuses what the trend fetch cached today; a topic not
+ * fetched yet is fetched now (same request, same cache), so the stream never costs extra calls.
+ */
+export async function loadNewsStories(entries: Entry[], signal: AbortSignal): Promise<void> {
+  if (!guardianKey()) throw new Error('add a Guardian API key (top bar) to see Guardian articles');
+  const found = new Map<string, NewsMatch>();
+  for (const E of entries) {
+    if (signal.aborted) return;
+    const q = queryOf(E);
+    if (!guardianArticles(q.q).length) await ADAPTERS.guardian.fetch(E.name, { signal, query: q });
+    guardianArticles(q.q).forEach(a => {
+      const m = found.get(a.id) || { ...a, topics: [] };
+      if (!m.topics.includes(E.key)) m.topics.push(E.key);
+      found.set(a.id, m);
+    });
+    stories.news = new Map(found);
+    bump();
+  }
+}
 export async function loadStories() {
   if (storyAbort) storyAbort.abort();
   storyAbort = new AbortController();
-  const streams = activeChannel().streams;
+  const streams = activeChannel().streams.filter(s => s !== 'news' || guardianKey());
   if (!streams.includes(state.storySrc)) state.storySrc = streams[0] || 'reading';
   const { signal } = storyAbort,
     src = state.storySrc,
@@ -178,6 +205,7 @@ export async function loadStories() {
   try {
     if (src === 'hn') await loadHNStories(entries, signal);
     else if (src === 'forecasts') await loadForecastStories(entries, signal);
+    else if (src === 'news') await loadNewsStories(entries, signal);
     else await loadReadingStories(entries, signal);
     if (src !== 'reading') stories.errors[src] = null;
     stories.at[src] = Date.now();

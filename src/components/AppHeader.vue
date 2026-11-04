@@ -54,13 +54,15 @@
         :key="c.id"
         type="button"
         class="channel"
+        :class="{ on: c.id === view.active }"
         :aria-current="c.id === view.active ? 'page' : undefined"
+        :aria-label="c.label + (c.heat ? `, ${c.heat.n} ${c.heat.level}` : '')"
+        :title="c.label"
         @click="selectLens(c.lensId)"
       >
-        {{ c.label }}
-        <span v-if="c.heat" :class="['heat', c.heat.level]" :aria-label="c.heat.n + ' ' + c.heat.level">
-          {{ c.heat.n }}
-        </span>
+        <channel-icon :name="c.icon"></channel-icon>
+        <span class="ch-label">{{ c.label }}</span>
+        <span v-if="c.heat" :class="['heat', c.heat.level]" aria-hidden="true">{{ c.heat.n }}</span>
       </button>
       <form v-if="view.canAdd && adding" class="ch-new" autocomplete="off" @submit.prevent="create">
         <label class="sr-only" for="ch-name">New channel name</label>
@@ -97,12 +99,14 @@ import { activeChannel, channels } from '../channels';
 import { MAX_LENSES } from '../core/config';
 import { ui } from '../core/ui-store';
 import { refresh } from '../live';
+import ChannelIcon from './ChannelIcon.vue';
 import { lensById, state } from '../state';
 
 // PRECOG / Trend Radar · Header: name, heartbeat, controls, and the channel bar that switches the whole view.
 
 export default defineComponent({
   name: 'AppHeader',
+  components: { ChannelIcon },
   setup() {
     const view = computed(() => {
       ui.v;

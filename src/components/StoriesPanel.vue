@@ -39,7 +39,32 @@
     </div>
 
     <ol class="stories">
-      <template v-if="view.src === 'reading'">
+      <template v-if="view.src === 'news'">
+        <li v-for="(it, i) in view.items" :key="it.n.id" class="story">
+          <span class="rank">{{ i + 1 }}</span>
+          <div>
+            <div class="title">
+              <a :href="it.n.url" target="_blank" rel="noopener noreferrer">{{ it.n.title }}</a>
+            </div>
+            <div class="smeta">
+              <span v-for="E in it.topics" :key="E.key" class="stopic">
+                <topic-dot :color="E.color"></topic-dot>
+                {{ E.name }}
+              </span>
+              <span class="site">The Guardian</span>
+              <span v-if="it.n.section">{{ it.n.section }}</span>
+              <span>{{ when(it.n.t) }}</span>
+            </div>
+          </div>
+          <div class="vel">
+            <b>{{ it.n.topics.length }}</b>
+            {{ it.n.topics.length === 1 ? 'topic' : 'topics' }}
+            <small>newest first</small>
+            <div class="vbar"><i :style="{ width: it.pct.toFixed(1) + '%' }"></i></div>
+          </div>
+        </li>
+      </template>
+      <template v-else-if="view.src === 'reading'">
         <li v-for="(it, i) in view.items" :key="it.r.id" class="story">
           <span class="rank">{{ i + 1 }}</span>
           <div>
@@ -130,7 +155,7 @@
 <script lang="ts">
 import { computed, defineComponent, ref } from 'vue';
 import type { Entry } from '../types';
-import type { ForecastMatch, HNStory, ReadingMatch } from '../features/stories';
+import type { ForecastMatch, HNStory, NewsMatch, ReadingMatch } from '../features/stories';
 import { addReadingSite, removeReadingSite, setStoryScope, setStorySource } from '../actions';
 import { ago } from '../core/format';
 import { quantile } from '../core/stats';
@@ -146,6 +171,7 @@ import PanelShell from './PanelShell.vue';
 // each matched to the topics in scope.
 
 interface Item {
+  n?: NewsMatch;
   r?: ReadingMatch;
   f?: ForecastMatch;
   s?: HNStory;
@@ -182,7 +208,22 @@ export default defineComponent({
       let items: Item[] = [],
         meta = '',
         empty = '';
-      if (src === 'reading') {
+      if (src === 'news') {
+        // Articles naming more of the channel's topics first, then the newest.
+        const list = [...stories.news.values()]
+          .map(n => ({ ...n, topics: n.topics.filter(k => scopeKeys.has(k)) }))
+          .filter(n => n.topics.length)
+          .sort((a, b) => b.topics.length - a.topics.length || b.t - a.t);
+        const newest = Math.max(...list.map(n => n.t), 0),
+          oldest = Math.min(...list.map(n => n.t), newest);
+        items = list.slice(0, 12).map(n => ({
+          n,
+          topics: topicsOf(n.topics),
+          pct: newest > oldest ? 15 + ((n.t - oldest) / (newest - oldest)) * 85 : 100,
+        }));
+        meta = at ? `checked ${ago(at)} · ${list.length} Guardian articles name your topics` : '';
+        empty = 'No recent Guardian articles name these topics.';
+      } else if (src === 'reading') {
         // Posts naming a topic rank by match strength; the rest still show, lower, as "new".
         const rank = (r: ReadingMatch) => {
           const n = r.topics.filter(k => scopeKeys.has(k)).length;
@@ -239,6 +280,7 @@ export default defineComponent({
       if (!siteMsg.value) newSite.value = '';
     }
     const TABS = [
+      ['news', 'The Guardian'],
       ['reading', 'Reading'],
       ['forecasts', 'Forecasts'],
       ['hn', 'Hacker News'],
@@ -247,14 +289,14 @@ export default defineComponent({
       ['topic', 'This topic'],
       ['lens', 'Whole channel'],
     ];
-    const tabs = computed(
-      () => (
-        ui.v,
-        activeChannel()
-          .streams.map(id => TABS.find(t => t[0] === id))
-          .filter(Boolean)
-      ),
-    );
+    // The Guardian tab appears once a key is set.
+    const tabs = computed(() => {
+      ui.v;
+      return activeChannel()
+        .streams.filter(id => id !== 'news' || ui.guardian)
+        .map(id => TABS.find(t => t[0] === id))
+        .filter(Boolean);
+    });
     const when = (t: number) =>
       Math.abs(Date.now() - t) < 30 * DAY_MS
         ? ago(t)
