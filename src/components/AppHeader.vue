@@ -57,7 +57,8 @@
         :class="{ on: c.id === view.active }"
         :aria-current="c.id === view.active ? 'page' : undefined"
         :aria-label="c.label + (c.heat ? `, ${c.heat.n} ${c.heat.level}` : '')"
-        :title="c.label"
+        :aria-keyshortcuts="c.n <= 9 ? String(c.n) : undefined"
+        :title="c.n <= 9 ? `${c.label} (press ${c.n})` : c.label"
         @click="selectLens(c.lensId)"
       >
         <channel-icon :name="c.icon"></channel-icon>
@@ -112,7 +113,7 @@ export default defineComponent({
       ui.v;
       return {
         active: activeChannel()?.id,
-        list: channels().map(c => ({ ...c, heat: lensHeat(lensById(c.lensId)) })),
+        list: channels().map((c, i) => ({ ...c, n: i + 1, heat: lensHeat(lensById(c.lensId)) })),
         canAdd: state.lenses.length < MAX_LENSES,
       };
     });

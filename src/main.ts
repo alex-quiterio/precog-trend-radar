@@ -12,7 +12,7 @@ import './sources/hackernews';
 import App from './App.vue';
 import StateTag from './components/StateTag.vue';
 import TopicDot from './components/TopicDot.vue';
-import { applyTheme, shiftLens, shiftTopic } from './actions';
+import { applyTheme, selectLens, shiftLens, shiftTopic } from './actions';
 import { HOUR, LS, store } from './core/config';
 import { ago, changeLabel, fmtAxis, fmtPct, fmtTick, fmtTime, fmtVal, nf0, nf1 } from './core/format';
 import { looksLikePerson } from './core/guard';
@@ -21,7 +21,7 @@ import { bump, ui } from './core/ui-store';
 import { loadDatapoints } from './features/datapoints';
 import { loadGitHub } from './features/github';
 import { loadMyGitHub } from './features/github-me';
-import { activeChannel } from './channels';
+import { activeChannel, channels } from './channels';
 import { saveLook } from './features/brief';
 import { startStoryTimer } from './features/stories';
 import { liveUpdated, loadLive, startLive } from './live';
@@ -73,6 +73,15 @@ document.addEventListener('keydown', e => {
   if (e.altKey || e.ctrlKey || e.metaKey) return;
   const target = e.target instanceof Element ? e.target : document.body;
   if (target.closest('input, textarea, select, [contenteditable], dialog, .grip')) return;
+  // 1–9 jump to that channel, in channel-bar order.
+  if (/^[1-9]$/.test(e.key) && !e.shiftKey) {
+    const c = channels()[+e.key - 1];
+    if (!c) return;
+    e.preventDefault();
+    selectLens(c.lensId);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
   if (e.key === '[' || e.key === ']') {
     e.preventDefault();
     shiftLens(e.key === ']' ? 1 : -1);
