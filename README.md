@@ -113,9 +113,9 @@ flowchart LR
 | RSS                                | mentions per day across your feeds                       | Through the local proxy when feeds block browser reads.                       |
 | ECB · Eurostat · IPMA · Open-Meteo | the Datapoints panel                                     | Official open data.                                                           |
 
-### GDELT snapshot
+### GDELT rate limit
 
-GDELT allows one request every ~5 s per network and answers anything faster with a 429, which a browser sees only as `Failed to fetch`. So that every visitor doesn't queue ~50 requests of their own, the Pages workflow runs `scripts/gdelt-snapshot.ts` every 6 hours. It fetches the timelines and 24-hour article lists for the shipped lenses once, from CI, and publishes them as `data/gdelt.json` next to the page. The dashboard reads the snapshot first and only calls GDELT directly for custom topics. When GDELT refuses three times in a row, the browser pauses GDELT for 20 minutes, and the pause survives a reload.
+GDELT allows one request every ~5 s per network and answers anything faster with a 429, which a browser sees only as `Failed to fetch`. The dashboard asks it one request at a time, sends one combined query per lens for stories, and caches results for the day. When GDELT refuses three times in a row, the dashboard pauses GDELT for 20 minutes, and the pause survives a reload. The index keeps working from the other sources meanwhile.
 
 ## Privacy and scope
 

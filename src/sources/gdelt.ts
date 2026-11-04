@@ -1,8 +1,6 @@
 // PRECOG / Trend Radar · GDELT global news share per day, throttled to its one-request-per-5-s limit.
-//
-// Reads, in order: today's localStorage cache → the daily snapshot that CI publishes next to the page
-// (data/gdelt.json, built by scripts/gdelt-snapshot.ts) → GDELT itself, one request at a time.
-import { HOUR, MIN, sleep, store } from '../core/config';
+// Results are cached in localStorage for the day; GDELT is asked one request at a time.
+import { MIN, sleep, store } from '../core/config';
 import { gdeltDate, gdeltQuery, storyQueries, timelinePoints } from './gdelt-query';
 import { registerAdapter, utcDay, withTimeout } from './registry';
 
@@ -67,7 +65,6 @@ export function gdeltCall(params: string, signal?: AbortSignal): Promise<any> {
 }
 export { gdeltDate, gdeltQuery, storyQueries, timelinePoints };
 
-// --- Snapshot published by CI (same origin; absent when opened from file://) -----
 export interface GdeltArticle {
   url: string;
   title: string;
@@ -75,26 +72,6 @@ export interface GdeltArticle {
   sourcecountry?: string;
   seendate?: string;
 }
-export interface GdeltSnapshot {
-  at: string;
-  timelines: Record<string, { t: string; value: number }[]>;
-  articles?: Record<string, GdeltArticle[]>;
-}
-let snapshot: Promise<GdeltSnapshot | null> | null = null;
-let snapshotAt = 0;
-export function loadSnapshot(): Promise<GdeltSnapshot | null> {
-  if (snapshot && Date.now() - snapshotAt < HOUR) return snapshot;
-  snapshotAt = Date.now();
-  snapshot =
-    typeof location === 'undefined' || location.protocol === 'file:'
-      ? Promise.resolve(null)
-      : fetch('./data/gdelt.json', { cache: 'no-cache', signal: AbortSignal.timeout(15000) })
-          .then(r => (r.ok ? r.json() : null))
-          .then(j => (j && j.timelines ? j : null))
-          .catch(() => null);
-  return snapshot;
-}
-
 registerAdapter({
   id: 'news',
   label: 'Global news share (GDELT) / day',
@@ -107,13 +84,6 @@ registerAdapter({
     const key = 'precog.gdelt.v1.' + q.toLowerCase();
     const c = store.get(key, null);
     if (c && c.day === utcDay() && c.points.length) return { topic, points: c.points };
-    const snap = await loadSnapshot();
-    const fromSnap = snap?.timelines[q.toLowerCase()];
-    // A snapshot from yesterday is still better than hammering GDELT; it's at most a day behind.
-    if (fromSnap?.length && Date.now() - Date.parse(snap.at) < 36 * HOUR) {
-      store.set(key, { day: utcDay(), points: fromSnap });
-      return { topic, points: fromSnap };
-    }
     const points = timelinePoints(
       await gdeltCall(`mode=timelinevol&timespan=3months&query=${encodeURIComponent(q)}`, signal),
     );

@@ -4,7 +4,7 @@ import { HOUR, LS, MIN, STORY_REFRESH_MS, store } from '../core/config';
 import { bump } from '../core/ui-store';
 import { orderedEntries } from '../live';
 import type { GdeltArticle } from '../sources/gdelt';
-import { gdelt, gdeltCall, gdeltDate, loadSnapshot, storyQueries } from '../sources/gdelt';
+import { gdelt, gdeltCall, gdeltDate, storyQueries } from '../sources/gdelt';
 import { getJSON, phrase, pool, queryOf } from '../sources/registry';
 import { loadFeedItems, rssCache, topicRegex } from '../sources/rss';
 import type { TGSItem } from '../sources/tgs';
@@ -169,11 +169,8 @@ export function jaccard(a, b) {
   return i / (a.size + b.size - i || 1);
 }
 const ARTICLE_KEY = 'precog.gdelt.articles.v1.';
-/** Articles from the last 24 h for one combined query: CI snapshot if fresh, then today's cache, then GDELT. */
+/** Articles from the last 24 h for one combined query, cached for an hour. */
 async function newsArticles(q: string, signal: AbortSignal): Promise<GdeltArticle[]> {
-  const snap = await loadSnapshot();
-  const fromSnap = snap?.articles?.[q.toLowerCase()];
-  if (fromSnap && Date.now() - Date.parse(snap.at) < 8 * HOUR) return fromSnap;
   const c = store.get<{ at: number; articles: GdeltArticle[] } | null>(ARTICLE_KEY + q.toLowerCase(), null);
   if (c && Date.now() - c.at < HOUR) return c.articles;
   const j = await gdeltCall(
@@ -193,7 +190,7 @@ async function newsArticles(q: string, signal: AbortSignal): Promise<GdeltArticl
 export async function loadNewsStories(entries: Entry[], signal: AbortSignal): Promise<void> {
   const clusters = [];
   const byKey = new Map(entries.map(E => [E.key, E]));
-  // Grouped per lens, like the CI snapshot, so its combined queries can be reused here.
+  // One combined query per lens.
   const lensIds = [...new Set(entries.map(E => E.lensId))];
   const groups = lensIds.flatMap(id =>
     storyQueries(

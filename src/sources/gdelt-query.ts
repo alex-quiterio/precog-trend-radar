@@ -1,5 +1,4 @@
-// PRECOG / Trend Radar · Pure GDELT query helpers, shared by the browser and the CI snapshot script.
-// No imports on purpose: scripts/gdelt-snapshot.ts runs this file directly under Node.
+// PRECOG / Trend Radar · Pure GDELT query helpers (no imports, so they test in isolation).
 
 const DAY = 86400e3;
 
@@ -7,7 +6,7 @@ const DAY = 86400e3;
 export const phrase = (q: string): string =>
   /["()]|\bOR\b/.test(q) || !/\s/.test(q.trim()) ? q.trim() : `"${q.trim()}"`;
 
-/** The GDELT query for one topic. The snapshot is keyed by this string, lower-cased. */
+/** The GDELT query for one topic; also the cache key, lower-cased. */
 export const gdeltQuery = (q: string, country?: string | null): string =>
   phrase(q) + (country ? ` sourcecountry:${country}` : '');
 
