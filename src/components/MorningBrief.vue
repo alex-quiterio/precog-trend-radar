@@ -1,5 +1,5 @@
 <template>
-  <panel-shell id="p-brief" title="Morning brief" :meta="head.meta" :index="index" :data-tick="ui.v">
+  <panel-shell id="p-brief" :title="head.title" :meta="head.meta" :index="index" :data-tick="ui.v">
     <p class="brief-date">{{ head.greet }}. {{ head.date }}.</p>
     <p class="brief-sub">{{ head.sub }}</p>
     <ul v-if="b.lines.length" class="brief-list">
@@ -8,11 +8,10 @@
     <p v-else class="empty">Waiting for data…</p>
     <div v-if="b.movers.length" class="table-scroll">
       <table class="movers">
-        <caption class="sr-only">Top movers by z-score across all lenses</caption>
+        <caption class="sr-only">Top movers by z-score in this lens</caption>
         <thead>
           <tr>
             <th scope="col">Top movers</th>
-            <th scope="col">Lens</th>
             <th scope="col">Now</th>
             <th scope="col">Change</th>
             <th scope="col">z</th>
@@ -27,7 +26,6 @@
                 {{ E.name }}
               </button>
             </td>
-            <td class="lens">{{ lensName(E) }}</td>
             <td>{{ fmtVal(E.stats.latest) }}</td>
             <td>
               <span class="mbar" aria-hidden="true"><i :style="bar(E)"></i></span>
@@ -53,10 +51,10 @@ import { markRead, select } from '../actions';
 import { DAY } from '../core/config';
 import { fmtTime } from '../core/format';
 import { ui } from '../core/ui-store';
-import { briefMarkdown, buildBrief, copyText, lensName } from '../features/brief';
+import { briefMarkdown, buildBrief, copyText } from '../features/brief';
 import { setSource } from '../live';
 import { SOURCES } from '../sources/registry';
-import { allEntries, state } from '../state';
+import { state } from '../state';
 import StateTag from './StateTag.vue';
 import TopicDot from './TopicDot.vue';
 import PanelShell from './PanelShell.vue';
@@ -77,7 +75,8 @@ export default defineComponent({
       return {
         greet: hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening',
         date: now.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' }),
-        sub: `${allEntries().length} topics across ${state.lenses.length} lenses · ${SOURCES[state.source].label}`,
+        title: `Morning brief · ${b.value.lens?.name || ''}`,
+        sub: `${b.value.items.length} topics in ${b.value.lens?.name || 'this lens'} · ${SOURCES[state.source].label}`,
         meta: state.liveLoaded
           ? `data to ${fmtTime(Math.max(0, ...b.value.items.map(E => E.stats.lt)), DAY)}`
           : ui.offline
@@ -97,7 +96,7 @@ export default defineComponent({
       markRead();
       note.value = 'Marked as read.';
     }
-    return { ui, state, b, head, bar, note, copy, read, lensName, select, goLive: () => setSource('blend') };
+    return { ui, state, b, head, bar, note, copy, read, select, goLive: () => setSource('blend') };
   },
 });
 </script>
