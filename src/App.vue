@@ -14,7 +14,7 @@
       <p class="status" role="status">{{ ui.status }}</p>
     </section>
 
-    <div class="layout" :class="{ wide: !view.side }" :key="'l-' + view.channel.id">
+    <div class="layout" :key="'l-' + view.channel.id">
       <div class="main">
         <section class="block" aria-labelledby="b-gist">
           <h3 id="b-gist" class="block-head">
@@ -51,12 +51,19 @@
           <stories-panel :index="5"></stories-panel>
         </section>
       </div>
-      <aside v-if="view.side" class="side" aria-label="Context">
+      <aside class="side" aria-label="Radar and context">
         <h3 class="block-head">
           <span>◇</span>
-          Context
+          Radar
         </h3>
-        <datapoints-panel :index="1"></datapoints-panel>
+        <radar-panel :index="1"></radar-panel>
+        <template v-if="view.side">
+          <h3 class="block-head">
+            <span>◇</span>
+            Context
+          </h3>
+          <datapoints-panel :index="2"></datapoints-panel>
+        </template>
       </aside>
     </div>
 
@@ -80,6 +87,7 @@ import SignalPanel from './components/SignalPanel.vue';
 import StoriesPanel from './components/StoriesPanel.vue';
 import GitHubPanel from './components/GitHubPanel.vue';
 import GitHubMePanel from './components/GitHubMePanel.vue';
+import RadarPanel from './components/RadarPanel.vue';
 
 // PRECOG / Trend Radar · One channel on screen at a time: its gist, trends, streams and context.
 
@@ -94,6 +102,7 @@ export default defineComponent({
     StoriesPanel,
     GitHubPanel,
     GitHubMePanel,
+    RadarPanel,
   },
   setup() {
     const view = computed(() => {
