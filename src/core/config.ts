@@ -114,7 +114,8 @@ export const PRESETS = [
     ],
   },
 ];
-export const PRESET_VERSION = 7;
+// v8 re-runs the upgrade for browsers that versions 5-7 marked as upgraded without saving the new lenses.
+export const PRESET_VERSION = 8;
 export const LS = {
   presetVer: 'precog.presetver',
   lenses: 'precog.lenses.v1',

@@ -76,4 +76,26 @@ describe('lenses', () => {
     loadLenses();
     expect(JSON.parse(mem.get(LS.lenses) || '[]').map(l => l.id)).toContain('github');
   });
+
+  it('repairs a browser marked as upgraded that still holds the old lenses', () => {
+    mem.set(LS.presetVer, '7');
+    mem.set(
+      LS.lenses,
+      JSON.stringify(
+        ['world', 'tgs', 'portugal', 'circular', 'geo', 'climate', 'land', 'nl'].map(id => saved(id, ['X'])),
+      ),
+    );
+    loadLenses();
+    expect(state.lenses.map(l => l.id)).toEqual([
+      'world',
+      'tgs',
+      'portugal',
+      'circular',
+      'amsterdam',
+      'marginalian',
+      'github',
+    ]);
+    loadLenses(); // and it sticks on the next load
+    expect(state.lenses.map(l => l.id)).toContain('github');
+  });
 });
