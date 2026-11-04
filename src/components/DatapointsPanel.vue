@@ -1,43 +1,45 @@
 <template>
-  <panel-shell id="p-data" :title="view.title" :meta="view.meta" :index="index" :data-tick="ui.v">
-    <dl class="dp">
-      <div v-for="r in view.rows" :key="r.k" class="row">
-        <dt>
-          {{ r.k }}
-          <template v-if="r.sub">
-            <br />
-            <span class="muted">{{ r.sub }}</span>
-          </template>
-        </dt>
-        <dd>{{ r.v }}</dd>
-        <sparkline v-if="r.spark && r.spark.length > 1" class="dp-spark" :points="r.spark" color="currentColor" fit />
-        <span class="src">
-          <a :href="r.href" target="_blank" rel="noopener noreferrer">{{ r.src }}</a>
-        </span>
-      </div>
-    </dl>
-    <p v-if="!view.rows.length" class="empty">
-      {{
-        !view.loaded
-          ? 'Loading…'
-          : view.off
-            ? 'This lens shows no datapoints. Switch some on under Lenses → Datapoints.'
-            : 'No datapoints could be loaded (offline?).'
-      }}
-    </p>
+  <panel-shell id="p-data" title="Open data" :meta="view.meta" :index="index" :data-tick="ui.v">
+    <div v-if="view.groups.length" class="dp-groups">
+      <section v-for="g in view.groups" :key="g.id" class="dp-group" :aria-labelledby="'dp-' + g.id">
+        <header>
+          <h4 :id="'dp-' + g.id">{{ g.label }}</h4>
+          <span class="muted">{{ g.hint }}</span>
+        </header>
+        <dl class="dp">
+          <div v-for="r in g.rows" :key="r.k" class="row">
+            <dt>
+              {{ r.k }}
+              <span v-if="r.sub" class="sub">{{ r.sub }}</span>
+            </dt>
+            <dd>{{ r.v }}</dd>
+            <sparkline
+              v-if="r.spark && r.spark.length > 1"
+              class="dp-spark"
+              :points="r.spark"
+              color="currentColor"
+              fit
+            />
+            <span class="src">
+              <a :href="r.href" target="_blank" rel="noopener noreferrer">{{ r.src }}</a>
+            </span>
+          </div>
+        </dl>
+      </section>
+    </div>
+    <p v-else class="empty">{{ view.loaded ? 'No datapoints could be loaded (offline?).' : 'Loading…' }}</p>
   </panel-shell>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
+import { activeChannel } from '../channels';
 import { ui } from '../core/ui-store';
-import { SOURCE_CATALOG } from '../core/config';
-import { dp } from '../features/datapoints';
-import { activeLens, lensAllows } from '../state';
+import { DATAPOINT_GROUPS, dp } from '../features/datapoints';
 import PanelShell from './PanelShell.vue';
 import Sparkline from './Sparkline.vue';
 
-// PRECOG / Trend Radar · Datapoints: open data cards for the active lens (updated hourly).
+// PRECOG / Trend Radar · Context: the open-data cards the channel on screen picks, updated hourly.
 
 export default defineComponent({
   name: 'DatapointsPanel',
@@ -46,16 +48,19 @@ export default defineComponent({
   setup() {
     const view = computed(() => {
       ui.v;
-      const lens = activeLens();
-      const groups = SOURCE_CATALOG.filter(s => s.kind === 'datapoints' && lensAllows(lens, s.id));
+      // The channel picks its cards and their order; they're shown under their group headings.
+      const ids = activeChannel().datapoints;
+      const rows = ids.map(id => dp.rows.find(r => r.id === id)).filter(Boolean);
+      const order = [...new Set(rows.map(r => r.group))];
       return {
-        title: `Datapoints · ${lens ? lens.name : ''}`,
-        rows: dp.rows.filter(r => lensAllows(lens, r.group)),
-        off: !groups.length,
+        groups: order.map(id => ({
+          ...DATAPOINT_GROUPS.find(g => g.id === id),
+          rows: rows.filter(r => r.group === id),
+        })),
         loaded: !!dp.at,
         meta: dp.at
-          ? `real data · ${new Date(dp.at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}`
-          : 'real data',
+          ? `open data · ${new Date(dp.at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}`
+          : 'open data',
       };
     });
     return { ui, view };

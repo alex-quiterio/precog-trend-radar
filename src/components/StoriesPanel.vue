@@ -1,9 +1,9 @@
 <template>
-  <panel-shell id="p-stories" title="Rising stories" :meta="view.meta" :index="index" :data-tick="ui.v">
+  <panel-shell id="p-stories" title="Matched to your topics" :meta="view.meta" :index="index" :data-tick="ui.v">
     <template #controls>
-      <span class="seg no-print" role="group" aria-label="Story source">
+      <span class="seg no-print" role="group" aria-label="Signal source">
         <button
-          v-for="[id, label] in view.tabs"
+          v-for="[id, label] in tabs"
           :key="id"
           type="button"
           :aria-pressed="state.storySrc === id"
@@ -12,7 +12,7 @@
           {{ label }}
         </button>
       </span>
-      <span class="seg no-print" role="group" aria-label="Story scope">
+      <span class="seg no-print" role="group" aria-label="Which topics">
         <button
           v-for="[id, label] in SCOPES"
           :key="id"
@@ -24,15 +24,76 @@
         </button>
       </span>
     </template>
+
+    <div v-if="view.src === 'reading' && !view.fixedSites" class="sites no-print">
+      <span class="muted">Following</span>
+      <span v-for="s in sites" :key="s.url" class="site-chip">
+        <a :href="s.url" target="_blank" rel="noopener noreferrer">{{ s.name }}</a>
+        <button type="button" :aria-label="'Stop following ' + s.name" @click="unfollow(s.url)">×</button>
+      </span>
+      <form class="site-add" autocomplete="off" @submit.prevent="follow">
+        <label class="sr-only" for="site-input">Follow a WordPress site</label>
+        <input id="site-input" v-model="newSite" placeholder="+ follow a site (WordPress)" :disabled="adding" />
+      </form>
+      <span v-if="siteMsg" class="muted err">{{ siteMsg }}</span>
+    </div>
+
     <ol class="stories">
-      <li v-if="view.needsFeeds" class="empty">
-        Portuguese and Dutch outlets (RTP, Público, Observador, NOS, NU.nl, DutchNews, NL Times) block direct browser
-        access. Run the bundled proxy (
-        <code>npm run proxy</code>
-        ), then
-        <button class="btn small" type="button" @click="openFeeds('local')">set up PT + NL feeds</button>
-      </li>
-      <template v-else-if="view.src === 'hn'">
+      <template v-if="view.src === 'reading'">
+        <li v-for="(it, i) in view.items" :key="it.r.id" class="story">
+          <span class="rank">{{ i + 1 }}</span>
+          <div>
+            <div class="title">
+              <a :href="it.r.url" target="_blank" rel="noopener noreferrer">{{ it.r.title }}</a>
+            </div>
+            <div class="smeta">
+              <span v-for="E in it.topics" :key="E.key" class="stopic">
+                <topic-dot :color="E.color"></topic-dot>
+                {{ E.name }}
+              </span>
+              <span class="site">{{ it.r.site }}</span>
+              <span>{{ it.r.kind }}{{ it.r.num ? ' #' + it.r.num : '' }}</span>
+              <span>{{ when(it.r.t) }}</span>
+            </div>
+          </div>
+          <div class="vel">
+            <template v-if="it.r.topics.length">
+              <b>{{ it.r.topics.length }}</b>
+              {{ it.r.topics.length === 1 ? 'topic' : 'topics' }}
+              <small>{{ it.r.score >= 3 ? 'in the title' : 'in the text' }}</small>
+            </template>
+            <small v-else>new</small>
+            <div class="vbar"><i :style="{ width: it.pct.toFixed(1) + '%' }"></i></div>
+          </div>
+        </li>
+      </template>
+
+      <template v-else-if="view.src === 'forecasts'">
+        <li v-for="(it, i) in view.items" :key="it.f.id" class="story">
+          <span class="rank">{{ i + 1 }}</span>
+          <div>
+            <div class="title">
+              <a :href="it.f.url" target="_blank" rel="noopener noreferrer">{{ it.f.question }}</a>
+            </div>
+            <div class="smeta">
+              <span v-for="E in it.topics" :key="E.key" class="stopic">
+                <topic-dot :color="E.color"></topic-dot>
+                {{ E.name }}
+              </span>
+              <span>{{ nf0.format(it.f.bettors) }} forecasters</span>
+              <span>resolves {{ when(it.f.closes) }}</span>
+            </div>
+          </div>
+          <div class="vel">
+            <b>{{ Math.round(it.f.prob * 100) }}%</b>
+            yes
+            <small>Manifold · {{ nf0.format(it.f.vol24) }} traded today</small>
+            <div class="vbar"><i :style="{ width: it.pct.toFixed(1) + '%' }"></i></div>
+          </div>
+        </li>
+      </template>
+
+      <template v-else>
         <li v-for="(it, i) in view.items" :key="it.s.id" class="story">
           <span class="rank">{{ i + 1 }}</span>
           <div>
@@ -59,270 +120,161 @@
             <div class="vbar"><i :style="{ width: it.pct.toFixed(1) + '%' }"></i></div>
           </div>
         </li>
-        <li v-if="!view.items.length" class="empty">{{ view.empty }}</li>
       </template>
-      <template v-else-if="view.src === 'forecasts'">
-        <li v-for="(it, i) in view.items" :key="it.f.id" class="story">
-          <span class="rank">{{ i + 1 }}</span>
-          <div>
-            <div class="title">
-              <a :href="it.f.url" target="_blank" rel="noopener noreferrer">{{ it.f.question }}</a>
-            </div>
-            <div class="smeta">
-              <span v-for="E in it.topics" :key="E.key" class="stopic">
-                <topic-dot :color="E.color"></topic-dot>
-                {{ E.name }}
-              </span>
-              <span>{{ nf0.format(it.f.bettors) }} forecasters</span>
-              <span>resolves {{ when(it.f.closes) }}</span>
-            </div>
-          </div>
-          <div class="vel">
-            <b>{{ Math.round(it.f.prob * 100) }}%</b>
-            yes
-            <small>Manifold · {{ nf0.format(it.f.vol24) }} traded today</small>
-            <div class="vbar"><i :style="{ width: it.pct.toFixed(1) + '%' }"></i></div>
-          </div>
-        </li>
-        <li v-if="!view.items.length" class="empty">{{ view.empty }}</li>
-      </template>
-      <template v-else-if="view.src === 'tgs'">
-        <li v-for="(it, i) in view.items" :key="it.e.id" class="story">
-          <span class="rank">{{ i + 1 }}</span>
-          <div>
-            <div class="title">
-              <a :href="it.e.url" target="_blank" rel="noopener noreferrer">{{ it.e.title }}</a>
-            </div>
-            <div class="smeta">
-              <span v-for="E in it.topics" :key="E.key" class="stopic">
-                <topic-dot :color="E.color"></topic-dot>
-                {{ E.name }}
-              </span>
-              <span>{{ it.e.kind }}{{ it.e.num ? ' #' + it.e.num : '' }}</span>
-              <span>{{ when(it.e.t) }}</span>
-            </div>
-          </div>
-          <div class="vel">
-            <b>{{ it.e.topics.length }}</b>
-            {{ it.e.topics.length === 1 ? 'topic' : 'topics' }}
-            <small>{{ it.e.score >= 3 ? 'in the title' : 'in the description' }}</small>
-            <div class="vbar"><i :style="{ width: it.pct.toFixed(1) + '%' }"></i></div>
-          </div>
-        </li>
-        <li v-if="!view.items.length" class="empty">{{ view.empty }}</li>
-      </template>
-      <template v-else>
-        <li v-for="(it, i) in view.items" :key="it.c.id" class="story">
-          <span class="rank">{{ i + 1 }}</span>
-          <div>
-            <div class="title">
-              <a :href="it.c.url" target="_blank" rel="noopener noreferrer">{{ it.c.title }}</a>
-            </div>
-            <div class="smeta">
-              <span v-for="E in it.topics" :key="E.key" class="stopic">
-                <topic-dot :color="E.color"></topic-dot>
-                {{ E.name }}
-              </span>
-              <span>{{ it.c.domain }}</span>
-              <span>first seen {{ isFinite(it.c.first) ? ago(it.c.first) : '—' }}</span>
-              <span v-if="!view.isLocal">
-                {{ it.c.countries.size }} {{ it.c.countries.size === 1 ? 'country' : 'countries' }}
-              </span>
-            </div>
-          </div>
-          <div class="vel">
-            <b>{{ it.c.domains.size }}</b>
-            {{ it.c.domains.size === 1 ? 'outlet' : 'outlets' }}
-            <small>last {{ view.isLocal ? 48 : 24 }} h</small>
-            <div class="vbar"><i :style="{ width: it.pct.toFixed(1) + '%' }"></i></div>
-          </div>
-        </li>
-        <li v-if="!view.items.length" class="empty">{{ view.empty }}</li>
-        <li v-if="view.warn" class="empty">{{ view.warn }}</li>
-      </template>
+      <li v-if="!view.items.length" class="empty">{{ view.empty }}</li>
+      <li v-if="view.warn" class="empty">{{ view.warn }}</li>
     </ol>
   </panel-shell>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 import type { Entry } from '../types';
-import type { ForecastMatch, HNStory, StoryCluster, TGSMatch } from '../features/stories';
-import { openFeeds, setStoryScope, setStorySource } from '../actions';
+import type { ForecastMatch, HNStory, ReadingMatch } from '../features/stories';
+import { addReadingSite, removeReadingSite, setStoryScope, setStorySource } from '../actions';
 import { ago } from '../core/format';
 import { quantile } from '../core/stats';
 import { ui } from '../core/ui-store';
-import { stories, storyScopeEntries, storyTabs } from '../features/stories';
+import { stories, storyScopeEntries } from '../features/stories';
+import { readingSites } from '../sources/reading';
 import { state } from '../state';
+import { activeChannel } from '../channels';
 import TopicDot from './TopicDot.vue';
 import PanelShell from './PanelShell.vue';
 
-// PRECOG / Trend Radar · Rising stories: HN engagement velocity, GDELT and PT·NL story clusters, and
-// The Great Simplification episodes that touch your topics.
+// PRECOG / Trend Radar · Signals: posts from sites you follow, Manifold forecasts and Hacker News,
+// each matched to the topics in scope.
 
-interface StoryItem {
-  s?: HNStory;
-  c?: StoryCluster;
-  e?: TGSMatch;
+interface Item {
+  r?: ReadingMatch;
   f?: ForecastMatch;
+  s?: HNStory;
   topics: Entry[];
   breaking?: boolean;
   pct: number;
 }
-interface StoriesView {
-  src: string;
-  tabs?: string[][];
-  meta: string;
-  isLocal?: boolean;
-  needsFeeds?: boolean;
-  items?: StoryItem[];
-  empty?: string;
-  warn?: string;
-}
+const DAY_MS = 86400e3;
+// Recent first: a match counts half as much for every six months of age.
+const fade = (t: number) => 0.5 ** ((Date.now() - t) / (182 * DAY_MS));
 
 export default defineComponent({
   name: 'StoriesPanel',
   props: { index: Number },
   components: { PanelShell, TopicDot },
   setup() {
-    const view = computed((): StoriesView => {
+    const newSite = ref(''),
+      siteMsg = ref(''),
+      adding = ref(false);
+    const sites = computed(() => (ui.v, readingSites()));
+    const view = computed(() => {
       ui.v;
-      const tabs = storyTabs().map(id => [id, TAB_LABEL[id]]);
-      return { ...build(), tabs };
-    });
-    const build = (): StoriesView => {
-      const src = state.storySrc,
-        isLocal = src === 'local';
+      const src = state.storySrc;
       const scopeKeys = new Set(storyScopeEntries().map(E => E.key));
-      const inScope = (s: { topics: string[] }) => s.topics.some(k => scopeKeys.has(k));
-      const topicsOf = (s: { topics: string[] }) =>
-        s.topics
+      const topicsOf = (keys: string[]) =>
+        keys
+          .filter(k => scopeKeys.has(k))
           .map(k => state.rt.get(k))
           .filter(Boolean)
           .slice(0, 2);
-      if (src === 'hn') {
-        let list: HNStory[] = [...stories.hn.values()].filter(inScope);
+      const loading = stories.loading[src],
+        err = stories.errors[src],
+        at = stories.at[src];
+      let items: Item[] = [],
+        meta = '',
+        empty = '';
+      if (src === 'reading') {
+        // Posts naming a topic rank by match strength; the rest still show, lower, as "new".
+        const rank = (r: ReadingMatch) => {
+          const n = r.topics.filter(k => scopeKeys.has(k)).length;
+          return (n ? r.score : 0.4) * fade(r.t);
+        };
+        const list = [...stories.reading.values()].sort((a, b) => rank(b) - rank(a) || b.t - a.t);
+        const top = Math.max(1e-6, ...list.slice(0, 12).map(rank));
+        const matched = list.filter(r => r.topics.some(k => scopeKeys.has(k))).length;
+        items = list.slice(0, 12).map(r => ({ r, topics: topicsOf(r.topics), pct: (rank(r) / top) * 100 }));
+        meta = at ? `${matched} of ${stories.readingCount} posts name your topics` : '';
+        empty = 'Nothing from the sites you follow yet.';
+      } else if (src === 'forecasts') {
+        const list = [...stories.forecasts.values()]
+          .filter(f => f.topics.some(k => scopeKeys.has(k)))
+          .sort((a, b) => b.vol24 - a.vol24 || b.bettors - a.bettors);
+        items = list.slice(0, 12).map(f => ({ f, topics: topicsOf(f.topics), pct: f.prob * 100 }));
+        meta = at ? `checked ${ago(at)} · open markets on Manifold` : '';
+        empty = 'No open forecast (10+ forecasters) names these topics.';
+      } else {
+        let list = [...stories.hn.values()].filter(s => s.topics.some(k => scopeKeys.has(k)));
         list.sort((a, b) => b.vel - a.vel);
         if (state.storyScope !== 'topic') {
           const per = {};
-          list = list.filter(s => {
-            const k = s.topics[0];
-            per[k] = (per[k] || 0) + 1;
-            return per[k] <= 3;
-          });
+          list = list.filter(s => (per[s.topics[0]] = (per[s.topics[0]] || 0) + 1) <= 3);
         }
         const p80 = quantile(
             list.map(s => s.vel),
             0.8,
           ),
           vmax = Math.max(1, ...list.map(s => s.vel));
-        return {
-          src,
-          meta: stories.loading.hn
-            ? 'loading…'
-            : stories.at.hn
-              ? `checked ${ago(stories.at.hn)} · ranked by engagement/hour`
-              : '',
-          items: list.slice(0, 12).map(s => ({
-            s,
-            topics: topicsOf(s),
-            breaking: s.age < 8 && s.vel >= p80 && list.length >= 5,
-            pct: (s.vel / vmax) * 100,
-          })),
-          empty: stories.loading.hn
-            ? 'Loading stories…'
-            : stories.errors.hn
-              ? `Could not load: ${stories.errors.hn}`
-              : 'No Hacker News stories in the last 48 h for this scope.',
-        };
+        items = list.slice(0, 12).map(s => ({
+          s,
+          topics: topicsOf(s.topics),
+          breaking: s.age < 8 && s.vel >= p80 && list.length >= 5,
+          pct: (s.vel / vmax) * 100,
+        }));
+        meta = at ? `checked ${ago(at)} · ranked by engagement per hour` : '';
+        empty = 'No Hacker News stories in the last 48 h for these topics (English topics only).';
       }
-      if (src === 'forecasts') {
-        // Busiest markets first: today's trading, then how many people forecast.
-        const list: ForecastMatch[] = [...stories.forecasts.values()]
-          .map(f => ({ ...f, topics: f.topics.filter(k => scopeKeys.has(k)) }))
-          .filter(f => f.topics.length)
-          .sort((a, b) => b.vol24 - a.vol24 || b.bettors - a.bettors);
-        return {
-          src,
-          meta: stories.loading.forecasts
-            ? 'loading markets…'
-            : stories.at.forecasts
-              ? `checked ${ago(stories.at.forecasts)} · open markets on Manifold · crowd probability`
-              : '',
-          items: list.slice(0, 12).map(f => ({ f, topics: topicsOf(f), pct: f.prob * 100 })),
-          empty: stories.loading.forecasts
-            ? 'Loading forecasts…'
-            : stories.errors.forecasts
-              ? `Could not load: ${stories.errors.forecasts}.`
-              : 'No open forecast (10+ forecasters) names these topics.',
-        };
-      }
-      if (src === 'tgs') {
-        // Match strength (title hits count triple) fading with age: halves every 6 months,
-        // so a fresh episode beats an old one that names one more topic.
-        const rank = (e: TGSMatch) => e.score * 0.5 ** ((Date.now() - e.t) / (182 * 86400e3));
-        const list: TGSMatch[] = [...stories.tgs.values()]
-          .map(e => ({ ...e, topics: e.topics.filter(k => scopeKeys.has(k)) }))
-          .filter(e => e.topics.length)
-          .sort((a, b) => rank(b) - rank(a) || b.t - a.t);
-        const smax = Math.max(1, ...list.map(e => e.score));
-        return {
-          src,
-          meta: stories.loading.tgs
-            ? 'loading the catalogue…'
-            : stories.at.tgs
-              ? `${list.length} of ${stories.tgsCount} episodes match · thegreatsimplification.com`
-              : '',
-          items: list.slice(0, 12).map(e => ({ e, topics: topicsOf(e), pct: (e.score / smax) * 100 })),
-          empty: stories.loading.tgs
-            ? 'Loading The Great Simplification catalogue…'
-            : stories.errors.tgs
-              ? `Could not load: ${stories.errors.tgs}.`
-              : 'No episode or Frankly of The Great Simplification mentions these topics yet.',
-        };
-      }
-      const list: StoryCluster[] = [...stories[src as 'news' | 'local'].values()].filter(inScope);
-      list.sort((a, b) => b.domains.size - a.domains.size || b.first - a.first);
-      const dmax = Math.max(1, ...list.map(c => c.domains.size));
       return {
         src,
-        isLocal,
-        needsFeeds: isLocal && stories.errors.local === 'nofeeds',
-        meta: stories.loading[src]
-          ? isLocal
-            ? 'loading feeds…'
-            : 'loading (≈6 s per request)…'
-          : stories.at[src]
-            ? `checked ${ago(stories.at[src])} · ranked by outlets covering`
-            : '',
-        items: list.slice(0, 12).map(c => ({ c, topics: topicsOf(c), pct: (c.domains.size / dmax) * 100 })),
-        empty: stories.loading[src]
-          ? isLocal
-            ? 'Loading local feeds…'
-            : 'Loading global news (GDELT allows one request every ~5 s)…'
-          : stories.errors[src]
-            ? `${isLocal ? 'Local feeds' : 'Global news unavailable'}: ${stories.errors[src]}.`
-            : `No matching stories in the last ${isLocal ? 48 : 24} h for this scope.`,
-        warn: isLocal && list.length && stories.errors.local ? stories.errors.local : '',
+        fixedSites: !!activeChannel().sites?.length,
+        items,
+        meta: loading ? 'loading…' : meta,
+        empty: loading ? 'Loading…' : err && !items.length ? `Could not load: ${err}.` : empty,
+        warn: err && items.length ? `Some sources failed: ${err}.` : '',
       };
-    };
-    const TAB_LABEL = {
-      hn: 'Hacker News',
-      news: 'Global news',
-      local: 'PT · NL news',
-      forecasts: 'Forecasts',
-      tgs: 'Great Simplification',
-    };
+    });
+    async function follow() {
+      if (!newSite.value.trim()) return;
+      adding.value = true;
+      siteMsg.value = (await addReadingSite(newSite.value)) || '';
+      adding.value = false;
+      if (!siteMsg.value) newSite.value = '';
+    }
+    const TABS = [
+      ['reading', 'Reading'],
+      ['forecasts', 'Forecasts'],
+      ['hn', 'Hacker News'],
+    ];
+    const SCOPES = [
+      ['topic', 'This topic'],
+      ['lens', 'Whole channel'],
+    ];
+    const tabs = computed(
+      () => (
+        ui.v,
+        activeChannel()
+          .streams.map(id => TABS.find(t => t[0] === id))
+          .filter(Boolean)
+      ),
+    );
     const when = (t: number) =>
-      Math.abs(Date.now() - t) < 30 * 86400e3
+      Math.abs(Date.now() - t) < 30 * DAY_MS
         ? ago(t)
         : new Date(t).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
-    const SCOPES = [
-      ['topic', 'Topic'],
-      ['lens', 'Lens'],
-      ['all', 'All'],
-    ];
-    return { ui, state, view, SCOPES, setStorySource, setStoryScope, openFeeds, when };
+    return {
+      ui,
+      state,
+      view,
+      sites,
+      newSite,
+      siteMsg,
+      adding,
+      follow,
+      unfollow: removeReadingSite,
+      tabs,
+      SCOPES,
+      setStorySource,
+      setStoryScope,
+      when,
+    };
   },
 });
 </script>

@@ -3,14 +3,13 @@
   "version": "3.0.0",
   "private": true,
   "type": "module",
-  "description": "Morning brief of world attention trends. Tracks topics, never people.",
+  "description": "A personal situation room: pick a channel, get the gist. Tracks topics, never people.",
   "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run",
-    "proxy": "node feed-proxy.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "npm run typecheck && npm run format:check"

@@ -5,17 +5,7 @@ export interface LastLook {
   source: string;
   items: Record<string, { z: number | null; level: string | null; latest: number }>;
 }
-import {
-  ALL_SOURCES,
-  LS,
-  MAX_LENSES,
-  MAX_TOPICS,
-  PRESETS,
-  PRESET_VERSION,
-  SLOT_ANGLE,
-  slotColor,
-  store,
-} from './core/config';
+import { LS, MAX_LENSES, MAX_TOPICS, PRESETS, PRESET_VERSION, SLOT_ANGLE, slotColor, store } from './core/config';
 import { looksLikePerson } from './core/guard';
 
 export const state = {
@@ -26,10 +16,8 @@ export const state = {
   rt: new Map<string, Entry>(),
   alerts: [] as Alert[],
   alertSeq: 0,
-  tableView: false,
-  includeNews: true,
   storySrc: 'hn' as Prefs['storySrc'],
-  storyScope: 'all' as Prefs['storyScope'],
+  storyScope: 'lens' as Prefs['storyScope'],
   prevLook: null as LastLook | null,
   viewStart: Date.now(),
   liveLoaded: false,
@@ -95,7 +83,6 @@ export function saveLenses() {
       desc: l.desc || '',
       lang: l.lang,
       country: l.country,
-      sources: l.sources,
       topics: l.topics.map(({ name, slot, wiki, q }) => ({ name, slot, wiki, q })),
     })),
   );
@@ -104,76 +91,46 @@ export function savePrefs() {
   store.set(LS.prefs, {
     activeLens: state.activeLens,
     selectedByLens: state.selectedByLens,
-    tableView: state.tableView,
-    source: state.source,
-    includeNews: state.includeNews,
     theme: document.documentElement.dataset.theme || 'dark',
     storySrc: state.storySrc,
     storyScope: state.storyScope,
   });
-}
-/** Whether a lens uses a source (trend adapter, story tab or datapoint group). */
-export function lensAllows(lens: Lens | string | null | undefined, sourceId: string): boolean {
-  const l = typeof lens === 'string' ? lensById(lens) : lens;
-  return !l?.sources || l.sources.includes(sourceId);
 }
 export function presetLenses() {
   return PRESETS.map(p => ({
     id: p.id,
     name: p.name,
     desc: p.desc,
-    lang: p.lang,
-    country: p.country,
-    sources: p.sources,
+    lang: 'en',
+    country: null,
     topics: p.topics.map((t, slot) => {
       const [name, o = {}] = t as [string, { wiki?: string; q?: string }?];
       return { name, slot, wiki: o.wiki, q: o.q };
     }),
   }));
 }
-// Topic lists shipped by earlier versions, used to tell untouched presets from customised ones.
-const OLD_PRESET_TOPICS: Record<string, string[]> = {
-  portugal: [
-    'Portugal|Housing in Portugal|Permaculture|Regenerative agriculture|Water scarcity|Rural flight',
-    'Habitação|Incêndios|Seca|Êxodo rural|Permacultura|Agricultura regenerativa',
-  ],
-  circular: ['Circular economy|Recycling|Plastic pollution|Producer responsibility|Waste-to-energy|Packaging waste'],
-  tech: [
-    'AI agents|WebGPU|Rust|Solid-state batteries|Remote work',
-    'AI agents|MCP|Rust|TypeScript|Vue.js|Local-first software',
-  ],
-};
-// Presets that were retired, and the preset that takes their place when the user never edited them.
-const REPLACED_BY: Record<string, string> = { tech: 'tgs' };
+// Lens ids shipped by earlier versions. When the presets change, a saved lens with one of these ids (or a
+// current preset id) is an old preset and gives way; anything else is the user's own and is kept.
+const OLD_PRESET_IDS = new Set([
+  'world',
+  'geo',
+  'climate',
+  'circular',
+  'portugal',
+  'land',
+  'nl',
+  'tech',
+  'tgs',
+  'planet',
+  'amsterdam',
+]);
 export function loadLenses() {
   let lenses = store.get(LS.lenses, null);
   if (!Array.isArray(lenses) || !lenses.length) {
     lenses = presetLenses();
-    const old = store.get(LS.oldWatch, null); // migrate the single watchlist from v1 into its own lens
-    if (Array.isArray(old) && old.length)
-      lenses[lenses.length - 1] = {
-        id: 'watch',
-        name: 'My watchlist',
-        desc: 'The topics from your earlier watchlist.',
-        topics: old.filter(x => x && x.name).map(x => ({ name: x.name, slot: x.slot })),
-      };
   } else if ((store.get(LS.presetVer, 1) || 1) < PRESET_VERSION) {
-    // Upgrade preset lenses the user never edited, and add new presets where there's room.
-    // Anything the user changed is left alone.
-    const fresh = presetLenses();
-    lenses = lenses.map(l => {
-      const names = (l.topics || []).map(t => t.name).join('|');
-      const untouched = (OLD_PRESET_TOPICS[l.id] || []).includes(names);
-      if (!untouched) return l;
-      const next = REPLACED_BY[l.id];
-      if (next && !lenses.some(x => x.id === next)) return fresh.find(f => f.id === next);
-      return fresh.find(f => f.id === l.id) || l;
-    });
-    fresh.forEach((f, i) => {
-      if (lenses.some(l => l.id === f.id) || lenses.length >= MAX_LENSES) return;
-      const after = lenses.findIndex(l => l.id === fresh[i - 1]?.id);
-      lenses.splice(after + 1, 0, f);
-    });
+    const own = lenses.filter(l => l && !OLD_PRESET_IDS.has(l.id) && !PRESETS.some(p => p.id === l.id));
+    lenses = [...presetLenses(), ...own];
   }
   store.set(LS.presetVer, PRESET_VERSION);
   state.lenses = lenses.slice(0, MAX_LENSES).map(l => {
@@ -199,10 +156,6 @@ export function loadLenses() {
       desc: l.desc || '',
       lang: /^[a-z]{2,3}$/.test(l.lang || '') ? l.lang : 'en',
       country: l.country || null,
-      // Lenses saved before sources existed take their preset's sources; custom lenses use every source.
-      sources: Array.isArray(l.sources)
-        ? l.sources.filter(x => ALL_SOURCES.includes(x))
-        : PRESETS.find(p => p.id === l.id)?.sources,
       topics,
     };
   });

@@ -4,8 +4,7 @@ import { ago, changeLabel, fmtPct, fmtTime, fmtVal, nf0 } from '../core/format';
 import { levelOf } from '../core/stats';
 import { dp } from './datapoints';
 import { stories } from './stories';
-import { SOURCES } from '../sources/registry';
-import { activeLens, allEntries, entriesOf, lensAllows, lensById, state } from '../state';
+import { activeLens, allEntries, entriesOf, lensById, state } from '../state';
 
 export function lensName(E) {
   const l = lensById(E.lensId);
@@ -56,7 +55,8 @@ export function buildBrief() {
         .map(E => `${E.name} (${E.stats.z.toFixed(1)}σ, ${lensName(E)})`)
         .join(', ')}${elsewhere.length > 3 ? ` and ${elsewhere.length - 3} more` : ''}.`,
     );
-  const f = lensAllows(lens, 'pt-hazards') ? dp.facts : {};
+  // Fire and storm warnings matter for the land lens; elsewhere they'd be noise.
+  const f = lens?.id === 'portugal' ? dp.facts : {};
   if (f.fire && f.fire.hi)
     out.lines.push(
       `Portugal fire risk today: ${f.fire.hi} of ${f.fire.n} municipalities at very high or maximum risk (IPMA).`,
@@ -101,7 +101,7 @@ export function briefMarkdown() {
     .map(a => `- **${a.level.toUpperCase()}** ${a.topic} (${a.lens}), ${fmtTime(a.t, a.step)}: ${a.text}`)
     .join('\n');
   const keys = new Set(b.items.map(E => E.key));
-  const rowsDp = dp.rows.filter(r => lensAllows(b.lens, r.group));
+  const rowsDp = dp.rows;
   const top = [...stories.hn.values()]
     .filter(s => s.topics.some(k => keys.has(k)))
     .sort((a, b) => b.vel - a.vel)
@@ -109,7 +109,7 @@ export function briefMarkdown() {
     .map(s => `- [${s.title}](${s.url}) (${nf0.format(s.vel)}/h)`)
     .join('\n');
   return (
-    `## PRECOG brief, ${d} · ${b.lens?.name || ''}\n\nSource: ${SOURCES[state.source].label}\n\n${b.lines.map(l => `- ${l}`).join('\n')}\n\n| Topic | Now | Change | z | State |\n|---|---|---|---|---|\n${rows}\n` +
+    `## PRECOG brief, ${d} · ${b.lens?.name || ''}\n\n${b.lines.map(l => `- ${l}`).join('\n')}\n\n| Topic | Now | Change | z | State |\n|---|---|---|---|---|\n${rows}\n` +
     (rowsDp.length ? `\n### Datapoints\n${rowsDp.map(r => `- ${r.k}: ${r.v} (${r.src})`).join('\n')}\n` : '') +
     (recent ? `\n### Alerts\n${recent}\n` : '') +
     (top ? `\n### Rising stories\n${top}\n` : '')

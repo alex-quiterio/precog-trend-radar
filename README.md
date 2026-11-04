@@ -2,47 +2,62 @@
 
 # PRECOG / Trend Radar
 
-**A morning brief of world attention trends.**
-Spot what's starting to move, before it's everywhere.
+**A personal situation room: pick a channel, get the gist.**
+What's moving in the topics you care about, the numbers worth knowing, and what's being written, forecast and built around them.
 
 [**▶ Open the live dashboard**](https://alex-quiterio.github.io/precog-trend-radar/) ·
+[Channels](#channels) ·
 [Quick start](#quick-start) ·
-[How it works](#how-it-works) ·
-[Add a data source](#add-a-data-source)
+[How it works](#how-it-works)
 
 [![Build and deploy](https://github.com/alex-quiterio/precog-trend-radar/actions/workflows/pages.yml/badge.svg)](https://github.com/alex-quiterio/precog-trend-radar/actions/workflows/pages.yml)
 ![Vue 3](https://img.shields.io/badge/Vue-3.5-42b883?logo=vuedotjs&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178c6?logo=typescript&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-6-646cff?logo=vite&logoColor=white)
-![No API keys](https://img.shields.io/badge/API%20keys-none-111722)
 ![Tracks topics, never people](https://img.shields.io/badge/tracks-topics%2C%20never%20people-d03b3b)
 
-<img src="docs/screenshot-dark.png" alt="PRECOG dashboard in dark mode: the morning brief with top movers, open-data datapoints for Portugal, the Netherlands and the EU, lens tabs, the signal chart and the momentum radar" width="100%">
+<img src="docs/screenshot-dark.png" alt="PRECOG in dark mode on The Great Simplification channel: the gist of what moved, the attention chart, the planet's open data alongside, and episodes matched to the channel's topics" width="100%">
 
 </div>
 
 ---
 
-## Why
+## Channels
 
-News feeds tell you what already happened. PRECOG watches **how much attention topics get, day by day**, and flags the moment one breaks from its normal level. It reads open sources: Wikipedia pageviews, Hacker News and global news coverage. It shows each change as a z-score with a short forecast, so you can see a shift while it's still forming.
+PRECOG shows one **channel** at a time. A channel is a whole dashboard for one context: switching it switches the topics, the chart, the open data alongside and the streams below.
 
-Open it with your coffee. In about two minutes you know what's running hot, what's quietly climbing, and which stories are spreading fastest.
+| Channel                      | Topics it charts                                                                      | Context (open data)                                                    | Streams                             |
+| ---------------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | ----------------------------------- |
+| **World**                    | Ukraine, Gaza, tariffs, NATO, inflation, AI                                           | inflation, ECB rate, unemployment, CO₂                                 | Forecasts, Reading, Hacker News     |
+| **The Great Simplification** | climate change, peak oil, degrowth, overshoot, biodiversity loss, Hormuz              | CO₂, sea ice, Alentejo soil                                            | its episodes and Frankly, Forecasts |
+| **Portugal & the land**      | Alentejo, wildfires, desertification, rural flight, permaculture, regen. ag.          | IPMA fire risk and warnings, soil, Lisbon and Porto weather, inflation | Reading, Forecasts                  |
+| **Circular economy**         | circular economy, recycling, PPWR, producer responsibility, food waste, CSRD          | inflation, ECB rate, unemployment                                      | Reading, Hacker News, Forecasts     |
+| **Alternative Amsterdam**    | doughnut economics, housing co-ops, land trusts, squatting, urban farms, repair cafés | Amsterdam weather, inflation, unemployment                             | Reading, Hacker News                |
+| **GitHub**                   | AI agents, MCP, Rust, TypeScript, Vue, local-first                                    | new-repo trends, rising projects, **your own stats**                   | Hacker News                         |
 
-## What's on the screen
+Every channel has the same four parts:
 
-|                       |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ☀️ **Morning brief**  | What's running hot, the biggest moves, the steadiest climb and the most active lens, plus what changed **since your last look**. One click copies it as Markdown for your daily note.                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| 🔭 **Lenses**         | Themed watchlists: _World, Geopolitics, Climate & energy, Circular economy_ (packaging rules, food waste, CSRD), _Portugal, Land & homestead_ (permaculture, agroforestry, rewilding), _Nederland, Great Simplification_ (degrowth, peak oil, EROI, overshoot, biodiversity loss, Hormuz). Edit any of them: up to 8 lenses of 6 topics each. Local lenses read Portuguese and Dutch Wikipedia and filter news to local outlets. Each lens is its own dashboard: it chooses which sources feed its trend lines, which story tabs it shows and which datapoint cards it shows, so GitHub is never asked about a war. |
-| 📈 **Signal**         | The selected topic's history, a dashed 12-step forecast with a ±1σ band, and a hover crosshair. Swipe, drag or press `←` `→` to change topic, and `[` `]` to change lens.                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| 🚀 **Rising stories** | A [NewsWhip](https://www.newswhip.com/)-style ranking of stories by engagement **per hour**, measured as the page re-checks them, with a 24-hour projection and a **breaking out** flag. Plus story clusters from global news and from Portuguese and Dutch outlets, and the episodes of _The Great Simplification_ podcast that touch your topics. **Forecasts** lists open [Manifold](https://manifold.markets/) prediction markets on your topics with the crowd's probability. Questions that name a person are left out.                                                                                       |
-| 🎯 **Radar**          | A rotating sweep over your lens. Distance shows momentum (centre = rising fastest), size shows volume, and blips ping as the sweep passes.                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| 🚨 **Pre-cog alerts** | Raised when a topic's latest point is more than 2.5σ above its 30-step baseline (**ALERT**), or more than 1.8σ (**WATCH**). Each comes with a plain-English explanation and a projection.                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| 🧾 **Datapoints**     | Open data cards for the active lens: the ECB deposit rate, unemployment (PT / NL / euro area), IPMA fire risk and weather warnings, weather and air quality in Lisbon, Porto and Amsterdam, CO₂ at Mauna Loa, global sea ice extent and Alentejo soil moisture, the last three with a small chart.                                                                                                                                                                                                                                                                                                                  |
-| ♿ **Table view**     | Every topic in every lens in one accessible table. Respects reduced motion. Prints on A4 landscape.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+- **Gist:** what's running hot, the biggest moves, the steadiest climb, one line on what's hot in the other channels, and what changed since your last look. Copy it as Markdown for a daily note.
+- **Trends:** the selected topic's attention, day by day (100 = its own 30-day norm), with a 12-step forecast and a ±1σ band. Add or remove topics; `←` `→` switch topic, `[` `]` switch channel.
+- **Context:** the open-data cards that matter for that channel, with small charts where there's history.
+- **Streams:** **Reading** (posts from sites you follow, matched to the channel's topics), **Forecasts** (open [Manifold](https://manifold.markets/) markets with the crowd's probability) and **Hacker News** (stories ranked by engagement per hour).
 
-<p align="center"><img src="docs/screenshot-light.png" alt="PRECOG in light mode showing the Portugal lens" width="85%"></p>
+Make your own channel with **+ channel**: give it a name and up to six topics.
+
+### GitHub
+
+The GitHub channel adds a **Builders** section:
+
+<p align="center"><img src="docs/screenshot-light.png" alt="PRECOG in light mode on the GitHub channel: the gist of what moved across AI agents, MCP, Rust, TypeScript, Vue and local-first, and the attention chart" width="85%"></p>
+
+- **Open-source momentum:** new repositories per topic in the last 90 days against the 90 days before, the fastest-growing topic, the language mix of the leading new repos, and the new projects gaining stars fastest.
+- **Your GitHub:** public repos, stars, followers, main languages, your public activity over the last 30 days, and what you pushed recently. It reads public data for the username you set (`alex-quiterio` by default; **Change user** to switch).
+
+**GitHub token (optional).** Without one, GitHub allows about 10 searches a minute, so the momentum view takes about two minutes to fill in. With a token it's 30 a minute, and 5,000 profile calls an hour instead of 60. Create a [fine-grained token](https://github.com/settings/personal-access-tokens/new) with **no permissions** (public data is all PRECOG reads), then click **+ Token** on Your GitHub and paste it. It stays in your browser.
+
+### News coverage (The Guardian)
+
+Trend lines blend Wikipedia pageviews with Hacker News for tech topics. To add news coverage, get a free developer key at [open-platform.theguardian.com/access](https://open-platform.theguardian.com/access/) (**Register developer key**; it arrives by email), then click **+ Guardian key** and paste it. The key stays in your browser. Guardian article counts per day then join the trend lines for every topic. The developer tier allows about 500 calls a day; PRECOG caches each topic for the day.
 
 ## Quick start
 
@@ -53,93 +68,72 @@ npm install
 npm run dev        # http://localhost:5173
 ```
 
-Or skip the setup and use the [hosted version](https://alex-quiterio.github.io/precog-trend-radar/).
+Or use the [hosted version](https://alex-quiterio.github.io/precog-trend-radar/).
 
-`npm run build` writes **one self-contained `dist/index.html`** with all JS and CSS inlined. It opens straight from your file system, with no server.
-
-It opens straight onto **real data** from the World attention index. There's no simulated mode, so nothing on screen is ever made up. A cold start takes up to a minute while the sources answer, and results are cached after that. Press **↻ Refresh** any time.
-
-### Portuguese and Dutch news
-
-RTP, Público, Observador, NOS, NU.nl, DutchNews and NL Times block feed reads from other websites, so the dashboard can't fetch them directly. Run the small local proxy:
-
-```sh
-npm run proxy      # node feed-proxy.ts, listening on 127.0.0.1:8787
-```
-
-Then open **Rising stories → PT · NL news → set up PT + NL feeds**. The proxy runs on your machine and only fetches the news sites in its allowlist.
-
-On the hosted dashboard, Chrome asks before a website may call a server on your own machine. Allow it when prompted, or click the icon left of the address bar → **Site settings → Local network access → Allow**. Without that, every feed shows as unreachable even while the proxy is running. Running the dashboard locally (`npm run dev`) avoids the prompt.
+`npm run build` writes **one self-contained `dist/index.html`** with all JS and CSS inlined. It opens straight from your file system.
 
 ## How it works
 
 ```mermaid
 flowchart LR
-  subgraph Sources["Open sources (no keys)"]
-    W[Wikipedia pageviews<br/>en · pt · nl]
+  subgraph Trend["Trend sources"]
+    W[Wikipedia pageviews]
+    G[The Guardian<br/>with your key]
     H[Hacker News]
-    G[GDELT global news]
-    R[RSS feeds<br/>via local proxy]
   end
-  subgraph Logic["Plain TypeScript"]
-    A[Adapters] --> B[Blend<br/>100 = 30-day norm]
-    B --> S[Stats<br/>forecast · momentum · z]
-    S --> L[Alerts]
-    S --> BR[Morning brief]
+  subgraph Context["Context and streams"]
+    D[ECB · Eurostat · IPMA<br/>Open-Meteo · NOAA · NSIDC]
+    R[Followed WordPress sites]
+    M[Manifold]
+    GH[GitHub search + your profile]
   end
-  subgraph UI["Vue 3 components"]
-    C[Signal · Radar · Cards · Table<br/>Stories · Alerts · Datapoints]
-  end
-  W & H & G & R --> A
-  L & BR --> U[(reactive ui store)] --> C
+  W & G & H --> B[Blend<br/>100 = 30-day norm] --> S[Stats<br/>forecast · momentum · z] --> GI[Gist]
+  CH[(Channel)] --> GI & D & R & M & GH
 ```
 
-- **World attention index:** each source is re-based so **100 = its own 30-day median**, then the sources are averaged with weights. Only days that _every_ source has published are used, because sources publish with different delays. Sparse sources (a few items a day) get less weight, and low-volume topics never make the brief's headline claims.
+- **Attention index:** each source is re-based so **100 = its own 30-day median**, then the sources are averaged with weights. Only days that every source has published are used. Sparse sources get less weight, and low-volume topics never make the gist's headline claims.
 - **Forecast:** linear regression on the last 20 points, projected 12 steps ahead. The band is ±1σ of the residuals.
-- **z-score:** the latest point against the previous 30. One topic gets at most one alert every 6 steps, unless a watch escalates.
-- **Story velocity:** (points + comments) per hour between two checks at least 5 minutes apart. Before there are two checks, it's the average since the story was posted. The projection assumes engagement levels off: `E(t) = E∞ · (1 − e^(−t/8h))`.
+- **Running hot:** the latest point against the previous 30. Above 2.5σ is an **alert**, above 1.8σ a **watch**.
+- **Reading:** any WordPress site whose public API allows browser reads works (most do): **follow a site** in the Reading stream. Posts that name a topic in the title rank above those that name it in the text, and a match counts half as much for every six months of age.
+- **Channels** are defined in [`src/channels.ts`](src/channels.ts): the lens of topics, the datapoint cards, the streams and the sites each one shows.
 
 ### Sources
 
-| Source                             | Measures                                                 | Notes                                                                         |
-| ---------------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| Wikipedia pageviews                | daily views of the topic's article, in the lens language | Titles are resolved automatically, or set exactly with `Name \| wiki: Title`. |
-| Hacker News (Algolia)              | stories per day for the exact phrase                     | English lenses. Usually one request per topic, cached per day.                |
-| GDELT                              | the topic's share of worldwide news coverage per day     | Allows one request every ~5 s, so it fills in last. Cached for the day.       |
-| Manifold                           | open prediction markets on a topic, with probability     | Stories tab only. 10+ forecasters; questions naming people are dropped.       |
-| global-warming.org · Open-Meteo    | CO₂, sea ice, Alentejo soil moisture                     | Datapoints, with history for the small charts.                                |
-| The Great Simplification           | podcast episodes and Frankly monologues naming a topic   | Public WordPress API. Whole catalogue cached for 12 h. Stories tab only.      |
-| GitHub search                      | new repos per week                                       | Allows about 10 requests a minute. Cached for 12 h.                           |
-| RSS                                | mentions per day across your feeds                       | Through the local proxy when feeds block browser reads.                       |
-| ECB · Eurostat · IPMA · Open-Meteo | the Datapoints panel                                     | Official open data.                                                           |
-
-### GDELT rate limit
-
-GDELT allows one request every ~5 s per network and answers anything faster with a 429, which a browser sees only as `Failed to fetch`. The dashboard asks it one request at a time, sends one combined query per lens for stories, and caches results for the day. When GDELT refuses three times in a row, the dashboard pauses GDELT for 20 minutes, and the pause survives a reload. The index keeps working from the other sources meanwhile.
+| Source                                | Gives                                                  | Notes                                                                |
+| ------------------------------------- | ------------------------------------------------------ | -------------------------------------------------------------------- |
+| Wikipedia pageviews                   | daily views of each topic's English article            | Titles resolve automatically, or set one with `Name \| wiki: Title`. |
+| The Guardian                          | articles per day naming the topic                      | Needs your free key. Cached for the day.                             |
+| Hacker News (Algolia)                 | stories per day; stories ranked by engagement per hour | Cached per day.                                                      |
+| Manifold                              | open prediction markets, with probability              | 10+ forecasters; questions naming a person are dropped.              |
+| WordPress sites you follow            | posts matched to the channel's topics                  | Cached for 12 h.                                                     |
+| GitHub search and users API           | new repos per topic, rising repos, your public stats   | ~10 searches a minute unauthenticated; cached for 12 h / 30 min.     |
+| ECB · Eurostat                        | deposit rate, inflation (HICP), unemployment           | PT, NL and the euro area.                                            |
+| IPMA · Open-Meteo                     | fire risk, warnings, soil moisture, weather, air       | Portugal and Amsterdam.                                              |
+| NOAA · NSIDC (via global-warming.org) | CO₂ at Mauna Loa, global sea ice extent                | With history for the small charts.                                   |
 
 ## Privacy and scope
 
 PRECOG tracks **topics, never people**.
 
-- Topic and lens names that look like a person, an @handle or an email are refused. This is a heuristic based on common first names and titles.
-- A Wikipedia lookup that resolves to a person's article is skipped.
-- Story lists show headlines and outlets. Story authors are never requested.
-- Everything stays in your browser (`localStorage`). Nothing leaves your machine except the API requests themselves.
+- Topic and channel names that look like a person, an @handle or an email are refused. This is a heuristic based on common first names and titles.
+- A Wikipedia lookup that resolves to a person's article is skipped, and forecast questions that name a person are dropped.
+- The one exception is **Your GitHub**, which shows the public profile of the username you set yourself.
+- Everything stays in your browser (`localStorage`), including the Guardian key. Nothing leaves your machine except the API requests themselves.
 
 ## Project layout
 
 ```
 src/
 ├── main.ts                 boot: prefs, mount, data loop, keyboard
-├── App.vue                 root layout: header, status, two panel columns
-├── types.ts                shared data shapes (Entry, Stats, Alert, Adapter…)
-├── core/                   config, person guard, statistics, formatting, ui store
-├── sources/                registry + one adapter per source, and the blend
-├── features/               morning brief, rising stories, datapoints
+├── App.vue                 the channel on screen: hero, gist, trends, builders, streams, context
+├── channels.ts             channel definitions
+├── types.ts                shared data shapes (Entry, Stats, Adapter…)
+├── core/                   config and lenses, person guard, statistics, formatting, ui store
+├── sources/                registry, trend adapters (Wikipedia, Guardian, HN), Manifold, Reading
+├── features/               gist, streams, datapoints, GitHub momentum, your GitHub
 ├── components/             one Vue component per panel, plus PanelShell, Sparkline, tags
-├── state.ts · live.ts · alerts.ts · actions.ts · layout.ts
+├── state.ts · live.ts · alerts.ts · actions.ts
 └── styles/                 tokens (dark default + light), app, print and reduced motion
-feed-proxy.ts               allowlisted local feed proxy (node feed-proxy.ts)
 tests/                      Vitest unit tests for the pure logic
 ```
 
@@ -149,16 +143,15 @@ The logic modules are plain TypeScript with no DOM access. They change plain sta
 | ---------------- | -------------------------------------------------------- |
 | `npm run dev`    | Vite dev server with hot reload                          |
 | `npm run build`  | type-check, then build the single-file `dist/index.html` |
-| `npm test`       | Vitest unit tests (guard, stats, blend, preset upgrades) |
+| `npm test`       | Vitest unit tests                                        |
 | `npm run lint`   | `vue-tsc` type-check and Prettier check                  |
 | `npm run format` | Prettier, configured in `.prettierrc`                    |
-| `npm run proxy`  | the local PT/NL feed proxy                               |
 
 Every push to `main` runs lint, tests and the build in GitHub Actions, then deploys `dist/` to GitHub Pages.
 
 ## Add a data source
 
-An adapter returns attention points for one topic. Register it, and it appears in the source menu:
+An adapter returns attention points for one topic. Register it, then add its id to `SOURCES.blend.parts` in `src/sources/registry.ts` to blend it into every channel's trend lines:
 
 ```ts
 // src/sources/npm-downloads.ts, then add `import './sources/npm-downloads';` to main.ts

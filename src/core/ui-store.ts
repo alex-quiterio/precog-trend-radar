@@ -1,7 +1,7 @@
 // PRECOG / Trend Radar · The bridge between plain-JS logic and Vue.
 // Logic modules mutate plain state, then call bump(). Every component's render
 // reads ui.v, so one bump re-renders whatever is on screen. Everything the UI
-// shows that is not derived from state (status line, pulse, dialog requests) lives here.
+// shows that is not derived from state (status line, pulse, focus requests) lives here.
 import { reactive } from 'vue';
 
 export const ui = reactive({
@@ -16,9 +16,8 @@ export const ui = reactive({
   watchErr: false,
   focusAdd: 0, // ask the lens panel to focus its "add topic" input
   swap: 0, // replay the chart's topic-switch animation
-  feedsOpen: 0,
-  feedsIntent: 'source',
-  layout: { main: [], side: [] },
+  guardian: false, // a Guardian API key is set
+  ghToken: false, // a GitHub token is set
 });
 export function bump() {
   ui.v++;

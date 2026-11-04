@@ -25,74 +25,53 @@ const currentTheme = (): 'dark' | 'light' =>
 export const slotColor = (slot: number): string => PALETTES[currentTheme()][slot];
 export const SLOT_ANGLE = [20, 80, 140, 200, 260, 320];
 
-// Every source a lens can switch on. A lens is its own dashboard: these decide which trend
-// sources feed its chart, which story tabs it shows and which datapoint cards it shows.
-export type SourceKind = 'trend' | 'stories' | 'datapoints';
-export const SOURCE_CATALOG: { id: string; label: string; kind: SourceKind }[] = [
-  { id: 'wikipedia', label: 'Wikipedia', kind: 'trend' },
-  { id: 'news', label: 'Global news', kind: 'trend' },
-  { id: 'hn', label: 'Hacker News', kind: 'trend' },
-  { id: 'github', label: 'GitHub', kind: 'trend' },
-  { id: 'rss', label: 'PT · NL feeds', kind: 'trend' },
-  { id: 'forecasts', label: 'Forecasts', kind: 'stories' },
-  { id: 'tgs', label: 'Great Simplification', kind: 'stories' },
-  { id: 'economy', label: 'ECB · Eurostat', kind: 'datapoints' },
-  { id: 'pt-hazards', label: 'IPMA fire · warnings', kind: 'datapoints' },
-  { id: 'weather', label: 'Weather · air', kind: 'datapoints' },
-  { id: 'planet', label: 'CO₂ · sea ice', kind: 'datapoints' },
-  { id: 'soil', label: 'Alentejo soil', kind: 'datapoints' },
-];
-export const ALL_SOURCES = SOURCE_CATALOG.map(s => s.id);
-
-// Each topic: [display name, { wiki: exact article title, q: search phrase for news/HN }]
+// Each topic: [display name, { wiki: exact article title, q: search phrase for news and stories }]
+// One lens per channel (see channels.ts). English Wikipedia throughout: Portuguese and Dutch articles on
+// these subjects get too few views (1-20 a day) for a trend to mean anything.
 export const PRESETS = [
   {
     id: 'world',
     name: 'World',
-    desc: 'The big picture: the forces moving the most attention worldwide.',
-    sources: ['wikipedia', 'news', 'forecasts', 'tgs', 'economy', 'planet'],
+    desc: 'The big stories, and the slow plates under them.',
     topics: [
-      ['Climate change'],
-      ['Artificial intelligence', { q: 'AI' }],
-      ['Inflation'],
       ['Russo-Ukrainian war', { q: 'Ukraine' }],
       ['Gaza war', { q: 'Gaza' }],
       ['Tariffs', { wiki: 'Tariff', q: 'tariffs' }],
-    ],
-  },
-  {
-    id: 'geo',
-    name: 'Geopolitics',
-    desc: 'Alliances, trade and resources: the slow plates under the news.',
-    sources: ['wikipedia', 'news', 'forecasts', 'economy'],
-    topics: [
       ['NATO'],
-      ['BRICS'],
-      ['Sanctions', { wiki: 'Economic sanctions', q: 'sanctions' }],
-      ['Critical minerals'],
-      ['Taiwan Strait', { wiki: 'Cross-strait relations', q: 'Taiwan' }],
-      ['Immigration'],
+      ['Inflation'],
+      ['Artificial intelligence', { q: 'AI' }],
     ],
   },
   {
-    id: 'climate',
-    name: 'Climate & energy',
-    desc: 'Heat, fire, water and the energy transition.',
-    sources: ['wikipedia', 'news', 'hn', 'forecasts', 'tgs', 'planet', 'pt-hazards', 'weather'],
+    id: 'tgs',
+    name: 'The Great Simplification',
+    desc: 'Energy, ecology and the economy as one system, after Nate Hagens.',
     topics: [
-      ['Heat waves', { wiki: 'Heat wave', q: 'heatwave' }],
+      ['Climate change'],
+      ['Peak oil'],
+      ['Degrowth'],
+      ['Overshoot', { wiki: 'Overshoot (population)', q: 'ecological overshoot' }],
+      ['Biodiversity loss'],
+      ['Strait of Hormuz', { q: 'Hormuz' }],
+    ],
+  },
+  {
+    id: 'portugal',
+    name: 'Portugal & the land',
+    desc: 'The interior, fire and water, and the practices behind a rural, closed-loop life.',
+    topics: [
+      ['Alentejo'],
       ['Wildfires', { wiki: 'Wildfire', q: 'wildfire' }],
-      ['Solar power'],
-      ['Carbon price'],
-      ['Drought'],
-      ['Energy transition'],
+      ['Desertification'],
+      ['Rural flight'],
+      ['Permaculture'],
+      ['Regenerative agriculture'],
     ],
   },
   {
     id: 'circular',
     name: 'Circular economy',
     desc: 'Waste, packaging and reporting rules: what shapes B2B recycling and waste services.',
-    sources: ['wikipedia', 'news', 'tgs', 'economy'],
     topics: [
       ['Circular economy'],
       ['Recycling'],
@@ -103,74 +82,39 @@ export const PRESETS = [
     ],
   },
   {
-    id: 'portugal',
-    name: 'Portugal',
-    lang: 'pt',
-    country: 'portugal',
-    desc: 'Housing, fire, water and the interior, read through Portuguese Wikipedia and Portuguese outlets.',
-    sources: ['wikipedia', 'news', 'rss', 'pt-hazards', 'weather', 'soil', 'economy'],
+    id: 'amsterdam',
+    name: 'Alternative Amsterdam',
+    desc: 'The cooperative, regenerative city: doughnut economics, housing co-ops, squats and urban farms.',
     topics: [
-      ['Habitação', { wiki: 'Habitação em Portugal', q: 'habitação' }],
-      ['Incêndios', { wiki: 'Incêndios florestais em Portugal', q: 'incêndios' }],
-      ['Seca', { q: 'seca' }],
-      ['Êxodo rural', { q: 'despovoamento' }],
-      ['Alentejo'],
-      ['Lítio', { q: 'lítio' }],
+      ['Doughnut economics', { wiki: 'Doughnut (economic model)', q: 'doughnut economics' }],
+      ['Housing cooperative'],
+      ['Community land trust'],
+      ['Squatting'],
+      ['Urban agriculture'],
+      ['Repair Café', { q: 'repair cafe' }],
     ],
   },
   {
-    id: 'land',
-    name: 'Land & homestead',
-    desc: 'Growing food, restoring land and living lighter: the practices behind a rural, closed-loop life.',
-    sources: ['wikipedia', 'news', 'hn', 'tgs', 'soil', 'weather', 'pt-hazards'],
+    id: 'github',
+    name: 'GitHub',
+    desc: 'The stack and ideas worth watching early, and your own work.',
     topics: [
-      ['Permaculture'],
-      ['Regenerative agriculture'],
-      ['Agroforestry'],
-      ['Rewilding'],
-      ['Off-grid living', { wiki: 'Off-the-grid', q: 'off-grid' }],
-      ['Ecovillages', { wiki: 'Ecovillage', q: 'ecovillage' }],
-    ],
-  },
-  {
-    id: 'nl',
-    name: 'Nederland',
-    lang: 'nl',
-    country: 'netherlands',
-    desc: 'Dutch housing, nitrogen, energy and waste policy, read through Dutch Wikipedia and Dutch outlets.',
-    sources: ['wikipedia', 'news', 'rss', 'weather', 'economy'],
-    topics: [
-      ['Woningnood'],
-      ['Stikstofcrisis', { wiki: 'Stikstofcrisis in Nederland', q: 'stikstof' }],
-      ['Statiegeld'],
-      ['Circulaire economie'],
-      ['Energietransitie'],
-      ['Asiel', { wiki: 'Asielzoeker', q: 'asiel' }],
-    ],
-  },
-  {
-    id: 'tgs',
-    name: 'Great Simplification',
-    desc: 'Energy, ecology and the economy as one system: the themes of Nate Hagens’ The Great Simplification.',
-    sources: ['wikipedia', 'news', 'hn', 'forecasts', 'tgs', 'planet'],
-    topics: [
-      ['Degrowth'],
-      ['Peak oil'],
-      ['EROI', { wiki: 'Energy return on investment', q: 'energy return on investment' }],
-      ['Overshoot', { wiki: 'Overshoot (population)', q: 'ecological overshoot' }],
-      ['Biodiversity loss'],
-      ['Strait of Hormuz', { q: 'Hormuz' }],
+      ['AI agents', { wiki: 'AI agent', q: 'AI agents' }],
+      ['MCP', { wiki: 'Model Context Protocol', q: 'Model Context Protocol' }],
+      ['Rust', { wiki: 'Rust (programming language)', q: 'Rust' }],
+      ['TypeScript'],
+      ['Vue.js', { q: 'Vue' }],
+      ['Local-first software', { q: 'local-first' }],
     ],
   },
 ];
-export const PRESET_VERSION = 4;
+export const PRESET_VERSION = 6;
 export const LS = {
   presetVer: 'precog.presetver',
   lenses: 'precog.lenses.v1',
   oldWatch: 'precog.watchlist.v1',
   layout: 'precog.layout.v3',
   prefs: 'precog.prefs.v2',
-  rss: 'precog.rss.v1',
   look: 'precog.lastlook.v1',
   wikiTitles: 'precog.wikititle.v1',
   storyObs: 'precog.storyobs.v1',

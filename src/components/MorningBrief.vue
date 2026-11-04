@@ -1,7 +1,5 @@
 <template>
   <panel-shell id="p-brief" :title="head.title" :meta="head.meta" :index="index" :data-tick="ui.v">
-    <p class="brief-date">{{ head.greet }}. {{ head.date }}.</p>
-    <p class="brief-sub">{{ head.sub }}</p>
     <ul v-if="b.lines.length" class="brief-list">
       <li v-for="(l, i) in b.lines" :key="i">{{ l }}</li>
     </ul>
@@ -52,8 +50,6 @@ import { DAY } from '../core/config';
 import { fmtTime } from '../core/format';
 import { ui } from '../core/ui-store';
 import { briefMarkdown, buildBrief, copyText } from '../features/brief';
-import { setSource } from '../live';
-import { SOURCES } from '../sources/registry';
 import { state } from '../state';
 import StateTag from './StateTag.vue';
 import TopicDot from './TopicDot.vue';
@@ -70,13 +66,8 @@ export default defineComponent({
     const b = computed(() => (ui.v, buildBrief()));
     const head = computed(() => {
       ui.v;
-      const now = new Date(),
-        hr = now.getHours();
       return {
-        greet: hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening',
-        date: now.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' }),
-        title: `Morning brief · ${b.value.lens?.name || ''}`,
-        sub: `${b.value.items.length} topics in ${b.value.lens?.name || 'this lens'} · ${SOURCES[state.source].label}`,
+        title: 'What moved',
         meta: state.liveLoaded
           ? `data to ${fmtTime(Math.max(0, ...b.value.items.map(E => E.stats.lt)), DAY)}`
           : ui.offline
@@ -96,7 +87,7 @@ export default defineComponent({
       markRead();
       note.value = 'Marked as read.';
     }
-    return { ui, state, b, head, bar, note, copy, read, select, goLive: () => setSource('blend') };
+    return { ui, state, b, head, bar, note, copy, read, select };
   },
 });
 </script>

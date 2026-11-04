@@ -4,12 +4,10 @@ import './styles/tokens.css';
 import './styles/app.css';
 import './styles/print-motion.css';
 
-// Data sources register themselves on import, in this order (it is the order of the source menu).
+// Trend sources register themselves on import.
 import './sources/wikipedia';
+import './sources/guardian';
 import './sources/hackernews';
-import './sources/gdelt';
-import './sources/github';
-import './sources/rss';
 
 import App from './App.vue';
 import StateTag from './components/StateTag.vue';
@@ -19,13 +17,17 @@ import { HOUR, LS, store } from './core/config';
 import { ago, changeLabel, fmtAxis, fmtPct, fmtTick, fmtTime, fmtVal, nf0, nf1 } from './core/format';
 import { looksLikePerson } from './core/guard';
 import { arrowOf, levelOf } from './core/stats';
-import { bump } from './core/ui-store';
+import { bump, ui } from './core/ui-store';
 import { loadDatapoints } from './features/datapoints';
+import { loadGitHub } from './features/github';
+import { loadMyGitHub } from './features/github-me';
+import { activeChannel } from './channels';
 import { saveLook } from './features/brief';
 import { startStoryTimer } from './features/stories';
-import { loadLayout } from './layout';
-import { DEFAULT_SOURCE, liveUpdated, loadLive, setSource } from './live';
-import { ADAPTERS, SOURCES, registerAdapter } from './sources/registry';
+import { liveUpdated, loadLive, startLive } from './live';
+import { ADAPTERS, registerAdapter } from './sources/registry';
+import { guardianKey } from './sources/guardian';
+import { githubToken } from './sources/github-auth';
 import { lensById, loadLenses, state } from './state';
 import type { Prefs } from './types';
 
@@ -33,13 +35,12 @@ function boot(): void {
   const prefs = store.get<Partial<Prefs>>(LS.prefs, {});
   applyTheme(prefs.theme || 'dark');
   loadLenses();
-  loadLayout();
+  ui.guardian = !!guardianKey();
+  ui.ghToken = !!githubToken();
   state.activeLens = lensById(prefs.activeLens) ? prefs.activeLens : state.lenses[0]?.id || null;
   state.selectedByLens = prefs.selectedByLens && typeof prefs.selectedByLens === 'object' ? prefs.selectedByLens : {};
-  state.tableView = !!prefs.tableView;
-  state.includeNews = prefs.includeNews !== false;
-  state.storySrc = ['news', 'local', 'tgs', 'forecasts'].includes(prefs.storySrc) ? prefs.storySrc : 'hn';
-  state.storyScope = prefs.storyScope === 'topic' || prefs.storyScope === 'lens' ? prefs.storyScope : 'all';
+  state.storySrc = prefs.storySrc === 'forecasts' || prefs.storySrc === 'hn' ? prefs.storySrc : 'reading';
+  state.storyScope = prefs.storyScope === 'topic' ? 'topic' : 'lens';
   state.prevLook = store.get(LS.look, null);
 
   const app = createApp(App);
@@ -60,10 +61,9 @@ function boot(): void {
   app.component('TopicDot', TopicDot);
   app.mount('#app');
 
-  // 'demo' was a source before the simulator was removed; anything unknown falls back to the attention index.
-  let startSource = prefs.source && SOURCES[prefs.source] ? prefs.source : DEFAULT_SOURCE;
-  if (startSource === 'rss' && !store.get(LS.rss, { feeds: [] as string[] }).feeds.length) startSource = DEFAULT_SOURCE;
-  setSource(startSource);
+  startLive();
+  if (activeChannel().github) loadGitHub();
+  loadMyGitHub();
   loadDatapoints();
   setInterval(loadDatapoints, HOUR);
   startStoryTimer();
@@ -98,6 +98,6 @@ declare global {
     PRECOG: unknown;
   }
 }
-window.PRECOG = { registerAdapter, adapters: ADAPTERS, looksLikePerson, useSource: (id: string) => setSource(id) };
+window.PRECOG = { registerAdapter, adapters: ADAPTERS, looksLikePerson };
 
 boot();

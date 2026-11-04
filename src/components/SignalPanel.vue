@@ -129,7 +129,7 @@
         </svg>
         ±1σ
       </span>
-      <span class="hint">Swipe, drag or ←/→ to switch topic · [ ] to switch lens</span>
+      <span class="hint">Swipe, drag or ←/→ to switch topic · [ ] to switch channel</span>
     </div>
   </panel-shell>
 </template>

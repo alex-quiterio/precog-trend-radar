@@ -1,10 +1,10 @@
 <template>
-  <header class="topbar glass" :data-tick="ui.v">
+  <header class="topbar" :data-tick="ui.v">
     <div class="brand">
       <h1>
         PRECOG
         <span class="slash">/</span>
-        Trend Radar
+        <span class="sub">Trend Radar</span>
       </h1>
       <span class="pulse beat">
         <i :key="ui.beat" aria-hidden="true"></i>
@@ -12,21 +12,6 @@
       </span>
     </div>
     <div class="controls no-print">
-      <label>
-        Source
-        <select v-model="source" aria-label="Data source">
-          <option v-for="id in sourceIds" :key="id" :value="id">{{ SOURCES[id].label }}</option>
-        </select>
-      </label>
-      <label v-if="state.source === 'blend'">
-        <input
-          type="checkbox"
-          :checked="state.includeNews"
-          @change="setIncludeNews(($event.target as HTMLInputElement).checked)"
-        />
-        GDELT news
-      </label>
-      <button v-if="state.source === 'rss'" class="btn" type="button" @click="openFeeds('source')">Feeds…</button>
       <button
         class="btn"
         type="button"
@@ -37,52 +22,82 @@
       >
         ↻ {{ ui.loading ? 'Loading…' : 'Refresh' }}
       </button>
-      <button class="btn" type="button" :aria-pressed="state.tableView" @click="toggleTable">Table view</button>
       <button
         class="btn"
+        type="button"
+        :aria-pressed="ui.guardian"
+        :title="
+          ui.guardian
+            ? 'Guardian news counts are on. Click to change or remove the key.'
+            : 'Add a free Guardian API key to count news coverage for English topics.'
+        "
+        @click="editGuardianKey"
+      >
+        {{ ui.guardian ? '✓ Guardian' : '+ Guardian key' }}
+      </button>
+      <button
+        class="btn icon"
         type="button"
         :aria-label="ui.theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'"
         @click="toggleTheme"
       >
-        ◐ {{ ui.theme === 'light' ? 'Dark' : 'Light' }}
+        ◐
       </button>
     </div>
-    <span class="badge live">{{ badge }}</span>
+    <nav class="channels" aria-label="Channels">
+      <button
+        v-for="c in view.list"
+        :key="c.id"
+        type="button"
+        class="channel"
+        :aria-current="c.id === view.active ? 'page' : undefined"
+        @click="selectLens(c.lensId)"
+      >
+        {{ c.label }}
+        <span v-if="c.heat" :class="['heat', c.heat.level]" :aria-label="c.heat.n + ' ' + c.heat.level">
+          {{ c.heat.n }}
+        </span>
+      </button>
+      <button
+        v-if="view.canAdd"
+        type="button"
+        class="channel add"
+        title="Make your own channel from a new lens of topics"
+        @click="newChannel"
+      >
+        + channel
+      </button>
+    </nav>
   </header>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import { openFeeds, setIncludeNews, toggleTable, toggleTheme } from '../actions';
+import { addLens, editGuardianKey, lensHeat, selectLens, toggleTheme } from '../actions';
+import { activeChannel, channels } from '../channels';
+import { MAX_LENSES } from '../core/config';
 import { ui } from '../core/ui-store';
-import { refresh, setSource } from '../live';
-import { SOURCES } from '../sources/registry';
-import { state } from '../state';
+import { refresh } from '../live';
+import { lensById, state } from '../state';
 
-// PRECOG / Trend Radar · Header: title, pulse, source picker, refresh, table/theme toggles, LIVE badge.
+// PRECOG / Trend Radar · Header: name, heartbeat, controls, and the channel bar that switches the whole view.
 
 export default defineComponent({
   name: 'AppHeader',
   setup() {
-    const source = computed({ get: () => (ui.v, state.source), set: id => setSource(id) });
-    const sourceIds = computed(() => (ui.v, Object.keys(SOURCES)));
-    const badge = computed(() => {
+    const view = computed(() => {
       ui.v;
-      return state.source === 'blend' ? 'LIVE · INDEX' : `LIVE · ${state.source.toUpperCase()}`;
+      return {
+        active: activeChannel()?.id,
+        list: channels().map(c => ({ ...c, heat: lensHeat(lensById(c.lensId)) })),
+        canAdd: state.lenses.length < MAX_LENSES,
+      };
     });
-    return {
-      ui,
-      state,
-      SOURCES,
-      source,
-      sourceIds,
-      badge,
-      refresh,
-      toggleTable,
-      toggleTheme,
-      openFeeds,
-      setIncludeNews,
-    };
+    function newChannel() {
+      const name = window.prompt('Name your channel (you can add up to six topics to it):');
+      if (name && name.trim()) addLens(name.trim());
+    }
+    return { ui, view, refresh, toggleTheme, editGuardianKey, selectLens, newChannel };
   },
 });
 </script>

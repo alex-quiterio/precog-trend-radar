@@ -8,7 +8,7 @@ export const ADAPTERS: Record<string, Adapter> = {};
 export const SOURCES: Record<string, Source> = {
   blend: {
     label: 'World attention index',
-    parts: ['news', 'wikipedia', 'hn'],
+    parts: ['wikipedia', 'guardian', 'hn'],
     unit: 'index · 100 = 30-day norm',
     blend: true,
   },
@@ -49,7 +49,14 @@ export async function pool<T>(items: T[], n: number, fn: (item: T, i: number) =>
     }),
   );
 }
-export { phrase } from './gdelt-query';
+/** Quotes a multi-word topic for exact matching, unless it's already a query expression. */
+export const phrase = (q: string): string =>
+  /["()]|\bOR\b/.test(q) || !/\s/.test(q.trim()) ? q.trim() : `"${q.trim()}"`;
+/** Whole-word, case-insensitive match for a topic phrase in any language. */
+export const topicRegex = (q: string): RegExp => {
+  const n = String(q).replace(/"/g, '').trim();
+  return new RegExp(`(^|[^\\p{L}\\p{N}])${n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?=$|[^\\p{L}\\p{N}])`, 'iu');
+};
 export const queryOf = (E: Entry): Query => {
   const l: Partial<Lens> = lensById(E.lensId) || {};
   return {

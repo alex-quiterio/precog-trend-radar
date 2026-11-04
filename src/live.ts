@@ -1,13 +1,12 @@
 // PRECOG / Trend Radar · Data loop: live fetching, refresh, source switching.
-import { openFeeds } from './actions';
 import { rescanAll } from './alerts';
-import { HISTORY, LIVE_REFRESH_MS, LS, store } from './core/config';
+import { HISTORY, LIVE_REFRESH_MS } from './core/config';
 import { computeStats } from './core/stats';
 import { bump, ui } from './core/ui-store';
 import { loadStories } from './features/stories';
 import { blendParts } from './sources/blend';
-import { ADAPTERS, SKIP, SOURCES, pool, queryOf } from './sources/registry';
-import { activeLens, allEntries, entriesOf, lensAllows, savePrefs, state } from './state';
+import { ADAPTERS, SOURCES, pool, queryOf } from './sources/registry';
+import { activeLens, allEntries, entriesOf, state } from './state';
 
 export const DEFAULT_SOURCE = 'blend';
 export let liveTimer = null,
@@ -29,10 +28,7 @@ export function scheduleRender() {
     bump();
   });
 }
-export const liveParts = () =>
-  (SOURCES[state.source]?.parts || []).filter(
-    p => ADAPTERS[p] && !(p === 'news' && SOURCES[state.source].blend && !state.includeNews),
-  );
+export const liveParts = () => (SOURCES[state.source]?.parts || []).filter(p => ADAPTERS[p]);
 
 export function recompute(E) {
   const src = SOURCES[state.source],
@@ -42,17 +38,9 @@ export function recompute(E) {
   E.liveError = E.liveSeries.length ? null : errs.length === parts.length ? errs[0] : null;
   E.stats = computeStats(E.liveSeries);
 }
-const OFF_LENS = 'not a source for this lens';
 export async function fetchPart(E, pid, signal) {
   try {
-    // A lens only asks the sources it uses (GitHub has nothing to say about a war).
-    const res = !lensAllows(E.lensId, pid)
-      ? SKIP(E.name, OFF_LENS)
-      : await ADAPTERS[pid].fetch(E.name, {
-          signal,
-          query: queryOf(E),
-          config: { rss: store.get(LS.rss, { feeds: [], proxy: '' }) },
-        });
+    const res = await ADAPTERS[pid].fetch(E.name, { signal, query: queryOf(E) });
     if (signal.aborted) return;
     if (res.skip) {
       E.parts[pid] = null;
@@ -90,13 +78,8 @@ export async function loadLive() {
   const entries = orderedEntries();
   const total = entries.length * parts.length;
   let done = 0;
-  const note = parts.includes('news')
-    ? ' Global news (GDELT) allows one request every ~5 s, so it fills in last; results are cached for the day.'
-    : parts.includes('github')
-      ? ' GitHub allows ~10 searches a minute; results are cached.'
-      : '';
   ui.loading = true;
-  setStatus(`Fetching ${SOURCES[state.source].label}… 0/${total}.${note}`);
+  setStatus(`Fetching attention data… 0/${total}`);
   loadStories();
   await Promise.all(
     parts.map(pid =>
@@ -105,7 +88,7 @@ export async function loadLive() {
         await fetchPart(E, pid, signal);
         done++;
         if (!signal.aborted) {
-          setStatus(`Fetching ${SOURCES[state.source].label}… ${done}/${total}.${note}`);
+          setStatus(`Fetching attention data… ${done}/${total}`);
           scheduleRender();
         }
       }),
@@ -127,19 +110,15 @@ export async function loadLive() {
     return;
   }
   ui.offline = false;
-  const newsDown = parts.includes('news') && all.every(E => E.partErr.news);
+  const short = (p: string) => ADAPTERS[p].label.replace(/ (articles|stories|pageviews) \/ day$/, '');
   setStatus(
-    `LIVE · ${SOURCES[state.source].label}. Refreshes every 30 min.` +
-      (newsDown ? ' Global news (GDELT) did not answer, so the index uses the other sources.' : '') +
+    `Live · updated ${new Date(liveUpdated).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })} · refreshes every 30 min.` +
       (partial.length
         ? ' Missing: ' +
           parts
             .map(p => [p, all.filter(E => E.partErr[p]).length] as [string, number])
             .filter(([, n]) => n)
-            .map(
-              ([p, n]) =>
-                `${ADAPTERS[p].label.split(' ')[0] === 'Global' ? 'GDELT' : ADAPTERS[p].label.replace(/ \/.*$| posts| stories| pageviews/g, '')} for ${n} topic${n > 1 ? 's' : ''}`,
-            )
+            .map(([p, n]) => `${short(p)} for ${n} topic${n > 1 ? 's' : ''}`)
             .join(', ') +
           '.'
         : '') +
@@ -172,15 +151,4 @@ export function startLive() {
 /** Fetch again now, keeping what's on screen until new data arrives. */
 export function refresh() {
   if (!ui.loading) loadLive();
-}
-export function setSource(id) {
-  if (!SOURCES[id] || !SOURCES[id].parts) id = DEFAULT_SOURCE;
-  state.source = id;
-  savePrefs();
-  if (id === 'rss' && !store.get(LS.rss, { feeds: [] }).feeds.length) {
-    openFeeds('source');
-    bump();
-    return;
-  }
-  startLive();
 }

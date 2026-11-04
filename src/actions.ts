@@ -1,11 +1,17 @@
 // PRECOG / Trend Radar · User actions on lenses and topics: add, remove, select, switch. No DOM.
 import type { TopicDef } from './types';
-import { ALL_SOURCES, LS, MAX_LENSES, MAX_TOPICS, SOURCE_CATALOG, slotColor, store } from './core/config';
+import { LS, MAX_LENSES, MAX_TOPICS, slotColor, store } from './core/config';
 import { looksLikePerson } from './core/guard';
 import { levelOf } from './core/stats';
 import { bump, ui } from './core/ui-store';
 import { saveLook } from './features/brief';
-import { loadStories, stories, storyTabs } from './features/stories';
+import { loadGitHub } from './features/github';
+import { loadMyGitHub } from './features/github-me';
+import { githubToken, setGithubToken } from './sources/github-auth';
+import { activeChannel } from './channels';
+import { guardianKey, setGuardianKey } from './sources/guardian';
+import { probeSite, readingSites, saveReadingSites } from './sources/reading';
+import { loadStories, stories } from './features/stories';
 import { fetchPart, liveAbort, liveParts, setStatus, startLive } from './live';
 import {
   activeLens,
@@ -122,24 +128,8 @@ export function selectLens(id) {
   savePrefs();
   ui.swap++;
   bump();
-  if (state.storyScope !== 'all' || !storyTabs().includes(state.storySrc)) loadStories();
-}
-/** Switches one source on or off for the active lens, then refetches only what changed. */
-export function toggleLensSource(id: string): void {
-  const lens = activeLens();
-  if (!lens) return;
-  const on = new Set(lens.sources || ALL_SOURCES);
-  if (on.has(id)) on.delete(id);
-  else on.add(id);
-  lens.sources = ALL_SOURCES.filter(x => on.has(x));
-  saveLenses();
-  bump();
-  const kind = SOURCE_CATALOG.find(s => s.id === id)?.kind;
-  if (kind === 'trend' && liveParts().includes(id)) {
-    const ctl = liveAbort && !liveAbort.signal.aborted ? liveAbort : new AbortController();
-    Promise.all(entriesOf(lens).map(E => fetchPart(E, id, ctl.signal))).then(() => bump());
-  }
   loadStories();
+  if (activeChannel().github) loadGitHub();
 }
 export function select(key) {
   const E = state.rt.get(key);
@@ -151,7 +141,8 @@ export function select(key) {
   savePrefs();
   ui.swap++;
   bump();
-  if (state.storyScope === 'topic' || (changedLens && state.storyScope === 'lens')) loadStoriesDebounced();
+  if (state.storyScope === 'topic' || changedLens) loadStoriesDebounced();
+  if (changedLens && activeChannel().github) loadGitHub();
 }
 export function shiftTopic(d) {
   const list = entriesOf(activeLens());
@@ -188,16 +179,6 @@ export function setStoryScope(scope) {
   bump();
   loadStories();
 }
-export function toggleTable() {
-  state.tableView = !state.tableView;
-  savePrefs();
-  bump();
-}
-export function setIncludeNews(on) {
-  state.includeNews = on;
-  savePrefs();
-  startLive();
-}
 export function markRead() {
   saveLook();
   state.prevLook = store.get(LS.look, null);
@@ -219,7 +200,50 @@ export function toggleTheme() {
   savePrefs();
   bump();
 }
-export function openFeeds(intent = 'source') {
-  ui.feedsIntent = intent;
-  ui.feedsOpen++;
+/** Asks for a Guardian API key (kept in this browser only), then refetches so news counts join the index. */
+export function editGuardianKey(): void {
+  const now = guardianKey();
+  const k = window.prompt(
+    now
+      ? 'Your Guardian API key. Clear the field to stop using The Guardian.'
+      : 'Paste your free Guardian API key (from open-platform.theguardian.com/access). It stays in this browser.',
+    now,
+  );
+  if (k == null || k.trim() === now) return;
+  setGuardianKey(k);
+  ui.guardian = !!guardianKey();
+  startLive();
+}
+/** Follows a WordPress site in the Reading tab, after checking the browser may read it. */
+export async function addReadingSite(raw: string): Promise<string | null> {
+  try {
+    const site = await probeSite(raw);
+    const sites = readingSites();
+    if (sites.some(x => x.url === site.url)) return `Already following ${site.name}.`;
+    saveReadingSites([...sites, site]);
+    loadStories();
+    return null;
+  } catch (e) {
+    return e.message;
+  }
+}
+export function removeReadingSite(url: string): void {
+  saveReadingSites(readingSites().filter(x => x.url !== url));
+  loadStories();
+}
+/** Asks for an optional GitHub token (kept in this browser only), then reloads the GitHub views faster. */
+export function editGithubToken(): void {
+  const now = githubToken();
+  const t = window.prompt(
+    now
+      ? 'Your GitHub token. Clear the field to stop using it.'
+      : 'Paste a GitHub token to search 3× faster. A fine-grained token with no permissions is enough: ' +
+          'github.com/settings/personal-access-tokens/new. It stays in this browser.',
+    now,
+  );
+  if (t == null || t.trim() === now) return;
+  setGithubToken(t);
+  ui.ghToken = !!githubToken();
+  loadMyGitHub(true);
+  if (activeChannel().github) loadGitHub(true);
 }

@@ -42,8 +42,6 @@ export interface Lens {
   desc: string;
   lang?: string;
   country?: string | null;
-  /** Source ids this lens uses (see SOURCE_CATALOG). Missing means every source. */
-  sources?: string[];
   topics: TopicDef[];
 }
 
@@ -103,10 +101,7 @@ export interface Adapter {
   weight?: number;
   minMean?: number;
   lagDays?: number;
-  fetch(
-    topic: string,
-    ctx: { signal: AbortSignal; query: Query; config: { rss?: { feeds: string[]; proxy: string } } },
-  ): Promise<AdapterResult>;
+  fetch(topic: string, ctx: { signal: AbortSignal; query: Query }): Promise<AdapterResult>;
 }
 export interface Source {
   label: string;
@@ -118,10 +113,8 @@ export interface Source {
 export interface Prefs {
   activeLens: string;
   selectedByLens: Record<string, string>;
-  tableView: boolean;
   source: string;
-  includeNews: boolean;
   theme: 'dark' | 'light';
-  storySrc: 'hn' | 'news' | 'local' | 'tgs' | 'forecasts';
-  storyScope: 'topic' | 'lens' | 'all';
+  storySrc: 'reading' | 'forecasts' | 'hn';
+  storyScope: 'topic' | 'lens';
 }
