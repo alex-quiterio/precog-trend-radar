@@ -95,6 +95,12 @@ export const PRESETS = [
     ],
   },
   {
+    id: 'marginalian',
+    name: 'The Marginalian',
+    desc: 'Art, science, poetry and philosophy: what it means to live a decent, substantive, rewarding life.',
+    topics: [['Poetry'], ['Consciousness'], ['Stoicism'], ['Grief'], ['Solitude'], ['Meaning of life']],
+  },
+  {
     id: 'github',
     name: 'GitHub',
     desc: 'The stack and ideas worth watching early, and your own work.',
@@ -108,7 +114,7 @@ export const PRESETS = [
     ],
   },
 ];
-export const PRESET_VERSION = 6;
+export const PRESET_VERSION = 7;
 export const LS = {
   presetVer: 'precog.presetver',
   lenses: 'precog.lenses.v1',

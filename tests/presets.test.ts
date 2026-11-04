@@ -26,7 +26,15 @@ describe('lenses', () => {
 
   it('starts a first visit with one lens per channel', () => {
     loadLenses();
-    expect(state.lenses.map(l => l.id)).toEqual(['world', 'tgs', 'portugal', 'circular', 'amsterdam', 'github']);
+    expect(state.lenses.map(l => l.id)).toEqual([
+      'world',
+      'tgs',
+      'portugal',
+      'circular',
+      'amsterdam',
+      'marginalian',
+      'github',
+    ]);
     expect(state.lenses.every(l => l.lang === 'en')).toBe(true);
   });
 
@@ -48,6 +56,7 @@ describe('lenses', () => {
       'portugal',
       'circular',
       'amsterdam',
+      'marginalian',
       'github',
       'mine',
     ]);
@@ -59,5 +68,12 @@ describe('lenses', () => {
     mem.set(LS.lenses, JSON.stringify([saved('mine', ['Zig'])]));
     loadLenses();
     expect(state.lenses.map(l => l.id)).toEqual(['mine']);
+  });
+
+  it('saves the upgraded lenses straight away', () => {
+    mem.set(LS.presetVer, '4');
+    mem.set(LS.lenses, JSON.stringify([saved('geo', ['NATO'])]));
+    loadLenses();
+    expect(JSON.parse(mem.get(LS.lenses) || '[]').map(l => l.id)).toContain('github');
   });
 });

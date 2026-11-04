@@ -26,20 +26,21 @@ What's moving in the topics you care about, the numbers worth knowing, and what'
 
 PRECOG shows one **channel** at a time. A channel is a whole dashboard for one context: switching it switches the topics, the chart, the open data alongside and the streams below.
 
-| Channel                      | Topics it charts                                                                      | Context (open data)                                                             | Streams                             |
-| ---------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------- |
-| **World**                    | Ukraine, Gaza, tariffs, NATO, inflation, AI                                           | inflation, ECB rate, unemployment, CO₂                                          | Forecasts, Reading, Hacker News     |
-| **The Great Simplification** | climate change, peak oil, degrowth, overshoot, biodiversity loss, Hormuz              | CO₂, sea ice                                                                    | its episodes and Frankly, Forecasts |
-| **Portugal & the land**      | Alentejo, wildfires, desertification, rural flight, permaculture, regen. ag.          | IPMA fire risk and warnings, soil in Mafra, Lisbon and Porto weather, inflation | Reading, Forecasts                  |
-| **Circular economy**         | circular economy, recycling, PPWR, producer responsibility, food waste, CSRD          | inflation, ECB rate, unemployment                                               | Reading, Hacker News, Forecasts     |
-| **Alternative Amsterdam**    | doughnut economics, housing co-ops, land trusts, squatting, urban farms, repair cafés | Amsterdam soil and weather, inflation, unemployment                             | Reading, Hacker News                |
-| **GitHub**                   | AI agents, MCP, Rust, TypeScript, Vue, local-first                                    | new-repo trends, rising projects, **your own stats**                            | Hacker News                         |
+| Channel                      | Topics it charts                                                                      | Context (open data)                                                                                         | Streams                                           |
+| ---------------------------- | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| **World**                    | Ukraine, Gaza, tariffs, NATO, inflation, AI                                           | inflation, ECB rate, unemployment, CO₂                                                                      | Forecasts, Reading, Hacker News                   |
+| **The Great Simplification** | climate change, peak oil, degrowth, overshoot, biodiversity loss, Hormuz              | CO₂, sea ice                                                                                                | its episodes and Frankly, Forecasts               |
+| **Portugal & the land**      | Alentejo, wildfires, desertification, rural flight, permaculture, regen. ag.          | IPMA fire risk and warnings, soil in Mafra, Lisbon and Porto weather, Portuguese inflation and unemployment | Reading, Forecasts                                |
+| **Circular economy**         | circular economy, recycling, PPWR, producer responsibility, food waste, CSRD          | inflation, ECB rate, unemployment                                                                           | Reading, Hacker News, Forecasts                   |
+| **Alternative Amsterdam**    | doughnut economics, housing co-ops, land trusts, squatting, urban farms, repair cafés | Amsterdam soil and weather, Dutch inflation and unemployment                                                | Reading, Hacker News                              |
+| **The Marginalian**          | poetry, consciousness, Stoicism, grief, solitude, meaning of life                     | —                                                                                                           | The Marginalian's essays, matched to these topics |
+| **GitHub**                   | AI agents, MCP, Rust, TypeScript, Vue, local-first                                    | new-repo trends, rising projects, **your own stats**                                                        | Hacker News                                       |
 
 Every channel has the same four parts:
 
 - **Gist:** what's running hot, the biggest moves, the steadiest climb, one line on what's hot in the other channels, and what changed since your last look. Copy it as Markdown for a daily note.
 - **Trends:** the selected topic's attention, day by day (100 = its own 30-day norm), with a 12-step forecast and a ±1σ band. Add or remove topics; `←` `→` switch topic, `[` `]` switch channel.
-- **Context:** the open-data cards that matter for that channel, grouped by place (Portugal, Netherlands, Euro area, Planet), with small charts where there's history. Soil moisture in Mafra and Amsterdam is pinned to every channel (`PINNED_DATAPOINTS` in `src/channels.ts`).
+- **Context:** the open-data cards that matter for that channel, grouped by place (Portugal, Netherlands, Euro area, Planet), with small charts where there's history. A country channel only ever shows its own country's data: Portugal & the land never reports on the Netherlands, and Alternative Amsterdam never on Portugal (not even in the gist's "Elsewhere" line).
 - **Streams:** **Reading** (posts from sites you follow, matched to the channel's topics), **Forecasts** (open [Manifold](https://manifold.markets/) markets with the crowd's probability) and **Hacker News** (stories ranked by engagement per hour).
 
 Make your own channel with **+ channel**: give it a name and up to six topics.

@@ -4,6 +4,7 @@ import { ago, changeLabel, fmtPct, fmtTime, fmtVal, nf0 } from '../core/format';
 import { levelOf } from '../core/stats';
 import { dp } from './datapoints';
 import { stories } from './stories';
+import { channelOfLens } from '../channels';
 import { activeLens, allEntries, entriesOf, lensById, state } from '../state';
 
 export function lensName(E) {
@@ -43,8 +44,14 @@ export function buildBrief() {
       `Steadiest climb: ${climbers[0].name}, ${fmtPct(climbers[0].stats.momentum)} per step over the last ${FIT_N} steps. Not a spike yet, but a trend.`,
     );
   // Don't let the focus hide a fire elsewhere: name what's hot in the other lenses.
+  // A country channel never mentions another country's channel.
+  const here = lens && channelOfLens(lens.id)?.country;
   const elsewhere = state.lenses
     .filter(l => l !== lens)
+    .filter(l => {
+      const there = channelOfLens(l.id)?.country;
+      return !here || !there || there === here;
+    })
     .flatMap(entriesOf)
     .filter(E => E.stats && levelOf(E.stats.z) && !E.sparse)
     .sort((a, b) => b.stats.z - a.stats.z);

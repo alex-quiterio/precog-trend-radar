@@ -100,12 +100,21 @@ a:hover {
 .channels {
   grid-column: 1 / -1;
   display: flex;
-  gap: 2px;
+  flex-wrap: wrap;
+  gap: 0 2px;
   margin: 0 -6px;
-  overflow-x: auto;
-  scrollbar-width: none;
   border-top: 1px solid var(--hair);
   counter-reset: ch;
+}
+/* Phones: one scrolling row, with a fade that shows there's more to the right. */
+@media (max-width: 700px) {
+  .channels {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent);
+    mask-image: linear-gradient(90deg, #000 85%, transparent);
+  }
 }
 .channels::-webkit-scrollbar {
   display: none;

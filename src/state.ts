@@ -125,12 +125,14 @@ const OLD_PRESET_IDS = new Set([
   'amsterdam',
 ]);
 export function loadLenses() {
-  let lenses = store.get(LS.lenses, null);
+  let lenses = store.get(LS.lenses, null),
+    upgraded = false;
   if (!Array.isArray(lenses) || !lenses.length) {
     lenses = presetLenses();
   } else if ((store.get(LS.presetVer, 1) || 1) < PRESET_VERSION) {
     const own = lenses.filter(l => l && !OLD_PRESET_IDS.has(l.id) && !PRESETS.some(p => p.id === l.id));
     lenses = [...presetLenses(), ...own];
+    upgraded = true;
   }
   store.set(LS.presetVer, PRESET_VERSION);
   state.lenses = lenses.slice(0, MAX_LENSES).map(l => {
@@ -159,5 +161,6 @@ export function loadLenses() {
       topics,
     };
   });
+  if (upgraded) saveLenses(); // persist the upgrade now, not on the next edit
   syncEntries();
 }

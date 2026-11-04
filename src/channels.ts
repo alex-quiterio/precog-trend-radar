@@ -19,15 +19,12 @@ export interface Channel {
   sites?: string[];
   /** Extra views: the GitHub topic and personal panels. */
   github?: boolean;
+  /** A country channel. It never shows another country's data or topics, not even in "Elsewhere". */
+  country?: 'pt' | 'nl';
 }
 
-/** Cards shown in every channel's open data, after the channel's own: the places you keep an eye on. */
-export const PINNED_DATAPOINTS = ['soil-mafra', 'soil-amsterdam'];
-/** A channel's open-data cards: its own first, then the pinned ones it doesn't already show. */
-export const channelDatapoints = (c: Channel): string[] => [
-  ...c.datapoints,
-  ...PINNED_DATAPOINTS.filter(id => !c.datapoints.includes(id)),
-];
+/** A channel's open-data cards. Country channels only ever show their own country's data. */
+export const channelDatapoints = (c: Channel): string[] => c.datapoints;
 
 const TGS = 'https://www.thegreatsimplification.com';
 const MARGINALIAN = 'https://www.themarginalian.org';
@@ -57,13 +54,14 @@ export const CHANNELS: Channel[] = [
     lensId: 'portugal',
     datapoints: ['fire', 'warnings', 'soil-mafra', 'wx-lisbon', 'wx-porto', 'inflation-pt', 'unemployment-pt'],
     streams: ['reading', 'forecasts'],
+    country: 'pt',
   },
   {
     id: 'circular',
     label: 'Circular economy',
     kicker: 'The rules and markets that shape recycling and waste services.',
     lensId: 'circular',
-    datapoints: ['inflation-ea', 'ecb', 'inflation-pt', 'inflation-nl'],
+    datapoints: ['inflation-ea', 'ecb', 'unemployment-ea'],
     streams: ['reading', 'hn', 'forecasts'],
   },
   {
@@ -74,6 +72,16 @@ export const CHANNELS: Channel[] = [
     datapoints: ['soil-amsterdam', 'wx-amsterdam', 'inflation-nl', 'unemployment-nl'],
     streams: ['reading', 'hn'],
     sites: [MARGINALIAN, TGS],
+    country: 'nl',
+  },
+  {
+    id: 'marginalian',
+    label: 'Marginalian',
+    kicker: 'Art, science, poetry and philosophy, matched to what you’re watching.',
+    lensId: 'marginalian',
+    datapoints: [],
+    streams: ['reading'],
+    sites: [MARGINALIAN],
   },
   {
     id: 'github',
@@ -100,6 +108,8 @@ export function channels(): Channel[] {
     }));
   return [...CHANNELS.filter(c => lensById(c.lensId)), ...own];
 }
+/** The channel showing a lens (undefined for none). */
+export const channelOfLens = (lensId: string): Channel | undefined => channels().find(c => c.lensId === lensId);
 /** The channel on screen: the one whose lens is active. */
 export function activeChannel(): Channel {
   const all = channels();
