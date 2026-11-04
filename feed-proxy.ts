@@ -41,6 +41,9 @@ http
   .createServer(async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET');
+    // Chrome asks before a public site (the hosted dashboard) may call a server on your machine;
+    // without this answer it blocks the request.
+    res.setHeader('Access-Control-Allow-Private-Network', 'true');
     if (req.method === 'OPTIONS') {
       res.writeHead(204).end();
       return;

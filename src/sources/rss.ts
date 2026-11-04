@@ -51,7 +51,16 @@ export async function loadFeedItems(cfg, signal) {
       }
     }),
   );
-  if (!items.length && errors.length) throw new Error(errors.join('; '));
+  if (!items.length && errors.length) {
+    // Every feed failing the same way through the proxy means the proxy itself was unreachable.
+    if (cfg.proxy && errors.every(e => e.endsWith('blocked (needs the proxy)')))
+      throw new Error(
+        `can't reach the proxy at ${cfg.proxy.replace(/\?.*$/, '')}. Is \`npm run proxy\` running? ` +
+          'In Chrome, also allow this site to reach apps on your device: click the icon left of the address, ' +
+          'then Site settings → Local network access (or "Apps on device") → Allow',
+      );
+    throw new Error(errors.join('; '));
+  }
   Object.assign(rssCache, { at: Date.now(), key, items, errors });
   return items;
 }

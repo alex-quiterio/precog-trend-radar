@@ -15,7 +15,7 @@
       <input id="rss-proxy" v-model="proxy" type="text" placeholder="http://localhost:8787/?url=" />
       <p>
         These outlets block direct browser access. Run
-        <code>node feed-proxy.mjs</code>
+        <code>npm run proxy</code>
         from the PRECOG folder and use
         <code>http://localhost:8787/?url=</code>
         . It runs on your machine and only fetches the listed news sites.
