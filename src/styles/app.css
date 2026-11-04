@@ -1339,3 +1339,44 @@ select:hover {
 .sweep {
   pointer-events: none;
 }
+
+/* which sources feed the charted topic */
+.srcs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 11px;
+}
+.src-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 9px 2px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--hair);
+  color: var(--muted);
+}
+.src-chip i {
+  font-style: normal;
+  font-weight: 700;
+}
+.src-chip b {
+  font: 500 10px/1 var(--mono);
+  color: var(--muted);
+}
+.src-chip.ok {
+  color: var(--ink);
+  border-color: var(--accent);
+}
+.src-chip.ok i {
+  color: var(--accent);
+}
+.src-chip.error {
+  color: var(--ink);
+  border-color: var(--watch);
+}
+.src-chip.error i {
+  color: var(--watch);
+}

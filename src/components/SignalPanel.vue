@@ -17,6 +17,16 @@
           <template v-if="head.st.comp">· {{ compText(head.st.comp) }}</template>
         </div>
         <div class="sub" v-else-if="head.E && head.E.liveError">{{ head.E.liveError }}</div>
+        <div v-if="head.sources.length" class="srcs" aria-label="Sources for this topic">
+          <span class="muted">Sources</span>
+          <span v-for="x in head.sources" :key="x.id" :class="['src-chip', x.state]" :title="x.note">
+            <i aria-hidden="true">
+              {{ x.state === 'ok' ? '✓' : x.state === 'error' ? '!' : x.state === 'wait' ? '…' : '–' }}
+            </i>
+            {{ x.label }}
+            <b v-if="x.state === 'ok'">{{ x.days }}d</b>
+          </span>
+        </div>
       </div>
       <div class="switcher">
         <button class="btn" type="button" aria-label="Previous topic" @click="shiftTopic(-1)">‹</button>
@@ -140,10 +150,11 @@ import type { SeriesPoint } from '../types';
 import { shiftTopic } from '../actions';
 import { compText, niceTicks, pathOf, useWidth } from './helpers';
 import { DAY } from '../core/config';
-import { changeLabel, fmtAxis, fmtPct, fmtTick, fmtVal } from '../core/format';
+import { COMP_LABEL, changeLabel, fmtAxis, fmtPct, fmtTick, fmtVal } from '../core/format';
 import { arrowOf } from '../core/stats';
 import { ui } from '../core/ui-store';
-import { SOURCES } from '../sources/registry';
+import { ADAPTERS, SOURCES } from '../sources/registry';
+import { liveParts } from '../live';
 import { activeLens, entriesOf, selectedEntry, series, state } from '../state';
 import TopicDot from './TopicDot.vue';
 import PanelShell from './PanelShell.vue';
@@ -175,6 +186,26 @@ export default defineComponent({
         index: `${E ? list.indexOf(E) + 1 : 0}/${list.length}`,
         meta: st ? `1 step = ${st.step >= 7 * DAY ? '1 week' : '1 day'} · ${unit}` : unit,
         arrow: st ? arrowOf(st.momentum) : ['', ''],
+        // Each source's state for this topic, so you can see what's actually feeding the line.
+        sources: E
+          ? liveParts().map(pid => {
+              const pts = E.parts?.[pid],
+                err = E.partErr?.[pid],
+                skip = E.skipped?.[pid];
+              const label = COMP_LABEL[pid] || pid;
+              if (pts?.length)
+                return {
+                  id: pid,
+                  label,
+                  state: 'ok',
+                  days: pts.length,
+                  note: `${label}: ${pts.length} days of data, latest ${fmtVal(pts[pts.length - 1].value)} ${ADAPTERS[pid]?.unit || ''}`,
+                };
+              if (err) return { id: pid, label, state: 'error', note: `${label}: ${err}` };
+              if (skip) return { id: pid, label, state: 'skip', note: `${label}: ${skip}` };
+              return { id: pid, label, state: 'wait', note: `${label}: still loading` };
+            })
+          : [],
       };
     });
 
