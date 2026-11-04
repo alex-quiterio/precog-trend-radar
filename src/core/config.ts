@@ -123,20 +123,20 @@ export const PRESETS = [
     ],
   },
   {
-    id: 'tech',
-    name: 'Tech radar',
-    desc: 'The stack and ideas worth watching early: agents, MCP, and the languages this dashboard is built with.',
+    id: 'tgs',
+    name: 'Great Simplification',
+    desc: 'Energy, ecology and the economy as one system: the themes of Nate Hagens’ The Great Simplification.',
     topics: [
-      ['AI agents', { wiki: 'AI agent' }],
-      ['MCP', { wiki: 'Model Context Protocol', q: 'Model Context Protocol' }],
-      ['Rust', { wiki: 'Rust (programming language)', q: 'Rust' }],
-      ['TypeScript'],
-      ['Vue.js', { q: 'Vue' }],
-      ['Local-first software', { q: 'local-first' }],
+      ['Degrowth'],
+      ['Peak oil'],
+      ['EROI', { wiki: 'Energy return on investment', q: 'energy return on investment' }],
+      ['Overshoot', { wiki: 'Overshoot (population)', q: 'ecological overshoot' }],
+      ['Biodiversity loss'],
+      ['Strait of Hormuz', { q: 'Hormuz' }],
     ],
   },
 ];
-export const PRESET_VERSION = 3;
+export const PRESET_VERSION = 4;
 export const LS = {
   presetVer: 'precog.presetver',
   lenses: 'precog.lenses.v1',

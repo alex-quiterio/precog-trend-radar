@@ -43,10 +43,18 @@ describe('preset upgrade', () => {
     );
     loadLenses();
     const byId = Object.fromEntries(state.lenses.map(l => [l.id, l.topics.map(t => t.name)]));
-    expect(byId.tech).toContain('TypeScript');
+    expect(byId.tech).toBeUndefined(); // the untouched Tech radar is replaced by Great Simplification
+    expect(byId.tgs).toContain('Degrowth');
     expect(byId.circular).toEqual(['Circular economy', 'My own topic']);
     expect(byId.portugal).toContain('Alentejo');
     expect(state.lenses.map(l => l.id)).toContain('land');
+  });
+
+  it('keeps a Tech radar the user edited', () => {
+    mem.set(LS.presetVer, '3');
+    mem.set(LS.lenses, JSON.stringify([saved('tech', ['AI agents', 'Zig'])]));
+    loadLenses();
+    expect(state.lenses.find(l => l.id === 'tech')?.topics.map(t => t.name)).toEqual(['AI agents', 'Zig']);
   });
 
   it('starts a first visit with all eight preset lenses', () => {
@@ -59,7 +67,7 @@ describe('preset upgrade', () => {
       'portugal',
       'land',
       'nl',
-      'tech',
+      'tgs',
     ]);
   });
 });

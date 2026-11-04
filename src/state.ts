@@ -121,25 +121,36 @@ const OLD_PRESET_TOPICS: Record<string, string[]> = {
     'Habitação|Incêndios|Seca|Êxodo rural|Permacultura|Agricultura regenerativa',
   ],
   circular: ['Circular economy|Recycling|Plastic pollution|Producer responsibility|Waste-to-energy|Packaging waste'],
-  tech: ['AI agents|WebGPU|Rust|Solid-state batteries|Remote work'],
+  tech: [
+    'AI agents|WebGPU|Rust|Solid-state batteries|Remote work',
+    'AI agents|MCP|Rust|TypeScript|Vue.js|Local-first software',
+  ],
 };
+// Presets that were retired, and the preset that takes their place when the user never edited them.
+const REPLACED_BY: Record<string, string> = { tech: 'tgs' };
 export function loadLenses() {
   let lenses = store.get(LS.lenses, null);
   if (!Array.isArray(lenses) || !lenses.length) {
     lenses = presetLenses();
-    const old = store.get(LS.oldWatch, null); // migrate the single watchlist from v1 into "Tech radar"
+    const old = store.get(LS.oldWatch, null); // migrate the single watchlist from v1 into its own lens
     if (Array.isArray(old) && old.length)
-      lenses.find(l => l.id === 'tech').topics = old
-        .filter(x => x && x.name)
-        .map(x => ({ name: x.name, slot: x.slot }));
+      lenses[lenses.length - 1] = {
+        id: 'watch',
+        name: 'My watchlist',
+        desc: 'The topics from your earlier watchlist.',
+        topics: old.filter(x => x && x.name).map(x => ({ name: x.name, slot: x.slot })),
+      };
   } else if ((store.get(LS.presetVer, 1) || 1) < PRESET_VERSION) {
     // Upgrade preset lenses the user never edited, and add new presets where there's room.
     // Anything the user changed is left alone.
     const fresh = presetLenses();
     lenses = lenses.map(l => {
       const names = (l.topics || []).map(t => t.name).join('|');
-      const upgrade = (OLD_PRESET_TOPICS[l.id] || []).includes(names);
-      return upgrade ? fresh.find(f => f.id === l.id) : l;
+      const untouched = (OLD_PRESET_TOPICS[l.id] || []).includes(names);
+      if (!untouched) return l;
+      const next = REPLACED_BY[l.id];
+      if (next && !lenses.some(x => x.id === next)) return fresh.find(f => f.id === next);
+      return fresh.find(f => f.id === l.id) || l;
     });
     fresh.forEach((f, i) => {
       if (lenses.some(l => l.id === f.id) || lenses.length >= MAX_LENSES) return;

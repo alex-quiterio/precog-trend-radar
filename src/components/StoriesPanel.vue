@@ -206,11 +206,13 @@ export default defineComponent({
         };
       }
       if (src === 'tgs') {
-        // Strongest match first (title hits count triple), then newest.
+        // Match strength (title hits count triple) fading with age: halves every 6 months,
+        // so a fresh episode beats an old one that names one more topic.
+        const rank = (e: TGSMatch) => e.score * 0.5 ** ((Date.now() - e.t) / (182 * 86400e3));
         const list: TGSMatch[] = [...stories.tgs.values()]
           .map(e => ({ ...e, topics: e.topics.filter(k => scopeKeys.has(k)) }))
           .filter(e => e.topics.length)
-          .sort((a, b) => b.score - a.score || b.t - a.t);
+          .sort((a, b) => rank(b) - rank(a) || b.t - a.t);
         const smax = Math.max(1, ...list.map(e => e.score));
         return {
           src,
