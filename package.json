@@ -1,0 +1,34 @@
+{
+  "name": "precog-trend-radar",
+  "version": "3.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Morning brief of world attention trends. Tracks topics, never people.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "typecheck": "vue-tsc --noEmit",
+    "test": "vitest run",
+    "proxy": "node feed-proxy.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "npm run typecheck && npm run format:check"
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
+  "dependencies": {
+    "vue": "3.5.13"
+  },
+  "devDependencies": {
+    "@types/node": "22.15.21",
+    "@vitejs/plugin-vue": "5.2.4",
+    "prettier": "3.5.3",
+    "typescript": "5.8.3",
+    "vite": "6.3.5",
+    "vite-plugin-singlefile": "2.2.0",
+    "vitest": "3.1.4",
+    "vue-tsc": "2.2.10"
+  }
+}
