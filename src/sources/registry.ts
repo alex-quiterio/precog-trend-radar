@@ -49,7 +49,7 @@ export async function pool<T>(items: T[], n: number, fn: (item: T, i: number) =>
     }),
   );
 }
-export const phrase = q => (/["()]|\bOR\b/.test(q) || !/\s/.test(q.trim()) ? q.trim() : `"${q.trim()}"`);
+export { phrase } from './gdelt-query';
 export const queryOf = (E: Entry): Query => {
   const l: Partial<Lens> = lensById(E.lensId) || {};
   return {

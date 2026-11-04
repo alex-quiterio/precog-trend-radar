@@ -61,6 +61,31 @@
         </li>
         <li v-if="!view.items.length" class="empty">{{ view.empty }}</li>
       </template>
+      <template v-else-if="view.src === 'tgs'">
+        <li v-for="(it, i) in view.items" :key="it.e.id" class="story">
+          <span class="rank">{{ i + 1 }}</span>
+          <div>
+            <div class="title">
+              <a :href="it.e.url" target="_blank" rel="noopener noreferrer">{{ it.e.title }}</a>
+            </div>
+            <div class="smeta">
+              <span v-for="E in it.topics" :key="E.key" class="stopic">
+                <topic-dot :color="E.color"></topic-dot>
+                {{ E.name }}
+              </span>
+              <span>{{ it.e.kind }}{{ it.e.num ? ' #' + it.e.num : '' }}</span>
+              <span>{{ when(it.e.t) }}</span>
+            </div>
+          </div>
+          <div class="vel">
+            <b>{{ it.e.topics.length }}</b>
+            {{ it.e.topics.length === 1 ? 'topic' : 'topics' }}
+            <small>{{ it.e.score >= 3 ? 'in the title' : 'in the description' }}</small>
+            <div class="vbar"><i :style="{ width: it.pct.toFixed(1) + '%' }"></i></div>
+          </div>
+        </li>
+        <li v-if="!view.items.length" class="empty">{{ view.empty }}</li>
+      </template>
       <template v-else>
         <li v-for="(it, i) in view.items" :key="it.c.id" class="story">
           <span class="rank">{{ i + 1 }}</span>
@@ -97,7 +122,7 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import type { Entry } from '../types';
-import type { HNStory, StoryCluster } from '../features/stories';
+import type { HNStory, StoryCluster, TGSMatch } from '../features/stories';
 import { openFeeds, setStoryScope, setStorySource } from '../actions';
 import { ago } from '../core/format';
 import { quantile } from '../core/stats';
@@ -107,11 +132,13 @@ import { state } from '../state';
 import TopicDot from './TopicDot.vue';
 import PanelShell from './PanelShell.vue';
 
-// PRECOG / Trend Radar · Rising stories: HN engagement velocity, GDELT and PT·NL story clusters.
+// PRECOG / Trend Radar · Rising stories: HN engagement velocity, GDELT and PT·NL story clusters, and
+// The Great Simplification episodes that touch your topics.
 
 interface StoryItem {
   s?: HNStory;
   c?: StoryCluster;
+  e?: TGSMatch;
   topics: Entry[];
   breaking?: boolean;
   pct: number;
@@ -178,6 +205,28 @@ export default defineComponent({
               : 'No Hacker News stories in the last 48 h for this scope.',
         };
       }
+      if (src === 'tgs') {
+        // Strongest match first (title hits count triple), then newest.
+        const list: TGSMatch[] = [...stories.tgs.values()]
+          .map(e => ({ ...e, topics: e.topics.filter(k => scopeKeys.has(k)) }))
+          .filter(e => e.topics.length)
+          .sort((a, b) => b.score - a.score || b.t - a.t);
+        const smax = Math.max(1, ...list.map(e => e.score));
+        return {
+          src,
+          meta: stories.loading.tgs
+            ? 'loading the catalogue…'
+            : stories.at.tgs
+              ? `${list.length} of ${stories.tgsCount} episodes match · thegreatsimplification.com`
+              : '',
+          items: list.slice(0, 12).map(e => ({ e, topics: topicsOf(e), pct: (e.score / smax) * 100 })),
+          empty: stories.loading.tgs
+            ? 'Loading The Great Simplification catalogue…'
+            : stories.errors.tgs
+              ? `Could not load: ${stories.errors.tgs}.`
+              : 'No episode or Frankly of The Great Simplification mentions these topics yet.',
+        };
+      }
       const list: StoryCluster[] = [...stories[src as 'news' | 'local'].values()].filter(inScope);
       list.sort((a, b) => b.domains.size - a.domains.size || b.first - a.first);
       const dmax = Math.max(1, ...list.map(c => c.domains.size));
@@ -188,7 +237,7 @@ export default defineComponent({
         meta: stories.loading[src]
           ? isLocal
             ? 'loading feeds…'
-            : 'loading (≈6 s per topic)…'
+            : 'loading (≈6 s per request)…'
           : stories.at[src]
             ? `checked ${ago(stories.at[src])} · ranked by outlets covering`
             : '',
@@ -207,13 +256,18 @@ export default defineComponent({
       ['hn', 'Hacker News'],
       ['news', 'Global news'],
       ['local', 'PT · NL news'],
+      ['tgs', 'Great Simplification'],
     ];
+    const when = (t: number) =>
+      Date.now() - t < 30 * 86400e3
+        ? ago(t)
+        : new Date(t).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
     const SCOPES = [
       ['topic', 'Topic'],
       ['lens', 'Lens'],
       ['all', 'All'],
     ];
-    return { ui, state, view, SOURCES_TABS, SCOPES, setStorySource, setStoryScope, openFeeds };
+    return { ui, state, view, SOURCES_TABS, SCOPES, setStorySource, setStoryScope, openFeeds, when };
   },
 });
 </script>

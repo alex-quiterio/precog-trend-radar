@@ -38,7 +38,7 @@ function boot(): void {
   state.selectedByLens = prefs.selectedByLens && typeof prefs.selectedByLens === 'object' ? prefs.selectedByLens : {};
   state.tableView = !!prefs.tableView;
   state.includeNews = prefs.includeNews !== false;
-  state.storySrc = prefs.storySrc === 'news' || prefs.storySrc === 'local' ? prefs.storySrc : 'hn';
+  state.storySrc = ['news', 'local', 'tgs'].includes(prefs.storySrc) ? prefs.storySrc : 'hn';
   state.storyScope = prefs.storyScope === 'topic' || prefs.storyScope === 'lens' ? prefs.storyScope : 'all';
   state.prevLook = store.get(LS.look, null);
 

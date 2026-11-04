@@ -15,7 +15,8 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "noEmit": true,
+    "allowImportingTsExtensions": true,
     "jsx": "preserve"
   },
-  "include": ["src/**/*.ts", "src/**/*.vue", "tests/**/*.ts", "vite.config.ts", "feed-proxy.ts"]
+  "include": ["src/**/*.ts", "src/**/*.vue", "tests/**/*.ts", "vite.config.ts", "feed-proxy.ts", "scripts/**/*.ts"]
 }

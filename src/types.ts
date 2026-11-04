@@ -120,6 +120,6 @@ export interface Prefs {
   source: string;
   includeNews: boolean;
   theme: 'dark' | 'light';
-  storySrc: 'hn' | 'news' | 'local';
+  storySrc: 'hn' | 'news' | 'local' | 'tgs';
   storyScope: 'topic' | 'lens' | 'all';
 }

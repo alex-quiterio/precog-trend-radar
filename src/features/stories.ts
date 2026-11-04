@@ -3,9 +3,12 @@ import type { Entry } from '../types';
 import { HOUR, LS, MIN, STORY_REFRESH_MS, store } from '../core/config';
 import { bump } from '../core/ui-store';
 import { orderedEntries } from '../live';
-import { gdelt, gdeltCall, gdeltDate } from '../sources/gdelt';
+import type { GdeltArticle } from '../sources/gdelt';
+import { gdelt, gdeltCall, gdeltDate, loadSnapshot, storyQueries } from '../sources/gdelt';
 import { getJSON, phrase, pool, queryOf } from '../sources/registry';
 import { loadFeedItems, rssCache, topicRegex } from '../sources/rss';
+import type { TGSItem } from '../sources/tgs';
+import { loadTGSCatalog, tgsScore } from '../sources/tgs';
 import { activeLens, entriesOf, selectedEntry, state } from '../state';
 
 /** A Hacker News story with its measured or estimated engagement velocity. */
@@ -37,13 +40,20 @@ export interface StoryCluster {
   first: number;
   topics: string[];
 }
+/** A Great Simplification episode or Frankly that mentions some of the topics in scope. */
+export interface TGSMatch extends TGSItem {
+  topics: string[];
+  score: number;
+}
 export const stories = {
   hn: new Map<string, HNStory>(),
   news: new Map<string, StoryCluster>(),
   local: new Map<string, StoryCluster>(),
-  loading: { hn: false, news: false, local: false },
-  errors: { hn: null, news: null, local: null },
-  at: { hn: 0, news: 0, local: 0 },
+  tgs: new Map<string, TGSMatch>(),
+  tgsCount: 0,
+  loading: { hn: false, news: false, local: false, tgs: false },
+  errors: { hn: null, news: null, local: null, tgs: null },
+  at: { hn: 0, news: 0, local: 0, tgs: 0 },
 };
 export let storyTimer = null,
   storyAbort = null;
@@ -137,19 +147,56 @@ export function jaccard(a, b) {
   });
   return i / (a.size + b.size - i || 1);
 }
+const ARTICLE_KEY = 'precog.gdelt.articles.v1.';
+/** Articles from the last 24 h for one combined query: CI snapshot if fresh, then today's cache, then GDELT. */
+async function newsArticles(q: string, signal: AbortSignal): Promise<GdeltArticle[]> {
+  const snap = await loadSnapshot();
+  const fromSnap = snap?.articles?.[q.toLowerCase()];
+  if (fromSnap && Date.now() - Date.parse(snap.at) < 8 * HOUR) return fromSnap;
+  const c = store.get<{ at: number; articles: GdeltArticle[] } | null>(ARTICLE_KEY + q.toLowerCase(), null);
+  if (c && Date.now() - c.at < HOUR) return c.articles;
+  const j = await gdeltCall(
+    `mode=artlist&timespan=24h&maxrecords=250&sort=hybridrel&query=${encodeURIComponent(q)}`,
+    signal,
+  );
+  const articles: GdeltArticle[] = (j.articles || []).map(a => ({
+    url: a.url,
+    title: a.title,
+    domain: a.domain,
+    sourcecountry: a.sourcecountry,
+    seendate: a.seendate,
+  }));
+  store.set(ARTICLE_KEY + q.toLowerCase(), { at: Date.now(), articles });
+  return articles;
+}
 export async function loadNewsStories(entries: Entry[], signal: AbortSignal): Promise<void> {
   const clusters = [];
-  for (const E of entries) {
+  const byKey = new Map(entries.map(E => [E.key, E]));
+  // Grouped per lens, like the CI snapshot, so its combined queries can be reused here.
+  const lensIds = [...new Set(entries.map(E => E.lensId))];
+  const groups = lensIds.flatMap(id =>
+    storyQueries(
+      entries
+        .filter(E => E.lensId === id)
+        .map(E => {
+          const qq = queryOf(E);
+          return { key: E.key, q: qq.q, country: qq.country };
+        }),
+    ),
+  );
+  if (!groups.length) throw new Error('topic names are too short for GDELT (3+ letters)');
+  for (const g of groups) {
     if (signal.aborted) return;
     try {
-      const qq = queryOf(E);
-      const j = await gdeltCall(
-        `mode=artlist&timespan=24h&maxrecords=75&sort=hybridrel&query=${encodeURIComponent(phrase(qq.q) + (qq.country ? ` sourcecountry:${qq.country}` : ''))}`,
-        signal,
-      );
-      (j.articles || []).forEach(a => {
+      const articles = await newsArticles(g.q, signal);
+      // One request covers several topics, so each headline is credited to the topics it names.
+      const matchers = g.keys.map(k => [k, topicRegex(queryOf(byKey.get(k)).q)] as const);
+      articles.forEach(a => {
         const tk = toks(a.title);
         if (tk.size < 3) return;
+        const hit = matchers.filter(([, re]) => re.test(a.title)).map(([k]) => k);
+        const keys = hit.length ? hit : g.keys.length === 1 ? g.keys : [];
+        if (!keys.length) return;
         let c = clusters.find(c => jaccard(c.tk, tk) >= 0.34);
         if (!c) {
           c = {
@@ -173,7 +220,9 @@ export async function loadNewsStories(entries: Entry[], signal: AbortSignal): Pr
           c.url = a.url;
           c.domain = a.domain;
         }
-        if (!c.topics.includes(E.key)) c.topics.push(E.key);
+        keys.forEach(k => {
+          if (!c.topics.includes(k)) c.topics.push(k);
+        });
       });
       stories.errors.news = null;
     } catch (e) {
@@ -225,6 +274,30 @@ export async function loadLocalStories(entries: Entry[], signal: AbortSignal): P
   stories.errors.local =
     rssCache.errors && rssCache.errors.length ? 'some feeds failed: ' + rssCache.errors.join('; ') : null;
 }
+/** Matches the podcast catalogue against every topic in scope, by its name, search phrase and article title. */
+export async function loadTGSStories(entries: Entry[], signal: AbortSignal): Promise<void> {
+  const catalog = await loadTGSCatalog(signal);
+  const matchers = entries.map(E => {
+    const qq = queryOf(E);
+    const terms = [...new Set([qq.q, E.name, qq.wiki].filter(Boolean).map(t => t.replace(/"/g, '').trim()))];
+    return { key: E.key, res: terms.filter(t => t.length >= 2).map(topicRegex) };
+  });
+  const found = new Map<string, TGSMatch>();
+  catalog.forEach(it => {
+    let score = 0;
+    const topics: string[] = [];
+    matchers.forEach(m => {
+      const s = tgsScore(it, m.res);
+      if (s) {
+        score += s;
+        topics.push(m.key);
+      }
+    });
+    if (topics.length) found.set(it.id, { ...it, topics, score });
+  });
+  stories.tgs = found;
+  stories.tgsCount = catalog.length;
+}
 export async function loadStories() {
   if (storyAbort) storyAbort.abort();
   storyAbort = new AbortController();
@@ -236,7 +309,10 @@ export async function loadStories() {
   try {
     if (src === 'hn') await loadHNStories(entries, signal);
     else if (src === 'local') await loadLocalStories(entries, signal);
-    else await loadNewsStories(entries, signal);
+    else if (src === 'tgs') {
+      await loadTGSStories(entries, signal);
+      stories.errors.tgs = null;
+    } else await loadNewsStories(entries, signal);
     if (src === 'hn') stories.errors.hn = null;
     stories.at[src] = Date.now();
   } catch (e) {

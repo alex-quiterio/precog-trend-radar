@@ -104,9 +104,14 @@ flowchart LR
 | Wikipedia pageviews                | daily views of the topic's article, in the lens language | Titles are resolved automatically, or set exactly with `Name \| wiki: Title`. |
 | Hacker News (Algolia)              | stories per day for the exact phrase                     | English lenses. Usually one request per topic, cached per day.                |
 | GDELT                              | the topic's share of worldwide news coverage per day     | Allows one request every ~5 s, so it fills in last. Cached for the day.       |
+| The Great Simplification           | podcast episodes and Frankly monologues naming a topic   | Public WordPress API. Whole catalogue cached for 12 h. Stories tab only.      |
 | GitHub search                      | new repos per week                                       | Allows about 10 requests a minute. Cached for 12 h.                           |
 | RSS                                | mentions per day across your feeds                       | Through the local proxy when feeds block browser reads.                       |
 | ECB · Eurostat · IPMA · Open-Meteo | the Datapoints panel                                     | Official open data.                                                           |
+
+### GDELT snapshot
+
+GDELT allows one request every ~5 s per network and answers anything faster with a 429, which a browser sees only as `Failed to fetch`. So that every visitor doesn't queue ~50 requests of their own, the Pages workflow runs `scripts/gdelt-snapshot.ts` every 6 hours. It fetches the timelines and 24-hour article lists for the shipped lenses once, from CI, and publishes them as `data/gdelt.json` next to the page. The dashboard reads the snapshot first and only calls GDELT directly for custom topics. When GDELT refuses three times in a row, the browser pauses GDELT for 20 minutes, and the pause survives a reload.
 
 ## Privacy and scope
 
