@@ -31,16 +31,16 @@ Open it with your coffee. In about two minutes you know what's running hot, what
 
 ## What's on the screen
 
-|                       |                                                                                                                                                                                                                                                                      |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ☀️ **Morning brief**  | What's running hot, the biggest moves, the steadiest climb and the most active lens, plus what changed **since your last look**. One click copies it as Markdown for your daily note.                                                                                |
-| 🔭 **Lenses**         | Themed watchlists: _World, Geopolitics, Climate & energy, Circular economy, Portugal, Nederland, Tech radar_. Up to 8 lenses of 6 topics each. Local lenses read Portuguese and Dutch Wikipedia and filter news to local outlets.                                    |
-| 📈 **Signal**         | The selected topic's history, a dashed 12-step forecast with a ±1σ band, and a hover crosshair. Swipe, drag or press `←` `→` to change topic, and `[` `]` to change lens.                                                                                            |
-| 🚀 **Rising stories** | A [NewsWhip](https://www.newswhip.com/)-style ranking of stories by engagement **per hour**, measured as the page re-checks them, with a 24-hour projection and a **breaking out** flag. Plus story clusters from global news and from Portuguese and Dutch outlets. |
-| 🎯 **Radar**          | A rotating sweep over your lens. Distance shows momentum (centre = rising fastest), size shows volume, and blips ping as the sweep passes.                                                                                                                           |
-| 🚨 **Pre-cog alerts** | Raised when a topic's latest point is more than 2.5σ above its 30-step baseline (**ALERT**), or more than 1.8σ (**WATCH**). Each comes with a plain-English explanation and a projection.                                                                            |
-| 🧾 **Datapoints**     | Official open data: the ECB deposit rate, unemployment (PT / NL / euro area), IPMA fire risk and weather warnings, and today's weather and air quality in Lisbon, Porto and Amsterdam.                                                                               |
-| ♿ **Table view**     | Every topic in every lens in one accessible table. Respects reduced motion. Prints on A4 landscape.                                                                                                                                                                  |
+|                       |                                                                                                                                                                                                                                                                                                                                                                                            |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ☀️ **Morning brief**  | What's running hot, the biggest moves, the steadiest climb and the most active lens, plus what changed **since your last look**. One click copies it as Markdown for your daily note.                                                                                                                                                                                                      |
+| 🔭 **Lenses**         | Themed watchlists: _World, Geopolitics, Climate & energy, Circular economy_ (packaging rules, food waste, CSRD), _Portugal, Land & homestead_ (permaculture, agroforestry, rewilding), _Nederland, Tech radar_ (agents, MCP, Rust, TypeScript, Vue). Edit any of them: up to 8 lenses of 6 topics each. Local lenses read Portuguese and Dutch Wikipedia and filter news to local outlets. |
+| 📈 **Signal**         | The selected topic's history, a dashed 12-step forecast with a ±1σ band, and a hover crosshair. Swipe, drag or press `←` `→` to change topic, and `[` `]` to change lens.                                                                                                                                                                                                                  |
+| 🚀 **Rising stories** | A [NewsWhip](https://www.newswhip.com/)-style ranking of stories by engagement **per hour**, measured as the page re-checks them, with a 24-hour projection and a **breaking out** flag. Plus story clusters from global news and from Portuguese and Dutch outlets.                                                                                                                       |
+| 🎯 **Radar**          | A rotating sweep over your lens. Distance shows momentum (centre = rising fastest), size shows volume, and blips ping as the sweep passes.                                                                                                                                                                                                                                                 |
+| 🚨 **Pre-cog alerts** | Raised when a topic's latest point is more than 2.5σ above its 30-step baseline (**ALERT**), or more than 1.8σ (**WATCH**). Each comes with a plain-English explanation and a projection.                                                                                                                                                                                                  |
+| 🧾 **Datapoints**     | Official open data: the ECB deposit rate, unemployment (PT / NL / euro area), IPMA fire risk and weather warnings, and today's weather and air quality in Lisbon, Porto and Amsterdam.                                                                                                                                                                                                     |
+| ♿ **Table view**     | Every topic in every lens in one accessible table. Respects reduced motion. Prints on A4 landscape.                                                                                                                                                                                                                                                                                        |
 
 <p align="center"><img src="docs/screenshot-light.png" alt="PRECOG in light mode showing the Portugal lens" width="85%"></p>
 
@@ -57,7 +57,7 @@ Or skip the setup and use the [hosted version](https://alex-quiterio.github.io/p
 
 `npm run build` writes **one self-contained `dist/index.html`** with all JS and CSS inlined. It opens straight from your file system, with no server.
 
-The dashboard starts in **DEMO DATA** mode (seeded random walks, clearly labelled). Choose **World attention index** in the source menu for real data.
+It opens straight onto **real data** from the World attention index. There's no simulated mode, so nothing on screen is ever made up. A cold start takes up to a minute while the sources answer, and results are cached after that. Press **↻ Refresh** any time.
 
 ### Portuguese and Dutch news
 
@@ -124,7 +124,7 @@ src/
 ├── main.ts                 boot: prefs, mount, data loop, keyboard
 ├── App.vue                 root layout: header, status, two panel columns
 ├── types.ts                shared data shapes (Entry, Stats, Alert, Adapter…)
-├── core/                   config, person guard, simulator, statistics, formatting, ui store
+├── core/                   config, person guard, statistics, formatting, ui store
 ├── sources/                registry + one adapter per source, and the blend
 ├── features/               morning brief, rising stories, datapoints
 ├── components/             one Vue component per panel, plus PanelShell, Sparkline, tags
@@ -140,7 +140,7 @@ The logic modules are plain TypeScript with no DOM access. They change plain sta
 | ---------------- | -------------------------------------------------------- |
 | `npm run dev`    | Vite dev server with hot reload                          |
 | `npm run build`  | type-check, then build the single-file `dist/index.html` |
-| `npm test`       | Vitest unit tests (guard, stats, blend, simulator)       |
+| `npm test`       | Vitest unit tests (guard, stats, blend, preset upgrades) |
 | `npm run lint`   | `vue-tsc` type-check and Prettier check                  |
 | `npm run format` | Prettier, configured in `.prettierrc`                    |
 | `npm run proxy`  | the local PT/NL feed proxy                               |
