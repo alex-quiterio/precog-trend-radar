@@ -17,6 +17,8 @@ export const ui = reactive({
   focusAdd: 0, // ask the lens panel to focus its "add topic" input
   swap: 0, // replay the chart's topic-switch animation
   guardian: false, // a Guardian API key is set
+  guardianState: 'off' as 'off' | 'checking' | 'ok' | 'error',
+  guardianNote: '', // what the Guardian button's tooltip says
   ghToken: false, // a GitHub token is set
 });
 export function bump() {

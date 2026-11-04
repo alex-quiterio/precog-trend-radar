@@ -169,20 +169,24 @@ a:hover {
 }
 .ch-add {
   align-self: center;
-  margin-left: auto;
-  width: 24px;
-  height: 24px;
+  margin: 0 8px 0 auto;
+  width: 26px;
+  height: 26px;
+  padding: 0;
   border-radius: 50%;
-  border: 1px dashed var(--axis);
-  background: transparent;
+  border: 1px solid var(--hair);
+  background: var(--card);
   color: var(--muted);
-  font: 400 15px/1 var(--sans);
-  display: grid;
-  place-items: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition:
     color 0.15s,
     border-color 0.15s,
     background 0.15s;
+}
+.ch-add svg {
+  display: block;
 }
 .ch-add:hover {
   color: var(--accent);
@@ -191,7 +195,7 @@ a:hover {
 }
 .ch-new {
   align-self: center;
-  margin-left: auto;
+  margin: 0 8px 0 auto;
 }
 .ch-new input {
   width: 160px;
@@ -1239,4 +1243,13 @@ select:hover {
       0 0 0 2px transparent,
       var(--shadow);
   }
+}
+
+/* Guardian key state on the header button */
+.btn.guardian.error {
+  border-color: var(--watch);
+  background: transparent;
+}
+.btn.guardian.checking {
+  opacity: 0.8;
 }

@@ -55,6 +55,8 @@ registerAdapter({
         if (e instanceof HttpError && (e.status === 401 || e.status === 403))
           throw new Error('The Guardian rejected the API key');
         if (e instanceof HttpError && e.status === 429) throw new Error('Guardian daily limit reached');
+        // A rejected key comes back without CORS headers, so the browser only sees a network error.
+        if (e instanceof TypeError) throw new Error('The Guardian refused the request (most likely the key)');
         throw e;
       }
       pages = j.response?.pages || 1;

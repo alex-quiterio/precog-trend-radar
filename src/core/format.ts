@@ -40,4 +40,4 @@ export function ago(t) {
 }
 export const changeLabel = st =>
   !st ? '' : st.step >= 2 * DAY ? 'vs previous point' : st.step >= DAY ? 'vs yesterday' : 'vs 24h ago';
-export const COMP_LABEL = { wikipedia: 'Wikipedia', hn: 'HN', news: 'news' };
+export const COMP_LABEL = { wikipedia: 'Wikipedia', guardian: 'Guardian', hn: 'HN' };

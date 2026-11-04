@@ -23,17 +23,21 @@
         ↻ {{ ui.loading ? 'Loading…' : 'Refresh' }}
       </button>
       <button
-        class="btn"
+        class="btn guardian"
+        :class="ui.guardian ? ui.guardianState : ''"
         type="button"
         :aria-pressed="ui.guardian"
         :title="
           ui.guardian
-            ? 'Guardian news counts are on. Click to change or remove the key.'
-            : 'Add a free Guardian API key to count news coverage for English topics.'
+            ? ui.guardianNote + ' Click to change or remove the key.'
+            : 'Add a free Guardian API key to count news coverage for each topic.'
         "
         @click="editGuardianKey"
       >
-        {{ ui.guardian ? '✓ Guardian' : '+ Guardian key' }}
+        <template v-if="!ui.guardian">+ Guardian key</template>
+        <template v-else-if="ui.guardianState === 'checking'">Guardian…</template>
+        <template v-else-if="ui.guardianState === 'error'">⚠ Guardian</template>
+        <template v-else>✓ Guardian</template>
       </button>
       <button
         class="btn icon"
@@ -78,7 +82,9 @@
         aria-label="New channel"
         @click="open"
       >
-        +
+        <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
+          <path d="M6 1.5v9M1.5 6h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+        </svg>
       </button>
     </nav>
   </header>

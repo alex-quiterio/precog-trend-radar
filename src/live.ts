@@ -79,6 +79,7 @@ export async function loadLive() {
   const total = entries.length * parts.length;
   let done = 0;
   ui.loading = true;
+  if (ui.guardian) Object.assign(ui, { guardianState: 'checking', guardianNote: 'Counting Guardian articles…' });
   setStatus(`Fetching attention data… 0/${total}`);
   loadStories();
   await Promise.all(
@@ -99,6 +100,7 @@ export async function loadLive() {
   liveUpdated = Date.now();
   state.liveLoaded = true;
   rescanAll();
+  reportGuardian();
   bump();
   beat(`updated ${new Date(liveUpdated).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}`);
   const all = allEntries(),
@@ -151,4 +153,22 @@ export function startLive() {
 /** Fetch again now, keeping what's on screen until new data arrives. */
 export function refresh() {
   if (!ui.loading) loadLive();
+}
+/** Tells the header whether the Guardian key is working: how many topics got articles, or why not. */
+function reportGuardian() {
+  if (!ui.guardian) return Object.assign(ui, { guardianState: 'off', guardianNote: '' });
+  const all = allEntries();
+  const ok = all.filter(E => E.parts.guardian?.length).length;
+  const err = all.map(E => E.partErr.guardian).find(Boolean);
+  const articles = all.reduce((a, E) => a + (E.parts.guardian || []).reduce((b, p) => b + p.value, 0), 0);
+  if (ok)
+    Object.assign(ui, {
+      guardianState: 'ok',
+      guardianNote: `Guardian key works: ${ok} of ${all.length} topics, ${articles.toLocaleString()} articles in the last 45 days.${err ? ` Some failed: ${err}.` : ''}`,
+    });
+  else
+    Object.assign(ui, {
+      guardianState: 'error',
+      guardianNote: err ? `Guardian: ${err}.` : 'Guardian returned no articles for these topics.',
+    });
 }
