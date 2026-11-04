@@ -1,7 +1,22 @@
 <template>
   <panel-shell id="p-brief" :title="head.title" :meta="head.meta" :index="index" :data-tick="ui.v">
     <ul v-if="b.lines.length" class="brief-list">
-      <li v-for="(l, i) in b.lines" :key="i">{{ l }}</li>
+      <li v-for="(l, i) in b.lines" :key="i">
+        <template v-for="(p, j) in l" :key="j">
+          <template v-if="typeof p === 'string'">{{ p }}</template>
+          <button
+            v-else
+            class="brief-topic"
+            type="button"
+            :title="'Chart ' + p.text"
+            :aria-label="'Chart ' + p.text"
+            @click="focusTopic(p.key)"
+          >
+            <topic-dot :color="p.color"></topic-dot>
+            {{ p.text }}
+          </button>
+        </template>
+      </li>
     </ul>
     <p v-else class="empty">Waiting for data…</p>
     <div v-if="b.movers.length" class="table-scroll">
@@ -19,7 +34,7 @@
         <tbody>
           <tr v-for="E in b.movers" :key="E.key">
             <td>
-              <button class="topic" type="button" @click="select(E.key)">
+              <button class="topic" type="button" :title="'Chart ' + E.name" @click="focusTopic(E.key)">
                 <topic-dot :color="E.color"></topic-dot>
                 {{ E.name }}
               </button>
@@ -45,7 +60,7 @@
 
 <script lang="ts">
 import { ref, computed, defineComponent } from 'vue';
-import { markRead, select } from '../actions';
+import { focusTopic, markRead } from '../actions';
 import { DAY } from '../core/config';
 import { fmtTime } from '../core/format';
 import { ui } from '../core/ui-store';
@@ -87,7 +102,7 @@ export default defineComponent({
       markRead();
       note.value = 'Marked as read.';
     }
-    return { ui, state, b, head, bar, note, copy, read, select };
+    return { ui, state, b, head, bar, note, copy, read, focusTopic };
   },
 });
 </script>

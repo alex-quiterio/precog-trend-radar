@@ -142,9 +142,6 @@ a:hover {
   color: var(--axis);
   transition: color 0.15s;
 }
-.channel.add::before {
-  content: none;
-}
 .channel::after {
   content: '';
   position: absolute;
@@ -170,12 +167,41 @@ a:hover {
 .channel[aria-current='page']::after {
   transform: scaleX(1);
 }
-.channel.add {
-  color: var(--axis);
+.ch-add {
+  align-self: center;
+  margin-left: auto;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px dashed var(--axis);
+  background: transparent;
+  color: var(--muted);
+  font: 400 15px/1 var(--sans);
+  display: grid;
+  place-items: center;
+  transition:
+    color 0.15s,
+    border-color 0.15s,
+    background 0.15s;
+}
+.ch-add:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.ch-new {
+  align-self: center;
   margin-left: auto;
 }
-.channel.add:hover {
-  color: var(--accent);
+.ch-new input {
+  width: 160px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--accent);
+  background: var(--card);
+  font-size: 12px;
+  outline: none;
 }
 .channel .heat {
   font: 600 10px/1 var(--mono);
@@ -1171,4 +1197,46 @@ select:hover {
 }
 .stories.compact .story {
   padding: 8px 0;
+}
+
+/* gist: topics named in a sentence chart that topic when clicked */
+.brief-topic {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  background: transparent;
+  padding: 0 2px;
+  margin: 0 -2px;
+  border-radius: 5px;
+  color: var(--ink);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: var(--axis);
+  text-underline-offset: 3px;
+  vertical-align: baseline;
+}
+.brief-topic:hover {
+  background: var(--track);
+  text-decoration-color: var(--accent);
+}
+.brief-topic .dot,
+.brief-topic svg {
+  flex: none;
+}
+/* the chart flashes when a topic is picked from elsewhere on the page */
+.panel.flash {
+  animation: flash 1.2s ease-out;
+}
+@keyframes flash {
+  0% {
+    box-shadow:
+      0 0 0 2px var(--accent),
+      var(--shadow);
+  }
+  100% {
+    box-shadow:
+      0 0 0 2px transparent,
+      var(--shadow);
+  }
 }

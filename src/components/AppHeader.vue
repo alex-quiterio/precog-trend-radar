@@ -58,21 +58,34 @@
           {{ c.heat.n }}
         </span>
       </button>
+      <form v-if="view.canAdd && adding" class="ch-new" autocomplete="off" @submit.prevent="create">
+        <label class="sr-only" for="ch-name">New channel name</label>
+        <input
+          id="ch-name"
+          ref="nameInput"
+          v-model="name"
+          maxlength="30"
+          placeholder="Channel name…"
+          @keydown.esc="cancel"
+          @blur="!name.trim() && cancel()"
+        />
+      </form>
       <button
-        v-if="view.canAdd"
+        v-else-if="view.canAdd"
         type="button"
-        class="channel add"
-        title="Make your own channel from a new lens of topics"
-        @click="newChannel"
+        class="ch-add"
+        title="New channel"
+        aria-label="New channel"
+        @click="open"
       >
-        + channel
+        +
       </button>
     </nav>
   </header>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
+import { computed, defineComponent, nextTick, ref } from 'vue';
 import { addLens, editGuardianKey, lensHeat, selectLens, toggleTheme } from '../actions';
 import { activeChannel, channels } from '../channels';
 import { MAX_LENSES } from '../core/config';
@@ -93,11 +106,36 @@ export default defineComponent({
         canAdd: state.lenses.length < MAX_LENSES,
       };
     });
-    function newChannel() {
-      const name = window.prompt('Name your channel (you can add up to six topics to it):');
-      if (name && name.trim()) addLens(name.trim());
+    // New channel: a small "+" that opens an inline name field (Enter creates, Esc cancels).
+    const adding = ref(false),
+      name = ref(''),
+      nameInput = ref<HTMLInputElement | null>(null);
+    function open() {
+      adding.value = true;
+      nextTick(() => nameInput.value?.focus());
     }
-    return { ui, view, refresh, toggleTheme, editGuardianKey, selectLens, newChannel };
+    function cancel() {
+      adding.value = false;
+      name.value = '';
+    }
+    function create() {
+      if (name.value.trim()) addLens(name.value.trim());
+      cancel();
+    }
+    return {
+      ui,
+      view,
+      refresh,
+      toggleTheme,
+      editGuardianKey,
+      selectLens,
+      adding,
+      name,
+      nameInput,
+      open,
+      cancel,
+      create,
+    };
   },
 });
 </script>

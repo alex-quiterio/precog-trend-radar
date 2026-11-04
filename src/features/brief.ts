@@ -5,7 +5,29 @@ import { levelOf } from '../core/stats';
 import { dp } from './datapoints';
 import { stories } from './stories';
 import { channelOfLens } from '../channels';
+import type { Entry } from '../types';
 import { activeLens, allEntries, entriesOf, lensById, state } from '../state';
+
+/** A brief sentence: plain text, and topics the reader can click to chart. */
+export type BriefPart = string | { key: string; text: string; color: string };
+export type BriefLine = BriefPart[];
+const isEntry = (v: unknown): v is Entry => !!v && typeof v === 'object' && 'key' in v && 'lensId' in v && 'name' in v;
+/** Tagged template for a brief line: interpolated topics become clickable parts, arrays are spliced in. */
+function ln(strings: TemplateStringsArray, ...vals: unknown[]): BriefLine {
+  const out: BriefLine = [];
+  strings.forEach((str, i) => {
+    if (str) out.push(str);
+    if (i >= vals.length) return;
+    const v = vals[i];
+    if (isEntry(v)) out.push({ key: v.key, text: v.name, color: v.color });
+    else if (Array.isArray(v)) out.push(...(v as BriefPart[]));
+    else out.push(String(v));
+  });
+  return out;
+}
+/** Joins several lines' parts with a separator. */
+const join = (lines: BriefLine[], sep = ', '): BriefLine => lines.flatMap((l, i) => (i ? [sep, ...l] : l));
+export const lineText = (l: BriefLine): string => l.map(p => (typeof p === 'string' ? p : p.text)).join('');
 
 export function lensName(E) {
   const l = lensById(E.lensId);
@@ -15,33 +37,32 @@ export function lensName(E) {
 export function buildBrief() {
   const lens = activeLens();
   const items = entriesOf(lens).filter(E => E.stats);
-  const out = { lines: [], movers: [], items, lens };
+  const out = { lines: [] as BriefLine[], movers: [], items, lens };
   if (!items.length) return out;
-  if (!state.liveLoaded) out.lines.push('Still loading: numbers will settle once every source has answered.');
+  if (!state.liveLoaded) out.lines.push(ln`Still loading: numbers will settle once every source has answered.`);
   const hot = items.filter(E => levelOf(E.stats.z)).sort((a, b) => b.stats.z - a.stats.z);
   out.lines.push(
     hot.length
-      ? `${hot.length} topic${hot.length > 1 ? 's are' : ' is'} running hot: ${hot
-          .slice(0, 3)
-          .map(E => `${E.name} (${E.stats.z.toFixed(1)}σ)`)
-          .join(', ')}${hot.length > 3 ? ` and ${hot.length - 3} more` : ''}.`
-      : `Nothing unusual: every topic is within ${Z_WATCH}σ of its 30-step baseline.`,
+      ? ln`${hot.length} topic${hot.length > 1 ? 's are' : ' is'} running hot: ${join(
+          hot.slice(0, 3).map(E => ln`${E} (${E.stats.z.toFixed(1)}σ)`),
+        )}${hot.length > 3 ? ` and ${hot.length - 3} more` : ''}.`
+      : ln`Nothing unusual: every topic is within ${Z_WATCH}σ of its 30-step baseline.`,
   );
   const withChg = items.filter(E => E.stats.change != null && !E.sparse);
   if (withChg.length) {
     const up = withChg.reduce((a, b) => (b.stats.change > a.stats.change ? b : a));
     const dn = withChg.reduce((a, b) => (b.stats.change < a.stats.change ? b : a));
     if (up.stats.change > 0)
-      out.lines.push(`Biggest move up: ${up.name}, ${fmtPct(up.stats.change)} ${changeLabel(up.stats)}.`);
+      out.lines.push(ln`Biggest move up: ${up}, ${fmtPct(up.stats.change)} ${changeLabel(up.stats)}.`);
     if (dn.stats.change < 0 && dn !== up)
-      out.lines.push(`Biggest drop: ${dn.name}, ${fmtPct(dn.stats.change)} ${changeLabel(dn.stats)}.`);
+      out.lines.push(ln`Biggest drop: ${dn}, ${fmtPct(dn.stats.change)} ${changeLabel(dn.stats)}.`);
   }
   const climbers = items
     .filter(E => !levelOf(E.stats.z) && E.stats.momentum > 0.3 && !E.sparse)
     .sort((a, b) => b.stats.momentum - a.stats.momentum);
   if (climbers.length)
     out.lines.push(
-      `Steadiest climb: ${climbers[0].name}, ${fmtPct(climbers[0].stats.momentum)} per step over the last ${FIT_N} steps. Not a spike yet, but a trend.`,
+      ln`Steadiest climb: ${climbers[0]}, ${fmtPct(climbers[0].stats.momentum)} per step over the last ${FIT_N} steps. Not a spike yet, but a trend.`,
     );
   // Don't let the focus hide a fire elsewhere: name what's hot in the other lenses.
   // A country channel never mentions another country's channel.
@@ -57,20 +78,19 @@ export function buildBrief() {
     .sort((a, b) => b.stats.z - a.stats.z);
   if (elsewhere.length)
     out.lines.push(
-      `Elsewhere: ${elsewhere
-        .slice(0, 3)
-        .map(E => `${E.name} (${E.stats.z.toFixed(1)}σ, ${lensName(E)})`)
-        .join(', ')}${elsewhere.length > 3 ? ` and ${elsewhere.length - 3} more` : ''}.`,
+      ln`Elsewhere: ${join(
+        elsewhere.slice(0, 3).map(E => ln`${E} (${E.stats.z.toFixed(1)}σ, ${lensName(E)})`),
+      )}${elsewhere.length > 3 ? ` and ${elsewhere.length - 3} more` : ''}.`,
     );
   // Fire and storm warnings matter for the land lens; elsewhere they'd be noise.
   const f = lens?.id === 'portugal' ? dp.facts : {};
   if (f.fire && f.fire.hi)
     out.lines.push(
-      `Portugal fire risk today: ${f.fire.hi} of ${f.fire.n} municipalities at very high or maximum risk (IPMA).`,
+      ln`Portugal fire risk today: ${f.fire.hi} of ${f.fire.n} municipalities at very high or maximum risk (IPMA).`,
     );
   if (f.warnings && (f.warnings.red || f.warnings.orange))
     out.lines.push(
-      `IPMA has ${f.warnings.red} red and ${f.warnings.orange} orange weather warnings active (${f.warnings.types}).`,
+      ln`IPMA has ${f.warnings.red} red and ${f.warnings.orange} orange weather warnings active (${f.warnings.types}).`,
     );
   const prev = state.prevLook;
   if (prev && prev.source === state.source) {
@@ -84,7 +104,7 @@ export function buildBrief() {
       return p && p.level && !levelOf(E.stats.z);
     });
     out.lines.push(
-      `Since your last look ${ago(prev.at)}: ${newly.length ? 'newly hot: ' + newly.map(E => E.name).join(', ') : 'nothing new turned hot'}${cooled.length ? '; cooled down: ' + cooled.map(E => E.name).join(', ') : ''}.`,
+      ln`Since your last look ${ago(prev.at)}: ${newly.length ? ln`newly hot: ${join(newly.map(E => ln`${E}`))}` : 'nothing new turned hot'}${cooled.length ? ln`; cooled down: ${join(cooled.map(E => ln`${E}`))}` : ''}.`,
     );
   }
   out.movers = items
@@ -116,7 +136,7 @@ export function briefMarkdown() {
     .map(s => `- [${s.title}](${s.url}) (${nf0.format(s.vel)}/h)`)
     .join('\n');
   return (
-    `## PRECOG brief, ${d} · ${b.lens?.name || ''}\n\n${b.lines.map(l => `- ${l}`).join('\n')}\n\n| Topic | Now | Change | z | State |\n|---|---|---|---|---|\n${rows}\n` +
+    `## PRECOG brief, ${d} · ${b.lens?.name || ''}\n\n${b.lines.map(l => `- ${lineText(l)}`).join('\n')}\n\n| Topic | Now | Change | z | State |\n|---|---|---|---|---|\n${rows}\n` +
     (rowsDp.length ? `\n### Datapoints\n${rowsDp.map(r => `- ${r.k}: ${r.v} (${r.src})`).join('\n')}\n` : '') +
     (recent ? `\n### Alerts\n${recent}\n` : '') +
     (top ? `\n### Rising stories\n${top}\n` : '')

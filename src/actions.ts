@@ -247,3 +247,21 @@ export function editGithubToken(): void {
   loadMyGitHub(true);
   if (activeChannel().github) loadGitHub(true);
 }
+/**
+ * Charts a topic from anywhere (the gist's sentences, the movers table): selects it, switching to its
+ * channel if it lives in another one, then brings the trend chart into view and flashes it.
+ */
+export function focusTopic(key: string): void {
+  if (!state.rt.get(key)) return;
+  select(key);
+  // Let the channel re-render first; the chart element is recreated when the channel changes.
+  setTimeout(() => {
+    const el = document.getElementById('p-signal');
+    if (!el) return;
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    el.classList.remove('flash');
+    void el.offsetWidth; // restart the animation
+    el.classList.add('flash');
+  }, 60);
+}
