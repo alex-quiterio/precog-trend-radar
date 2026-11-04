@@ -47,7 +47,7 @@ export const CHANNELS: Channel[] = [
     label: 'Portugal & land',
     kicker: 'Fire, water and soil in the interior, and the practices of a rural, closed-loop life.',
     lensId: 'portugal',
-    datapoints: ['fire', 'warnings', 'soil', 'wx-lisbon', 'wx-porto', 'inflation'],
+    datapoints: ['fire', 'warnings', 'soil-mafra', 'soil', 'wx-lisbon', 'wx-porto', 'inflation'],
     streams: ['reading', 'forecasts'],
   },
   {

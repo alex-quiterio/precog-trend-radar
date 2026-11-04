@@ -36,6 +36,11 @@ export const PLACES = [
   ['Porto', 41.15, -8.61],
   ['Amsterdam', 52.37, 4.9],
 ];
+// Soil moisture cards: [card id, place, latitude, longitude].
+export const SOIL_PLACES: [string, string, number, number][] = [
+  ['soil', 'Alentejo (Beja)', 38.02, -7.86],
+  ['soil-mafra', 'Mafra', 38.94, -9.33],
+];
 export const aqiWord = v =>
   v == null
     ? ''
@@ -224,39 +229,41 @@ export async function loadDatapoints() {
         spark: months.slice(-60).map(k => ({ t: Date.UTC(+k.slice(0, 4), +k.slice(4) - 1), value: data[k].anom })),
       });
     }),
-    // --- Land: is the Alentejo drying out? -----------------------------
-    task(async () => {
-      const j = await getJSON(
-        'https://api.open-meteo.com/v1/forecast?latitude=38.02&longitude=-7.86&hourly=soil_moisture_3_to_9cm&daily=precipitation_sum&past_days=60&forecast_days=1&timezone=UTC',
-      );
-      const byDay = new Map<string, number[]>();
-      (j.hourly?.time || []).forEach((t: string, i: number) => {
-        const v = j.hourly.soil_moisture_3_to_9cm[i];
-        if (v == null) return;
-        const d = t.slice(0, 10);
-        byDay.set(d, [...(byDay.get(d) || []), v]);
-      });
-      const days = [...byDay.entries()].map(([d, vs]) => ({
-        t: Date.parse(d),
-        value: vs.reduce((a, b) => a + b, 0) / vs.length,
-      }));
-      if (days.length < 31) return;
-      const now = days[days.length - 1],
-        before = days[days.length - 31];
-      const rain = (j.daily?.precipitation_sum || []).slice(-31, -1).reduce((a, b) => a + (b || 0), 0);
-      const change = ((now.value - before.value) / (before.value || 1)) * 100;
-      rows.push({
-        group: 'land',
-        id: 'soil',
-        k: 'Soil moisture · Alentejo (Beja)',
-        v: `${nf2.format(now.value)} m³/m³`,
-        sub: `${change >= 0 ? '+' : ''}${nf0.format(change)}% in 30 days · ${nf0.format(rain)} mm of rain`,
-        src: 'Open-Meteo · 3–9 cm below the surface',
-        href: 'https://open-meteo.com/en/docs',
-        o: 22,
-        spark: days,
-      });
-    }),
+    // --- Land: is the soil drying out? One card per place --------------------
+    ...SOIL_PLACES.map(([id, name, lat, lon], i) =>
+      task(async () => {
+        const j = await getJSON(
+          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=soil_moisture_3_to_9cm&daily=precipitation_sum&past_days=60&forecast_days=1&timezone=UTC`,
+        );
+        const byDay = new Map<string, number[]>();
+        (j.hourly?.time || []).forEach((t: string, k: number) => {
+          const v = j.hourly.soil_moisture_3_to_9cm[k];
+          if (v == null) return;
+          const d = t.slice(0, 10);
+          byDay.set(d, [...(byDay.get(d) || []), v]);
+        });
+        const days = [...byDay.entries()].map(([d, vs]) => ({
+          t: Date.parse(d),
+          value: vs.reduce((a, b) => a + b, 0) / vs.length,
+        }));
+        if (days.length < 31) return;
+        const now = days[days.length - 1],
+          before = days[days.length - 31];
+        const rain = (j.daily?.precipitation_sum || []).slice(-31, -1).reduce((a, b) => a + (b || 0), 0);
+        const change = ((now.value - before.value) / (before.value || 1)) * 100;
+        rows.push({
+          group: 'land',
+          id,
+          k: `Soil moisture · ${name}`,
+          v: `${nf2.format(now.value)} m³/m³`,
+          sub: `${change >= 0 ? '+' : ''}${nf0.format(change)}% in 30 days · ${nf0.format(rain)} mm of rain`,
+          src: 'Open-Meteo · 3–9 cm below the surface',
+          href: 'https://open-meteo.com/en/docs',
+          o: 22 + i,
+          spark: days,
+        });
+      }),
+    ),
   ]);
   dp.rows = rows.sort((a, b) => a.o - b.o);
   dp.facts = facts;
