@@ -48,7 +48,7 @@ export const CHANNELS: Channel[] = [
     kicker: 'Energy, ecology and the economy as one system, with the planet’s slow numbers.',
     lensId: 'tgs',
     datapoints: ['co2', 'seaice'],
-    streams: ['news', 'reading', 'forecasts'],
+    streams: ['reading', 'news', 'forecasts'],
     sites: [TGS],
   },
   {

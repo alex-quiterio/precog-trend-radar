@@ -28,9 +28,9 @@ export interface ReadingItem {
 }
 
 const SITES_KEY = 'precog.reading.sites.v1';
-const CACHE_KEY = 'precog.reading.v2.';
+const CACHE_KEY = 'precog.reading.v3.';
 const TTL = 12 * HOUR;
-const TEXT_MAX = 2500;
+const TEXT_MAX = 1200; // enough to match topics; keeps the cache well inside browser storage
 const PAGES_PER_TYPE = 2; // newest 200 per type: enough to match against, light on the site
 
 export const DEFAULT_SITES: ReadingSite[] = [

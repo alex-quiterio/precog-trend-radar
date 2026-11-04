@@ -292,10 +292,14 @@ export default defineComponent({
     // The Guardian tab appears once a key is set.
     const tabs = computed(() => {
       ui.v;
-      return activeChannel()
-        .streams.filter(id => id !== 'news' || ui.guardian)
+      const c = activeChannel();
+      // A channel that reads one site names the tab after it ("The Great Simplification").
+      const only = c.sites?.length === 1 ? readingSites().find(x => x.url === c.sites[0])?.name : '';
+      return c.streams
+        .filter(id => id !== 'news' || ui.guardian)
         .map(id => TABS.find(t => t[0] === id))
-        .filter(Boolean);
+        .filter(Boolean)
+        .map(([id, label]) => [id, id === 'reading' && only ? only : label]);
     });
     const when = (t: number) =>
       Math.abs(Date.now() - t) < 30 * DAY_MS

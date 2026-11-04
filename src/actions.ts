@@ -212,7 +212,8 @@ export function editGuardianKey(): void {
   if (k == null || k.trim() === now) return;
   setGuardianKey(k);
   ui.guardian = !!guardianKey();
-  if (ui.guardian && !now) state.storySrc = 'news'; // show the articles straight away
+  // Show the articles straight away, unless this channel leads with something else (e.g. its podcast).
+  if (ui.guardian && !now && activeChannel().streams[0] === 'news') state.storySrc = 'news';
   savePrefs();
   startLive();
 }

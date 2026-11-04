@@ -31,7 +31,19 @@ import { githubToken } from './sources/github-auth';
 import { lensById, loadLenses, state } from './state';
 import type { Prefs } from './types';
 
+/** Removes caches written by earlier versions (GDELT, old Reading and Guardian formats) to free storage. */
+function dropOldCaches(): void {
+  try {
+    Object.keys(localStorage)
+      .filter(k => /^precog\.(gdelt|reading\.v[12]\.|guardian\.v1\.|tgs\.|rss\.)/.test(k))
+      .forEach(k => localStorage.removeItem(k));
+  } catch {
+    /* storage unavailable */
+  }
+}
+
 function boot(): void {
+  dropOldCaches();
   const prefs = store.get<Partial<Prefs>>(LS.prefs, {});
   applyTheme(prefs.theme || 'dark');
   loadLenses();

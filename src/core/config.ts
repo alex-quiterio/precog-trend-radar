@@ -167,7 +167,15 @@ export const store = {
     try {
       localStorage.setItem(k, JSON.stringify(v));
     } catch {
-      /* storage unavailable or full */
+      // Storage full: drop old caches (versioned keys no longer read), then try once more.
+      try {
+        Object.keys(localStorage)
+          .filter(x => /^precog\.(reading\.v[12]|guardian\.v1|gdelt)\./.test(x))
+          .forEach(x => localStorage.removeItem(x));
+        localStorage.setItem(k, JSON.stringify(v));
+      } catch {
+        /* storage unavailable */
+      }
     }
   },
 };
