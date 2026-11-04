@@ -69,7 +69,7 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import { activeChannel, channels } from './channels';
+import { activeChannel, channelDatapoints, channels } from './channels';
 import { ui } from './core/ui-store';
 import { activeLens } from './state';
 import AppHeader from './components/AppHeader.vue';
@@ -104,7 +104,7 @@ export default defineComponent({
         channel,
         no: String(i + 1).padStart(2, '0'),
         title: activeLens()?.name || channel.label,
-        side: channel.datapoints.length > 0,
+        side: channelDatapoints(channel).length > 0,
         updated: new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' }),
       };
     });

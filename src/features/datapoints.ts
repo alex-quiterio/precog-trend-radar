@@ -38,7 +38,6 @@ export const PLACES = [
 ];
 // Soil moisture cards: [card id, place, latitude, longitude].
 export const SOIL_PLACES: [string, string, number, number][] = [
-  ['soil', 'Alentejo (Beja)', 38.02, -7.86],
   ['soil-mafra', 'Mafra', 38.94, -9.33],
   ['soil-amsterdam', 'Amsterdam', 52.37, 4.9],
 ];

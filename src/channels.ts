@@ -21,6 +21,14 @@ export interface Channel {
   github?: boolean;
 }
 
+/** Cards shown in every channel's open data, after the channel's own: the places you keep an eye on. */
+export const PINNED_DATAPOINTS = ['soil-mafra', 'soil-amsterdam'];
+/** A channel's open-data cards: its own first, then the pinned ones it doesn't already show. */
+export const channelDatapoints = (c: Channel): string[] => [
+  ...c.datapoints,
+  ...PINNED_DATAPOINTS.filter(id => !c.datapoints.includes(id)),
+];
+
 const TGS = 'https://www.thegreatsimplification.com';
 const MARGINALIAN = 'https://www.themarginalian.org';
 
@@ -38,7 +46,7 @@ export const CHANNELS: Channel[] = [
     label: 'Great Simplification',
     kicker: 'Energy, ecology and the economy as one system, with the planet’s slow numbers.',
     lensId: 'tgs',
-    datapoints: ['co2', 'seaice', 'soil'],
+    datapoints: ['co2', 'seaice'],
     streams: ['reading', 'forecasts'],
     sites: [TGS],
   },
@@ -47,7 +55,7 @@ export const CHANNELS: Channel[] = [
     label: 'Portugal & land',
     kicker: 'Fire, water and soil in the interior, and the practices of a rural, closed-loop life.',
     lensId: 'portugal',
-    datapoints: ['fire', 'warnings', 'soil-mafra', 'soil', 'wx-lisbon', 'wx-porto', 'inflation'],
+    datapoints: ['fire', 'warnings', 'soil-mafra', 'wx-lisbon', 'wx-porto', 'inflation'],
     streams: ['reading', 'forecasts'],
   },
   {

@@ -33,7 +33,7 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import { activeChannel } from '../channels';
+import { activeChannel, channelDatapoints } from '../channels';
 import { ui } from '../core/ui-store';
 import { DATAPOINT_GROUPS, dp } from '../features/datapoints';
 import PanelShell from './PanelShell.vue';
@@ -49,7 +49,7 @@ export default defineComponent({
     const view = computed(() => {
       ui.v;
       // The channel picks its cards and their order; they're shown under their group headings.
-      const ids = activeChannel().datapoints;
+      const ids = channelDatapoints(activeChannel());
       const rows = ids.map(id => dp.rows.find(r => r.id === id)).filter(Boolean);
       const order = [...new Set(rows.map(r => r.group))];
       return {
