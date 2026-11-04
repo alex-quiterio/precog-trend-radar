@@ -63,7 +63,7 @@ export const CHANNELS: Channel[] = [
     label: 'Alt Amsterdam',
     kicker: 'The cooperative, regenerative city.',
     lensId: 'amsterdam',
-    datapoints: ['wx-amsterdam', 'inflation', 'unemployment'],
+    datapoints: ['soil-amsterdam', 'wx-amsterdam', 'inflation', 'unemployment'],
     streams: ['reading', 'hn'],
     sites: [MARGINALIAN, TGS],
   },

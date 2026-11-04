@@ -7,7 +7,7 @@ import { getJSON } from '../sources/registry';
 
 export type DatapointGroup = 'land' | 'money' | 'planet' | 'weather';
 export const DATAPOINT_GROUPS: { id: DatapointGroup; label: string; hint: string }[] = [
-  { id: 'land', label: 'Land', hint: 'Portugal: fire, warnings, soil' },
+  { id: 'land', label: 'Land', hint: 'Fire, warnings, soil' },
   { id: 'money', label: 'Money', hint: 'Rates, prices, jobs' },
   { id: 'planet', label: 'Planet', hint: 'The slow numbers' },
   { id: 'weather', label: 'Weather', hint: 'Today, with air quality' },
@@ -40,6 +40,7 @@ export const PLACES = [
 export const SOIL_PLACES: [string, string, number, number][] = [
   ['soil', 'Alentejo (Beja)', 38.02, -7.86],
   ['soil-mafra', 'Mafra', 38.94, -9.33],
+  ['soil-amsterdam', 'Amsterdam', 52.37, 4.9],
 ];
 export const aqiWord = v =>
   v == null

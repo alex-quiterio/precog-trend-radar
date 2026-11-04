@@ -26,14 +26,14 @@ What's moving in the topics you care about, the numbers worth knowing, and what'
 
 PRECOG shows one **channel** at a time. A channel is a whole dashboard for one context: switching it switches the topics, the chart, the open data alongside and the streams below.
 
-| Channel                      | Topics it charts                                                                      | Context (open data)                                                    | Streams                             |
-| ---------------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | ----------------------------------- |
-| **World**                    | Ukraine, Gaza, tariffs, NATO, inflation, AI                                           | inflation, ECB rate, unemployment, CO₂                                 | Forecasts, Reading, Hacker News     |
-| **The Great Simplification** | climate change, peak oil, degrowth, overshoot, biodiversity loss, Hormuz              | CO₂, sea ice, Alentejo soil                                            | its episodes and Frankly, Forecasts |
-| **Portugal & the land**      | Alentejo, wildfires, desertification, rural flight, permaculture, regen. ag.          | IPMA fire risk and warnings, soil, Lisbon and Porto weather, inflation | Reading, Forecasts                  |
-| **Circular economy**         | circular economy, recycling, PPWR, producer responsibility, food waste, CSRD          | inflation, ECB rate, unemployment                                      | Reading, Hacker News, Forecasts     |
-| **Alternative Amsterdam**    | doughnut economics, housing co-ops, land trusts, squatting, urban farms, repair cafés | Amsterdam weather, inflation, unemployment                             | Reading, Hacker News                |
-| **GitHub**                   | AI agents, MCP, Rust, TypeScript, Vue, local-first                                    | new-repo trends, rising projects, **your own stats**                   | Hacker News                         |
+| Channel                      | Topics it charts                                                                      | Context (open data)                                                                              | Streams                             |
+| ---------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------- |
+| **World**                    | Ukraine, Gaza, tariffs, NATO, inflation, AI                                           | inflation, ECB rate, unemployment, CO₂                                                           | Forecasts, Reading, Hacker News     |
+| **The Great Simplification** | climate change, peak oil, degrowth, overshoot, biodiversity loss, Hormuz              | CO₂, sea ice, Alentejo soil                                                                      | its episodes and Frankly, Forecasts |
+| **Portugal & the land**      | Alentejo, wildfires, desertification, rural flight, permaculture, regen. ag.          | IPMA fire risk and warnings, soil in Mafra and the Alentejo, Lisbon and Porto weather, inflation | Reading, Forecasts                  |
+| **Circular economy**         | circular economy, recycling, PPWR, producer responsibility, food waste, CSRD          | inflation, ECB rate, unemployment                                                                | Reading, Hacker News, Forecasts     |
+| **Alternative Amsterdam**    | doughnut economics, housing co-ops, land trusts, squatting, urban farms, repair cafés | Amsterdam soil and weather, inflation, unemployment                                              | Reading, Hacker News                |
+| **GitHub**                   | AI agents, MCP, Rust, TypeScript, Vue, local-first                                    | new-repo trends, rising projects, **your own stats**                                             | Hacker News                         |
 
 Every channel has the same four parts:
 
@@ -108,7 +108,7 @@ flowchart LR
 | WordPress sites you follow            | posts matched to the channel's topics                  | Cached for 12 h.                                                     |
 | GitHub search and users API           | new repos per topic, rising repos, your public stats   | ~10 searches a minute unauthenticated; cached for 12 h / 30 min.     |
 | ECB · Eurostat                        | deposit rate, inflation (HICP), unemployment           | PT, NL and the euro area.                                            |
-| IPMA · Open-Meteo                     | fire risk, warnings, soil moisture, weather, air       | Portugal and Amsterdam.                                              |
+| IPMA · Open-Meteo                     | fire risk, warnings, soil moisture, weather, air       | Portugal (Mafra, Alentejo, Lisbon, Porto) and Amsterdam.             |
 | NOAA · NSIDC (via global-warming.org) | CO₂ at Mauna Loa, global sea ice extent                | With history for the small charts.                                   |
 
 ## Privacy and scope
