@@ -1395,3 +1395,65 @@ select:hover {
 .src-chip.error i {
   color: var(--watch);
 }
+
+/* loading beacon: a beam of light sweeps the header's bottom edge while anything is fetching */
+.beacon {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  overflow: visible;
+  clip-path: inset(-20px 0 -20px 0);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.beacon::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 26%;
+  left: -26%;
+  background: linear-gradient(90deg, transparent, var(--accent) 35%, #fff 50%, var(--accent) 65%, transparent);
+  box-shadow:
+    0 0 10px 1px var(--accent),
+    0 0 28px 6px var(--accent-soft);
+}
+.topbar.busy .beacon {
+  opacity: 1;
+}
+.topbar.busy .beacon::before {
+  animation: beam 1.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+@keyframes beam {
+  0% {
+    left: -26%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+.topbar.busy .pulse i {
+  box-shadow:
+    0 0 0 3px var(--accent-soft),
+    0 0 12px var(--accent);
+  animation: glow 1.2s ease-in-out infinite alternate;
+}
+@keyframes glow {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .topbar.busy .beacon::before {
+    left: 0;
+    width: 100%;
+    opacity: 0.6;
+  }
+}

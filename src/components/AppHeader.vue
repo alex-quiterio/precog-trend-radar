@@ -1,5 +1,6 @@
 <template>
-  <header class="topbar" :data-tick="ui.v">
+  <header class="topbar" :class="{ busy: view.busy }" :data-tick="ui.v" :aria-busy="view.busy">
+    <span class="beacon" aria-hidden="true"></span>
     <div class="brand">
       <h1>
         PRECOG
@@ -100,6 +101,9 @@ import { activeChannel, channels } from '../channels';
 import { MAX_LENSES } from '../core/config';
 import { ui } from '../core/ui-store';
 import { refresh } from '../live';
+import { stories } from '../features/stories';
+import { gh } from '../features/github';
+import { me } from '../features/github-me';
 import ChannelIcon from './ChannelIcon.vue';
 import { lensById, state } from '../state';
 
@@ -115,6 +119,8 @@ export default defineComponent({
         active: activeChannel()?.id,
         list: channels().map((c, i) => ({ ...c, n: i + 1, heat: lensHeat(lensById(c.lensId)) })),
         canAdd: state.lenses.length < MAX_LENSES,
+        // Anything still fetching lights the beacon: trends, streams, GitHub.
+        busy: ui.loading || Object.values(stories.loading).some(Boolean) || gh.loading || me.loading,
       };
     });
     // New channel: a small "+" that opens an inline name field (Enter creates, Esc cancels).
