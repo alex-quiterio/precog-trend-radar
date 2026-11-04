@@ -42,6 +42,8 @@ export interface Lens {
   desc: string;
   lang?: string;
   country?: string | null;
+  /** Source ids this lens uses (see SOURCE_CATALOG). Missing means every source. */
+  sources?: string[];
   topics: TopicDef[];
 }
 
@@ -120,6 +122,6 @@ export interface Prefs {
   source: string;
   includeNews: boolean;
   theme: 'dark' | 'light';
-  storySrc: 'hn' | 'news' | 'local' | 'tgs';
+  storySrc: 'hn' | 'news' | 'local' | 'tgs' | 'forecasts';
   storyScope: 'topic' | 'lens' | 'all';
 }

@@ -9,7 +9,9 @@ import { getJSON, phrase, pool, queryOf } from '../sources/registry';
 import { loadFeedItems, rssCache, topicRegex } from '../sources/rss';
 import type { TGSItem } from '../sources/tgs';
 import { loadTGSCatalog, tgsScore } from '../sources/tgs';
-import { activeLens, entriesOf, selectedEntry, state } from '../state';
+import type { Forecast } from '../sources/manifold';
+import { searchForecasts } from '../sources/manifold';
+import { activeLens, entriesOf, lensAllows, savePrefs, selectedEntry, state } from '../state';
 
 /** A Hacker News story with its measured or estimated engagement velocity. */
 export interface HNStory {
@@ -45,23 +47,42 @@ export interface TGSMatch extends TGSItem {
   topics: string[];
   score: number;
 }
+/** An open prediction market on a topic in scope. */
+export interface ForecastMatch extends Forecast {
+  topics: string[];
+}
+/** Story tab → the lens source it needs. */
+export const STORY_SOURCE = { hn: 'hn', news: 'news', local: 'rss', forecasts: 'forecasts', tgs: 'tgs' } as const;
+export type StorySrc = keyof typeof STORY_SOURCE;
 export const stories = {
   hn: new Map<string, HNStory>(),
+  forecasts: new Map<string, ForecastMatch>(),
   news: new Map<string, StoryCluster>(),
   local: new Map<string, StoryCluster>(),
   tgs: new Map<string, TGSMatch>(),
   tgsCount: 0,
-  loading: { hn: false, news: false, local: false, tgs: false },
-  errors: { hn: null, news: null, local: null, tgs: null },
-  at: { hn: 0, news: 0, local: 0, tgs: 0 },
+  loading: { hn: false, news: false, local: false, tgs: false, forecasts: false },
+  errors: { hn: null, news: null, local: null, tgs: null, forecasts: null },
+  at: { hn: 0, news: 0, local: 0, tgs: 0, forecasts: 0 },
 };
 export let storyTimer = null,
   storyAbort = null;
 export const TAU = 8; // hours; engagement modelled as E(t) = E∞·(1 − e^(−t/τ))
-export function storyScopeEntries(): Entry[] {
-  if (state.storyScope === 'topic') return [selectedEntry()].filter(Boolean);
-  if (state.storyScope === 'lens') return entriesOf(activeLens());
-  return orderedEntries();
+export function storyScopeEntries(src: StorySrc = state.storySrc): Entry[] {
+  const all =
+    state.storyScope === 'topic'
+      ? [selectedEntry()].filter(Boolean)
+      : state.storyScope === 'lens'
+        ? entriesOf(activeLens())
+        : orderedEntries();
+  return all.filter(E => lensAllows(E.lensId, STORY_SOURCE[src]));
+}
+/** Story tabs the active lens uses (and that have a topic in scope), in display order. */
+export function storyTabs(): StorySrc[] {
+  const lens = activeLens();
+  return (Object.keys(STORY_SOURCE) as StorySrc[]).filter(
+    src => lensAllows(lens, STORY_SOURCE[src]) && storyScopeEntries(src).length,
+  );
 }
 export function observe(id, eng) {
   const obs = store.get(LS.storyObs, {});
@@ -298,9 +319,33 @@ export async function loadTGSStories(entries: Entry[], signal: AbortSignal): Pro
   stories.tgs = found;
   stories.tgsCount = catalog.length;
 }
+/** Open markets whose question names a topic in scope (Manifold's search is fuzzy, so we re-check). */
+export async function loadForecastStories(entries: Entry[], signal: AbortSignal): Promise<void> {
+  const found = new Map<string, ForecastMatch>();
+  await pool(entries, 4, async E => {
+    const qq = queryOf(E);
+    const res = [...new Set([qq.q, E.name].map(t => t.replace(/"/g, '').trim()))].map(topicRegex);
+    const list = await searchForecasts(qq.q.replace(/"/g, ''), signal);
+    list
+      .filter(f => res.some(re => re.test(f.question)))
+      .forEach(f => {
+        const m = found.get(f.id) || { ...f, topics: [] };
+        if (!m.topics.includes(E.key)) m.topics.push(E.key);
+        found.set(f.id, m);
+      });
+    stories.forecasts = new Map(found);
+    if (!signal.aborted) bump();
+  });
+  stories.forecasts = found;
+}
 export async function loadStories() {
   if (storyAbort) storyAbort.abort();
   storyAbort = new AbortController();
+  const tabs = storyTabs();
+  if (tabs.length && !tabs.includes(state.storySrc)) {
+    state.storySrc = tabs[0]; // this lens doesn't use the tab that was open
+    savePrefs();
+  }
   const { signal } = storyAbort,
     src = state.storySrc,
     entries = storyScopeEntries();
@@ -309,7 +354,10 @@ export async function loadStories() {
   try {
     if (src === 'hn') await loadHNStories(entries, signal);
     else if (src === 'local') await loadLocalStories(entries, signal);
-    else if (src === 'tgs') {
+    else if (src === 'forecasts') {
+      await loadForecastStories(entries, signal);
+      stories.errors.forecasts = null;
+    } else if (src === 'tgs') {
       await loadTGSStories(entries, signal);
       stories.errors.tgs = null;
     } else await loadNewsStories(entries, signal);

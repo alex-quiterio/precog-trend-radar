@@ -18,7 +18,13 @@ import { pathOf, useWidth } from './helpers';
 
 export default defineComponent({
   name: 'Sparkline',
-  props: { points: { type: Array as PropType<SeriesPoint[]>, default: () => [] }, color: String, note: String },
+  props: {
+    points: { type: Array as PropType<SeriesPoint[]>, default: () => [] },
+    color: String,
+    note: String,
+    /** Scale to the series' own min–max instead of from zero (for slow numbers like CO₂). */
+    fit: Boolean,
+  },
   setup(props) {
     const el = ref(null),
       width = useWidth(el, 150);
@@ -27,9 +33,12 @@ export default defineComponent({
         w = Math.max(60, width.value),
         h = 40;
       if (s.length < 2) return { w, h };
-      const max = Math.max(...s.map(p => p.value)) || 1;
+      const vals = s.map(p => p.value),
+        max = Math.max(...vals),
+        min = props.fit ? Math.min(...vals) : 0,
+        span = max - min || 1;
       const X = k => 2 + (k / (s.length - 1)) * (w - 8),
-        Y = v => h - 5 - (v / max) * (h - 10);
+        Y = v => h - 5 - ((v - min) / span) * (h - 10);
       return {
         w,
         h,

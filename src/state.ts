@@ -5,7 +5,17 @@ export interface LastLook {
   source: string;
   items: Record<string, { z: number | null; level: string | null; latest: number }>;
 }
-import { LS, MAX_LENSES, MAX_TOPICS, PRESETS, PRESET_VERSION, SLOT_ANGLE, slotColor, store } from './core/config';
+import {
+  ALL_SOURCES,
+  LS,
+  MAX_LENSES,
+  MAX_TOPICS,
+  PRESETS,
+  PRESET_VERSION,
+  SLOT_ANGLE,
+  slotColor,
+  store,
+} from './core/config';
 import { looksLikePerson } from './core/guard';
 
 export const state = {
@@ -85,6 +95,7 @@ export function saveLenses() {
       desc: l.desc || '',
       lang: l.lang,
       country: l.country,
+      sources: l.sources,
       topics: l.topics.map(({ name, slot, wiki, q }) => ({ name, slot, wiki, q })),
     })),
   );
@@ -101,6 +112,11 @@ export function savePrefs() {
     storyScope: state.storyScope,
   });
 }
+/** Whether a lens uses a source (trend adapter, story tab or datapoint group). */
+export function lensAllows(lens: Lens | string | null | undefined, sourceId: string): boolean {
+  const l = typeof lens === 'string' ? lensById(lens) : lens;
+  return !l?.sources || l.sources.includes(sourceId);
+}
 export function presetLenses() {
   return PRESETS.map(p => ({
     id: p.id,
@@ -108,6 +124,7 @@ export function presetLenses() {
     desc: p.desc,
     lang: p.lang,
     country: p.country,
+    sources: p.sources,
     topics: p.topics.map((t, slot) => {
       const [name, o = {}] = t as [string, { wiki?: string; q?: string }?];
       return { name, slot, wiki: o.wiki, q: o.q };
@@ -182,6 +199,10 @@ export function loadLenses() {
       desc: l.desc || '',
       lang: /^[a-z]{2,3}$/.test(l.lang || '') ? l.lang : 'en',
       country: l.country || null,
+      // Lenses saved before sources existed take their preset's sources; custom lenses use every source.
+      sources: Array.isArray(l.sources)
+        ? l.sources.filter(x => ALL_SOURCES.includes(x))
+        : PRESETS.find(p => p.id === l.id)?.sources,
       topics,
     };
   });

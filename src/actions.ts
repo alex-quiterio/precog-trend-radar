@@ -1,11 +1,11 @@
 // PRECOG / Trend Radar · User actions on lenses and topics: add, remove, select, switch. No DOM.
 import type { TopicDef } from './types';
-import { LS, MAX_LENSES, MAX_TOPICS, slotColor, store } from './core/config';
+import { ALL_SOURCES, LS, MAX_LENSES, MAX_TOPICS, SOURCE_CATALOG, slotColor, store } from './core/config';
 import { looksLikePerson } from './core/guard';
 import { levelOf } from './core/stats';
 import { bump, ui } from './core/ui-store';
 import { saveLook } from './features/brief';
-import { loadStories, stories } from './features/stories';
+import { loadStories, stories, storyTabs } from './features/stories';
 import { fetchPart, liveAbort, liveParts, setStatus, startLive } from './live';
 import {
   activeLens,
@@ -122,7 +122,24 @@ export function selectLens(id) {
   savePrefs();
   ui.swap++;
   bump();
-  if (state.storyScope !== 'all') loadStories();
+  if (state.storyScope !== 'all' || !storyTabs().includes(state.storySrc)) loadStories();
+}
+/** Switches one source on or off for the active lens, then refetches only what changed. */
+export function toggleLensSource(id: string): void {
+  const lens = activeLens();
+  if (!lens) return;
+  const on = new Set(lens.sources || ALL_SOURCES);
+  if (on.has(id)) on.delete(id);
+  else on.add(id);
+  lens.sources = ALL_SOURCES.filter(x => on.has(x));
+  saveLenses();
+  bump();
+  const kind = SOURCE_CATALOG.find(s => s.id === id)?.kind;
+  if (kind === 'trend' && liveParts().includes(id)) {
+    const ctl = liveAbort && !liveAbort.signal.aborted ? liveAbort : new AbortController();
+    Promise.all(entriesOf(lens).map(E => fetchPart(E, id, ctl.signal))).then(() => bump());
+  }
+  loadStories();
 }
 export function select(key) {
   const E = state.rt.get(key);

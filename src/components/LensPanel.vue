@@ -22,6 +22,22 @@
       </form>
     </div>
     <p class="lens-desc">{{ view.lens ? view.lens.desc || 'Your lens. Add up to six topics.' : '' }}</p>
+    <div v-if="view.lens" class="lens-sources no-print" aria-label="Sources this lens uses">
+      <span v-for="g in SOURCE_GROUPS" :key="g.kind" class="src-group">
+        <span class="src-kind">{{ g.label }}</span>
+        <span class="seg" role="group" :aria-label="g.label + ' sources'">
+          <button
+            v-for="src in g.items"
+            :key="src.id"
+            type="button"
+            :aria-pressed="lensAllows(view.lens, src.id)"
+            @click="toggleLensSource(src.id)"
+          >
+            {{ src.label }}
+          </button>
+        </span>
+      </span>
+    </div>
     <div class="watch-row">
       <span v-for="E in view.list" :key="E.key" class="chip" :class="{ sel: view.sel === E }">
         <button class="name" type="button" :aria-pressed="view.sel === E" :title="chipTitle(E)" @click="select(E.key)">
@@ -50,10 +66,10 @@
 
 <script lang="ts">
 import { ref, computed, watch, nextTick, defineComponent } from 'vue';
-import { addLens, addTopic, lensHeat, removeLens, removeTopic, select, selectLens } from '../actions';
-import { MAX_LENSES, MAX_TOPICS } from '../core/config';
+import { addLens, addTopic, lensHeat, removeLens, removeTopic, select, selectLens, toggleLensSource } from '../actions';
+import { MAX_LENSES, MAX_TOPICS, SOURCE_CATALOG } from '../core/config';
 import { ui } from '../core/ui-store';
-import { activeLens, allEntries, entriesOf, selectedEntry, state } from '../state';
+import { activeLens, allEntries, entriesOf, lensAllows, selectedEntry, state } from '../state';
 import TopicDot from './TopicDot.vue';
 import PanelShell from './PanelShell.vue';
 
@@ -80,6 +96,12 @@ export default defineComponent({
         meta: `${list.length}/${MAX_TOPICS} in ${lens ? lens.name : '—'} · ${allEntries().length} total`,
       };
     });
+    // Each lens is its own dashboard: these toggles decide what feeds and fills it.
+    const SOURCE_GROUPS = [
+      ['trend', 'Trend'],
+      ['stories', 'Stories'],
+      ['datapoints', 'Datapoints'],
+    ].map(([kind, label]) => ({ kind, label, items: SOURCE_CATALOG.filter(s => s.kind === kind) }));
     const chipTitle = E =>
       [E.def.wiki && `Wikipedia: ${E.def.wiki}`, E.def.q && `search: ${E.def.q}`].filter(Boolean).join(' · ');
     function submitTopic() {
@@ -111,6 +133,9 @@ export default defineComponent({
       removeLens,
       MAX_LENSES,
       MAX_TOPICS,
+      SOURCE_GROUPS,
+      lensAllows,
+      toggleLensSource,
     };
   },
 });

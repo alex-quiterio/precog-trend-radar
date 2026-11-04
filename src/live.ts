@@ -6,8 +6,8 @@ import { computeStats } from './core/stats';
 import { bump, ui } from './core/ui-store';
 import { loadStories } from './features/stories';
 import { blendParts } from './sources/blend';
-import { ADAPTERS, SOURCES, pool, queryOf } from './sources/registry';
-import { activeLens, allEntries, entriesOf, savePrefs, state } from './state';
+import { ADAPTERS, SKIP, SOURCES, pool, queryOf } from './sources/registry';
+import { activeLens, allEntries, entriesOf, lensAllows, savePrefs, state } from './state';
 
 export const DEFAULT_SOURCE = 'blend';
 export let liveTimer = null,
@@ -38,17 +38,21 @@ export function recompute(E) {
   const src = SOURCES[state.source],
     parts = liveParts();
   E.liveSeries = src.blend ? blendParts(E, parts) : E.parts[parts[0]] || [];
-  const errs = parts.map(p => E.partErr[p]).filter(Boolean);
+  const errs = parts.map(p => E.partErr[p] || E.skipped?.[p]).filter(Boolean);
   E.liveError = E.liveSeries.length ? null : errs.length === parts.length ? errs[0] : null;
   E.stats = computeStats(E.liveSeries);
 }
+const OFF_LENS = 'not a source for this lens';
 export async function fetchPart(E, pid, signal) {
   try {
-    const res = await ADAPTERS[pid].fetch(E.name, {
-      signal,
-      query: queryOf(E),
-      config: { rss: store.get(LS.rss, { feeds: [], proxy: '' }) },
-    });
+    // A lens only asks the sources it uses (GitHub has nothing to say about a war).
+    const res = !lensAllows(E.lensId, pid)
+      ? SKIP(E.name, OFF_LENS)
+      : await ADAPTERS[pid].fetch(E.name, {
+          signal,
+          query: queryOf(E),
+          config: { rss: store.get(LS.rss, { feeds: [], proxy: '' }) },
+        });
     if (signal.aborted) return;
     if (res.skip) {
       E.parts[pid] = null;
@@ -64,6 +68,7 @@ export async function fetchPart(E, pid, signal) {
       .sort((a, b) => a.t - b.t)
       .slice(-HISTORY);
     E.partErr[pid] = E.parts[pid].length ? null : 'no data returned';
+    if (E.skipped) delete E.skipped[pid];
     if (res.meta) Object.assign(E.meta, res.meta);
   } catch (e) {
     if (e.name === 'AbortError') return;

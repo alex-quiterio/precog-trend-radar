@@ -3,7 +3,7 @@
     <template #controls>
       <span class="seg no-print" role="group" aria-label="Story source">
         <button
-          v-for="[id, label] in SOURCES_TABS"
+          v-for="[id, label] in view.tabs"
           :key="id"
           type="button"
           :aria-pressed="state.storySrc === id"
@@ -28,7 +28,7 @@
       <li v-if="view.needsFeeds" class="empty">
         Portuguese and Dutch outlets (RTP, Público, Observador, NOS, NU.nl, DutchNews, NL Times) block direct browser
         access. Run the bundled proxy (
-        <code>node feed-proxy.mjs</code>
+        <code>npm run proxy</code>
         ), then
         <button class="btn small" type="button" @click="openFeeds('local')">set up PT + NL feeds</button>
       </li>
@@ -56,6 +56,31 @@
             <b>{{ nf0.format(it.s.vel) }}</b>
             /h
             <small>{{ it.s.measured ? 'measured' : 'avg since posted' }} · ≈{{ nf0.format(it.s.pred24) }} by 24h</small>
+            <div class="vbar"><i :style="{ width: it.pct.toFixed(1) + '%' }"></i></div>
+          </div>
+        </li>
+        <li v-if="!view.items.length" class="empty">{{ view.empty }}</li>
+      </template>
+      <template v-else-if="view.src === 'forecasts'">
+        <li v-for="(it, i) in view.items" :key="it.f.id" class="story">
+          <span class="rank">{{ i + 1 }}</span>
+          <div>
+            <div class="title">
+              <a :href="it.f.url" target="_blank" rel="noopener noreferrer">{{ it.f.question }}</a>
+            </div>
+            <div class="smeta">
+              <span v-for="E in it.topics" :key="E.key" class="stopic">
+                <topic-dot :color="E.color"></topic-dot>
+                {{ E.name }}
+              </span>
+              <span>{{ nf0.format(it.f.bettors) }} forecasters</span>
+              <span>resolves {{ when(it.f.closes) }}</span>
+            </div>
+          </div>
+          <div class="vel">
+            <b>{{ Math.round(it.f.prob * 100) }}%</b>
+            yes
+            <small>Manifold · {{ nf0.format(it.f.vol24) }} traded today</small>
             <div class="vbar"><i :style="{ width: it.pct.toFixed(1) + '%' }"></i></div>
           </div>
         </li>
@@ -122,12 +147,12 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import type { Entry } from '../types';
-import type { HNStory, StoryCluster, TGSMatch } from '../features/stories';
+import type { ForecastMatch, HNStory, StoryCluster, TGSMatch } from '../features/stories';
 import { openFeeds, setStoryScope, setStorySource } from '../actions';
 import { ago } from '../core/format';
 import { quantile } from '../core/stats';
 import { ui } from '../core/ui-store';
-import { stories, storyScopeEntries } from '../features/stories';
+import { stories, storyScopeEntries, storyTabs } from '../features/stories';
 import { state } from '../state';
 import TopicDot from './TopicDot.vue';
 import PanelShell from './PanelShell.vue';
@@ -139,12 +164,14 @@ interface StoryItem {
   s?: HNStory;
   c?: StoryCluster;
   e?: TGSMatch;
+  f?: ForecastMatch;
   topics: Entry[];
   breaking?: boolean;
   pct: number;
 }
 interface StoriesView {
   src: string;
+  tabs?: string[][];
   meta: string;
   isLocal?: boolean;
   needsFeeds?: boolean;
@@ -160,6 +187,10 @@ export default defineComponent({
   setup() {
     const view = computed((): StoriesView => {
       ui.v;
+      const tabs = storyTabs().map(id => [id, TAB_LABEL[id]]);
+      return { ...build(), tabs };
+    });
+    const build = (): StoriesView => {
       const src = state.storySrc,
         isLocal = src === 'local';
       const scopeKeys = new Set(storyScopeEntries().map(E => E.key));
@@ -203,6 +234,27 @@ export default defineComponent({
             : stories.errors.hn
               ? `Could not load: ${stories.errors.hn}`
               : 'No Hacker News stories in the last 48 h for this scope.',
+        };
+      }
+      if (src === 'forecasts') {
+        // Busiest markets first: today's trading, then how many people forecast.
+        const list: ForecastMatch[] = [...stories.forecasts.values()]
+          .map(f => ({ ...f, topics: f.topics.filter(k => scopeKeys.has(k)) }))
+          .filter(f => f.topics.length)
+          .sort((a, b) => b.vol24 - a.vol24 || b.bettors - a.bettors);
+        return {
+          src,
+          meta: stories.loading.forecasts
+            ? 'loading markets…'
+            : stories.at.forecasts
+              ? `checked ${ago(stories.at.forecasts)} · open markets on Manifold · crowd probability`
+              : '',
+          items: list.slice(0, 12).map(f => ({ f, topics: topicsOf(f), pct: f.prob * 100 })),
+          empty: stories.loading.forecasts
+            ? 'Loading forecasts…'
+            : stories.errors.forecasts
+              ? `Could not load: ${stories.errors.forecasts}.`
+              : 'No open forecast (10+ forecasters) names these topics.',
         };
       }
       if (src === 'tgs') {
@@ -253,15 +305,16 @@ export default defineComponent({
             : `No matching stories in the last ${isLocal ? 48 : 24} h for this scope.`,
         warn: isLocal && list.length && stories.errors.local ? stories.errors.local : '',
       };
-    });
-    const SOURCES_TABS = [
-      ['hn', 'Hacker News'],
-      ['news', 'Global news'],
-      ['local', 'PT · NL news'],
-      ['tgs', 'Great Simplification'],
-    ];
+    };
+    const TAB_LABEL = {
+      hn: 'Hacker News',
+      news: 'Global news',
+      local: 'PT · NL news',
+      forecasts: 'Forecasts',
+      tgs: 'Great Simplification',
+    };
     const when = (t: number) =>
-      Date.now() - t < 30 * 86400e3
+      Math.abs(Date.now() - t) < 30 * 86400e3
         ? ago(t)
         : new Date(t).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
     const SCOPES = [
@@ -269,7 +322,7 @@ export default defineComponent({
       ['lens', 'Lens'],
       ['all', 'All'],
     ];
-    return { ui, state, view, SOURCES_TABS, SCOPES, setStorySource, setStoryScope, openFeeds, when };
+    return { ui, state, view, SCOPES, setStorySource, setStoryScope, openFeeds, when };
   },
 });
 </script>

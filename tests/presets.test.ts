@@ -12,7 +12,7 @@ globalThis.localStorage = {
 } as Storage;
 
 const { LS } = await import('../src/core/config');
-const { loadLenses, state } = await import('../src/state');
+const { lensAllows, loadLenses, state } = await import('../src/state');
 
 const saved = (id: string, names: string[]) => ({
   id,
@@ -69,5 +69,33 @@ describe('preset upgrade', () => {
       'nl',
       'tgs',
     ]);
+  });
+});
+
+describe('lens sources', () => {
+  beforeEach(() => mem.clear());
+
+  it('scopes preset lenses: no GitHub or Hacker News for geopolitics, no Forecasts for Portugal', () => {
+    loadLenses();
+    expect(lensAllows('geo', 'github')).toBe(false);
+    expect(lensAllows('geo', 'hn')).toBe(false);
+    expect(lensAllows('geo', 'wikipedia')).toBe(true);
+    expect(lensAllows('portugal', 'forecasts')).toBe(false);
+    expect(lensAllows('portugal', 'soil')).toBe(true);
+  });
+
+  it('gives saved preset lenses their preset sources, and custom lenses every source', () => {
+    mem.set(LS.presetVer, '4');
+    mem.set(LS.lenses, JSON.stringify([saved('geo', ['NATO']), saved('mine', ['Zig'])]));
+    loadLenses();
+    expect(lensAllows('geo', 'github')).toBe(false);
+    expect(lensAllows('mine', 'github')).toBe(true);
+  });
+
+  it('keeps sources the user chose', () => {
+    mem.set(LS.presetVer, '4');
+    mem.set(LS.lenses, JSON.stringify([{ ...saved('geo', ['NATO']), sources: ['wikipedia', 'github', 'bogus'] }]));
+    loadLenses();
+    expect(state.lenses[0].sources).toEqual(['wikipedia', 'github']);
   });
 });

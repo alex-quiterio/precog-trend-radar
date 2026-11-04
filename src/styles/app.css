@@ -459,6 +459,27 @@ select:hover {
   font-size: 11.5px;
   margin: 0 0 10px;
 }
+.lens-sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin: 0 0 10px;
+}
+.src-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+}
+.src-group .seg {
+  flex-wrap: wrap;
+}
+.src-kind {
+  color: var(--muted);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
 .watch-row {
   display: flex;
   flex-wrap: wrap;
@@ -1008,6 +1029,12 @@ th .topic {
   text-align: right;
   font: 500 18px/1.1 var(--serif);
   white-space: nowrap;
+}
+.dp .dp-spark {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 34px;
+  color: var(--ink-2);
 }
 .dp .src {
   grid-column: 1 / -1;

@@ -1,15 +1,21 @@
-// PRECOG / Trend Radar · Datapoints panel: ECB, Eurostat, IPMA and Open-Meteo.
+// PRECOG / Trend Radar · Datapoints panel: ECB, Eurostat, IPMA, Open-Meteo, NOAA CO₂ and NSIDC sea ice.
+// Every card belongs to a group; the active lens decides which groups it shows.
 import { nf0, nf1, nf2 } from '../core/format';
 import { bump } from '../core/ui-store';
+import type { SeriesPoint } from '../types';
 import { getJSON } from '../sources/registry';
 
 export interface DatapointRow {
+  /** Lens source id that shows this card (see SOURCE_CATALOG). */
+  group: string;
   k: string;
   v: string;
   sub?: string;
   src: string;
   href: string;
   o: number;
+  /** Optional history for a small chart, oldest first. */
+  spark?: SeriesPoint[];
 }
 export interface DatapointFacts {
   fire?: { hi: number; max: number; n: number };
@@ -54,6 +60,7 @@ export async function loadDatapoints() {
         obs = Object.values(s.observations)[0][0];
       const since = j.structure.dimensions.observation[0].values.slice(-1)[0].id;
       rows.push({
+        group: 'economy',
         k: 'ECB deposit rate',
         v: `${nf2.format(obs)}%`,
         src: `ECB Data Portal · since ${since}`,
@@ -69,6 +76,7 @@ export async function loadDatapoints() {
         t = Object.keys(j.dimension.time.category.index)[0];
       const val = c => j.value[String(g[c])];
       rows.push({
+        group: 'economy',
         k: 'Unemployment · PT / NL / euro area',
         v: ['PT', 'NL', 'EA21'].map(c => (val(c) == null ? '—' : nf1.format(val(c)) + '%')).join(' · '),
         src: `Eurostat une_rt_m · ${t}, seasonally adjusted`,
@@ -83,6 +91,7 @@ export async function loadDatapoints() {
         max = lv.filter(x => x === 5).length;
       facts.fire = { hi, max, n: lv.length };
       rows.push({
+        group: 'pt-hazards',
         k: 'Fire risk · Portugal, today',
         v: `${hi} of ${lv.length}`,
         sub: 'municipalities very high or maximum',
@@ -99,6 +108,7 @@ export async function loadDatapoints() {
       const types = [...new Set(active.map(w => w.awarenessTypeName))].slice(0, 3).join(', ');
       facts.warnings = { red: by('red'), orange: by('orange'), yellow: by('yellow'), types };
       rows.push({
+        group: 'pt-hazards',
         k: 'Weather warnings · Portugal',
         v: active.length ? `${by('red')} red · ${by('orange')} orange · ${by('yellow')} yellow` : 'none',
         src: `IPMA${types ? ' · ' + types : ''}`,
@@ -124,12 +134,85 @@ export async function loadDatapoints() {
           aqi = A[i]?.current?.european_aqi;
         if (!d) return;
         rows.push({
+          group: 'weather',
           k: `${name} today`,
           v: `${nf0.format(d.temperature_2m_max[0])}°C`,
           src: `Open-Meteo · rain ${nf1.format(d.precipitation_sum[0])} mm${aqi != null ? ` · air ${aqi} (${aqiWord(aqi)})` : ''}`,
           href: 'https://open-meteo.com/',
           o: 5 + i,
         });
+      });
+    }),
+    // --- Planet: the slow numbers under everything else -----------------
+    task(async () => {
+      const j = await getJSON('https://global-warming.org/api/co2-api');
+      const rows_ = (j.co2 || []).map(r => ({
+        t: Date.UTC(+r.year, +r.month - 1, +r.day),
+        value: +r.trend,
+      }));
+      const last = rows_[rows_.length - 1],
+        yearAgo = rows_.find(r => r.t >= last.t - 365 * 86400e3);
+      rows.push({
+        group: 'planet',
+        k: 'CO₂ in the air · Mauna Loa',
+        v: `${nf1.format(last.value)} ppm`,
+        sub: `${yearAgo ? '+' + nf2.format(last.value - yearAgo.value) + ' ppm in a year' : ''}`,
+        src: `NOAA trend via global-warming.org · ${new Date(last.t).toISOString().slice(0, 10)}`,
+        href: 'https://gml.noaa.gov/ccgg/trends/',
+        o: 20,
+        spark: rows_.filter((_, i) => i % 30 === 0 || i === rows_.length - 1).slice(-61), // ~5 years, monthly
+      });
+    }),
+    task(async () => {
+      const j = await getJSON('https://global-warming.org/api/arctic-api');
+      const data = j.arcticData?.data || {};
+      const months = Object.keys(data)
+        .sort()
+        .filter(m => data[m].value > 0);
+      const m = months[months.length - 1],
+        d = data[m];
+      rows.push({
+        group: 'planet',
+        k: 'Global sea ice extent',
+        v: `${nf2.format(d.value)} M km²`,
+        sub: `${d.anom > 0 ? '+' : ''}${nf2.format(d.anom)} vs the 1991–2020 norm for the month`,
+        src: `NSIDC via global-warming.org · ${m.slice(0, 4)}-${m.slice(4)}`,
+        href: 'https://nsidc.org/sea-ice-today',
+        o: 21,
+        // the anomaly, so the seasons don't drown the trend
+        spark: months.slice(-60).map(k => ({ t: Date.UTC(+k.slice(0, 4), +k.slice(4) - 1), value: data[k].anom })),
+      });
+    }),
+    // --- Land: is the Alentejo drying out? -----------------------------
+    task(async () => {
+      const j = await getJSON(
+        'https://api.open-meteo.com/v1/forecast?latitude=38.02&longitude=-7.86&hourly=soil_moisture_3_to_9cm&daily=precipitation_sum&past_days=60&forecast_days=1&timezone=UTC',
+      );
+      const byDay = new Map<string, number[]>();
+      (j.hourly?.time || []).forEach((t: string, i: number) => {
+        const v = j.hourly.soil_moisture_3_to_9cm[i];
+        if (v == null) return;
+        const d = t.slice(0, 10);
+        byDay.set(d, [...(byDay.get(d) || []), v]);
+      });
+      const days = [...byDay.entries()].map(([d, vs]) => ({
+        t: Date.parse(d),
+        value: vs.reduce((a, b) => a + b, 0) / vs.length,
+      }));
+      if (days.length < 31) return;
+      const now = days[days.length - 1],
+        before = days[days.length - 31];
+      const rain = (j.daily?.precipitation_sum || []).slice(-31, -1).reduce((a, b) => a + (b || 0), 0);
+      const change = ((now.value - before.value) / (before.value || 1)) * 100;
+      rows.push({
+        group: 'soil',
+        k: 'Soil moisture · Alentejo (Beja)',
+        v: `${nf2.format(now.value)} m³/m³`,
+        sub: `${change >= 0 ? '+' : ''}${nf0.format(change)}% in 30 days · ${nf0.format(rain)} mm of rain`,
+        src: 'Open-Meteo · 3–9 cm below the surface',
+        href: 'https://open-meteo.com/en/docs',
+        o: 22,
+        spark: days,
       });
     }),
   ]);
