@@ -51,19 +51,19 @@
           <stories-panel :index="5"></stories-panel>
         </section>
       </div>
-      <aside class="side" aria-label="Radar and context">
-        <h3 class="block-head">
-          <span>◇</span>
-          Radar
-        </h3>
-        <radar-panel :index="1"></radar-panel>
+      <aside class="side" aria-label="Context and radar">
         <template v-if="view.side">
           <h3 class="block-head">
             <span>◇</span>
             Context
           </h3>
-          <datapoints-panel :index="2"></datapoints-panel>
+          <datapoints-panel :index="1"></datapoints-panel>
         </template>
+        <h3 class="block-head">
+          <span>◇</span>
+          Radar
+        </h3>
+        <radar-panel :index="2"></radar-panel>
       </aside>
     </div>
 
