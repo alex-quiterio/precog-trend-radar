@@ -1,0 +1,154 @@
+// PRECOG / Trend Radar · Constants, lens presets, storage keys and tiny DOM helpers. Loaded first.
+
+export const MIN = 60e3,
+  HOUR = 3600e3,
+  DAY = 86400e3;
+export const MAX_TOPICS = 6,
+  MAX_LENSES = 8,
+  HISTORY = 90,
+  FC_STEPS = 12,
+  FIT_N = 20,
+  BASE_N = 30;
+export const Z_ALERT = 2.5,
+  Z_WATCH = 1.8,
+  ALERT_CAP = 30,
+  MIN_BASE = 8;
+export const TICK_MS = 2000,
+  LIVE_REFRESH_MS = 30 * MIN,
+  STORY_REFRESH_MS = 10 * MIN;
+// Topic colours in fixed order (validated for colour-blind separation). Red and amber are reserved for alerts.
+export const PALETTES = {
+  dark: ['#3987e5', '#d55181', '#008300', '#9085e9', '#199e70', '#d95926'],
+  light: ['#2a78d6', '#e87ba4', '#008300', '#6250d6', '#1baf7a', '#eb6834'],
+};
+export const slotColor = slot => PALETTES[document.documentElement.dataset.theme === 'light' ? 'light' : 'dark'][slot];
+export const SLOT_ANGLE = [20, 80, 140, 200, 260, 320];
+
+// Each topic: [display name, { wiki: exact article title, q: search phrase for news/HN }]
+export const PRESETS = [
+  {
+    id: 'world',
+    name: 'World',
+    desc: 'The big picture: the forces moving the most attention worldwide.',
+    topics: [
+      ['Climate change'],
+      ['Artificial intelligence', { q: 'AI' }],
+      ['Inflation'],
+      ['Russo-Ukrainian war', { q: 'Ukraine' }],
+      ['Gaza war', { q: 'Gaza' }],
+      ['Tariffs', { wiki: 'Tariff', q: 'tariffs' }],
+    ],
+  },
+  {
+    id: 'geo',
+    name: 'Geopolitics',
+    desc: 'Alliances, trade and resources: the slow plates under the news.',
+    topics: [
+      ['NATO'],
+      ['BRICS'],
+      ['Sanctions', { wiki: 'Economic sanctions', q: 'sanctions' }],
+      ['Critical minerals'],
+      ['Taiwan Strait', { wiki: 'Cross-strait relations', q: 'Taiwan' }],
+      ['Immigration'],
+    ],
+  },
+  {
+    id: 'climate',
+    name: 'Climate & energy',
+    desc: 'Heat, fire, water and the energy transition.',
+    topics: [
+      ['Heat waves', { wiki: 'Heat wave', q: 'heatwave' }],
+      ['Wildfires', { wiki: 'Wildfire', q: 'wildfire' }],
+      ['Solar power'],
+      ['Carbon price'],
+      ['Drought'],
+      ['Energy transition'],
+    ],
+  },
+  {
+    id: 'circular',
+    name: 'Circular economy',
+    desc: 'Waste, packaging, recycling and producer responsibility.',
+    topics: [
+      ['Circular economy'],
+      ['Recycling'],
+      ['Plastic pollution'],
+      ['Producer responsibility', { wiki: 'Extended producer responsibility', q: 'extended producer responsibility' }],
+      ['Waste-to-energy'],
+      ['Packaging waste'],
+    ],
+  },
+  {
+    id: 'portugal',
+    name: 'Portugal',
+    lang: 'pt',
+    country: 'portugal',
+    desc: 'Land, housing, fire and water, read through Portuguese Wikipedia and Portuguese outlets.',
+    topics: [
+      ['Habitação', { wiki: 'Habitação em Portugal', q: 'habitação' }],
+      ['Incêndios', { wiki: 'Incêndios florestais em Portugal', q: 'incêndios' }],
+      ['Seca', { q: 'seca' }],
+      ['Êxodo rural', { q: 'despovoamento' }],
+      ['Permacultura'],
+      ['Agricultura regenerativa'],
+    ],
+  },
+  {
+    id: 'nl',
+    name: 'Nederland',
+    lang: 'nl',
+    country: 'netherlands',
+    desc: 'Dutch housing, nitrogen, energy and waste policy, read through Dutch Wikipedia and Dutch outlets.',
+    topics: [
+      ['Woningnood'],
+      ['Stikstofcrisis', { wiki: 'Stikstofcrisis in Nederland', q: 'stikstof' }],
+      ['Statiegeld'],
+      ['Circulaire economie'],
+      ['Energietransitie'],
+      ['Asiel', { wiki: 'Asielzoeker', q: 'asiel' }],
+    ],
+  },
+  {
+    id: 'tech',
+    name: 'Tech radar',
+    desc: 'Technologies worth watching early.',
+    topics: [
+      ['AI agents', { wiki: 'AI agent' }],
+      ['WebGPU'],
+      ['Rust', { wiki: 'Rust (programming language)', q: 'Rust' }],
+      ['Solid-state batteries', { wiki: 'Solid-state battery' }],
+      ['Remote work'],
+    ],
+  },
+];
+export const PRESET_VERSION = 2;
+export const LS = {
+  presetVer: 'precog.presetver',
+  lenses: 'precog.lenses.v1',
+  oldWatch: 'precog.watchlist.v1',
+  layout: 'precog.layout.v3',
+  prefs: 'precog.prefs.v2',
+  rss: 'precog.rss.v1',
+  look: 'precog.lastlook.v1',
+  wikiTitles: 'precog.wikititle.v1',
+  storyObs: 'precog.storyobs.v1',
+};
+
+export const store = {
+  get<T>(k: string, d: T): T {
+    try {
+      const v = localStorage.getItem(k);
+      return v == null ? d : JSON.parse(v);
+    } catch {
+      return d;
+    }
+  },
+  set(k: string, v: unknown): void {
+    try {
+      localStorage.setItem(k, JSON.stringify(v));
+    } catch {
+      /* storage unavailable or full */
+    }
+  },
+};
+export const sleep = (ms: number): Promise<void> => new Promise(r => setTimeout(r, ms));
