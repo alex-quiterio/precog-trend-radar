@@ -15,8 +15,7 @@ export function buildBrief() {
   const items = allEntries().filter(E => E.stats);
   const out = { lines: [], movers: [], items };
   if (!items.length) return out;
-  if (state.mode === 'live' && !state.liveLoaded)
-    out.lines.push('Still loading: numbers will settle once every source has answered.');
+  if (!state.liveLoaded) out.lines.push('Still loading: numbers will settle once every source has answered.');
   const hot = items.filter(E => levelOf(E.stats.z)).sort((a, b) => b.stats.z - a.stats.z);
   out.lines.push(
     hot.length
@@ -26,7 +25,7 @@ export function buildBrief() {
           .join(', ')}${hot.length > 3 ? ` and ${hot.length - 3} more` : ''}.`
       : `Nothing unusual: every topic is within ${Z_WATCH}σ of its 30-step baseline.`,
   );
-  const withChg = items.filter(E => E.stats.change != null && !(state.mode === 'live' && E.sparse));
+  const withChg = items.filter(E => E.stats.change != null && !E.sparse);
   if (withChg.length) {
     const up = withChg.reduce((a, b) => (b.stats.change > a.stats.change ? b : a));
     const dn = withChg.reduce((a, b) => (b.stats.change < a.stats.change ? b : a));
@@ -38,7 +37,7 @@ export function buildBrief() {
       out.lines.push(`Biggest drop: ${dn.name}, ${fmtPct(dn.stats.change)} ${changeLabel(dn.stats)}.`);
   }
   const climbers = items
-    .filter(E => !levelOf(E.stats.z) && E.stats.momentum > 0.3 && !(state.mode === 'live' && E.sparse))
+    .filter(E => !levelOf(E.stats.z) && E.stats.momentum > 0.3 && !E.sparse)
     .sort((a, b) => b.stats.momentum - a.stats.momentum);
   if (climbers.length)
     out.lines.push(
@@ -66,7 +65,7 @@ export function buildBrief() {
       `IPMA has ${f.warnings.red} red and ${f.warnings.orange} orange weather warnings active (${f.warnings.types}).`,
     );
   const prev = state.prevLook;
-  if (state.mode === 'live' && prev && prev.source === state.source) {
+  if (prev && prev.source === state.source) {
     const newly = items.filter(E => {
       const p = prev.items[E.key],
         L = levelOf(E.stats.z);
@@ -81,7 +80,7 @@ export function buildBrief() {
     );
   }
   out.movers = items
-    .filter(E => !(state.mode === 'live' && E.sparse))
+    .filter(E => !E.sparse)
     .sort((a, b) => (b.stats.z ?? -99) - (a.stats.z ?? -99))
     .slice(0, 7);
   return out;
@@ -105,14 +104,14 @@ export function briefMarkdown() {
     .map(s => `- [${s.title}](${s.url}) (${nf0.format(s.vel)}/h)`)
     .join('\n');
   return (
-    `## PRECOG brief, ${d}\n\nSource: ${state.mode === 'demo' ? 'DEMO DATA (simulated)' : SOURCES[state.source].label}\n\n${b.lines.map(l => `- ${l}`).join('\n')}\n\n| Topic | Lens | Now | Change | z | State |\n|---|---|---|---|---|---|\n${rows}\n` +
+    `## PRECOG brief, ${d}\n\nSource: ${SOURCES[state.source].label}\n\n${b.lines.map(l => `- ${l}`).join('\n')}\n\n| Topic | Lens | Now | Change | z | State |\n|---|---|---|---|---|---|\n${rows}\n` +
     (dp.rows.length ? `\n### Datapoints\n${dp.rows.map(r => `- ${r.k}: ${r.v} (${r.src})`).join('\n')}\n` : '') +
     (recent ? `\n### Alerts\n${recent}\n` : '') +
-    (top && state.mode === 'live' ? `\n### Rising stories\n${top}\n` : '')
+    (top ? `\n### Rising stories\n${top}\n` : '')
   );
 }
 export function saveLook() {
-  if (state.mode !== 'live' || !state.liveLoaded) return;
+  if (!state.liveLoaded) return;
   const items = {};
   allEntries().forEach(E => {
     if (E.stats) items[E.key] = { z: E.stats.z, level: levelOf(E.stats.z), latest: E.stats.latest };

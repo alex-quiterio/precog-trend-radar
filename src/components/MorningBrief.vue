@@ -40,11 +40,8 @@
       </table>
     </div>
     <div class="brief-actions no-print">
-      <button v-if="state.mode === 'demo'" class="btn primary" type="button" @click="goLive">
-        Use live world data
-      </button>
       <button class="btn" type="button" @click="copy">Copy brief as Markdown</button>
-      <button v-if="state.mode === 'live'" class="btn" type="button" @click="read">Mark as read</button>
+      <button class="btn" type="button" @click="read">Mark as read</button>
       <span class="muted" role="status">{{ note }}</span>
     </div>
   </panel-shell>
@@ -80,16 +77,12 @@ export default defineComponent({
       return {
         greet: hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening',
         date: now.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' }),
-        sub:
-          state.mode === 'demo'
-            ? 'Simulated numbers. Switch the source to World attention index for real data.'
-            : `${allEntries().length} topics across ${state.lenses.length} lenses · ${SOURCES[state.source].label}`,
-        meta:
-          state.mode === 'demo'
-            ? 'DEMO DATA'
-            : state.liveLoaded
-              ? `data to ${fmtTime(Math.max(0, ...b.value.items.map(E => E.stats.lt)), DAY)}`
-              : 'loading…',
+        sub: `${allEntries().length} topics across ${state.lenses.length} lenses · ${SOURCES[state.source].label}`,
+        meta: state.liveLoaded
+          ? `data to ${fmtTime(Math.max(0, ...b.value.items.map(E => E.stats.lt)), DAY)}`
+          : ui.offline
+            ? 'offline'
+            : 'loading…',
       };
     });
     const bar = E => {

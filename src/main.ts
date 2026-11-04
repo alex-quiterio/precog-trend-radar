@@ -24,7 +24,7 @@ import { loadDatapoints } from './features/datapoints';
 import { saveLook } from './features/brief';
 import { startStoryTimer } from './features/stories';
 import { loadLayout } from './layout';
-import { liveUpdated, loadLive, setSource } from './live';
+import { DEFAULT_SOURCE, liveUpdated, loadLive, setSource } from './live';
 import { ADAPTERS, SOURCES, registerAdapter } from './sources/registry';
 import { lensById, loadLenses, state } from './state';
 import type { Prefs } from './types';
@@ -60,8 +60,9 @@ function boot(): void {
   app.component('TopicDot', TopicDot);
   app.mount('#app');
 
-  let startSource = prefs.source && SOURCES[prefs.source] ? prefs.source : 'demo';
-  if (startSource === 'rss' && !store.get(LS.rss, { feeds: [] as string[] }).feeds.length) startSource = 'demo';
+  // 'demo' was a source before the simulator was removed; anything unknown falls back to the attention index.
+  let startSource = prefs.source && SOURCES[prefs.source] ? prefs.source : DEFAULT_SOURCE;
+  if (startSource === 'rss' && !store.get(LS.rss, { feeds: [] as string[] }).feeds.length) startSource = DEFAULT_SOURCE;
   setSource(startSource);
   loadDatapoints();
   setInterval(loadDatapoints, HOUR);
@@ -84,7 +85,7 @@ document.addEventListener('keydown', e => {
 });
 window.addEventListener('beforeprint', bump);
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && state.mode === 'live' && Date.now() - liveUpdated > HOUR) loadLive();
+  if (document.visibilityState === 'visible' && Date.now() - liveUpdated > HOUR) loadLive();
   if (document.visibilityState === 'hidden' && Date.now() - state.viewStart > 20e3) saveLook();
 });
 window.addEventListener('pagehide', () => {

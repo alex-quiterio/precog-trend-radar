@@ -226,10 +226,6 @@ export async function loadLocalStories(entries: Entry[], signal: AbortSignal): P
     rssCache.errors && rssCache.errors.length ? 'some feeds failed: ' + rssCache.errors.join('; ') : null;
 }
 export async function loadStories() {
-  if (state.mode !== 'live') {
-    bump();
-    return;
-  }
   if (storyAbort) storyAbort.abort();
   storyAbort = new AbortController();
   const { signal } = storyAbort,
@@ -252,6 +248,6 @@ export async function loadStories() {
 export function startStoryTimer(): void {
   clearInterval(storyTimer);
   storyTimer = setInterval(() => {
-    if (state.mode === 'live' && document.visibilityState === 'visible') loadStories();
+    if (document.visibilityState === 'visible') loadStories();
   }, STORY_REFRESH_MS);
 }

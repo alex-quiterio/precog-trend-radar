@@ -27,7 +27,7 @@ import { ui } from '../core/ui-store';
 import { dp } from '../features/datapoints';
 import PanelShell from './PanelShell.vue';
 
-// PRECOG / Trend Radar · Datapoints: official open data for PT, NL and the euro area (always real, even in demo mode).
+// PRECOG / Trend Radar · Datapoints: official open data for PT, NL and the euro area (updated hourly).
 
 export default defineComponent({
   name: 'DatapointsPanel',

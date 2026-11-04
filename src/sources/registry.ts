@@ -6,7 +6,6 @@ import { lensById } from '../state';
 
 export const ADAPTERS: Record<string, Adapter> = {};
 export const SOURCES: Record<string, Source> = {
-  demo: { label: 'Simulated (demo)' },
   blend: {
     label: 'World attention index',
     parts: ['news', 'wikipedia', 'hn'],

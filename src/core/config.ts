@@ -13,15 +13,16 @@ export const Z_ALERT = 2.5,
   Z_WATCH = 1.8,
   ALERT_CAP = 30,
   MIN_BASE = 8;
-export const TICK_MS = 2000,
-  LIVE_REFRESH_MS = 30 * MIN,
+export const LIVE_REFRESH_MS = 30 * MIN,
   STORY_REFRESH_MS = 10 * MIN;
 // Topic colours in fixed order (validated for colour-blind separation). Red and amber are reserved for alerts.
 export const PALETTES = {
   dark: ['#3987e5', '#d55181', '#008300', '#9085e9', '#199e70', '#d95926'],
   light: ['#2a78d6', '#e87ba4', '#008300', '#6250d6', '#1baf7a', '#eb6834'],
 };
-export const slotColor = slot => PALETTES[document.documentElement.dataset.theme === 'light' ? 'light' : 'dark'][slot];
+const currentTheme = (): 'dark' | 'light' =>
+  typeof document !== 'undefined' && document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+export const slotColor = (slot: number): string => PALETTES[currentTheme()][slot];
 export const SLOT_ANGLE = [20, 80, 140, 200, 260, 320];
 
 // Each topic: [display name, { wiki: exact article title, q: search phrase for news/HN }]
@@ -68,14 +69,14 @@ export const PRESETS = [
   {
     id: 'circular',
     name: 'Circular economy',
-    desc: 'Waste, packaging, recycling and producer responsibility.',
+    desc: 'Waste, packaging and reporting rules: what shapes B2B recycling and waste services.',
     topics: [
       ['Circular economy'],
       ['Recycling'],
-      ['Plastic pollution'],
+      ['Packaging rules (PPWR)', { wiki: 'Packaging and packaging waste directive', q: 'packaging waste regulation' }],
       ['Producer responsibility', { wiki: 'Extended producer responsibility', q: 'extended producer responsibility' }],
-      ['Waste-to-energy'],
-      ['Packaging waste'],
+      ['Food waste', { wiki: 'Food loss and waste', q: 'food waste' }],
+      ['CSRD', { wiki: 'Sustainability reporting', q: 'CSRD' }],
     ],
   },
   {
@@ -83,14 +84,27 @@ export const PRESETS = [
     name: 'Portugal',
     lang: 'pt',
     country: 'portugal',
-    desc: 'Land, housing, fire and water, read through Portuguese Wikipedia and Portuguese outlets.',
+    desc: 'Housing, fire, water and the interior, read through Portuguese Wikipedia and Portuguese outlets.',
     topics: [
       ['Habitação', { wiki: 'Habitação em Portugal', q: 'habitação' }],
       ['Incêndios', { wiki: 'Incêndios florestais em Portugal', q: 'incêndios' }],
       ['Seca', { q: 'seca' }],
       ['Êxodo rural', { q: 'despovoamento' }],
-      ['Permacultura'],
-      ['Agricultura regenerativa'],
+      ['Alentejo'],
+      ['Lítio', { q: 'lítio' }],
+    ],
+  },
+  {
+    id: 'land',
+    name: 'Land & homestead',
+    desc: 'Growing food, restoring land and living lighter: the practices behind a rural, closed-loop life.',
+    topics: [
+      ['Permaculture'],
+      ['Regenerative agriculture'],
+      ['Agroforestry'],
+      ['Rewilding'],
+      ['Off-grid living', { wiki: 'Off-the-grid', q: 'off-grid' }],
+      ['Ecovillages', { wiki: 'Ecovillage', q: 'ecovillage' }],
     ],
   },
   {
@@ -111,17 +125,18 @@ export const PRESETS = [
   {
     id: 'tech',
     name: 'Tech radar',
-    desc: 'Technologies worth watching early.',
+    desc: 'The stack and ideas worth watching early: agents, MCP, and the languages this dashboard is built with.',
     topics: [
       ['AI agents', { wiki: 'AI agent' }],
-      ['WebGPU'],
+      ['MCP', { wiki: 'Model Context Protocol', q: 'Model Context Protocol' }],
       ['Rust', { wiki: 'Rust (programming language)', q: 'Rust' }],
-      ['Solid-state batteries', { wiki: 'Solid-state battery' }],
-      ['Remote work'],
+      ['TypeScript'],
+      ['Vue.js', { q: 'Vue' }],
+      ['Local-first software', { q: 'local-first' }],
     ],
   },
 ];
-export const PRESET_VERSION = 2;
+export const PRESET_VERSION = 3;
 export const LS = {
   presetVer: 'precog.presetver',
   lenses: 'precog.lenses.v1',

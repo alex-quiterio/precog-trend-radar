@@ -16,8 +16,8 @@
         <p>{{ a.text }}</p>
       </li>
       <li v-if="!view.list.length" key="empty" class="empty">
-        No unusual spikes {{ view.live ? 'in the fetched history' : 'yet' }}. Alerts appear when the latest point is
-        more than {{ Z_WATCH }}σ above its {{ BASE_N }}-step baseline.
+        No unusual spikes {{ ui.loading ? 'yet (still loading)' : 'in the fetched history' }}. Alerts appear when the
+        latest point is more than {{ Z_WATCH }}σ above its {{ BASE_N }}-step baseline.
       </li>
     </transition-group>
   </panel-shell>
@@ -45,7 +45,6 @@ export default defineComponent({
       return {
         list: state.alerts.slice(),
         meta: `${n} alert · ${state.alerts.length - n} watch · all lenses`,
-        live: state.mode === 'live',
       };
     });
     return { ui, view, iso, Z_WATCH, BASE_N };

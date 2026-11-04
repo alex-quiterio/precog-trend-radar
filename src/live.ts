@@ -1,9 +1,7 @@
-// PRECOG / Trend Radar · Data loop: demo ticks, live fetching, source switching.
+// PRECOG / Trend Radar · Data loop: live fetching, refresh, source switching.
 import { openFeeds } from './actions';
-import { evaluate, pushAlert, rescanAll } from './alerts';
-import { HISTORY, HOUR, LIVE_REFRESH_MS, LS, TICK_MS, store } from './core/config';
-import { fmtTime } from './core/format';
-import { simStep } from './core/sim';
+import { rescanAll } from './alerts';
+import { HISTORY, LIVE_REFRESH_MS, LS, store } from './core/config';
 import { computeStats } from './core/stats';
 import { bump, ui } from './core/ui-store';
 import { loadStories } from './features/stories';
@@ -11,8 +9,8 @@ import { blendParts } from './sources/blend';
 import { ADAPTERS, SOURCES, pool, queryOf } from './sources/registry';
 import { activeLens, allEntries, entriesOf, savePrefs, state } from './state';
 
-export let tickTimer = null,
-  liveTimer = null,
+export const DEFAULT_SOURCE = 'blend';
+export let liveTimer = null,
   liveAbort = null,
   liveUpdated = 0,
   renderQueued = false;
@@ -92,6 +90,7 @@ export async function loadLive() {
     : parts.includes('github')
       ? ' GitHub allows ~10 searches a minute; results are cached.'
       : '';
+  ui.loading = true;
   setStatus(`Fetching ${SOURCES[state.source].label}… 0/${total}.${note}`);
   loadStories();
   await Promise.all(
@@ -108,6 +107,7 @@ export async function loadLive() {
     ),
   );
   if (signal.aborted) return;
+  ui.loading = false;
   liveUpdated = Date.now();
   state.liveLoaded = true;
   rescanAll();
@@ -117,11 +117,11 @@ export async function loadLive() {
     failed = all.filter(E => E.liveError),
     partial = all.filter(E => !E.liveError && parts.some(p => E.partErr[p]));
   if (all.length && failed.length === all.length) {
-    const why = failed[0].liveError;
-    setSource('demo');
-    setStatus(`Live source failed (${why}). Back on DEMO DATA.`);
+    ui.offline = true;
+    setStatus(`Couldn't reach any source (${failed[0].liveError}). Check your connection, then press ↻ Refresh.`);
     return;
   }
+  ui.offline = false;
   const newsDown = parts.includes('news') && all.every(E => E.partErr.news);
   setStatus(
     `LIVE · ${SOURCES[state.source].label}. Refreshes every 30 min.` +
@@ -142,42 +142,13 @@ export async function loadLive() {
   );
 }
 
-export function demoTick() {
-  state.simNow += HOUR;
-  allEntries().forEach(E => {
-    E.simSeries.push({ t: state.simNow, value: simStep(E.sim) });
-    if (E.simSeries.length > HISTORY) E.simSeries.shift();
-    E.stats = computeStats(E.simSeries);
-    const a = evaluate(E, E.stats);
-    if (a) pushAlert(a);
-  });
-  beat(`tick · ${fmtTime(state.simNow, HOUR)} (simulated)`);
-  bump();
-}
 export function stopLive() {
   if (liveAbort) liveAbort.abort();
   liveAbort = null;
   clearInterval(liveTimer);
   liveTimer = null;
 }
-export function startDemo() {
-  stopLive();
-  state.mode = 'demo';
-  state.source = 'demo';
-  allEntries().forEach(E => {
-    E.stats = computeStats(E.simSeries);
-  });
-  rescanAll();
-  clearInterval(tickTimer);
-  tickTimer = setInterval(demoTick, TICK_MS);
-  setStatus('Simulated random walks with injected spikes. 1 tick = 1 simulated hour, a new point every 2 s.');
-  beat(`tick · ${fmtTime(state.simNow, HOUR)} (simulated)`);
-  bump();
-}
 export function startLive() {
-  clearInterval(tickTimer);
-  tickTimer = null;
-  state.mode = 'live';
   state.liveLoaded = false;
   allEntries().forEach(E => {
     E.parts = {};
@@ -193,11 +164,14 @@ export function startLive() {
   clearInterval(liveTimer);
   liveTimer = setInterval(loadLive, LIVE_REFRESH_MS);
 }
+/** Fetch again now, keeping what's on screen until new data arrives. */
+export function refresh() {
+  if (!ui.loading) loadLive();
+}
 export function setSource(id) {
-  if (!SOURCES[id]) id = 'demo';
+  if (!SOURCES[id] || !SOURCES[id].parts) id = DEFAULT_SOURCE;
   state.source = id;
   savePrefs();
-  if (id === 'demo') return startDemo();
   if (id === 'rss' && !store.get(LS.rss, { feeds: [] }).feeds.length) {
     openFeeds('source');
     bump();

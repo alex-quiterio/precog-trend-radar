@@ -27,6 +27,16 @@
         GDELT news
       </label>
       <button v-if="state.source === 'rss'" class="btn" type="button" @click="openFeeds('source')">Feeds…</button>
+      <button
+        class="btn"
+        type="button"
+        :disabled="ui.loading"
+        :aria-busy="ui.loading"
+        aria-label="Refresh data now"
+        @click="refresh"
+      >
+        ↻ {{ ui.loading ? 'Loading…' : 'Refresh' }}
+      </button>
       <button class="btn" type="button" :aria-pressed="state.tableView" @click="toggleTable">Table view</button>
       <button
         class="btn"
@@ -37,7 +47,7 @@
         ◐ {{ ui.theme === 'light' ? 'Dark' : 'Light' }}
       </button>
     </div>
-    <span class="badge" :class="{ live: state.mode === 'live' }">{{ badge }}</span>
+    <span class="badge live">{{ badge }}</span>
   </header>
 </template>
 
@@ -45,11 +55,11 @@
 import { computed, defineComponent } from 'vue';
 import { openFeeds, setIncludeNews, toggleTable, toggleTheme } from '../actions';
 import { ui } from '../core/ui-store';
-import { setSource } from '../live';
+import { refresh, setSource } from '../live';
 import { SOURCES } from '../sources/registry';
 import { state } from '../state';
 
-// PRECOG / Trend Radar · Header: title, pulse, source picker, table/theme toggles, DEMO/LIVE badge.
+// PRECOG / Trend Radar · Header: title, pulse, source picker, refresh, table/theme toggles, LIVE badge.
 
 export default defineComponent({
   name: 'AppHeader',
@@ -58,10 +68,21 @@ export default defineComponent({
     const sourceIds = computed(() => (ui.v, Object.keys(SOURCES)));
     const badge = computed(() => {
       ui.v;
-      if (state.mode !== 'live') return 'DEMO DATA';
       return state.source === 'blend' ? 'LIVE · INDEX' : `LIVE · ${state.source.toUpperCase()}`;
     });
-    return { ui, state, SOURCES, source, sourceIds, badge, toggleTable, toggleTheme, openFeeds, setIncludeNews };
+    return {
+      ui,
+      state,
+      SOURCES,
+      source,
+      sourceIds,
+      badge,
+      refresh,
+      toggleTable,
+      toggleTheme,
+      openFeeds,
+      setIncludeNews,
+    };
   },
 });
 </script>

@@ -33,7 +33,7 @@ import { ref, watch, defineComponent } from 'vue';
 import { LS, store } from '../core/config';
 import { ui } from '../core/ui-store';
 import { loadStories, stories } from '../features/stories';
-import { setSource, setStatus } from '../live';
+import { DEFAULT_SOURCE, setSource, setStatus } from '../live';
 import { FEED_PRESETS, rssCache } from '../sources/rss';
 import { state } from '../state';
 
@@ -81,7 +81,9 @@ export default defineComponent({
         setStatus('No valid feed URLs (they must start with http:// or https://).');
       }
       if (intent === 'local') return;
-      if (!(state.mode === 'live' && state.source === 'rss')) setSource(state.mode === 'live' ? state.source : 'demo');
+      // Picked the RSS source but saved no feeds: go back to the attention index.
+      if (state.source === 'rss' && !store.get(LS.rss, { feeds: [] as string[] }).feeds.length)
+        setSource(DEFAULT_SOURCE);
     }
     return { dlg, feeds, proxy, addPresets, onClose };
   },

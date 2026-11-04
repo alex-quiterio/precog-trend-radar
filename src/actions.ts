@@ -1,7 +1,6 @@
 // PRECOG / Trend Radar · User actions on lenses and topics: add, remove, select, switch. No DOM.
 import type { TopicDef } from './types';
-import { scanHistory } from './alerts';
-import { ALERT_CAP, LS, MAX_LENSES, MAX_TOPICS, slotColor, store } from './core/config';
+import { LS, MAX_LENSES, MAX_TOPICS, slotColor, store } from './core/config';
 import { looksLikePerson } from './core/guard';
 import { levelOf } from './core/stats';
 import { bump, ui } from './core/ui-store';
@@ -64,19 +63,12 @@ export function addTopic(raw) {
   saveLenses();
   savePrefs();
   watchMsg(`Tracking “${name}” in ${lens.name}.`);
-  if (state.mode === 'demo') {
-    scanHistory(E).forEach(a => state.alerts.push(a));
-    state.alerts.sort((a, b) => b.t - a.t);
-    state.alerts.length = Math.min(state.alerts.length, ALERT_CAP);
+  bump();
+  const ctl = liveAbort && !liveAbort.signal.aborted ? liveAbort : new AbortController();
+  Promise.all(liveParts().map(p => fetchPart(E, p, ctl.signal))).then(() => {
+    if (E.liveError) setStatus(`No data for ${E.name}: ${E.liveError}`);
     bump();
-  } else {
-    bump();
-    const ctl = liveAbort && !liveAbort.signal.aborted ? liveAbort : new AbortController();
-    Promise.all(liveParts().map(p => fetchPart(E, p, ctl.signal))).then(() => {
-      if (E.liveError) setStatus(`No data for ${E.name}: ${E.liveError}`);
-      bump();
-    });
-  }
+  });
   return true;
 }
 export function removeTopic(key) {
@@ -187,8 +179,7 @@ export function toggleTable() {
 export function setIncludeNews(on) {
   state.includeNews = on;
   savePrefs();
-  if (state.mode === 'live') startLive();
-  else bump();
+  startLive();
 }
 export function markRead() {
   saveLook();

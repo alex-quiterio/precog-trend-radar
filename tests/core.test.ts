@@ -1,8 +1,7 @@
-// Unit tests for PRECOG's pure logic: the person guard, statistics, the attention blend and the simulator.
+// Unit tests for PRECOG's pure logic: the person guard, statistics and the attention blend.
 import { describe, expect, it } from 'vitest';
 import { DAY } from '../src/core/config';
 import { looksLikePerson } from '../src/core/guard';
-import { makeSim, simStep } from '../src/core/sim';
 import { computeStats, levelOf } from '../src/core/stats';
 import { blendParts } from '../src/sources/blend';
 import { ADAPTERS, utcDay } from '../src/sources/registry';
@@ -97,16 +96,5 @@ describe('blendParts (world attention index)', () => {
     E.parts.dense = daily(Array(40).fill(500), end);
     blendParts(E, ['dense', 'sparse']);
     expect(E.sparse).toBe(false);
-  });
-});
-
-describe('simulation', () => {
-  it('is deterministic per topic name', () => {
-    const run = (name: string) => {
-      const s = makeSim(name);
-      return Array.from({ length: 5 }, () => simStep(s));
-    };
-    expect(run('webgpu')).toEqual(run('webgpu'));
-    expect(run('webgpu')).not.toEqual(run('rust'));
   });
 });

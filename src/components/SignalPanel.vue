@@ -167,18 +167,13 @@ export default defineComponent({
         st = E && E.stats,
         lens = activeLens(),
         list = entriesOf(lens);
-      const unit = state.mode === 'live' ? SOURCES[state.source]?.unit || '' : 'simulated';
+      const unit = SOURCES[state.source]?.unit || '';
       return {
         E,
         st,
         name: E ? `${E.name} · ${lens.name}` : 'No topic selected',
         index: `${E ? list.indexOf(E) + 1 : 0}/${list.length}`,
-        meta:
-          state.mode === 'demo'
-            ? '1 step = 1 simulated hour'
-            : st
-              ? `1 step = ${st.step >= 7 * DAY ? '1 week' : '1 day'} · ${unit}`
-              : unit,
+        meta: st ? `1 step = ${st.step >= 7 * DAY ? '1 week' : '1 day'} · ${unit}` : unit,
         arrow: st ? arrowOf(st.momentum) : ['', ''],
       };
     });

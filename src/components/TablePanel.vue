@@ -26,7 +26,7 @@
             </th>
             <td>
               {{ E.stats ? fmtVal(E.stats.latest) : E.liveError || '—' }}
-              <span v-if="E.sparse && view.live" class="muted">(low volume)</span>
+              <span v-if="E.sparse" class="muted">(low volume)</span>
             </td>
             <td>{{ E.stats ? fmtPct(E.stats.change) : '—' }}</td>
             <td>
@@ -66,9 +66,8 @@ export default defineComponent({
     const view = computed(() => {
       ui.v;
       return {
-        caption: `Current attention per topic, all lenses (${state.mode === 'demo' ? 'DEMO DATA, simulated; change vs 24 simulated hours ago' : 'LIVE, ' + SOURCES[state.source].label + '; change vs previous day'}). Alert when z > ${Z_ALERT}, watch when z > ${Z_WATCH}, against the previous ${BASE_N} points.`,
+        caption: `Current attention per topic, all lenses (${SOURCES[state.source].label}; change vs the previous point). Alert when z > ${Z_ALERT}, watch when z > ${Z_WATCH}, against the previous ${BASE_N} points.`,
         groups: state.lenses.map(l => ({ l, rows: entriesOf(l) })),
-        live: state.mode === 'live',
       };
     });
     return { ui, view, select };

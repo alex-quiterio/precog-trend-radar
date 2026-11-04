@@ -1,36 +1,21 @@
 // PRECOG / Trend Radar · App state: lenses -> topics -> runtime entries, persistence and migrations.
-import type { Alert, Entry, Lens, Prefs, SeriesPoint } from './types';
+import type { Alert, Entry, Lens, Prefs, SeriesPoint, TopicDef } from './types';
 export interface LastLook {
   at: number;
   source: string;
   items: Record<string, { z: number | null; level: string | null; latest: number }>;
 }
-import {
-  HISTORY,
-  HOUR,
-  LS,
-  MAX_LENSES,
-  MAX_TOPICS,
-  PRESETS,
-  PRESET_VERSION,
-  SLOT_ANGLE,
-  slotColor,
-  store,
-} from './core/config';
+import { LS, MAX_LENSES, MAX_TOPICS, PRESETS, PRESET_VERSION, SLOT_ANGLE, slotColor, store } from './core/config';
 import { looksLikePerson } from './core/guard';
-import { makeSim, simStep } from './core/sim';
-import { computeStats } from './core/stats';
 
 export const state = {
-  mode: 'demo' as 'demo' | 'live',
-  source: 'demo',
+  source: 'blend',
   lenses: [] as Lens[],
   activeLens: null as string | null,
   selectedByLens: {} as Record<string, string>,
   rt: new Map<string, Entry>(),
   alerts: [] as Alert[],
   alertSeq: 0,
-  simNow: Math.floor(Date.now() / HOUR) * HOUR,
   tableView: false,
   includeNews: true,
   storySrc: 'hn' as Prefs['storySrc'],
@@ -40,7 +25,7 @@ export const state = {
   liveLoaded: false,
 };
 export const keyOf = (lensId: string, name: string): string => `${lensId}::${name.toLowerCase()}`;
-export const series = (E: Entry): SeriesPoint[] => (state.mode === 'demo' ? E.simSeries : E.liveSeries);
+export const series = (E: Entry): SeriesPoint[] => E.liveSeries;
 export const lensById = (id: string | null | undefined): Lens | undefined => state.lenses.find(l => l.id === id);
 export const activeLens = (): Lens | null => lensById(state.activeLens) || state.lenses[0] || null;
 export const entriesOf = (lens: Lens | null | undefined): Entry[] =>
@@ -52,7 +37,7 @@ export function selectedEntry(): Entry | null {
   const list = entriesOf(lens);
   return list.find(E => E.name === state.selectedByLens[lens.id]) || list[0] || null;
 }
-export function ensureEntry(lens, def) {
+export function ensureEntry(lens: Lens, def: TopicDef): Entry {
   const key = keyOf(lens.id, def.name);
   let E = state.rt.get(key);
   if (!E) {
@@ -64,8 +49,6 @@ export function ensureEntry(lens, def) {
       slot: def.slot,
       color: slotColor(def.slot),
       angle: SLOT_ANGLE[def.slot],
-      sim: makeSim(def.name.toLowerCase()),
-      simSeries: [],
       parts: {},
       partErr: {},
       meta: {},
@@ -74,14 +57,12 @@ export function ensureEntry(lens, def) {
       stats: null,
       lastAlert: null,
     };
-    for (let i = HISTORY - 1; i >= 0; i--) E.simSeries.push({ t: state.simNow - i * HOUR, value: simStep(E.sim) });
     state.rt.set(key, E);
   }
   E.def = def;
   E.slot = def.slot;
   E.color = slotColor(def.slot);
   E.angle = SLOT_ANGLE[def.slot];
-  if (state.mode === 'demo') E.stats = computeStats(E.simSeries);
   return E;
 }
 export function syncEntries() {
@@ -133,6 +114,15 @@ export function presetLenses() {
     }),
   }));
 }
+// Topic lists shipped by earlier versions, used to tell untouched presets from customised ones.
+const OLD_PRESET_TOPICS: Record<string, string[]> = {
+  portugal: [
+    'Portugal|Housing in Portugal|Permaculture|Regenerative agriculture|Water scarcity|Rural flight',
+    'Habitação|Incêndios|Seca|Êxodo rural|Permacultura|Agricultura regenerativa',
+  ],
+  circular: ['Circular economy|Recycling|Plastic pollution|Producer responsibility|Waste-to-energy|Packaging waste'],
+  tech: ['AI agents|WebGPU|Rust|Solid-state batteries|Remote work'],
+};
 export function loadLenses() {
   let lenses = store.get(LS.lenses, null);
   if (!Array.isArray(lenses) || !lenses.length) {
@@ -143,16 +133,19 @@ export function loadLenses() {
         .filter(x => x && x.name)
         .map(x => ({ name: x.name, slot: x.slot }));
   } else if ((store.get(LS.presetVer, 1) || 1) < PRESET_VERSION) {
-    // v2: Portugal lens reads Portuguese sources; new Nederland lens
+    // Upgrade preset lenses the user never edited, and add new presets where there's room.
+    // Anything the user changed is left alone.
     const fresh = presetLenses();
-    const i = lenses.findIndex(l => l.id === 'portugal');
-    if (i >= 0) lenses[i] = fresh.find(l => l.id === 'portugal');
-    if (!lenses.some(l => l.id === 'nl') && lenses.length < MAX_LENSES)
-      lenses.splice(
-        i >= 0 ? i + 1 : lenses.length,
-        0,
-        fresh.find(l => l.id === 'nl'),
-      );
+    lenses = lenses.map(l => {
+      const names = (l.topics || []).map(t => t.name).join('|');
+      const upgrade = (OLD_PRESET_TOPICS[l.id] || []).includes(names);
+      return upgrade ? fresh.find(f => f.id === l.id) : l;
+    });
+    fresh.forEach((f, i) => {
+      if (lenses.some(l => l.id === f.id) || lenses.length >= MAX_LENSES) return;
+      const after = lenses.findIndex(l => l.id === fresh[i - 1]?.id);
+      lenses.splice(after + 1, 0, f);
+    });
   }
   store.set(LS.presetVer, PRESET_VERSION);
   state.lenses = lenses.slice(0, MAX_LENSES).map(l => {

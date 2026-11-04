@@ -7,6 +7,8 @@ import { reactive } from 'vue';
 export const ui = reactive({
   v: 0, // render version: bumped after every state change
   status: '', // status line under the header
+  loading: false, // a live fetch is in flight
+  offline: false, // the last fetch reached no source at all
   pulse: 'starting…',
   beat: 0,
   theme: 'dark',

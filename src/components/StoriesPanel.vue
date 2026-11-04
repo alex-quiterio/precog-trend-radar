@@ -25,12 +25,7 @@
       </span>
     </template>
     <ol class="stories">
-      <li v-if="view.demo" class="empty">
-        Rising stories need live data: switch the source to
-        <b>World attention index</b>
-        . Demo mode never invents headlines.
-      </li>
-      <li v-else-if="view.needsFeeds" class="empty">
+      <li v-if="view.needsFeeds" class="empty">
         Portuguese and Dutch outlets (RTP, Público, Observador, NOS, NU.nl, DutchNews, NL Times) block direct browser
         access. Run the bundled proxy (
         <code>node feed-proxy.mjs</code>
@@ -124,7 +119,6 @@ interface StoryItem {
 interface StoriesView {
   src: string;
   meta: string;
-  demo?: boolean;
   isLocal?: boolean;
   needsFeeds?: boolean;
   items?: StoryItem[];
@@ -141,7 +135,6 @@ export default defineComponent({
       ui.v;
       const src = state.storySrc,
         isLocal = src === 'local';
-      if (state.mode !== 'live') return { src, demo: true, meta: '' };
       const scopeKeys = new Set(storyScopeEntries().map(E => E.key));
       const inScope = (s: { topics: string[] }) => s.topics.some(k => scopeKeys.has(k));
       const topicsOf = (s: { topics: string[] }) =>

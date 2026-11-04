@@ -45,7 +45,7 @@ export interface Lens {
   topics: TopicDef[];
 }
 
-/** Runtime data for one topic: simulated and live series, stats, per-source parts. */
+/** Runtime data for one topic: its series, stats and per-source parts. */
 export interface Entry {
   key: string;
   lensId: string;
@@ -54,8 +54,6 @@ export interface Entry {
   slot: number;
   color: string;
   angle: number;
-  sim: unknown;
-  simSeries: SeriesPoint[];
   parts: Record<string, SeriesPoint[] | null>;
   partErr: Record<string, string | null>;
   skipped?: Record<string, string>;
