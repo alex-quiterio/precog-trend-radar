@@ -38,7 +38,7 @@ export const CHANNELS: Channel[] = [
     label: 'World',
     kicker: 'The big stories, what forecasters expect, and the money underneath.',
     lensId: 'world',
-    datapoints: ['inflation', 'ecb', 'unemployment', 'co2'],
+    datapoints: ['inflation-ea', 'ecb', 'unemployment-ea', 'co2'],
     streams: ['forecasts', 'reading', 'hn'],
   },
   {
@@ -55,7 +55,7 @@ export const CHANNELS: Channel[] = [
     label: 'Portugal & land',
     kicker: 'Fire, water and soil in the interior, and the practices of a rural, closed-loop life.',
     lensId: 'portugal',
-    datapoints: ['fire', 'warnings', 'soil-mafra', 'wx-lisbon', 'wx-porto', 'inflation'],
+    datapoints: ['fire', 'warnings', 'soil-mafra', 'wx-lisbon', 'wx-porto', 'inflation-pt', 'unemployment-pt'],
     streams: ['reading', 'forecasts'],
   },
   {
@@ -63,7 +63,7 @@ export const CHANNELS: Channel[] = [
     label: 'Circular economy',
     kicker: 'The rules and markets that shape recycling and waste services.',
     lensId: 'circular',
-    datapoints: ['inflation', 'ecb', 'unemployment'],
+    datapoints: ['inflation-ea', 'ecb', 'inflation-pt', 'inflation-nl'],
     streams: ['reading', 'hn', 'forecasts'],
   },
   {
@@ -71,7 +71,7 @@ export const CHANNELS: Channel[] = [
     label: 'Alt Amsterdam',
     kicker: 'The cooperative, regenerative city.',
     lensId: 'amsterdam',
-    datapoints: ['soil-amsterdam', 'wx-amsterdam', 'inflation', 'unemployment'],
+    datapoints: ['soil-amsterdam', 'wx-amsterdam', 'inflation-nl', 'unemployment-nl'],
     streams: ['reading', 'hn'],
     sites: [MARGINALIAN, TGS],
   },

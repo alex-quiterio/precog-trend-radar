@@ -1,17 +1,34 @@
 // PRECOG / Trend Radar · Datapoints panel: ECB, Eurostat, IPMA, Open-Meteo, NOAA CO₂ and NSIDC sea ice.
-// Cards sit in four groups: Land, Money, Planet, Weather.
+// Cards sit in groups by place: Portugal, Netherlands, Euro area, Planet. No card mixes two countries.
 import { nf0, nf1, nf2 } from '../core/format';
 import { bump } from '../core/ui-store';
 import type { SeriesPoint } from '../types';
 import { getJSON } from '../sources/registry';
 
-export type DatapointGroup = 'land' | 'money' | 'planet' | 'weather';
+export type DatapointGroup = 'pt' | 'nl' | 'ea' | 'planet';
 export const DATAPOINT_GROUPS: { id: DatapointGroup; label: string; hint: string }[] = [
-  { id: 'land', label: 'Land', hint: 'Fire, warnings, soil' },
-  { id: 'money', label: 'Money', hint: 'Rates, prices, jobs' },
+  { id: 'pt', label: 'Portugal', hint: 'Land, weather, prices, jobs' },
+  { id: 'nl', label: 'Netherlands', hint: 'Land, weather, prices, jobs' },
+  { id: 'ea', label: 'Euro area', hint: 'Rates, prices, jobs' },
   { id: 'planet', label: 'Planet', hint: 'The slow numbers' },
-  { id: 'weather', label: 'Weather', hint: 'Today, with air quality' },
 ];
+/** Eurostat area code → card group, id suffix and name. */
+const AREAS: [string, DatapointGroup, string, string][] = [
+  ['PT', 'pt', 'pt', 'Portugal'],
+  ['NL', 'nl', 'nl', 'Netherlands'],
+  ['EA21', 'ea', 'ea', 'Euro area'],
+];
+/** Reads one area's monthly series out of a Eurostat JSON-stat reply (geo × time). */
+function eurostatSeries(j: any, geo: string): { t: number; value: number }[] {
+  const g = j.dimension.geo.category.index,
+    times = Object.keys(j.dimension.time.category.index),
+    n = times.length;
+  if (g[geo] == null) return [];
+  return times
+    .map((t, i) => ({ t: Date.parse(t + '-01'), value: j.value[String(g[geo] * n + i)] }))
+    .filter(p => p.value != null);
+}
+const month = (t: number) => new Date(t).toISOString().slice(0, 7);
 export interface DatapointRow {
   /** Stable id a channel picks the card by (see channels.ts). */
   id: string;
@@ -31,15 +48,15 @@ export interface DatapointFacts {
   warnings?: { red: number; orange: number; yellow: number; types: string };
 }
 export const dp = { rows: [] as DatapointRow[], at: 0, facts: {} as DatapointFacts };
-export const PLACES = [
-  ['Lisbon', 38.72, -9.14],
-  ['Porto', 41.15, -8.61],
-  ['Amsterdam', 52.37, 4.9],
+export const PLACES: [string, number, number, DatapointGroup][] = [
+  ['Lisbon', 38.72, -9.14, 'pt'],
+  ['Porto', 41.15, -8.61, 'pt'],
+  ['Amsterdam', 52.37, 4.9, 'nl'],
 ];
 // Soil moisture cards: [card id, place, latitude, longitude].
-export const SOIL_PLACES: [string, string, number, number][] = [
-  ['soil-mafra', 'Mafra', 38.94, -9.33],
-  ['soil-amsterdam', 'Amsterdam', 52.37, 4.9],
+export const SOIL_PLACES: [string, string, number, number, DatapointGroup][] = [
+  ['soil-mafra', 'Mafra', 38.94, -9.33, 'pt'],
+  ['soil-amsterdam', 'Amsterdam', 52.37, 4.9, 'nl'],
 ];
 export const aqiWord = v =>
   v == null
@@ -74,7 +91,7 @@ export async function loadDatapoints() {
         obs = Object.values(s.observations)[0][0];
       const since = j.structure.dimensions.observation[0].values.slice(-1)[0].id;
       rows.push({
-        group: 'money',
+        group: 'ea',
         id: 'ecb',
         k: 'ECB deposit rate',
         v: `${nf2.format(obs)}%`,
@@ -85,19 +102,27 @@ export async function loadDatapoints() {
     }),
     task(async () => {
       const j = await getJSON(
-        'https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/une_rt_m?geo=PT&geo=NL&geo=EA21&s_adj=SA&age=TOTAL&sex=T&unit=PC_ACT&lastTimePeriod=1',
+        'https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/une_rt_m?geo=PT&geo=NL&geo=EA21&s_adj=SA&age=TOTAL&sex=T&unit=PC_ACT&lastTimePeriod=13',
       );
-      const g = j.dimension.geo.category.index,
-        t = Object.keys(j.dimension.time.category.index)[0];
-      const val = c => j.value[String(g[c])];
-      rows.push({
-        group: 'money',
-        id: 'unemployment',
-        k: 'Unemployment · PT / NL / euro area',
-        v: ['PT', 'NL', 'EA21'].map(c => (val(c) == null ? '—' : nf1.format(val(c)) + '%')).join(' · '),
-        src: `Eurostat une_rt_m · ${t}, seasonally adjusted`,
-        href: 'https://ec.europa.eu/eurostat/databrowser/view/une_rt_m/default/table',
-        o: 2,
+      AREAS.forEach(([geo, group, suffix, name]) => {
+        const series = eurostatSeries(j, geo);
+        const last = series[series.length - 1];
+        if (!last) return;
+        const yearAgo = series[0];
+        rows.push({
+          group,
+          id: `unemployment-${suffix}`,
+          k: `Unemployment · ${name}`,
+          v: `${nf1.format(last.value)}%`,
+          sub:
+            yearAgo && yearAgo !== last
+              ? `${last.value - yearAgo.value >= 0 ? '+' : '−'}${nf1.format(Math.abs(last.value - yearAgo.value))} pts in a year`
+              : '',
+          src: `Eurostat une_rt_m · ${month(last.t)}, seasonally adjusted`,
+          href: 'https://ec.europa.eu/eurostat/databrowser/view/une_rt_m/default/table',
+          o: 3,
+          spark: series,
+        });
       });
     }),
     task(async () => {
@@ -105,24 +130,21 @@ export async function loadDatapoints() {
       const j = await getJSON(
         'https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/prc_hicp_minr?geo=PT&geo=NL&geo=EA21&unit=RCH_A&coicop18=TOTAL&lastTimePeriod=13',
       );
-      const g = j.dimension.geo.category.index,
-        times = Object.keys(j.dimension.time.category.index),
-        n = times.length;
-      const at = (c: string, i: number) => j.value[String(g[c] * n + i)];
-      const last = (c: string) => {
-        for (let i = n - 1; i >= 0; i--) if (at(c, i) != null) return at(c, i);
-        return null;
-      };
-      rows.push({
-        group: 'money',
-        id: 'inflation',
-        k: 'Inflation · PT / NL / euro area',
-        v: ['PT', 'NL', 'EA21'].map(c => (last(c) == null ? '—' : nf1.format(last(c)) + '%')).join(' · '),
-        sub: 'prices vs a year earlier; chart: Portugal',
-        src: `Eurostat HICP · ${times[n - 1]}`,
-        href: 'https://ec.europa.eu/eurostat/databrowser/view/prc_hicp_minr/default/table',
-        o: 1.5,
-        spark: times.map((t, i) => ({ t: Date.parse(t + '-01'), value: at('PT', i) })).filter(p => p.value != null),
+      AREAS.forEach(([geo, group, suffix, name]) => {
+        const series = eurostatSeries(j, geo);
+        const last = series[series.length - 1];
+        if (!last) return;
+        rows.push({
+          group,
+          id: `inflation-${suffix}`,
+          k: `Inflation · ${name}`,
+          v: `${nf1.format(last.value)}%`,
+          sub: 'prices vs a year earlier',
+          src: `Eurostat HICP · ${month(last.t)}`,
+          href: 'https://ec.europa.eu/eurostat/databrowser/view/prc_hicp_minr/default/table',
+          o: 2,
+          spark: series,
+        });
       });
     }),
     task(async () => {
@@ -132,9 +154,9 @@ export async function loadDatapoints() {
         max = lv.filter(x => x === 5).length;
       facts.fire = { hi, max, n: lv.length };
       rows.push({
-        group: 'land',
+        group: 'pt',
         id: 'fire',
-        k: 'Fire risk · Portugal, today',
+        k: 'Fire risk today',
         v: `${hi} of ${lv.length}`,
         sub: 'municipalities very high or maximum',
         src: `IPMA RCM · ${max} at maximum (5) · ${j.dataPrev}`,
@@ -150,9 +172,9 @@ export async function loadDatapoints() {
       const types = [...new Set(active.map(w => w.awarenessTypeName))].slice(0, 3).join(', ');
       facts.warnings = { red: by('red'), orange: by('orange'), yellow: by('yellow'), types };
       rows.push({
-        group: 'land',
+        group: 'pt',
         id: 'warnings',
-        k: 'Weather warnings · Portugal',
+        k: 'Weather warnings (IPMA)',
         v: active.length ? `${by('red')} red · ${by('orange')} orange · ${by('yellow')} yellow` : 'none',
         src: `IPMA${types ? ' · ' + types : ''}`,
         href: 'https://www.ipma.pt/pt/otempo/prev-sam/',
@@ -172,12 +194,12 @@ export async function loadDatapoints() {
       ]);
       const W = Array.isArray(wx) ? wx : [wx],
         A = aq ? (Array.isArray(aq) ? aq : [aq]) : [];
-      PLACES.forEach(([name], i) => {
+      PLACES.forEach(([name, , , group], i) => {
         const d = W[i]?.daily,
           aqi = A[i]?.current?.european_aqi;
         if (!d) return;
         rows.push({
-          group: 'weather',
+          group,
           id: `wx-${String(name).toLowerCase()}`,
           k: `${name} today`,
           v: `${nf0.format(d.temperature_2m_max[0])}°C`,
@@ -230,7 +252,7 @@ export async function loadDatapoints() {
       });
     }),
     // --- Land: is the soil drying out? One card per place --------------------
-    ...SOIL_PLACES.map(([id, name, lat, lon], i) =>
+    ...SOIL_PLACES.map(([id, name, lat, lon, group], i) =>
       task(async () => {
         const j = await getJSON(
           `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=soil_moisture_3_to_9cm&daily=precipitation_sum&past_days=60&forecast_days=1&timezone=UTC`,
@@ -252,7 +274,7 @@ export async function loadDatapoints() {
         const rain = (j.daily?.precipitation_sum || []).slice(-31, -1).reduce((a, b) => a + (b || 0), 0);
         const change = ((now.value - before.value) / (before.value || 1)) * 100;
         rows.push({
-          group: 'land',
+          group,
           id,
           k: `Soil moisture · ${name}`,
           v: `${nf2.format(now.value)} m³/m³`,

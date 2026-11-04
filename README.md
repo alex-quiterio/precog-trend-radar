@@ -39,7 +39,7 @@ Every channel has the same four parts:
 
 - **Gist:** what's running hot, the biggest moves, the steadiest climb, one line on what's hot in the other channels, and what changed since your last look. Copy it as Markdown for a daily note.
 - **Trends:** the selected topic's attention, day by day (100 = its own 30-day norm), with a 12-step forecast and a ±1σ band. Add or remove topics; `←` `→` switch topic, `[` `]` switch channel.
-- **Context:** the open-data cards that matter for that channel, with small charts where there's history. Soil moisture in Mafra and Amsterdam is pinned to every channel (`PINNED_DATAPOINTS` in `src/channels.ts`).
+- **Context:** the open-data cards that matter for that channel, grouped by place (Portugal, Netherlands, Euro area, Planet), with small charts where there's history. Soil moisture in Mafra and Amsterdam is pinned to every channel (`PINNED_DATAPOINTS` in `src/channels.ts`).
 - **Streams:** **Reading** (posts from sites you follow, matched to the channel's topics), **Forecasts** (open [Manifold](https://manifold.markets/) markets with the crowd's probability) and **Hacker News** (stories ranked by engagement per hour).
 
 Make your own channel with **+ channel**: give it a name and up to six topics.
