@@ -1,4 +1,5 @@
 // PRECOG / Trend Radar · Datapoints panel: ECB, Eurostat, IPMA, Open-Meteo, NOAA CO₂ and NSIDC sea ice.
+// Housing (prices, rents, mortgages) and energy (energy prices, renewable share, sun and wind) included.
 // Cards sit in groups by place: Portugal, Netherlands, Euro area, Planet. No card mixes two countries.
 import { nf0, nf1, nf2 } from '../core/format';
 import { bump } from '../core/ui-store';
@@ -18,17 +19,43 @@ const AREAS: [string, DatapointGroup, string, string][] = [
   ['NL', 'nl', 'nl', 'Netherlands'],
   ['EA21', 'ea', 'ea', 'Euro area'],
 ];
-/** Reads one area's monthly series out of a Eurostat JSON-stat reply (geo × time). */
-function eurostatSeries(j: any, geo: string): { t: number; value: number }[] {
-  const g = j.dimension.geo.category.index,
-    times = Object.keys(j.dimension.time.category.index),
-    n = times.length;
-  if (g[geo] == null) return [];
+/**
+ * Reads one series out of a Eurostat JSON-stat reply: pick a value for each dimension you name (geo, siec…);
+ * dimensions you don't name must have a single value. Time runs along the last dimension.
+ */
+function eurostatSeries(j: any, pick: Record<string, string>): { t: number; value: number }[] {
+  const ids: string[] = j.id,
+    size: number[] = j.size;
+  const times = Object.keys(j.dimension.time.category.index);
+  let base = 0;
+  for (let d = 0; d < ids.length; d++) {
+    if (ids[d] === 'time') continue;
+    const idx = pick[ids[d]] != null ? j.dimension[ids[d]].category.index[pick[ids[d]]] : 0;
+    if (idx == null) return [];
+    base = base * size[d] + idx;
+  }
+  const tIdx = ids.indexOf('time');
   return times
-    .map((t, i) => ({ t: Date.parse(t + '-01'), value: j.value[String(g[geo] * n + i)] }))
+    .map((t, i) => {
+      // time is the last dimension in Eurostat replies, so the flat index is base * nTimes + i
+      const v = tIdx === ids.length - 1 ? j.value[String(base * times.length + i)] : undefined;
+      return {
+        t: Date.parse(
+          /Q\d$/.test(t) ? `${t.slice(0, 4)}-${String((+t.slice(-1) - 1) * 3 + 1).padStart(2, '0')}-01` : t + '-01',
+        ),
+        value: v,
+      };
+    })
     .filter(p => p.value != null);
 }
 const month = (t: number) => new Date(t).toISOString().slice(0, 7);
+const quarter = (t: number) => `${new Date(t).getUTCFullYear()}-Q${Math.floor(new Date(t).getUTCMonth() / 3) + 1}`;
+/** House prices use 'EA' rather than 'EA21'. */
+const HPI_AREAS: [string, DatapointGroup, string, string][] = [
+  ['PT', 'pt', 'pt', 'Portugal'],
+  ['NL', 'nl', 'nl', 'Netherlands'],
+  ['EA', 'ea', 'ea', 'Euro area'],
+];
 export interface DatapointRow {
   /** Stable id a channel picks the card by (see channels.ts). */
   id: string;
@@ -105,7 +132,7 @@ export async function loadDatapoints() {
         'https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/une_rt_m?geo=PT&geo=NL&geo=EA21&s_adj=SA&age=TOTAL&sex=T&unit=PC_ACT&lastTimePeriod=13',
       );
       AREAS.forEach(([geo, group, suffix, name]) => {
-        const series = eurostatSeries(j, geo);
+        const series = eurostatSeries(j, { geo });
         const last = series[series.length - 1];
         if (!last) return;
         const yearAgo = series[0];
@@ -131,7 +158,7 @@ export async function loadDatapoints() {
         'https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/prc_hicp_minr?geo=PT&geo=NL&geo=EA21&unit=RCH_A&coicop18=TOTAL&lastTimePeriod=13',
       );
       AREAS.forEach(([geo, group, suffix, name]) => {
-        const series = eurostatSeries(j, geo);
+        const series = eurostatSeries(j, { geo });
         const last = series[series.length - 1];
         if (!last) return;
         rows.push({
@@ -249,6 +276,162 @@ export async function loadDatapoints() {
         o: 21,
         // the anomaly, so the seasons don't drown the trend
         spark: months.slice(-60).map(k => ({ t: Date.UTC(+k.slice(0, 4), +k.slice(4) - 1), value: data[k].anom })),
+      });
+    }),
+    // --- Housing: prices, rents, mortgages ------------------------------------
+    task(async () => {
+      const j = await getJSON(
+        'https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/prc_hpi_q?geo=PT&geo=NL&geo=EA&unit=RCH_A&purchase=TOTAL&lastTimePeriod=12',
+      );
+      HPI_AREAS.forEach(([geo, group, suffix, name]) => {
+        const series = eurostatSeries(j, { geo });
+        const last = series[series.length - 1];
+        if (!last) return;
+        rows.push({
+          group,
+          id: `hpi-${suffix}`,
+          k: `House prices · ${name}`,
+          v: `${last.value >= 0 ? '+' : '−'}${nf1.format(Math.abs(last.value))}%`,
+          sub: 'vs a year earlier',
+          src: `Eurostat house price index · ${quarter(last.t)}`,
+          href: 'https://ec.europa.eu/eurostat/databrowser/view/prc_hpi_q/default/table',
+          o: 10,
+          spark: series,
+        });
+      });
+    }),
+    task(async () => {
+      const j = await getJSON(
+        'https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/prc_hicp_minr?geo=PT&geo=NL&geo=EA21&unit=RCH_A&coicop18=CP041&lastTimePeriod=13',
+      );
+      AREAS.forEach(([geo, group, suffix, name]) => {
+        const series = eurostatSeries(j, { geo });
+        const last = series[series.length - 1];
+        if (!last) return;
+        rows.push({
+          group,
+          id: `rent-${suffix}`,
+          k: `Rents · ${name}`,
+          v: `${last.value >= 0 ? '+' : '−'}${nf1.format(Math.abs(last.value))}%`,
+          sub: 'actual rents vs a year earlier',
+          src: `Eurostat HICP rents · ${month(last.t)}`,
+          href: 'https://ec.europa.eu/eurostat/databrowser/view/prc_hicp_minr/default/table',
+          o: 11,
+          spark: series,
+        });
+      });
+    }),
+    task(async () => {
+      const j = await getJSON(
+        'https://data-api.ecb.europa.eu/service/data/MIR/M.PT+NL+U2.B.A2C.A.R.A.2250.EUR.N?format=jsondata&lastNObservations=13',
+      );
+      const areas = j.structure.dimensions.series[1].values.map(v => v.id);
+      const times = j.structure.dimensions.observation[0].values.map(v => Date.parse(v.id + '-01'));
+      Object.entries(j.dataSets[0].series as Record<string, { observations: Record<string, number[]> }>).forEach(
+        ([k, ser]) => {
+          const code = areas[+k.split(':')[1]];
+          const area = { PT: ['pt', 'Portugal'], NL: ['nl', 'Netherlands'], U2: ['ea', 'Euro area'] }[code];
+          if (!area) return;
+          const series = Object.entries(ser.observations)
+            .map(([i, o]) => ({ t: times[+i], value: o[0] }))
+            .filter(p => p.value != null)
+            .sort((a, b) => a.t - b.t);
+          const last = series[series.length - 1];
+          if (!last) return;
+          rows.push({
+            group: area[0] as DatapointGroup,
+            id: `mortgage-${area[0]}`,
+            k: `Mortgage rate · ${area[1]}`,
+            v: `${nf2.format(last.value)}%`,
+            sub: 'new house-purchase loans',
+            src: `ECB MFI interest rates · ${month(last.t)}`,
+            href: 'https://data.ecb.europa.eu/data/datasets/MIR',
+            o: 12,
+            spark: series,
+          });
+        },
+      );
+    }),
+    // --- Energy: what powers the grid, and what it costs ------------------------
+    task(async () => {
+      const j = await getJSON(
+        'https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/prc_hicp_minr?geo=PT&geo=NL&geo=EA21&unit=RCH_A&coicop18=NRG&lastTimePeriod=13',
+      );
+      AREAS.forEach(([geo, group, suffix, name]) => {
+        const series = eurostatSeries(j, { geo });
+        const last = series[series.length - 1];
+        if (!last) return;
+        rows.push({
+          group,
+          id: `energyinfl-${suffix}`,
+          k: `Energy prices · ${name}`,
+          v: `${last.value >= 0 ? '+' : '−'}${nf1.format(Math.abs(last.value))}%`,
+          sub: 'household energy vs a year earlier',
+          src: `Eurostat HICP energy · ${month(last.t)}`,
+          href: 'https://ec.europa.eu/eurostat/databrowser/view/prc_hicp_minr/default/table',
+          o: 14,
+          spark: series,
+        });
+      });
+    }),
+    task(async () => {
+      const j = await getJSON(
+        'https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/nrg_cb_pem?geo=PT&geo=NL&siec=TOTAL&siec=RA000&unit=GWH&lastTimePeriod=13',
+      );
+      (
+        [
+          ['PT', 'pt', 'Portugal'],
+          ['NL', 'nl', 'Netherlands'],
+        ] as [string, DatapointGroup, string][]
+      ).forEach(([geo, group, name]) => {
+        const total = eurostatSeries(j, { geo, siec: 'TOTAL' }),
+          ren = eurostatSeries(j, { geo, siec: 'RA000' });
+        const series = ren
+          .map(r => {
+            const t = total.find(x => x.t === r.t);
+            return t && t.value > 0 ? { t: r.t, value: (r.value / t.value) * 100 } : null;
+          })
+          .filter(Boolean);
+        const last = series[series.length - 1];
+        if (!last) return;
+        rows.push({
+          group,
+          id: `renew-${group}`,
+          k: `Renewable electricity · ${name}`,
+          v: `${nf0.format(last.value)}%`,
+          sub: 'share of electricity generated',
+          src: `Eurostat nrg_cb_pem · ${month(last.t)}`,
+          href: 'https://ec.europa.eu/eurostat/databrowser/view/nrg_cb_pem/default/table',
+          o: 13,
+          spark: series,
+        });
+      });
+    }),
+    task(async () => {
+      const j = await getJSON(
+        'https://api.open-meteo.com/v1/forecast?latitude=38.72,52.37&longitude=-9.14,4.9&daily=shortwave_radiation_sum,wind_speed_10m_max&past_days=29&forecast_days=1&timezone=auto',
+      );
+      (
+        [
+          ['lisbon', 'Lisbon', 'pt'],
+          ['amsterdam', 'Amsterdam', 'nl'],
+        ] as [string, string, DatapointGroup][]
+      ).forEach(([id, name, group], i) => {
+        const d = (Array.isArray(j) ? j : [j])[i]?.daily;
+        if (!d) return;
+        const sun = d.shortwave_radiation_sum,
+          n = sun.length;
+        rows.push({
+          group,
+          id: `sun-${id}`,
+          k: `Sun and wind · ${name} today`,
+          v: `${nf1.format(sun[n - 1] / 3.6)} kWh/m²`,
+          sub: `solar energy on flat ground · wind up to ${nf0.format(d.wind_speed_10m_max[n - 1])} km/h`,
+          src: 'Open-Meteo · chart: last 30 days',
+          href: 'https://open-meteo.com/',
+          o: 15,
+          spark: d.time.map((t: string, k: number) => ({ t: Date.parse(t), value: sun[k] / 3.6 })),
+        });
       });
     }),
     // --- Land: is the soil drying out? One card per place --------------------

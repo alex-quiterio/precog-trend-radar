@@ -29,7 +29,9 @@ describe('lenses', () => {
     expect(state.lenses.map(l => l.id)).toEqual([
       'world',
       'tgs',
+      'energy',
       'portugal',
+      'housing',
       'circular',
       'amsterdam',
       'marginalian',
@@ -53,7 +55,9 @@ describe('lenses', () => {
     expect(state.lenses.map(l => l.id)).toEqual([
       'world',
       'tgs',
+      'energy',
       'portugal',
+      'housing',
       'circular',
       'amsterdam',
       'marginalian',
@@ -89,7 +93,9 @@ describe('lenses', () => {
     expect(state.lenses.map(l => l.id)).toEqual([
       'world',
       'tgs',
+      'energy',
       'portugal',
+      'housing',
       'circular',
       'amsterdam',
       'marginalian',

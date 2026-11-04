@@ -4,7 +4,7 @@ export const MIN = 60e3,
   HOUR = 3600e3,
   DAY = 86400e3;
 export const MAX_TOPICS = 6,
-  MAX_LENSES = 8,
+  MAX_LENSES = 10,
   HISTORY = 90,
   FC_STEPS = 12,
   FIT_N = 20,
@@ -56,6 +56,19 @@ export const PRESETS = [
     ],
   },
   {
+    id: 'energy',
+    name: 'Energy & power',
+    desc: 'How electricity is made, stored and priced, and what that costs at home.',
+    topics: [
+      ['Renewable energy'],
+      ['Solar power'],
+      ['Wind power'],
+      ['Energy storage'],
+      ['Heat pump'],
+      ['Nuclear power'],
+    ],
+  },
+  {
     id: 'portugal',
     name: 'Portugal & the land',
     desc: 'The interior, fire and water, and the practices behind a rural, closed-loop life.',
@@ -66,6 +79,19 @@ export const PRESETS = [
       ['Rural flight'],
       ['Permaculture'],
       ['Regenerative agriculture'],
+    ],
+  },
+  {
+    id: 'housing',
+    name: 'Housing',
+    desc: 'Prices, rents and mortgages in Portugal and the Netherlands, and the politics of a home.',
+    topics: [
+      ['Housing crisis'],
+      ['Affordable housing'],
+      ['Rent control'],
+      ['Mortgage loan', { q: 'mortgage rates' }],
+      ['Gentrification'],
+      ['Short-term rental', { q: 'short-term rental' }],
     ],
   },
   {
@@ -114,8 +140,9 @@ export const PRESETS = [
     ],
   },
 ];
-// v8 re-runs the upgrade for browsers that versions 5-7 marked as upgraded without saving the new lenses.
-export const PRESET_VERSION = 8;
+// v8 re-ran the upgrade for browsers that versions 5-7 marked as upgraded without saving the new lenses.
+// v9 adds Energy & power and Housing.
+export const PRESET_VERSION = 9;
 export const LS = {
   presetVer: 'precog.presetver',
   lenses: 'precog.lenses.v1',
