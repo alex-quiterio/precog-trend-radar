@@ -111,6 +111,7 @@
 </template>
 
 <script lang="ts">
+import './github.css';
 import { computed, defineComponent } from 'vue';
 import { ago, nf0 } from '@core/format';
 import { editGithubToken } from '@/actions';

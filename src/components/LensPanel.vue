@@ -93,3 +93,78 @@ export default defineComponent({
   },
 });
 </script>
+
+<style>
+/* This panel's styles. Global (not scoped), like the rest of the page: class names are specific to it. */
+/* lenses + watchlist */
+
+.watch-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border: 1px solid var(--hair);
+  background: var(--glass-strong);
+  border-radius: 999px;
+  padding: 2px 2px 2px 10px;
+}
+.chip.sel {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 1px var(--ink);
+}
+.chip .name {
+  border: 0;
+  background: transparent;
+  padding: 4px 4px 4px 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border-radius: 999px;
+}
+.chip .x {
+  border: 0;
+  background: transparent;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1;
+}
+.chip .x:hover {
+  background: var(--track);
+  color: var(--ink);
+}
+.add-form {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+.add-form input {
+  border: 1px dashed var(--axis);
+  background: var(--card);
+  border-radius: 999px;
+  padding: 6px 12px;
+  width: 220px;
+  min-height: 32px;
+}
+.add-form input:focus,
+.lens-add input:focus {
+  border-style: solid;
+  background: var(--glass-strong);
+}
+.watch-msg {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--ink-2);
+  min-height: 1.2em;
+}
+.watch-msg.err::before {
+  content: '⚠ ';
+}
+</style>

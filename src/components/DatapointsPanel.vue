@@ -66,3 +66,80 @@ export default defineComponent({
   },
 });
 </script>
+
+<style>
+/* This panel's styles. Global (not scoped), like the rest of the page: class names are specific to it. */
+/* datapoints */
+.dp {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+.dp .row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--hair);
+}
+.dp .row:last-child {
+  border-bottom: 0;
+}
+.dp dt {
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.dp dd {
+  margin: 0;
+  text-align: right;
+  font: 500 18px/1.1 var(--sans);
+  white-space: nowrap;
+}
+.dp .dp-spark {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 34px;
+  color: var(--ink-2);
+}
+.dp .src {
+  grid-column: 1 / -1;
+  font-size: 10.5px;
+  color: var(--muted);
+}
+.dp .src a {
+  color: var(--muted);
+}
+
+.dp dt .sub {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+}
+.dp-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 6px 22px;
+}
+.dp-group > header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 10px 0 4px;
+  border-bottom: 1px solid var(--axis);
+}
+.dp-group h4 {
+  margin: 0;
+  font: 600 15px/1.2 var(--sans);
+  color: var(--ink);
+}
+.dp-group header .muted {
+  font-size: 10.5px;
+}
+/* Phones */
+@media (max-width: 600px) {
+  .dp dd {
+    white-space: normal;
+    font-size: 16px;
+  }
+}
+</style>

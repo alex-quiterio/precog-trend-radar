@@ -150,11 +150,11 @@ import type { SeriesPoint } from '@/types';
 import { shiftTopic } from '@/actions';
 import { compText, niceTicks, pathOf, useWidth } from '@components/helpers';
 import { DAY } from '@core/config';
-import { COMP_LABEL, changeLabel, fmtAxis, fmtPct, fmtTick, fmtVal } from '@core/format';
+import { COMP_LABEL, changeLabel, fmtAxis, fmtPct, fmtTick, fmtTime, fmtVal } from '@core/format';
 import { arrowOf } from '@core/stats';
 import { ui } from '@core/ui-store';
 import { ADAPTERS, SOURCES } from '@sources/registry';
-import { liveParts } from '@/live';
+import { live } from '@/live';
 import { activeLens, entriesOf, selectedEntry, series, state } from '@/state';
 import TopicDot from '@components/TopicDot.vue';
 import PanelShell from '@components/PanelShell.vue';
@@ -187,7 +187,7 @@ export default defineComponent({
         arrow: st ? arrowOf(st.momentum) : ['', ''],
         // Each source's state for this topic, so you can see what's actually feeding the line.
         sources: E
-          ? liveParts().map(pid => {
+          ? live.parts().map(pid => {
               const pts = E.parts?.[pid],
                 err = E.partErr?.[pid],
                 skip = E.skipped?.[pid];
@@ -335,7 +335,190 @@ export default defineComponent({
       },
       shiftTopic,
       compText,
+      fmtVal,
+      fmtPct,
+      fmtTime,
+      changeLabel,
     };
   },
 });
 </script>
+
+<style>
+/* This panel's styles. Global (not scoped), like the rest of the page: class names are specific to it. */
+/* signal */
+.signal-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.sel-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.big {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+.big .num {
+  font: 500 52px/1 var(--sans);
+  letter-spacing: -0.01em;
+  font-variant-numeric: lining-nums;
+}
+.big .arrow {
+  font: 400 30px/1 var(--sans);
+}
+.big .chg {
+  font-size: 14px;
+  font-weight: 600;
+}
+.sub {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 4px;
+}
+.switcher {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-2);
+  font-size: 12px;
+}
+.switcher .btn {
+  width: 34px;
+  padding: 0;
+}
+.chart-wrap {
+  position: relative;
+  margin-top: 10px;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  border-radius: 10px;
+  outline-offset: 4px;
+  cursor: crosshair;
+}
+.chart-wrap svg {
+  display: block;
+  width: 100%;
+  transform: translateX(var(--dx, 0px));
+  transition:
+    transform 0.25s ease,
+    opacity 0.25s ease;
+}
+.chart-wrap.dragging svg {
+  transition: none;
+}
+.chart-wrap svg.swapped {
+  animation: swap 0.35s ease;
+}
+@keyframes swap {
+  from {
+    opacity: 0.25;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.gl {
+  stroke: var(--grid);
+  stroke-width: 1;
+}
+.base {
+  stroke: var(--axis);
+  stroke-width: 1;
+}
+.yl,
+.xl {
+  fill: var(--muted);
+  font: 10.5px var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+.nowline {
+  stroke: var(--axis);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+}
+.nowlbl {
+  fill: var(--muted);
+  font: 10px var(--mono);
+  letter-spacing: 0.08em;
+}
+.key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  align-items: center;
+}
+.key svg {
+  vertical-align: middle;
+  margin-right: 5px;
+}
+/* the chart flashes when a topic is picked from elsewhere on the page */
+.panel.flash {
+  animation: flash 1.2s ease-out;
+}
+@keyframes flash {
+  0% {
+    box-shadow:
+      0 0 0 2px var(--accent),
+      var(--shadow);
+  }
+  100% {
+    box-shadow:
+      0 0 0 2px transparent,
+      var(--shadow);
+  }
+}
+/* which sources feed the charted topic */
+.srcs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 11px;
+}
+.src-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 9px 2px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--hair);
+  color: var(--muted);
+}
+.src-chip i {
+  font-style: normal;
+  font-weight: 700;
+}
+.src-chip b {
+  font: 500 10px/1 var(--mono);
+  color: var(--muted);
+}
+.src-chip.ok {
+  color: var(--ink);
+  border-color: var(--accent);
+}
+.src-chip.ok i {
+  color: var(--accent);
+}
+.src-chip.error {
+  color: var(--ink);
+  border-color: var(--watch);
+}
+.src-chip.error i {
+  color: var(--watch);
+}
+</style>

@@ -130,20 +130,23 @@ PRECOG tracks **topics, never people**.
 
 ```
 src/
-├── main.ts                 boot: prefs, mount, data loop, keyboard
+├── main.ts                 mount the app and start the data loops
+├── boot/                   restoring the last view, keyboard shortcuts, page lifecycle, console hooks
 ├── App.vue                 the channel on screen: hero, gist, trends, builders, streams, context
 ├── channels.ts             channel definitions
 ├── types.ts                shared data shapes (Entry, Stats, Adapter…)
-├── state.ts · live.ts · alerts.ts · actions.ts
-├── core/                   config and lenses, person guard, statistics, formatting, errors, ui store
+├── state.ts · alerts.ts · actions.ts
+├── live.ts                 the data loop (createLiveLoop: fake sources in, testable)
+├── core/                   config and lenses, storage (swappable backend), person guard, statistics, formatting
 ├── sources/                one folder per source; index.ts lists them all; registries for adapters, streams, cards
 │   ├── wikipedia/          index.ts (fetch + adapter) · parse.ts (read replies) · parse.test.ts · fixtures/
 │   ├── hackernews/ guardian/ manifold/ reading/ github/
 │   └── ecb/ eurostat/ ipma/ open-meteo/ global-warming/     parsers behind the Open data cards
 ├── features/               gist, streams, datapoints, GitHub momentum, your GitHub
-├── components/             one Vue component per panel, plus PanelShell, Sparkline, tags
-└── styles/                 tokens (dark default + light), app, print and reduced motion
-tests/                      Vitest unit tests for the core logic (parser tests sit next to each source)
+├── components/             one Vue component per panel, each with its own styles, plus PanelShell, Sparkline, tags
+└── styles/                 tokens (dark default + light), shared base styles, print and reduced motion
+tests/                      Vitest: core logic, the data loop, stream loader, storage, shortcuts, panel rendering
+                            (parser tests sit next to each source)
 ```
 
 Imports use path aliases: `@core/…`, `@features/…`, `@sources/…`, `@components/…`, and `@/…` for the top-level

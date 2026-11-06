@@ -1,7 +1,7 @@
 // PRECOG / Trend Radar · World attention index: re-base each source to its 30-day median, weight, combine.
 import { DAY, HISTORY, MIN_BASE } from '@core/config';
 import { mean, median } from '@core/stats';
-import type { Entry, SeriesPoint } from '@/types';
+import type { Adapter, Entry, SeriesPoint } from '@/types';
 import { ADAPTERS, utcDay } from '@sources/registry';
 
 interface Candidate {
@@ -13,13 +13,17 @@ interface Candidate {
 }
 
 // --- Blend: each component re-based to 100 = its own 30-day median, then weighted ---
-export function blendParts(E: Pick<Entry, 'parts'> & { sparse?: boolean }, partIds: string[]): SeriesPoint[] {
+export function blendParts(
+  E: Pick<Entry, 'parts'> & { sparse?: boolean },
+  partIds: string[],
+  adapters: Record<string, Pick<Adapter, 'weight' | 'minMean' | 'lagDays'>> = ADAPTERS,
+): SeriesPoint[] {
   const today = utcDay();
   const cands: Candidate[] = [];
   for (const pid of partIds) {
     const pts = E.parts[pid];
     if (!pts || pts.length < MIN_BASE) continue;
-    const ad = ADAPTERS[pid];
+    const ad = adapters[pid] ?? {};
     const daily = new Map<number, number>();
     const cutoff = today - (ad.lagDays || 0) * DAY; // drop days a source has not finished publishing
     pts.forEach(p => {

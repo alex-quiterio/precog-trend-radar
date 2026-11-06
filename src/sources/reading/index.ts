@@ -38,6 +38,10 @@ const ownSites = (stored: unknown): ReadingSite[] =>
 const own = shallowRef<ReadingSite[]>(ownSites(store.get<unknown>(SITES_KEY, [])));
 /** Every followed site: the built-in ones first, then yours. */
 export const readingSites = (): ReadingSite[] => [...BUILT_IN_SITES, ...own.value];
+/** Reads the followed sites from storage again (after storage changed underneath, e.g. in tests). */
+export function reloadReadingSites(): void {
+  own.value = ownSites(store.get<unknown>(SITES_KEY, []));
+}
 /** Saves the followed sites. Built-in sites are always kept, whatever the list says. */
 export function saveReadingSites(sites: ReadingSite[]): void {
   own.value = ownSites(sites);

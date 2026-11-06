@@ -120,3 +120,128 @@ export default defineComponent({
   },
 });
 </script>
+
+<style>
+/* This panel's styles. Global (not scoped), like the rest of the page: class names are specific to it. */
+.status {
+  margin: 0 6px 6px;
+  min-height: 1.5em;
+  color: var(--muted);
+  font-size: 11.5px;
+}
+
+/* channel hero */
+.channel-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 8px 24px;
+  padding: 30px 4px 18px;
+  animation: enter 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.ch-kicker {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font: 500 11px/1 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.ch-no {
+  color: var(--accent);
+  margin-right: 10px;
+}
+.channel-hero h2 {
+  margin: 0;
+  font: 600 34px/1.1 var(--sans);
+  letter-spacing: -0.02em;
+}
+.ch-desc {
+  margin: 8px 0 0;
+  color: var(--ink-2);
+  font-size: 14px;
+  max-width: 70ch;
+}
+.channel-hero .status {
+  margin: 0;
+  text-align: right;
+  max-width: 46ch;
+}
+
+/* layout: the channel's main column, and its context alongside on wide screens */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 22px 26px;
+  align-items: start;
+}
+.main,
+.side {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+@media (min-width: 1180px) {
+  .layout:not(.wide) {
+    grid-template-columns: minmax(0, 1fr) 360px;
+  }
+  .side {
+    position: sticky;
+    top: 120px;
+    max-height: calc(100vh - 132px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+}
+.block {
+  min-width: 0;
+}
+.block-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 4px 10px;
+  color: var(--ink-2);
+  font: 600 11px/1 var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.block-head span {
+  color: var(--accent);
+  font-weight: 500;
+}
+.block-head::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--hair), transparent);
+}
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.foot {
+  margin: 44px 4px 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--hair);
+  color: var(--muted);
+  font-size: 11px;
+}
+/* Phones */
+@media (max-width: 600px) {
+  .page {
+    padding: 0 12px 52px;
+  }
+  .channel-hero {
+    grid-template-columns: minmax(0, 1fr);
+    padding-top: 20px;
+  }
+  .channel-hero h2 {
+    font-size: 26px;
+  }
+  .channel-hero .status {
+    text-align: left;
+  }
+}
+</style>

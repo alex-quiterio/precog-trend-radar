@@ -172,3 +172,97 @@ export default defineComponent({
   },
 });
 </script>
+
+<style>
+/* This panel's styles. Global (not scoped), like the rest of the page: class names are specific to it. */
+/* radar */
+.radar-wrap {
+  position: relative;
+}
+#radar {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1/1;
+  overflow: visible;
+}
+.ring {
+  fill: none;
+  stroke: var(--ring-line);
+  stroke-width: 1;
+}
+.ring.flat {
+  stroke-dasharray: 3 4;
+  stroke: var(--ring-flat);
+}
+.spoke {
+  stroke: var(--spoke);
+  stroke-width: 1;
+}
+.rlbl {
+  fill: var(--muted);
+  font: 9.5px var(--mono);
+  letter-spacing: 0.12em;
+}
+.sweep-line {
+  stroke: var(--sweep-line);
+  stroke-width: 1.5;
+}
+.sweep-slice {
+  fill: var(--sweep-fill);
+}
+.blip {
+  transition: transform 0.9s cubic-bezier(0.3, 0.7, 0.2, 1);
+  cursor: pointer;
+}
+.blip .core {
+  stroke: var(--ring);
+  stroke-width: 2;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.blip .ping {
+  fill: none;
+  stroke-width: 2;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.blip .ping.on {
+  animation: ping 0.9s ease-out forwards;
+}
+@keyframes ping {
+  0% {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.8);
+  }
+}
+@keyframes pop {
+  0% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.blip text {
+  fill: var(--ink);
+  font: 10px var(--mono);
+  paint-order: stroke;
+  stroke: var(--halo);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+.radar-key {
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 6px;
+}
+.sweep {
+  pointer-events: none;
+}
+</style>

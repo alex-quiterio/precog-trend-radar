@@ -1,18 +1,11 @@
 // The shipped lenses, and upgrading saved lenses when they change.
 import { beforeEach, describe, expect, it } from 'vitest';
 
-const mem = new Map<string, string>();
-globalThis.localStorage = {
-  getItem: k => mem.get(k) ?? null,
-  setItem: (k, v) => void mem.set(k, String(v)),
-  removeItem: k => void mem.delete(k),
-  clear: () => mem.clear(),
-  key: () => null,
-  length: 0,
-} as Storage;
+import { LS } from '@core/config';
+import { memoryBackend, useBackend } from '@core/storage';
+import { loadLenses, state } from '@/state';
 
-const { LS } = await import('@core/config');
-const { loadLenses, state } = await import('@/state');
+let mem = memoryBackend().data;
 
 const saved = (id: string, names: string[]) => ({
   id,
@@ -22,7 +15,7 @@ const saved = (id: string, names: string[]) => ({
 });
 
 describe('lenses', () => {
-  beforeEach(() => mem.clear());
+  beforeEach(() => void (mem = useBackend(memoryBackend()).data));
 
   it('starts a first visit with one lens per channel', () => {
     loadLenses();

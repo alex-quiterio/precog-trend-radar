@@ -13,7 +13,7 @@ import { activeChannel } from '@/channels';
 import { guardianKey, setGuardianKey } from '@sources/guardian';
 import { probeSite, readingSites, saveReadingSites } from '@sources/reading';
 import { loadStories, stories } from '@features/stories';
-import { fetchPart, liveAbort, liveParts, setStatus, startLive } from '@/live';
+import { live } from '@/live';
 import {
   activeLens,
   ensureEntry,
@@ -70,9 +70,10 @@ export function addTopic(raw: string): boolean {
   saveLenses();
   savePrefs();
   watchMsg(`Tracking “${name}” in ${lens.name}.`);
-  const ctl = liveAbort?.signal.aborted === false ? liveAbort : new AbortController();
-  Promise.all(liveParts().map(p => fetchPart(E, p, ctl.signal))).then(() => {
-    if (E.liveError) setStatus(`No data for ${E.name}: ${E.liveError}`);
+  // Fetch the new topic now; a refresh that starts meanwhile cancels it along with everything else.
+  const signal = live.signal() ?? new AbortController().signal;
+  Promise.all(live.parts().map(p => live.fetchPart(E, p, signal))).then(() => {
+    if (E.liveError) live.setStatus(`No data for ${E.name}: ${E.liveError}`);
   });
   return true;
 }
@@ -208,7 +209,7 @@ export function editGuardianKey(): void {
   // Show the articles straight away, unless this channel leads with something else (e.g. its podcast).
   if (ui.guardian && !now && activeChannel().streams[0] === 'news') state.storySrc = 'news';
   savePrefs();
-  startLive();
+  live.start();
 }
 /** Follows a WordPress site in the Reading tab, after checking the browser may read it. */
 export async function addReadingSite(raw: string): Promise<string | null> {

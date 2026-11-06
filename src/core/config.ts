@@ -154,29 +154,6 @@ export const LS = {
   storyObs: 'precog.storyobs.v1',
 };
 
-export const store = {
-  get<T>(k: string, d: T): T {
-    try {
-      const v = localStorage.getItem(k);
-      return v == null ? d : JSON.parse(v);
-    } catch {
-      return d;
-    }
-  },
-  set(k: string, v: unknown): void {
-    try {
-      localStorage.setItem(k, JSON.stringify(v));
-    } catch {
-      // Storage full: drop old caches (versioned keys no longer read), then try once more.
-      try {
-        Object.keys(localStorage)
-          .filter(x => /^precog\.(reading\.v[12]|guardian\.v1|gdelt)\./.test(x))
-          .forEach(x => localStorage.removeItem(x));
-        localStorage.setItem(k, JSON.stringify(v));
-      } catch {
-        /* storage unavailable */
-      }
-    }
-  },
-};
+// Storage lives in core/storage.ts; re-exported here because most modules import it with the keys above.
+export { store } from '@core/storage';
 export const sleep = (ms: number): Promise<void> => new Promise(r => setTimeout(r, ms));

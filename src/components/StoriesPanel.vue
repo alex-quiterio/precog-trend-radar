@@ -167,3 +167,167 @@ export default defineComponent({
   },
 });
 </script>
+
+<style>
+/* This panel's styles. Global (not scoped), like the rest of the page: class names are specific to it. */
+/* stories */
+.stories {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.story {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) auto;
+  gap: 4px 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--hair);
+  align-items: start;
+}
+.story:last-child {
+  border-bottom: 0;
+}
+.story .rank {
+  font: 500 18px/1.1 var(--sans);
+  color: var(--muted);
+  text-align: right;
+}
+.story .title {
+  font-weight: 600;
+  line-height: 1.35;
+}
+.story .smeta {
+  color: var(--muted);
+  font-size: 11.5px;
+  margin-top: 3px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  align-items: center;
+}
+.story .stopic {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--ink-2);
+}
+.story .stopic .dot {
+  width: 8px;
+  height: 8px;
+}
+.story .vel {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.story .vel b {
+  font: 500 18px/1 var(--sans);
+}
+.story .vel small {
+  display: block;
+  color: var(--muted);
+  font-size: 10.5px;
+  margin-top: 3px;
+}
+.vbar {
+  height: 4px;
+  border-radius: 4px;
+  background: var(--track);
+  margin-top: 5px;
+  overflow: hidden;
+  width: 90px;
+  margin-left: auto;
+}
+.vbar i {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: var(--ink-2);
+}
+/* Phones: the figure moves under the title as one line, so titles get the full width. */
+@media (max-width: 600px) {
+  .story {
+    grid-template-columns: 22px minmax(0, 1fr);
+  }
+  .story .vel {
+    grid-column: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 8px;
+    text-align: left;
+    white-space: normal;
+  }
+  .story .vel b {
+    font-size: 15px;
+  }
+  .story .vel small {
+    display: inline;
+    margin-top: 0;
+  }
+  .story .vel .vbar {
+    width: 56px;
+    margin: 0;
+    align-self: center;
+  }
+}
+.flag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 1px 6px;
+  border-radius: 5px;
+  border: 1.5px solid var(--ink);
+  color: var(--ink);
+}
+/* reading: followed sites */
+.sites {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin: -2px 0 10px;
+  font-size: 11.5px;
+}
+.site-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border: 1px solid var(--hair);
+  background: var(--card);
+  border-radius: 999px;
+  padding: 2px 4px 2px 10px;
+}
+.site-chip a {
+  text-decoration: none;
+}
+.site-chip button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}
+.site-chip button:hover {
+  background: var(--track);
+  color: var(--ink);
+}
+.site-add input {
+  border: 1px dashed var(--axis);
+  background: transparent;
+  border-radius: 999px;
+  padding: 3px 12px;
+  width: 230px;
+  max-width: 100%;
+}
+.smeta .site {
+  color: var(--accent);
+}
+.smeta .desc {
+  color: var(--muted);
+  flex-basis: 100%;
+}
+</style>

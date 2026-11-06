@@ -107,6 +107,7 @@
 </template>
 
 <script lang="ts">
+import './github.css';
 import { computed, defineComponent } from 'vue';
 import { ago, nf0, nf1 } from '@core/format';
 import { ui } from '@core/ui-store';

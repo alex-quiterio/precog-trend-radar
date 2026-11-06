@@ -62,7 +62,7 @@
 import { ref, computed, defineComponent } from 'vue';
 import { focusTopic, markRead } from '@/actions';
 import { DAY } from '@core/config';
-import { fmtTime } from '@core/format';
+import { fmtPct, fmtTime, fmtVal } from '@core/format';
 import { ui } from '@core/ui-store';
 import { briefMarkdown, buildBrief, copyText, type Scored } from '@features/brief';
 import { state } from '@/state';
@@ -101,7 +101,141 @@ export default defineComponent({
       markRead();
       note.value = 'Marked as read.';
     }
-    return { ui, state, b, head, bar, note, copy, read, focusTopic };
+    return { ui, state, b, head, bar, note, copy, read, focusTopic, fmtVal, fmtPct };
   },
 });
 </script>
+
+<style>
+/* This panel's styles. Global (not scoped), like the rest of the page: class names are specific to it. */
+/* brief */
+
+.brief-list {
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.brief-list li {
+  padding-left: 18px;
+  position: relative;
+  font-size: 13px;
+}
+.brief-list li::before {
+  content: '›';
+  position: absolute;
+  left: 3px;
+  color: var(--muted);
+}
+.movers {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.movers td,
+.movers th {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--hair);
+  white-space: nowrap;
+  text-align: right;
+}
+.movers td:first-child,
+.movers th:first-child {
+  text-align: left;
+}
+.movers .topic {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  padding: 2px 0;
+  font-weight: 500;
+  color: var(--ink);
+}
+.movers .topic:hover {
+  color: var(--accent);
+}
+.movers tbody tr:hover {
+  background: var(--track);
+}
+.movers thead th {
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.mbar {
+  position: relative;
+  width: 110px;
+  height: 8px;
+  display: inline-block;
+  vertical-align: middle;
+}
+.mbar::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -2px;
+  bottom: -2px;
+  width: 1px;
+  background: var(--axis);
+}
+.mbar i {
+  position: absolute;
+  top: 0;
+  height: 8px;
+  border-radius: 4px;
+}
+/* Phones: drop the bar and z (State says the same thing), let long names wrap, so nothing scrolls sideways. */
+@media (max-width: 600px) {
+  .movers .mbar,
+  .movers .col-z {
+    display: none;
+  }
+  .movers td,
+  .movers th {
+    padding: 6px 4px;
+  }
+  .movers td:first-child {
+    white-space: normal;
+  }
+  .movers .topic {
+    text-align: left;
+  }
+}
+.brief-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  align-items: center;
+}
+/* gist: topics named in a sentence chart that topic when clicked */
+.brief-topic {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  background: transparent;
+  padding: 0 2px;
+  margin: 0 -2px;
+  border-radius: 5px;
+  color: var(--ink);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: var(--axis);
+  text-underline-offset: 3px;
+  vertical-align: baseline;
+}
+.brief-topic:hover {
+  background: var(--track);
+  text-decoration-color: var(--accent);
+}
+.brief-topic .dot,
+.brief-topic svg {
+  flex: none;
+}
+</style>
