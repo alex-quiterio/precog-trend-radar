@@ -37,7 +37,7 @@ export const CHANNELS: Channel[] = [
     id: 'world',
     icon: 'globe',
     label: 'World',
-    kicker: 'The big stories, what forecasters expect, and the money underneath.',
+    kicker: 'What the internet is echoing today, what forecasters expect, and the money underneath.',
     lensId: 'world',
     datapoints: ['inflation-ea', 'ecb', 'unemployment-ea', 'co2'],
     streams: ['news', 'forecasts', 'reading', 'hn'],

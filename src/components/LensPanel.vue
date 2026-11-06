@@ -12,10 +12,35 @@
       </button>
     </template>
     <div class="watch-row">
-      <span v-for="E in view.list" :key="E.key" class="chip" :class="{ sel: view.sel === E }">
+      <span
+        v-for="E in view.list"
+        :key="E.key"
+        class="chip"
+        :class="{ sel: view.sel === E, pinned: view.hot && hotOf(E)?.pinned }"
+      >
         <button class="name" type="button" :aria-pressed="view.sel === E" :title="chipTitle(E)" @click="select(E.key)">
           <topic-dot :color="E.color"></topic-dot>
           {{ E.name }}
+          <span v-if="view.hot && isNew(E)" class="hot-new">new</span>
+        </button>
+        <button
+          v-if="view.hot"
+          class="pin no-print"
+          type="button"
+          :aria-pressed="!!hotOf(E)?.pinned"
+          :aria-label="(hotOf(E)?.pinned ? 'Unpin ' : 'Pin ') + E.name"
+          :title="hotOf(E)?.pinned ? 'Pinned: stays on World. Click to let it go.' : 'Pin: keep it on World'"
+          @click="togglePin(E.key)"
+        >
+          <svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true">
+            <path
+              d="M4.5 1.5h3l-.5 3 2 1.5v1H3v-1l2-1.5zM6 7v3.5"
+              stroke="currentColor"
+              stroke-width="1.2"
+              stroke-linejoin="round"
+              :fill="hotOf(E)?.pinned ? 'currentColor' : 'none'"
+            />
+          </svg>
         </button>
         <button class="x" type="button" :aria-label="'Remove ' + E.name" @click="removeTopic(E.key)">×</button>
       </span>
@@ -31,6 +56,10 @@
         />
       </form>
     </div>
+    <p v-if="view.hot && view.echo" class="hot-why">
+      <span v-for="e in view.echo.tags" :key="e.id" class="echo" :title="e.title">{{ e.label }}</span>
+      <span class="why">{{ view.echo.why }}</span>
+    </p>
     <p class="watch-msg" :class="{ err: ui.watchErr }" role="status">{{ ui.watchMsg }}</p>
   </panel-shell>
 </template>
@@ -41,31 +70,66 @@ import { ref, computed, watch, nextTick, defineComponent } from 'vue';
 import { isBuiltInLens } from '@/channels';
 import { MAX_TOPICS } from '@core/config';
 import type { Entry } from '@/types';
+import { ECHO_LABEL, type Echo, dayOf } from '@features/hot-topics';
 import TopicDot from '@components/TopicDot.vue';
 import PanelShell from '@components/PanelShell.vue';
 
 // PRECOG / Trend Radar · Topics of the channel on screen: pick one to chart, add or remove topics.
+// On World the topics are picked each day from what the internet is echoing: pin one to keep it, and the
+// line under the topics says where the selected one is echoing.
 
 export default defineComponent({
   name: 'LensPanel',
   props: { index: Number },
   components: { PanelShell, TopicDot },
   setup() {
-    const { app, actions } = useApp();
+    const { app, actions, hot } = useApp();
     const ui = app.ui;
-    const { addTopic, removeLens, removeTopic, select } = actions;
+    const { addTopic, removeLens, removeTopic, select, togglePin } = actions;
+    const hotOf = (E: Entry) => hot.pickOf(E.name);
+    const isNew = (E: Entry) => hot.isNew(hotOf(E), dayOf(ui.now));
+    const SHORT: Record<Echo, string> = {
+      news: 'In the news',
+      read: 'Most read',
+      hn: 'Hacker News',
+      manifold: 'Manifold',
+      guardian: 'Guardian',
+    };
     const newTopic = ref(''),
       addInput = ref<HTMLInputElement | null>(null);
     const view = computed(() => {
       const lens = app.activeLens(),
         list = app.entriesOf(lens);
+      const isHot = !!lens && hot.owns(lens.id);
+      const sel = app.selectedEntry();
+      const p = sel && isHot ? hotOf(sel) : undefined;
+      const hs = hot.state;
       return {
+        hot: isHot,
+        echo: p && {
+          tags: p.echoes.map(e => ({ id: e, label: SHORT[e], title: ECHO_LABEL[e] })),
+          why:
+            p.why ||
+            (p.echoes.includes('news')
+              ? 'On the front page of Wikipedia, chosen by its editors.'
+              : p.pinned
+                ? 'Pinned by you.'
+                : 'Kept from before.'),
+        },
         lens,
         list,
         sel: app.selectedEntry(),
         full: list.length >= MAX_TOPICS,
         own: !!lens && !isBuiltInLens(lens.id),
-        meta: `${list.length} of ${MAX_TOPICS} · click one to chart it`,
+        meta: isHot
+          ? hs.loading
+            ? 'Picking today’s topics…'
+            : hs.error
+              ? `Couldn’t pick today’s topics (${hs.error}); showing the last ones`
+              : hs.day
+                ? 'Picked today from what the internet is echoing · pin one to keep it'
+                : `${list.length} of ${MAX_TOPICS} · click one to chart it`
+          : `${list.length} of ${MAX_TOPICS} · click one to chart it`,
       };
     });
     const chipTitle = (E: Entry) =>
@@ -90,6 +154,9 @@ export default defineComponent({
       select,
       removeTopic,
       removeLens,
+      togglePin,
+      hotOf,
+      isNew,
     };
   },
 });
@@ -119,6 +186,7 @@ export default defineComponent({
   box-shadow: 0 0 0 1px var(--ink);
 }
 .chip .name {
+  text-align: left;
   border: 0;
   background: transparent;
   padding: 4px 4px 4px 0;
@@ -136,6 +204,58 @@ export default defineComponent({
   color: var(--muted);
   font-size: 15px;
   line-height: 1;
+}
+.chip .pin {
+  border: 0;
+  background: transparent;
+  width: 24px;
+  height: 26px;
+  border-radius: 50%;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.chip .pin svg {
+  display: block;
+}
+.chip .pin:hover,
+.chip.pinned .pin {
+  color: var(--accent);
+}
+.hot-new {
+  font: 600 9.5px/1 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  padding: 2px 5px;
+}
+/* Where the selected World topic is echoing today */
+.hot-why {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.hot-why .echo {
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--ink);
+  white-space: nowrap;
+}
+.hot-why .why {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .chip .x:hover {
   background: var(--track);

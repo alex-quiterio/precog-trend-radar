@@ -4,8 +4,8 @@ import { expect, test, type Page } from '@playwright/test';
 import { SPIKING, mockApis } from './mock-apis';
 
 /** Opens the app and waits until the first data load has finished. */
-async function open(page: Page) {
-  await mockApis(page);
+async function open(page: Page, opts: Parameters<typeof mockApis>[1] = {}) {
+  await mockApis(page, opts);
   await page.goto('/');
   await expect(page.locator('.status')).toContainText('Live · updated', { timeout: 30_000 });
 }
@@ -111,4 +111,25 @@ test('creates a channel and deletes it from the channel bar; built-in channels h
   await expect(heroTitle(page)).not.toHaveText('Bikes');
   await page.reload();
   await expect(page.locator('.channels').getByRole('button', { name: 'Bikes' })).toHaveCount(0);
+});
+
+test('World picks its topics from what the internet is echoing, and a pin keeps one', async ({ page }) => {
+  await open(page, { echoes: true });
+  const topics = page.locator('#p-watch');
+  await expect(topics.locator('.chip .name')).toHaveCount(6);
+  for (const name of ['United States elections', 'Polish Constitutional Tribunal crisis', 'Binance hack', '.xyz'])
+    await expect(topics.getByRole('button', { name, exact: false }).first()).toBeVisible();
+  await expect(topics.getByText('Abdul El-Sayed')).toHaveCount(0); // the most-read article, but a person
+  await expect(topics.getByText('World Series')).toHaveCount(0); // in the news, but sport
+  await expect(topics.locator('.hot-new')).toHaveCount(0); // the first pick: everything is new, so nothing says so
+  // Where the selected topic echoes, at a glance.
+  await topics.locator('.chip .name', { hasText: 'United States elections' }).click();
+  const why = topics.locator('.hot-why');
+  await expect(why.locator('.echo')).toHaveText(['In the news', 'Most read', 'Manifold']);
+  await expect(why).toContainText('356k reads yesterday');
+  // Pin one; it stays pinned after a reload.
+  await topics.getByRole('button', { name: 'Pin .xyz' }).click();
+  await expect(topics.getByRole('button', { name: 'Unpin .xyz' })).toHaveAttribute('aria-pressed', 'true');
+  await page.reload();
+  await expect(page.locator('#p-watch').getByRole('button', { name: 'Unpin .xyz' })).toBeVisible();
 });

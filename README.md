@@ -30,7 +30,7 @@ PRECOG shows one **channel** at a time. A channel is a whole dashboard for one c
 
 | Channel                      | Topics it charts                                                                                | Context (open data)                                                                                                               | Streams                                           |
 | ---------------------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| **World**                    | Ukraine, Gaza, tariffs, NATO, inflation, AI                                                     | inflation, ECB rate, unemployment, CO₂                                                                                            | Forecasts, Reading, Hacker News                   |
+| **World**                    | Picked daily from what the internet is echoing                                                  | inflation, ECB rate, unemployment, CO₂                                                                                            | Forecasts, Reading, Hacker News                   |
 | **The Great Simplification** | climate change, peak oil, degrowth, overshoot, biodiversity loss, Hormuz                        | CO₂, sea ice                                                                                                                      | its episodes and Frankly, Forecasts               |
 | **Energy & power**           | renewable energy, solar, wind, energy storage, heat pumps, nuclear                              | renewable share of electricity and household energy prices (PT, NL, euro area), today's sun and wind in Lisbon and Amsterdam, CO₂ | Forecasts, The Great Simplification, Hacker News  |
 | **Portugal & the land**      | Alentejo, wildfires, desertification, rural flight, permaculture, regen. ag.                    | IPMA fire risk and warnings, soil in Mafra, Lisbon and Porto weather, Portuguese inflation and unemployment                       | Reading, Forecasts                                |
@@ -48,7 +48,22 @@ Every channel has the same four parts:
 - **Radar:** a rotating sweep over the channel's topics. Distance shows momentum (centre = rising fastest), size shows volume; click a blip to chart it.
 - **Streams:** **The Guardian** (the newest articles naming the channel's topics, once you add a key), **Reading** (posts from sites you follow, matched to the channel's topics), **Forecasts** (open [Manifold](https://manifold.markets/) markets with the crowd's probability) and **Hacker News** (stories ranked by engagement per hour).
 
-Make your own channel with **+ channel**: give it a name and up to six topics.
+Make your own channel with **+ channel**: give it a name and up to six topics. Delete it with the **×** next to its tab.
+
+### World: what the internet is echoing
+
+World's topics aren't fixed: each morning PRECOG picks the six that stand out, so at a glance you see what the
+internet is talking about today. Candidates come from Wikipedia's **In the news** stories (chosen by its
+editors) and its **most read** articles (counted by how far above their usual they are). A candidate gains weight
+for every other place it shows up: the **Hacker News** front page, **Manifold**'s busiest markets, and the
+**Guardian**'s newest articles once you add a key. Pages of one story fold into one topic (all the US election
+pages become "United States elections"). People, sport, films and shows are left out.
+
+Under the topics, the selected one shows where it is echoing and why it was picked, for example
+`In the news · Most read · Manifold — +8 related pages in the most read · 356k reads yesterday · 4 markets on Manifold`.
+A pick keeps a head start for three days so the chart doesn't reshuffle on every visit; topics that are new
+today say **new**. **Pin** a topic to keep it; one you add yourself is pinned. One you remove stays out of the
+picks for a week. If the pick fails (offline, Wikipedia down), World keeps the topics it had.
 
 ### GitHub
 
@@ -63,7 +78,7 @@ The GitHub channel adds a **Builders** section:
 
 ### News coverage (The Guardian)
 
-Trend lines blend Wikipedia pageviews with Hacker News for tech topics. To add news coverage, get a free developer key at [open-platform.theguardian.com/access](https://open-platform.theguardian.com/access/) (**Register developer key**; it arrives by email), then click **+ Guardian key** and paste it. The key stays in your browser. Guardian article counts per day then join the trend lines for every topic, and **The Guardian** tab in Streams lists the newest articles naming the channel's topics (from the same requests, so it costs no extra calls). The developer tier allows about 500 calls a day; PRECOG caches each topic for the day.
+Trend lines blend Wikipedia pageviews with Hacker News for tech topics. To add news coverage, get a free developer key at [open-platform.theguardian.com/access](https://open-platform.theguardian.com/access/) (**Register developer key**; it arrives by email), then open **Settings** (the sliders button in the header), click **+ Add key** and paste it. The key stays in your browser. Guardian article counts per day then join the trend lines for every topic, and **The Guardian** tab in Streams lists the newest articles naming the channel's topics (from the same requests, so it costs no extra calls). The developer tier allows about 500 calls a day; PRECOG caches each topic for the day.
 
 ## Quick start
 
@@ -111,6 +126,7 @@ flowchart LR
 | The Guardian                          | articles per day naming the topic                      | Needs your free key. Cached for the day.                             |
 | Hacker News (Algolia)                 | stories per day; stories ranked by engagement per hour | Cached per day.                                                      |
 | Manifold                              | open prediction markets, with probability              | 10+ forecasters; questions naming a person are dropped.              |
+| Wikipedia feed · Wikidata             | World's daily topics: In the news, most read           | Once a day. Wikidata says which articles are about people.           |
 | WordPress sites you follow            | posts matched to the channel's topics                  | Cached for 12 h.                                                     |
 | GitHub search and users API           | new repos per topic, rising repos, your public stats   | ~10 searches a minute unauthenticated; cached for 12 h / 30 min.     |
 | ECB · Eurostat                        | deposit rate, inflation (HICP), unemployment           | PT, NL and the euro area.                                            |
@@ -123,6 +139,7 @@ PRECOG tracks **topics, never people**.
 
 - Topic and channel names that look like a person, an @handle or an email are refused. This is a heuristic based on common first names and titles.
 - A Wikipedia lookup that resolves to a person's article is skipped, and forecast questions that name a person are dropped.
+- World's daily pick leaves out every article Wikidata lists as a person, plus any whose description reads like one ("American politician (born 1984)") and events named after one ("Disappearance of …"). If Wikidata can't answer, the name check above applies too.
 - The one exception is **Your GitHub**, which shows the public profile of the username you set yourself.
 - Everything stays in your browser (`localStorage`), including the Guardian key. Nothing leaves your machine except the API requests themselves.
 
@@ -145,8 +162,9 @@ src/
 ├── sources/                one folder per source; index.ts lists them all; registries for adapters, streams, cards
 │   ├── wikipedia/          index.ts (fetch + adapter) · parse.ts (read replies) · parse.test.ts · fixtures/
 │   ├── hackernews/ guardian/ manifold/ reading/ github/
+│   ├── echoes/             what the internet is talking about today (Wikipedia's feed, Wikidata, HN, Manifold)
 │   └── ecb/ eurostat/ ipma/ open-meteo/ global-warming/     parsers behind the Open data cards
-├── features/               gist, streams, datapoints, GitHub momentum, your GitHub
+├── features/               gist, streams, datapoints, GitHub momentum, your GitHub, World's daily topic pick
 ├── components/             one Vue component per panel, each with its own styles, plus PanelShell, Sparkline, tags
 └── styles/                 tokens (dark default + light), shared base styles, print and reduced motion
 tests/                      Vitest: core logic, the data loop, stream loader, storage, shortcuts, panel rendering

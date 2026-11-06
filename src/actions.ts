@@ -8,6 +8,7 @@ import { looksLikePerson } from '@core/guard';
 import { levelOf } from '@core/stats';
 import { saveLook } from '@features/brief';
 import type { GitHub } from '@features/github';
+import type { HotTopics } from '@features/hot-topics';
 import type { MyGitHub } from '@features/github-me';
 import { githubToken, setGithubToken } from '@sources/github/auth';
 import { activeChannel, channels, isBuiltInLens } from '@/channels';
@@ -33,8 +34,10 @@ export interface ActionDeps {
   /** The GitHub panels' loaders (optional: a test may leave them out). */
   github?: Pick<GitHub, 'load'>;
   myGithub?: Pick<MyGitHub, 'load'>;
+  /** World's daily topic pick (optional: without it, World's topics are fixed like any channel's). */
+  hot?: Pick<HotTopics, 'owns' | 'adopt' | 'dismiss' | 'makeRoom' | 'togglePin'>;
 }
-export function createActions(app: AppStore, { live, stories, github, myGithub }: ActionDeps) {
+export function createActions(app: AppStore, { live, stories, github, myGithub, hot }: ActionDeps) {
   const { state, ui } = app;
   function watchMsg(text: string, err = false): void {
     ui.watchMsg = text || '';
@@ -58,6 +61,8 @@ export function createActions(app: AppStore, { live, stories, github, myGithub }
       watchMsg(`“${name}” is already in ${lens.name}.`, true);
       return false;
     }
+    // World picks its own topics: one you add takes the place of the weakest pick that isn't pinned.
+    if (lens.topics.length >= MAX_TOPICS && hot?.owns(lens.id)) hot.makeRoom();
     if (lens.topics.length >= MAX_TOPICS) {
       watchMsg(`A lens holds ${MAX_TOPICS} topics. Remove one, or start a new lens.`, true);
       return false;
@@ -67,6 +72,7 @@ export function createActions(app: AppStore, { live, stories, github, myGithub }
     lens.topics.push(def);
     lens.topics.sort((a, b) => a.slot - b.slot);
     const E = app.ensureEntry(lens, def);
+    if (hot?.owns(lens.id)) hot.adopt(def);
     state.selectedByLens[lens.id] = name;
     app.saveLenses();
     app.savePrefs();
@@ -77,6 +83,11 @@ export function createActions(app: AppStore, { live, stories, github, myGithub }
       if (E.liveError) live.setStatus(`No data for ${E.name}: ${E.liveError}`);
     });
     return true;
+  }
+  /** Pins a picked World topic so it stays however it scores, or unpins it. */
+  function togglePin(key: string): void {
+    const E = state.rt.get(key);
+    if (E && hot?.owns(E.lensId)) hot.togglePin(E.name);
   }
   function removeTopic(key: string): void {
     const E = state.rt.get(key);
@@ -90,7 +101,10 @@ export function createActions(app: AppStore, { live, stories, github, myGithub }
       state.selectedByLens[lens.id] = (lens.topics[i] || lens.topics[i - 1])?.name ?? '';
     app.saveLenses();
     app.savePrefs();
-    watchMsg(`Removed “${E.name}” from ${lens.name}.`);
+    if (hot?.owns(lens.id)) {
+      hot.dismiss(E.name);
+      watchMsg(`Removed “${E.name}”. It won't be picked again for a week.`);
+    } else watchMsg(`Removed “${E.name}” from ${lens.name}.`);
   }
   function addLens(raw: string): void {
     const name = raw.trim().replace(/\s+/g, ' ').slice(0, 30);
@@ -285,6 +299,7 @@ export function createActions(app: AppStore, { live, stories, github, myGithub }
     watchMsg,
     addTopic,
     removeTopic,
+    togglePin,
     addLens,
     removeLens,
     selectLens,

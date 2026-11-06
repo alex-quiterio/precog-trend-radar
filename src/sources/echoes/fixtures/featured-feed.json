@@ -1,0 +1,1632 @@
+{
+  "news": [
+    {
+      "story": "In the United States, the Democratic Party wins a majority in both the House of Representatives and the Senate in the midterm elections.",
+      "links": [
+        {
+          "title": "2026_United_States_elections",
+          "normalizedtitle": "2026 United States elections",
+          "description": "",
+          "wikibase_item": "Q115857612",
+          "type": "standard",
+          "namespace": {
+            "id": 0,
+            "text": ""
+          }
+        },
+        {
+          "title": "Democratic_Party_(United_States)",
+          "normalizedtitle": "Democratic Party (United States)",
+          "description": "Political party",
+          "wikibase_item": "Q29552",
+          "type": "standard",
+          "namespace": {
+            "id": 0,
+            "text": ""
+          }
+        },
+        {
+          "title": "United_States_House_of_Representatives",
+          "normalizedtitle": "United States House of Representatives",
+          "description": "Lower house of the U.S. Congress",
+          "wikibase_item": "Q11701",
+          "type": "standard",
+          "namespace": {
+            "id": 0,
+            "text": ""
+          }
+        },
+        {
+          "title": "United_States_Senate",
+          "normalizedtitle": "United States Senate",
+          "description": "Upper house of the US Congress",
+          "wikibase_item": "Q66096",
+          "type": "standard",
+          "namespace": {
+            "id": 0,
+            "text": ""
+          }
+        }
+      ]
+    },
+    {
+      "story": "The Polish Constitutional Tribunal crisis escalates with the suspension of tribunal head Bogdan Święczkowski&nbsp; and deputy head Bartłomiej Sochański by judge Anna Korwin-Piotrowska.",
+      "links": [
+        {
+          "title": "Constitutional_Tribunal_(Poland)",
+          "normalizedtitle": "Constitutional Tribunal (Poland)",
+          "description": "Constitutional court of Poland",
+          "wikibase_item": "Q1636999",
+          "type": "standard",
+          "namespace": {
+            "id": 0,
+            "text": ""
+          }
+        },
+        {
+          "title": "2026_Polish_Constitutional_Tribunal_crisis",
+          "normalizedtitle": "2026 Polish Constitutional Tribunal crisis",
+          "description": "Suspension of president of Polish Constitutional Tribunal",
+          "wikibase_item": "Q141945180",
+          "type": "standard",
+          "namespace": {
+            "id": 0,
+            "text": ""
+          }
+        },
+        {
+          "title": "Bogdan_Święczkowski",
+          "normalizedtitle": "Bogdan Święczkowski",
+          "description": "Polish jurist and prosecutor (born 1970)",
+          "wikibase_item": "Q9175413",
+          "type": "standard",
+          "namespace": {
+            "id": 0,
+            "text": ""
+          }
+        },
+        {
+          "title": "Bartłomiej_Sochański",
+          "normalizedtitle": "Bartłomiej Sochański",
+          "description": "Polish politician (born 1955)",
+          "wikibase_item": "Q9166327",
+          "type": "standard",
+          "namespace": {
+            "id": 0,
+            "text": ""
+          }
+        },
+        {
+          "title": "Anna_Korwin-Piotrowska",
+          "normalizedtitle": "Anna Korwin-Piotrowska",
+          "description": "Polish judge (born 1969)",
+          "wikibase_item": "Q138693875",
+          "type": "standard",
+          "namespace": {
+            "id": 0,
+            "text": ""
+          }
+        }
+      ]
+    },
+    {
+      "story": "Digital currency worth US$6.3 billion is stolen from cryptocurrency exchange Binance.",
+      "links": [
+        {
+          "title": "2026_Binance_hack",
+          "normalizedtitle": "2026 Binance hack",
+          "description": "Cryptocurrency theft",
+          "wikibase_item": "Q141933756",
+          "type": "standard",
+          "namespace": {
+            "id": 0,
+            "text": ""
+          }
+        },
+        {
+          "title": "Digital_currency",
+          "normalizedtitle": "Digital currency",
+          "description": "Currency stored on electronic systems",
+          "wikibase_item": "Q10836209",
+          "type": "standard",
+          "namespace": {
+            "id": 0,
+            "text": ""
+          }
+        },
+        {
+          "title": "Cryptocurrency",
+          "normalizedtitle": "Cryptocurrency",
+          "description": "Digital asset using a distributed ledger",
+          "wikibase_item": "Q13479982",
+          "type": "standard",
+          "namespace": {
+            "id": 0,
+            "text": ""
+          }
+        },
+        {
+          "title": "Binance",
+          "normalizedtitle": "Binance",
+          "description": "International cryptocurrency exchange",
+          "wikibase_item": "Q51403327",
+          "type": "standard",
+          "namespace": {
+            "id": 0,
+            "text": ""
+          }
+        }
+      ]
+    },
+    {
+      "story": "American labor activist Dolores Huerta dies at the age of 96.",
+      "links": [
+        {
+          "title": "Dolores_Huerta",
+          "normalizedtitle": "Dolores Huerta",
+          "description": "American labor leader (1930–2026)",
+          "wikibase_item": "Q468843",
+          "type": "standard",
+          "namespace": {
+            "id": 0,
+            "text": ""
+          }
+        }
+      ]
+    },
+    {
+      "story": "In baseball, the Milwaukee Brewers defeat the Tampa Bay Rays to win the World Series.",
+      "links": [
+        {
+          "title": "2026_World_Series",
+          "normalizedtitle": "2026 World Series",
+          "description": "Major League Baseball's championship series",
+          "wikibase_item": "Q141598237",
+          "type": "standard",
+          "namespace": {
+            "id": 0,
+            "text": ""
+          }
+        },
+        {
+          "title": "Baseball",
+          "normalizedtitle": "Baseball",
+          "description": "Bat-and-ball game",
+          "wikibase_item": "Q5369",
+          "type": "standard",
+          "namespace": {
+            "id": 0,
+            "text": ""
+          }
+        },
+        {
+          "title": "Milwaukee_Brewers",
+          "normalizedtitle": "Milwaukee Brewers",
+          "description": "Major League Baseball franchise in Milwaukee, Wisconsin",
+          "wikibase_item": "Q848103",
+          "type": "standard",
+          "namespace": {
+            "id": 0,
+            "text": ""
+          }
+        },
+        {
+          "title": "Tampa_Bay_Rays",
+          "normalizedtitle": "Tampa Bay Rays",
+          "description": "Major League Baseball franchise",
+          "wikibase_item": "Q650865",
+          "type": "standard",
+          "namespace": {
+            "id": 0,
+            "text": ""
+          }
+        }
+      ]
+    }
+  ],
+  "mostread": {
+    "date": "2026-11-05Z",
+    "articles": [
+      {
+        "title": "Abdul_El-Sayed",
+        "normalizedtitle": "Abdul El-Sayed",
+        "description": "American epidemiologist and politician (born 1984)",
+        "wikibase_item": "Q25752879",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 808705,
+        "rank": 2,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 134093
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 243340
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 271285
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 1413749
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 808705
+          }
+        ]
+      },
+      {
+        "title": "Ramayana:_Part_1",
+        "normalizedtitle": "Ramayana: Part 1",
+        "description": "2026 Indian film by Nitesh Tiwari",
+        "wikibase_item": "Q135196186",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 609307,
+        "rank": 4,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 55707
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 60024
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 72890
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 103372
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 609307
+          }
+        ]
+      },
+      {
+        "title": "Russell_Brand",
+        "normalizedtitle": "Russell Brand",
+        "description": "English comedian and actor (born 1975)",
+        "wikibase_item": "Q296609",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 571124,
+        "rank": 5,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 7770
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 12643
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 13175
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 12055
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 571124
+          }
+        ]
+      },
+      {
+        "title": "James_Talarico",
+        "normalizedtitle": "James Talarico",
+        "description": "American politician (born 1989)",
+        "wikibase_item": "Q100742942",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 359575,
+        "rank": 7,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 56366
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 62655
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 105766
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 1256040
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 359575
+          }
+        ]
+      },
+      {
+        "title": "2026_United_States_elections",
+        "normalizedtitle": "2026 United States elections",
+        "description": "",
+        "wikibase_item": "Q115857612",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 356470,
+        "rank": 8,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 94454
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 201102
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 455194
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 1153444
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 356470
+          }
+        ]
+      },
+      {
+        "title": "Jon_Ossoff",
+        "normalizedtitle": "Jon Ossoff",
+        "description": "American politician (born 1987)",
+        "wikibase_item": "Q28839536",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 325378,
+        "rank": 9,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 19866
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 26815
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 46502
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 611863
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 325378
+          }
+        ]
+      },
+      {
+        "title": "Gina_Hinojosa",
+        "normalizedtitle": "Gina Hinojosa",
+        "description": "Governor-elect of Texas (born 1973)",
+        "wikibase_item": "Q28314533",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 284450,
+        "rank": 10,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 8286
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 12755
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 25636
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 1242354
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 284450
+          }
+        ]
+      },
+      {
+        "title": ".xyz",
+        "normalizedtitle": ".xyz",
+        "description": "Internet top-level domain",
+        "wikibase_item": "Q16049593",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 255809,
+        "rank": 11,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 52164
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 65692
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 104155
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 254329
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 255809
+          }
+        ]
+      },
+      {
+        "title": "Nithya_Raman",
+        "normalizedtitle": "Nithya Raman",
+        "description": "American politician (born 1981)",
+        "wikibase_item": "Q100728314",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 197142,
+        "rank": 12,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 4982
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 7087
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 12259
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 78504
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 197142
+          }
+        ]
+      },
+      {
+        "title": "2026_United_States_Senate_elections",
+        "normalizedtitle": "2026 United States Senate elections",
+        "description": "",
+        "wikibase_item": "Q104902179",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 170346,
+        "rank": 13,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 34336
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 61876
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 90787
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 493851
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 170346
+          }
+        ]
+      },
+      {
+        "title": "Deaths_in_2026",
+        "normalizedtitle": "Deaths in 2026",
+        "description": "",
+        "wikibase_item": "Q134185145",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 138500,
+        "rank": 15,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 135321
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 140295
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 140654
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 140436
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 138500
+          }
+        ]
+      },
+      {
+        "title": "2026_United_States_House_of_Representatives_elections",
+        "normalizedtitle": "2026 United States House of Representatives elections",
+        "description": "House elections for the 120th U.S. Congress",
+        "wikibase_item": "Q132767622",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 137339,
+        "rank": 16,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 12269
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 22748
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 50307
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 249406
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 137339
+          }
+        ]
+      },
+      {
+        "title": "Guy_Fawkes_Night",
+        "normalizedtitle": "Guy Fawkes Night",
+        "description": "Annual custom originating in England",
+        "wikibase_item": "Q844844",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 136878,
+        "rank": 17,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 9731
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 9553
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 10204
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 20473
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 136878
+          }
+        ]
+      },
+      {
+        "title": "United_States_midterm_election",
+        "normalizedtitle": "United States midterm election",
+        "description": "General elections in the United States",
+        "wikibase_item": "Q1570656",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 134210,
+        "rank": 18,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 62914
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 131229
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 244478
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 523575
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 134210
+          }
+        ]
+      },
+      {
+        "title": "Guy_Fawkes",
+        "normalizedtitle": "Guy Fawkes",
+        "description": "English participant in the Gunpowder Plot (1570–1606)",
+        "wikibase_item": "Q13898",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 133874,
+        "rank": 19,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 15740
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 12378
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 12502
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 21842
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 133874
+          }
+        ]
+      },
+      {
+        "title": "Scott_Colom",
+        "normalizedtitle": "Scott Colom",
+        "description": "American lawyer (born 1982)",
+        "wikibase_item": "Q115492489",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 132877,
+        "rank": 20,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 2853
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 3521
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 3975
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 171635
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 132877
+          }
+        ]
+      },
+      {
+        "title": "Keisha_Lance_Bottoms",
+        "normalizedtitle": "Keisha Lance Bottoms",
+        "description": "Governor-elect of Georgia (born 1970)",
+        "wikibase_item": "Q42770663",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 119279,
+        "rank": 21,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 5298
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 6887
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 15059
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 431379
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 119279
+          }
+        ]
+      },
+      {
+        "title": "Joran_van_der_Sloot",
+        "normalizedtitle": "Joran van der Sloot",
+        "description": "Dutch murderer (born 1987)",
+        "wikibase_item": "Q3273337",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 116017,
+        "rank": 22,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 2737
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 3259
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 4825
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 54916
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 116017
+          }
+        ]
+      },
+      {
+        "title": "2028_United_States_Senate_elections",
+        "normalizedtitle": "2028 United States Senate elections",
+        "description": "Senate election for the 121st US Congress",
+        "wikibase_item": "Q115858135",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 111686,
+        "rank": 23,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 4889
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 13165
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 14885
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 244552
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 111686
+          }
+        ]
+      },
+      {
+        "title": "2026_United_States_Senate_election_in_Mississippi",
+        "normalizedtitle": "2026 United States Senate election in Mississippi",
+        "description": "",
+        "wikibase_item": "Q133933238",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 110692,
+        "rank": 24,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 3513
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 5952
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 6161
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 141842
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 110692
+          }
+        ]
+      },
+      {
+        "title": "Hakeem_Jeffries",
+        "normalizedtitle": "Hakeem Jeffries",
+        "description": "American politician (born 1970)",
+        "wikibase_item": "Q5640425",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 110123,
+        "rank": 25,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 3846
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 5424
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 9716
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 214253
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 110123
+          }
+        ]
+      },
+      {
+        "title": "Donald_Trump",
+        "normalizedtitle": "Donald Trump",
+        "description": "President of the United States (2017–2021; since 2025)",
+        "wikibase_item": "Q22686",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 100703,
+        "rank": 26,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 36340
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 49669
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 75990
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 239807
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 100703
+          }
+        ]
+      },
+      {
+        "title": "Cristiano_Ronaldo",
+        "normalizedtitle": "Cristiano Ronaldo",
+        "description": "Portuguese footballer (born 1985)",
+        "wikibase_item": "Q11571",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 100332,
+        "rank": 27,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 21487
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 22471
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 19419
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 17536
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 100332
+          }
+        ]
+      },
+      {
+        "title": "Democratic_Party_(United_States)",
+        "normalizedtitle": "Democratic Party (United States)",
+        "description": "Political party",
+        "wikibase_item": "Q29552",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 91403,
+        "rank": 29,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 12921
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 20077
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 43592
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 256501
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 91403
+          }
+        ]
+      },
+      {
+        "title": "United_States_Senate",
+        "normalizedtitle": "United States Senate",
+        "description": "Upper house of the US Congress",
+        "wikibase_item": "Q66096",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 87455,
+        "rank": 30,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 9543
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 17475
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 31856
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 255791
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 87455
+          }
+        ]
+      },
+      {
+        "title": "Byron_Donalds",
+        "normalizedtitle": "Byron Donalds",
+        "description": "Governor-elect of Florida (born 1978)",
+        "wikibase_item": "Q59726216",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 87124,
+        "rank": 31,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 9146
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 10359
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 22813
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 362265
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 87124
+          }
+        ]
+      },
+      {
+        "title": "Jailer_2",
+        "normalizedtitle": "Jailer 2",
+        "description": "2026 Indian film by Nelson Dilipkumar",
+        "wikibase_item": "Q133255153",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 83507,
+        "rank": 32,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 115995
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 111475
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 96128
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 84467
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 83507
+          }
+        ]
+      },
+      {
+        "title": "Amy_Acton",
+        "normalizedtitle": "Amy Acton",
+        "description": "Governor-elect of Ohio (born 1966)",
+        "wikibase_item": "Q87773723",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 82470,
+        "rank": 33,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 14401
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 12834
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 22746
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 231084
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 82470
+          }
+        ]
+      },
+      {
+        "title": "Disappearance_of_Natalee_Holloway",
+        "normalizedtitle": "Disappearance of Natalee Holloway",
+        "description": "2005 disappearance of an American in Aruba",
+        "wikibase_item": "Q51722302",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 82100,
+        "rank": 34,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 3595
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 4521
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 5441
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 46120
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 82100
+          }
+        ]
+      },
+      {
+        "title": "Cindy_Hyde-Smith",
+        "normalizedtitle": "Cindy Hyde-Smith",
+        "description": "American politician (born 1959)",
+        "wikibase_item": "Q5120540",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 81671,
+        "rank": 35,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 1871
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 2461
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 3655
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 101857
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 81671
+          }
+        ]
+      },
+      {
+        "title": "Ansel_Adams",
+        "normalizedtitle": "Ansel Adams",
+        "description": "American photographer and environmentalist (1902–1984)",
+        "wikibase_item": "Q60809",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 80817,
+        "rank": 36,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 113390
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 84438
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 87663
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 79560
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 80817
+          }
+        ]
+      },
+      {
+        "title": "VisionQuest",
+        "normalizedtitle": "VisionQuest",
+        "description": "Marvel Studios television miniseries",
+        "wikibase_item": "Q126092795",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 79462,
+        "rank": 37,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 43454
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 44961
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 55043
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 157657
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 79462
+          }
+        ]
+      },
+      {
+        "title": "Godzilla_Minus_Zero",
+        "normalizedtitle": "Godzilla Minus Zero",
+        "description": "2026 Japanese film by Takashi Yamazaki",
+        "wikibase_item": "Q136700760",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 77851,
+        "rank": 39,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 18113
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 23658
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 48349
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 74443
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 77851
+          }
+        ]
+      },
+      {
+        "title": "Rob_Sand",
+        "normalizedtitle": "Rob Sand",
+        "description": "Governor-elect of Iowa (born 1982)",
+        "wikibase_item": "Q58756126",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 77298,
+        "rank": 40,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 2938
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 4271
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 7251
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 104601
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 77298
+          }
+        ]
+      },
+      {
+        "title": "United_States_House_of_Representatives",
+        "normalizedtitle": "United States House of Representatives",
+        "description": "Lower house of the U.S. Congress",
+        "wikibase_item": "Q11701",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 76892,
+        "rank": 41,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 10026
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 17350
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 32831
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 199639
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 76892
+          }
+        ]
+      },
+      {
+        "title": "Annie_Andrews",
+        "normalizedtitle": "Annie Andrews",
+        "description": "American physician and politician (born 1980)",
+        "wikibase_item": "Q90094834",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 76873,
+        "rank": 42,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 38
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 41
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 65
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 106308
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 76873
+          }
+        ]
+      },
+      {
+        "title": "Haley_Stevens",
+        "normalizedtitle": "Haley Stevens",
+        "description": "American politician (born 1983)",
+        "wikibase_item": "Q58322563",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 76110,
+        "rank": 43,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 360148
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 548345
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 208194
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 165950
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 76110
+          }
+        ]
+      },
+      {
+        "title": "Greg_Abbott",
+        "normalizedtitle": "Greg Abbott",
+        "description": "Governor of Texas since 2015",
+        "wikibase_item": "Q5605224",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 74279,
+        "rank": 44,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 6319
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 7464
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 15347
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 327943
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 74279
+          }
+        ]
+      },
+      {
+        "title": "Vivek_Ramaswamy",
+        "normalizedtitle": "Vivek Ramaswamy",
+        "description": "American entrepreneur (born 1985)",
+        "wikibase_item": "Q27881473",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 73594,
+        "rank": 45,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 18325
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 20094
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 43590
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 226620
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 73594
+          }
+        ]
+      },
+      {
+        "title": "Zohran_Mamdani",
+        "normalizedtitle": "Zohran Mamdani",
+        "description": "Mayor of New York City since 2026",
+        "wikibase_item": "Q28034971",
+        "type": "standard",
+        "namespace": {
+          "id": 0,
+          "text": ""
+        },
+        "views": 72564,
+        "rank": 46,
+        "view_history": [
+          {
+            "date": "2026-11-01Z",
+            "views": 14455
+          },
+          {
+            "date": "2026-11-02Z",
+            "views": 18585
+          },
+          {
+            "date": "2026-11-03Z",
+            "views": 24532
+          },
+          {
+            "date": "2026-11-04Z",
+            "views": 77975
+          },
+          {
+            "date": "2026-11-05Z",
+            "views": 72564
+          }
+        ]
+      }
+    ]
+  }
+}

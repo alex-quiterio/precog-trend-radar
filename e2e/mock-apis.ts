@@ -67,13 +67,25 @@ function markets(url: URL) {
   }));
 }
 
-export async function mockApis(page: Page): Promise<void> {
+/**
+ * Answers every outside request. With `echoes`, World's daily pick gets the saved replies of 6 Nov 2026
+ * (Wikipedia's feed, Wikidata, Hacker News's front page, Manifold's busiest markets); without, Wikipedia's
+ * feed is missing, so World keeps its shipped topics and the other tests can rely on them.
+ */
+export async function mockApis(page: Page, { echoes = false } = {}): Promise<void> {
   await page.route(
     url => !/^(localhost|127\.0\.0\.1)$/.test(new URL(url).hostname),
     async route => {
       const url = new URL(route.request().url());
       const h = url.hostname,
         p = url.pathname;
+      if (p.includes('/api/rest_v1/feed/featured/'))
+        return echoes ? json(route, fixture('echoes', 'featured-feed')) : route.fulfill({ status: 404 });
+      if (h === 'query.wikidata.org') return json(route, fixture('echoes', 'wikidata-humans'));
+      if (h === 'hn.algolia.com' && url.searchParams.get('tags') === 'front_page')
+        return json(route, echoes ? fixture('echoes', 'hn-front-page') : { hits: [] });
+      if (h === 'api.manifold.markets' && url.searchParams.get('sort') === '24-hour-vol')
+        return json(route, echoes ? fixture('echoes', 'manifold-trending') : []);
       if (h.endsWith('wikipedia.org')) {
         const title = url.searchParams.get('titles') || url.searchParams.get('search') || 'Topic';
         return json(

@@ -24,6 +24,13 @@ createApp(App).use(contextPlugin(ctx)).mount('#app');
 
 startClock(ctx.app.ui);
 ctx.live.start(); // also loads the stream on screen
+// World's topics: picked once a day from what the internet is echoing; new topics are fetched straight away.
+const pickHot = () =>
+  void ctx.hot.refresh().then(changed => {
+    if (changed) void ctx.live.load();
+  });
+pickHot();
+setInterval(pickHot, HOUR); // a no-op until the day changes
 if (activeChannel(ctx.app).github) void ctx.github.load();
 void ctx.myGithub.load();
 void ctx.datapoints.load();

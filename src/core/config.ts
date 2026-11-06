@@ -151,6 +151,7 @@ export const LS = {
   look: 'precog.lastlook.v1',
   wikiTitles: 'precog.wikititle.v1',
   storyObs: 'precog.storyobs.v1',
+  hot: 'precog.hot.v1',
 };
 
 // Storage lives in core/storage.ts; re-exported here because most modules import it with the keys above.
