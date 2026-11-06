@@ -1,0 +1,49 @@
+{
+  "items": [
+    {
+      "project": "en.wikipedia",
+      "article": "Rust_(programming_language)",
+      "granularity": "daily",
+      "timestamp": "2026102000",
+      "access": "all-access",
+      "agent": "user",
+      "views": 3419
+    },
+    {
+      "project": "en.wikipedia",
+      "article": "Rust_(programming_language)",
+      "granularity": "daily",
+      "timestamp": "2026102100",
+      "access": "all-access",
+      "agent": "user",
+      "views": 3772
+    },
+    {
+      "project": "en.wikipedia",
+      "article": "Rust_(programming_language)",
+      "granularity": "daily",
+      "timestamp": "2026102200",
+      "access": "all-access",
+      "agent": "user",
+      "views": 3875
+    },
+    {
+      "project": "en.wikipedia",
+      "article": "Rust_(programming_language)",
+      "granularity": "daily",
+      "timestamp": "2026102300",
+      "access": "all-access",
+      "agent": "user",
+      "views": 26299
+    },
+    {
+      "project": "en.wikipedia",
+      "article": "Rust_(programming_language)",
+      "granularity": "daily",
+      "timestamp": "2026102400",
+      "access": "all-access",
+      "agent": "user",
+      "views": 9393
+    }
+  ]
+}

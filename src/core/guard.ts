@@ -13,7 +13,7 @@ export const AMBIGUOUS_NAMES = new Set(
   ),
 );
 export const TITLES = /^(mr|mrs|ms|miss|mx|dr|prof|sir|dame|lord|lady|president|senator|ceo)\.?\s/i;
-export function looksLikePerson(raw) {
+export function looksLikePerson(raw: unknown): boolean {
   const s = String(raw || '').trim();
   if (!s) return false;
   if (/^@\w/.test(s) || /\S+@\S+\.\S+/.test(s) || /^(u|user)\/\w/i.test(s)) return true;

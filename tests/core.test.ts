@@ -1,11 +1,11 @@
 // Unit tests for PRECOG's pure logic: the person guard, statistics and the attention blend.
 import { describe, expect, it } from 'vitest';
-import { DAY } from '../src/core/config';
-import { looksLikePerson } from '../src/core/guard';
-import { computeStats, levelOf } from '../src/core/stats';
-import { blendParts } from '../src/sources/blend';
-import { ADAPTERS, utcDay } from '../src/sources/registry';
-import type { Entry, SeriesPoint } from '../src/types';
+import { DAY } from '@core/config';
+import { looksLikePerson } from '@core/guard';
+import { computeStats, levelOf } from '@core/stats';
+import { blendParts } from '@sources/blend';
+import { ADAPTERS, utcDay } from '@sources/registry';
+import type { Entry, SeriesPoint } from '@/types';
 
 const daily = (values: number[], end = Date.UTC(2026, 10, 1)): SeriesPoint[] =>
   values.map((value, i) => ({ t: end - (values.length - 1 - i) * DAY, value }));

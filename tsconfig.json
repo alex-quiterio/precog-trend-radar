@@ -5,8 +5,7 @@
     "moduleResolution": "bundler",
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "types": ["vite/client", "node"],
-    "strict": false,
-    "noImplicitAny": false,
+    "strict": true,
     "strictBindCallApply": true,
     "noImplicitThis": true,
     "noFallthroughCasesInSwitch": true,
@@ -15,7 +14,14 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "noEmit": true,
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "paths": {
+      "@core/*": ["./src/core/*"],
+      "@features/*": ["./src/features/*"],
+      "@sources/*": ["./src/sources/*"],
+      "@components/*": ["./src/components/*"],
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["src/**/*.ts", "src/**/*.vue", "tests/**/*.ts", "vite.config.ts"]
 }

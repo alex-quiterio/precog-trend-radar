@@ -11,8 +11,8 @@ globalThis.localStorage = {
   length: 0,
 } as Storage;
 
-const { LS } = await import('../src/core/config');
-const { loadLenses, state } = await import('../src/state');
+const { LS } = await import('@core/config');
+const { loadLenses, state } = await import('@/state');
 
 const saved = (id: string, names: string[]) => ({
   id,
@@ -78,7 +78,7 @@ describe('lenses', () => {
     mem.set(LS.presetVer, '4');
     mem.set(LS.lenses, JSON.stringify([saved('geo', ['NATO'])]));
     loadLenses();
-    expect(JSON.parse(mem.get(LS.lenses) || '[]').map(l => l.id)).toContain('github');
+    expect(JSON.parse(mem.get(LS.lenses) || '[]').map((l: { id: string }) => l.id)).toContain('github');
   });
 
   it('repairs a browser marked as upgraded that still holds the old lenses', () => {
@@ -102,6 +102,6 @@ describe('lenses', () => {
       'github',
     ]);
     loadLenses(); // and it sticks on the next load
-    expect(state.lenses.map(l => l.id)).toContain('github');
+    expect(state.lenses.map((l: { id: string }) => l.id)).toContain('github');
   });
 });

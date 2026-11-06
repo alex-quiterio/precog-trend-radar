@@ -1,11 +1,13 @@
 // PRECOG / Trend Radar · Pre-cog alert rules: z-score levels, de-duplication and plain-English explanations.
-import { ALERT_CAP, FC_STEPS, MIN_BASE } from './core/config';
-import { computeStats, levelOf } from './core/stats';
-import { allEntries, lensById, series, state } from './state';
+import { ALERT_CAP, FC_STEPS, MIN_BASE } from '@core/config';
+import { computeStats, levelOf } from '@core/stats';
+import { allEntries, lensById, series, state } from '@/state';
+import type { Alert, Entry, Stats } from '@/types';
 
-export function explain(name, st) {
+/** Why a topic is running hot, in a sentence. Only called with a z-score (an alert needs one). */
+export function explain(name: string, st: Stats & { z: number }): string {
   const head = `${name} attention is ${st.z.toFixed(1)}σ above its ${st.baseN}-step baseline`;
-  let tail;
+  let tail: string;
   if (st.slope > 0 && st.above >= FC_STEPS) tail = 'projected to keep rising across the full 12-step forecast';
   else if (st.slope > 0 && st.above > 0)
     tail = `projected to keep rising for ~${st.above} step${st.above > 1 ? 's' : ''}`;
@@ -13,8 +15,10 @@ export function explain(name, st) {
   else tail = 'the underlying trend is flat or falling, so this looks like a short-lived spike';
   return `${head}; ${tail}.`;
 }
-export function evaluate(E, st) {
-  const level = levelOf(st.z);
+export function evaluate(E: Entry, st: Stats): Alert | null {
+  const z = st.z;
+  if (z == null) return null;
+  const level = levelOf(z);
   if (!level) return null;
   const last = E.lastAlert;
   const escalated = last && last.level === 'watch' && level === 'alert';
@@ -30,14 +34,14 @@ export function evaluate(E, st) {
     step: st.step,
     topic: E.name,
     color: E.color,
-    z: st.z,
+    z,
     level,
-    text: explain(E.name, st),
+    text: explain(E.name, { ...st, z }),
   };
 }
-export function scanHistory(E) {
+export function scanHistory(E: Entry): Alert[] {
   const s = series(E),
-    out = [];
+    out: Alert[] = [];
   E.lastAlert = null;
   for (let i = MIN_BASE; i < s.length; i++) {
     const st = computeStats(s.slice(0, i + 1));
@@ -46,13 +50,13 @@ export function scanHistory(E) {
   }
   return out;
 }
-export function rescanAll() {
+export function rescanAll(): void {
   state.alerts = allEntries()
     .flatMap(scanHistory)
     .sort((a, b) => b.t - a.t || b.z - a.z)
     .slice(0, ALERT_CAP);
 }
-export function pushAlert(a) {
+export function pushAlert(a: Alert): void {
   state.alerts.unshift(a);
   state.alerts.length = Math.min(state.alerts.length, ALERT_CAP);
 }

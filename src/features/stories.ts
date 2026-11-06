@@ -1,17 +1,28 @@
 // PRECOG / Trend Radar · Streams: the news (The Guardian), what you're reading (followed sites), what
 // forecasters expect (Manifold) and what's spreading among builders (Hacker News), matched to your topics.
 import { reactive } from 'vue';
-import type { Entry } from '../types';
-import { HOUR, LS, MIN, STORY_REFRESH_MS, store } from '../core/config';
-import type { Forecast } from '../sources/manifold';
-import { searchForecasts } from '../sources/manifold';
-import type { ReadingItem } from '../sources/reading';
-import { loadReading, readingScore } from '../sources/reading';
-import type { GuardianArticle } from '../sources/guardian';
-import { guardianArticles, guardianKey } from '../sources/guardian';
-import { ADAPTERS, getJSON, phrase, pool, queryOf, topicRegex } from '../sources/registry';
-import { activeChannel } from '../channels';
-import { activeLens, entriesOf, selectedEntry, state } from '../state';
+import { errorText, isAbort } from '@core/errors';
+import { parseStoryHits } from '@sources/hackernews';
+
+/** A link's host without www, or '' when it isn't a valid URL. */
+const hostOf = (url: string): string => {
+  try {
+    return url ? new URL(url).hostname.replace(/^www\./, '') : '';
+  } catch {
+    return '';
+  }
+};
+import type { Entry } from '@/types';
+import { HOUR, LS, MIN, STORY_REFRESH_MS, store } from '@core/config';
+import type { Forecast } from '@sources/manifold';
+import { searchForecasts } from '@sources/manifold';
+import type { ReadingItem } from '@sources/reading';
+import { loadReading, readingScore } from '@sources/reading';
+import type { GuardianArticle } from '@sources/guardian';
+import { guardianArticles, guardianKey } from '@sources/guardian';
+import { ADAPTERS, getJSON, phrase, pool, queryOf, topicRegex } from '@sources/registry';
+import { activeChannel } from '@/channels';
+import { activeLens, entriesOf, selectedEntry, state } from '@/state';
 
 /** A Hacker News story with its measured or estimated engagement velocity. */
 export interface HNStory {
@@ -51,22 +62,30 @@ export const stories = reactive({
   reading: new Map<string, ReadingMatch>(),
   readingCount: 0,
   loading: { hn: false, forecasts: false, reading: false, news: false },
-  errors: { hn: null, forecasts: null, reading: null, news: null },
+  errors: { hn: null, forecasts: null, reading: null, news: null } as Record<StorySrc, string | null>,
   at: { hn: 0, forecasts: 0, reading: 0, news: 0 },
 });
-export let storyTimer = null,
-  storyAbort = null;
+let storyTimer: ReturnType<typeof setInterval> | undefined,
+  storyAbort: AbortController | null = null;
 export const TAU = 8; // hours; engagement modelled as E(t) = E∞·(1 − e^(−t/τ))
 /** Streams look at the selected topic, or at every topic of the channel on screen. */
 export function storyScopeEntries(): Entry[] {
-  if (state.storyScope === 'topic') return [selectedEntry()].filter(Boolean);
+  if (state.storyScope === 'topic') return [selectedEntry()].filter((E): E is Entry => !!E);
   return entriesOf(activeLens());
 }
-export function observe(id, eng) {
-  const obs = store.get(LS.storyObs, {});
+interface Observation {
+  t: number;
+  eng: number;
+}
+/**
+ * Records a story's engagement now and returns its measured rate (per hour) from two observations at least
+ * five minutes apart, or null until there are two.
+ */
+export function observe(id: string, eng: number): number | null {
+  const obs = store.get<Record<string, { prev?: Observation; cur: Observation }>>(LS.storyObs, {});
   const now = Date.now(),
     o = obs[id];
-  let rate = null;
+  let rate: number | null = null;
   if (o && o.prev && o.cur.t - o.prev.t >= 5 * MIN) rate = (o.cur.eng - o.prev.eng) / ((o.cur.t - o.prev.t) / HOUR);
   if (!o) obs[id] = { cur: { t: now, eng } };
   else if (now - o.cur.t >= 5 * MIN) {
@@ -81,7 +100,7 @@ export function observe(id, eng) {
 }
 export async function loadHNStories(entries: Entry[], signal: AbortSignal): Promise<void> {
   const since = Math.floor((Date.now() - 48 * HOUR) / 1000);
-  const found = new Map();
+  const found = new Map<string, HNStory>();
   await pool(
     entries.filter(E => queryOf(E).lang === 'en'),
     4,
@@ -92,18 +111,19 @@ export async function loadHNStories(entries: Entry[], signal: AbortSignal): Prom
         signal,
       );
       const re = topicRegex(queryOf(E).q);
-      (j.hits || [])
-        .filter(h => re.test(h.title || ''))
+      parseStoryHits(j)
+        .filter(h => re.test(h.title))
         .forEach(h => {
-          const s = found.get(h.objectID) || {
+          const discuss = `https://news.ycombinator.com/item?id=${h.objectID}`;
+          const s: HNStory = found.get(h.objectID) || {
             id: 'hn:' + h.objectID,
             title: h.title,
-            url: h.url || `https://news.ycombinator.com/item?id=${h.objectID}`,
-            discuss: `https://news.ycombinator.com/item?id=${h.objectID}`,
-            domain: h.url ? new URL(h.url).hostname.replace(/^www\./, '') : 'news.ycombinator.com',
-            t: h.created_at_i * 1000,
-            points: h.points || 0,
-            comments: h.num_comments || 0,
+            url: h.url || discuss,
+            discuss,
+            domain: hostOf(h.url) || 'news.ycombinator.com',
+            t: h.t,
+            points: h.points,
+            comments: h.comments,
             topics: [],
           };
           if (!s.topics.includes(E.key)) s.topics.push(E.key);
@@ -118,7 +138,7 @@ export async function loadHNStories(entries: Entry[], signal: AbortSignal): Prom
     s.eng = s.points + s.comments;
     const measured = observe(s.id, s.eng);
     s.measured = measured != null;
-    s.vel = s.measured ? Math.max(0, measured) : s.eng / age;
+    s.vel = measured != null ? Math.max(0, measured) : s.eng / age;
     const einf = s.eng / (1 - Math.exp(-age / TAU));
     s.pred24 = age >= 24 ? s.eng : einf * (1 - Math.exp(-24 / TAU));
     s.age = age;
@@ -132,7 +152,9 @@ export async function loadReadingStories(entries: Entry[], signal: AbortSignal):
   const items = sites?.length ? all.filter(it => sites.includes(it.origin)) : all;
   const matchers = entries.map(E => {
     const qq = queryOf(E);
-    const terms = [...new Set([qq.q, E.name, qq.wiki].filter(Boolean).map(t => t.replace(/"/g, '').trim()))];
+    const terms = [
+      ...new Set([qq.q, E.name, qq.wiki].filter((t): t is string => !!t).map(t => t.replace(/"/g, '').trim())),
+    ];
     return { key: E.key, res: terms.filter(t => t.length >= 2).map(topicRegex) };
   });
   const found = new Map<string, ReadingMatch>();
@@ -189,7 +211,7 @@ export async function loadNewsStories(entries: Entry[], signal: AbortSignal): Pr
     stories.news = new Map(found);
   }
 }
-export async function loadStories() {
+export async function loadStories(): Promise<void> {
   if (storyAbort) storyAbort.abort();
   storyAbort = new AbortController();
   const streams = activeChannel().streams.filter(s => s !== 'news' || guardianKey());
@@ -206,7 +228,7 @@ export async function loadStories() {
     if (src !== 'reading') stories.errors[src] = null;
     stories.at[src] = Date.now();
   } catch (e) {
-    if (e.name !== 'AbortError') stories.errors[src] = e.message;
+    if (!isAbort(e)) stories.errors[src] = errorText(e);
   }
   stories.loading[src] = false;
 }

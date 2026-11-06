@@ -29,7 +29,14 @@
       <span class="muted">Following</span>
       <span v-for="s in sites" :key="s.url" class="site-chip">
         <a :href="s.url" target="_blank" rel="noopener noreferrer">{{ s.name }}</a>
-        <button type="button" :aria-label="'Stop following ' + s.name" @click="unfollow(s.url)">×</button>
+        <button
+          v-if="!isBuiltInSite(s.url)"
+          type="button"
+          :aria-label="'Stop following ' + s.name"
+          @click="unfollow(s.url)"
+        >
+          ×
+        </button>
       </span>
       <form class="site-add" autocomplete="off" @submit.prevent="follow">
         <label class="sr-only" for="site-input">Follow a WordPress site</label>
@@ -40,7 +47,7 @@
 
     <ol class="stories">
       <template v-if="view.src === 'news'">
-        <li v-for="(it, i) in view.items" :key="it.n.id" class="story">
+        <li v-for="(it, i) in view.news" :key="it.n.id" class="story">
           <span class="rank">{{ i + 1 }}</span>
           <div>
             <div class="title">
@@ -65,7 +72,7 @@
         </li>
       </template>
       <template v-else-if="view.src === 'reading'">
-        <li v-for="(it, i) in view.items" :key="it.r.id" class="story">
+        <li v-for="(it, i) in view.reading" :key="it.r.id" class="story">
           <span class="rank">{{ i + 1 }}</span>
           <div>
             <div class="title">
@@ -94,7 +101,7 @@
       </template>
 
       <template v-else-if="view.src === 'forecasts'">
-        <li v-for="(it, i) in view.items" :key="it.f.id" class="story">
+        <li v-for="(it, i) in view.forecasts" :key="it.f.id" class="story">
           <span class="rank">{{ i + 1 }}</span>
           <div>
             <div class="title">
@@ -119,7 +126,7 @@
       </template>
 
       <template v-else>
-        <li v-for="(it, i) in view.items" :key="it.s.id" class="story">
+        <li v-for="(it, i) in view.hn" :key="it.s.id" class="story">
           <span class="rank">{{ i + 1 }}</span>
           <div>
             <div class="title">
@@ -146,7 +153,7 @@
           </div>
         </li>
       </template>
-      <li v-if="!view.items.length" class="empty">{{ view.empty }}</li>
+      <li v-if="!view.count" class="empty">{{ view.empty }}</li>
       <li v-if="view.warn" class="empty">{{ view.warn }}</li>
     </ol>
   </panel-shell>
@@ -154,34 +161,48 @@
 
 <script lang="ts">
 import { computed, defineComponent, ref } from 'vue';
-import type { Entry } from '../types';
-import type { ForecastMatch, HNStory, NewsMatch, ReadingMatch } from '../features/stories';
-import { addReadingSite, removeReadingSite, setStoryScope, setStorySource } from '../actions';
-import { ago } from '../core/format';
-import { quantile } from '../core/stats';
-import { ui } from '../core/ui-store';
-import { stories, storyScopeEntries } from '../features/stories';
-import { readingSites } from '../sources/reading';
-import { state } from '../state';
-import { activeChannel } from '../channels';
-import TopicDot from './TopicDot.vue';
-import PanelShell from './PanelShell.vue';
+import type { Entry, Prefs } from '@/types';
+import type { ForecastMatch, HNStory, NewsMatch, ReadingMatch, StorySrc } from '@features/stories';
+import { addReadingSite, removeReadingSite, setStoryScope, setStorySource } from '@/actions';
+import { ago } from '@core/format';
+import { quantile } from '@core/stats';
+import { ui } from '@core/ui-store';
+import { stories, storyScopeEntries } from '@features/stories';
+import { isBuiltInSite, readingSites } from '@sources/reading';
+import { state } from '@/state';
+import { activeChannel } from '@/channels';
+import TopicDot from '@components/TopicDot.vue';
+import PanelShell from '@components/PanelShell.vue';
 
 // PRECOG / Trend Radar · Signals: posts from sites you follow, Manifold forecasts and Hacker News,
 // each matched to the topics in scope.
 
-interface Item {
-  n?: NewsMatch;
-  r?: ReadingMatch;
-  f?: ForecastMatch;
-  s?: HNStory;
+/** A row: what it is, the topics in scope it names (two at most), and how full its bar is. */
+interface Row {
   topics: Entry[];
-  breaking?: boolean;
   pct: number;
 }
+/** A Hacker News story once its engagement numbers are worked out. */
+type RankedStory = HNStory & { vel: number; age: number; pred24: number };
+interface Rows {
+  news: (Row & { n: NewsMatch })[];
+  reading: (Row & { r: ReadingMatch })[];
+  forecasts: (Row & { f: ForecastMatch })[];
+  hn: (Row & { s: RankedStory; breaking: boolean })[];
+}
+const TABS: [StorySrc, string][] = [
+  ['news', 'The Guardian'],
+  ['reading', 'Reading'],
+  ['forecasts', 'Forecasts'],
+  ['hn', 'Hacker News'],
+];
+const SCOPES: [Prefs['storyScope'], string][] = [
+  ['topic', 'This topic'],
+  ['lens', 'Whole channel'],
+];
 const DAY_MS = 86400e3;
 // Recent first: a match counts half as much for every six months of age.
-const fade = (t: number) => 0.5 ** ((Date.now() - t) / (182 * DAY_MS));
+const fade = (t: number) => 0.5 ** ((ui.now - t) / (182 * DAY_MS));
 
 export default defineComponent({
   name: 'StoriesPanel',
@@ -199,13 +220,13 @@ export default defineComponent({
         keys
           .filter(k => scopeKeys.has(k))
           .map(k => state.rt.get(k))
-          .filter(Boolean)
+          .filter((E): E is Entry => !!E)
           .slice(0, 2);
       const loading = stories.loading[src],
         err = stories.errors[src],
         at = stories.at[src];
-      let items: Item[] = [],
-        meta = '',
+      const rows: Rows = { news: [], reading: [], forecasts: [], hn: [] };
+      let meta = '',
         empty = '';
       if (src === 'news') {
         // Articles naming more of the channel's topics first, then the newest.
@@ -215,7 +236,7 @@ export default defineComponent({
           .sort((a, b) => b.topics.length - a.topics.length || b.t - a.t);
         const newest = Math.max(...list.map(n => n.t), 0),
           oldest = Math.min(...list.map(n => n.t), newest);
-        items = list.slice(0, 12).map(n => ({
+        rows.news = list.slice(0, 12).map(n => ({
           n,
           topics: topicsOf(n.topics),
           pct: newest > oldest ? 15 + ((n.t - oldest) / (newest - oldest)) * 85 : 100,
@@ -231,21 +252,23 @@ export default defineComponent({
         const list = [...stories.reading.values()].sort((a, b) => rank(b) - rank(a) || b.t - a.t);
         const top = Math.max(1e-6, ...list.slice(0, 12).map(rank));
         const matched = list.filter(r => r.topics.some(k => scopeKeys.has(k))).length;
-        items = list.slice(0, 12).map(r => ({ r, topics: topicsOf(r.topics), pct: (rank(r) / top) * 100 }));
+        rows.reading = list.slice(0, 12).map(r => ({ r, topics: topicsOf(r.topics), pct: (rank(r) / top) * 100 }));
         meta = at ? `${matched} of ${stories.readingCount} posts name your topics` : '';
         empty = 'Nothing from the sites you follow yet.';
       } else if (src === 'forecasts') {
         const list = [...stories.forecasts.values()]
           .filter(f => f.topics.some(k => scopeKeys.has(k)))
           .sort((a, b) => b.vol24 - a.vol24 || b.bettors - a.bettors);
-        items = list.slice(0, 12).map(f => ({ f, topics: topicsOf(f.topics), pct: f.prob * 100 }));
+        rows.forecasts = list.slice(0, 12).map(f => ({ f, topics: topicsOf(f.topics), pct: f.prob * 100 }));
         meta = at ? `checked ${ago(at)} · open markets on Manifold` : '';
         empty = 'No open forecast (10+ forecasters) names these topics.';
       } else {
-        let list = [...stories.hn.values()].filter(s => s.topics.some(k => scopeKeys.has(k)));
+        let list: RankedStory[] = [...stories.hn.values()]
+          .filter(s => s.topics.some(k => scopeKeys.has(k)))
+          .map(s => ({ ...s, vel: s.vel ?? 0, age: s.age ?? 0, pred24: s.pred24 ?? 0 }));
         list.sort((a, b) => b.vel - a.vel);
         if (state.storyScope !== 'topic') {
-          const per = {};
+          const per: Record<string, number> = {};
           list = list.filter(s => (per[s.topics[0]] = (per[s.topics[0]] || 0) + 1) <= 3);
         }
         const p80 = quantile(
@@ -253,7 +276,7 @@ export default defineComponent({
             0.8,
           ),
           vmax = Math.max(1, ...list.map(s => s.vel));
-        items = list.slice(0, 12).map(s => ({
+        rows.hn = list.slice(0, 12).map(s => ({
           s,
           topics: topicsOf(s.topics),
           breaking: s.age < 8 && s.vel >= p80 && list.length >= 5,
@@ -262,13 +285,15 @@ export default defineComponent({
         meta = at ? `checked ${ago(at)} · ranked by engagement per hour` : '';
         empty = 'No Hacker News stories in the last 48 h for these topics (English topics only).';
       }
+      const count = rows.news.length + rows.reading.length + rows.forecasts.length + rows.hn.length;
       return {
         src,
         fixedSites: !!activeChannel().sites?.length,
-        items,
+        ...rows,
+        count,
         meta: loading ? 'loading…' : meta,
-        empty: loading ? 'Loading…' : err && !items.length ? `Could not load: ${err}.` : empty,
-        warn: err && items.length ? `Some sources failed: ${err}.` : '',
+        empty: loading ? 'Loading…' : err && !count ? `Could not load: ${err}.` : empty,
+        warn: err && count ? `Some sources failed: ${err}.` : '',
       };
     });
     async function follow() {
@@ -278,29 +303,17 @@ export default defineComponent({
       adding.value = false;
       if (!siteMsg.value) newSite.value = '';
     }
-    const TABS = [
-      ['news', 'The Guardian'],
-      ['reading', 'Reading'],
-      ['forecasts', 'Forecasts'],
-      ['hn', 'Hacker News'],
-    ];
-    const SCOPES = [
-      ['topic', 'This topic'],
-      ['lens', 'Whole channel'],
-    ];
     // The Guardian tab appears once a key is set.
     const tabs = computed(() => {
       const c = activeChannel();
       // A channel that reads one site names the tab after it ("The Great Simplification").
-      const only = c.sites?.length === 1 ? readingSites().find(x => x.url === c.sites[0])?.name : '';
-      return c.streams
-        .filter(id => id !== 'news' || ui.guardian)
-        .map(id => TABS.find(t => t[0] === id))
-        .filter(Boolean)
-        .map(([id, label]) => [id, id === 'reading' && only ? only : label]);
+      const only = c.sites?.length === 1 ? readingSites().find(x => x.url === c.sites?.[0])?.name : '';
+      return TABS.filter(([id]) => c.streams.includes(id) && (id !== 'news' || ui.guardian))
+        .sort(([a], [b]) => c.streams.indexOf(a) - c.streams.indexOf(b))
+        .map(([id, label]): [StorySrc, string] => [id, id === 'reading' && only ? only : label]);
     });
     const when = (t: number) =>
-      Math.abs(Date.now() - t) < 30 * DAY_MS
+      Math.abs(ui.now - t) < 30 * DAY_MS
         ? ago(t)
         : new Date(t).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
     return {
@@ -308,6 +321,7 @@ export default defineComponent({
       state,
       view,
       sites,
+      isBuiltInSite,
       newSite,
       siteMsg,
       adding,

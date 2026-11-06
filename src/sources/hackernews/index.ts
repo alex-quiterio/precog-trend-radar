@@ -1,6 +1,8 @@
 // PRECOG / Trend Radar · Hacker News stories per day (Algolia), cached per day.
-import { DAY, store } from '../core/config';
-import { SKIP, getJSON, iso, phrase, pool, registerAdapter, utcDay } from './registry';
+import { DAY, store } from '@core/config';
+import { SKIP, getJSON, iso, phrase, pool, registerAdapter, utcDay } from '@sources/registry';
+import { parseHitCount, parseHitTimes } from './parse';
+export * from './parse';
 
 // --- Hacker News (per-day counts, cached per day) ----------------------
 registerAdapter({
@@ -16,7 +18,7 @@ registerAdapter({
       days = 45,
       end = utcDay();
     const key = 'precog.hn.v2.' + q.toLowerCase();
-    const cache = store.get(key, { days: {} });
+    const cache = store.get<{ days: Record<number, number> }>(key, { days: {} });
     const starts = Array.from({ length: days }, (_, i) => end - (days - i) * DAY);
     let need = starts.filter(s => cache.days[s] == null || s >= end - 2 * DAY);
     if (need.length > 3) {
@@ -27,13 +29,14 @@ registerAdapter({
         `https://hn.algolia.com/api/v1/search_by_date?query=${encodeURIComponent(q)}&typoTolerance=false&tags=story&hitsPerPage=1000&attributesToRetrieve=created_at_i&numericFilters=${nfil}`,
         signal,
       );
-      if ((j.hits || []).length >= (j.nbHits || 0)) {
+      const times = parseHitTimes(j);
+      if (times.length >= parseHitCount(j)) {
         // complete: bucket locally, one request
         need.forEach(s => {
           cache.days[s] = 0;
         });
-        j.hits.forEach(x => {
-          const s = utcDay(x.created_at_i * 1000);
+        times.forEach(t => {
+          const s = utcDay(t);
           if (s in cache.days || need.includes(s)) cache.days[s] = (cache.days[s] || 0) + 1;
         });
         need = [];
@@ -45,10 +48,10 @@ registerAdapter({
         `https://hn.algolia.com/api/v1/search_by_date?query=${encodeURIComponent(q)}&typoTolerance=false&tags=story&hitsPerPage=0&numericFilters=${nfil}`,
         signal,
       );
-      cache.days[s] = j.nbHits || 0;
+      cache.days[s] = parseHitCount(j);
     });
     Object.keys(cache.days).forEach(k => {
-      if (+k < end - 70 * DAY) delete cache.days[k];
+      if (+k < end - 70 * DAY) delete cache.days[+k];
     });
     store.set(key, cache);
     return { topic, points: starts.map(s => ({ t: iso(s), value: cache.days[s] || 0 })) };

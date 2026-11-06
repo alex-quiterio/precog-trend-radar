@@ -45,17 +45,21 @@
 
 <script lang="ts">
 import { reactive, ref, computed, onMounted, onBeforeUnmount, defineComponent } from 'vue';
-import { focusTopic } from '../actions';
-import { fmtPct, fmtVal } from '../core/format';
-import { arrowOf } from '../core/stats';
-import { ui } from '../core/ui-store';
-import { activeLens, entriesOf } from '../state';
-import PanelShell from './PanelShell.vue';
+import { focusTopic } from '@/actions';
+import { fmtPct, fmtVal } from '@core/format';
+import { arrowOf } from '@core/stats';
+import { ui } from '@core/ui-store';
+import { activeLens, entriesOf } from '@/state';
+import { hasStats } from '@features/brief';
+import PanelShell from '@components/PanelShell.vue';
 
 const RC = 150,
   RR = 116,
   R_FLAT = 0.525;
-const polar = (deg, r) => [RC + r * Math.sin((deg * Math.PI) / 180), RC - r * Math.cos((deg * Math.PI) / 180)];
+const polar = (deg: number, r: number): [number, number] => [
+  RC + r * Math.sin((deg * Math.PI) / 180),
+  RC - r * Math.cos((deg * Math.PI) / 180),
+];
 const RADAR_STATIC = {
   rings: [0.25, 0.5, 0.75, 1].map(f => RR * f),
   spokes: [0, 45, 90, 135].map(a => [...polar(a, RR), ...polar(a + 180, RR)]),
@@ -71,13 +75,13 @@ export default defineComponent({
   props: { index: Number },
   components: { PanelShell },
   setup() {
-    const sweep = ref(null),
-      wrap = ref(null),
-      hovered = ref(null);
-    const flash = reactive({});
+    const sweep = ref<SVGGElement | null>(null),
+      wrap = ref<HTMLElement | null>(null),
+      hovered = ref<string | null>(null);
+    const flash = reactive<Record<string, number>>({});
     const view = computed(() => {
       const lens = activeLens(),
-        list = entriesOf(lens).filter(E => E.stats);
+        list = entriesOf(lens).filter(hasStats);
       const mMax = Math.max(2, ...list.map(E => Math.abs(E.stats.momentum)));
       const vMax = Math.max(1e-9, ...list.map(E => E.stats.latest));
       return {
@@ -112,11 +116,11 @@ export default defineComponent({
       };
     });
 
-    let raf = null,
+    let raf = 0,
       start = 0,
       prev = 0;
     const mq = matchMedia('(prefers-reduced-motion: reduce)');
-    const frame = now => {
+    const frame = (now: number) => {
       const a = (((now - start) / 6000) * 360) % 360;
       sweep.value?.setAttribute('transform', `rotate(${a.toFixed(2)} ${RC} ${RC})`);
       view.value.blips.forEach(b => {

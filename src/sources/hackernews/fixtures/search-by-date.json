@@ -1,0 +1,77 @@
+{
+  "hits": [
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "DamonHD"
+        },
+        "title": {
+          "fullyHighlighted": false,
+          "matchLevel": "full",
+          "matchedWords": ["heat", "pumps"],
+          "value": "UK homes to get low-/no-interest loans to fund solar panels and <em>heat pumps</em>"
+        },
+        "url": {
+          "fullyHighlighted": false,
+          "matchLevel": "full",
+          "matchedWords": ["heat", "pumps"],
+          "value": "https://www.theguardian.com/environment/2026/oct/27/homes-across-uk-to-get-low--or-no-interest-loans-to-fund-solar-panels-and-<em>heat-pumps</em>"
+        }
+      },
+      "created_at_i": 1793122910,
+      "objectID": "50262846"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "bookofjoe"
+        },
+        "title": {
+          "fullyHighlighted": false,
+          "matchLevel": "full",
+          "matchedWords": ["heat", "pumps"],
+          "value": "Window <em>Heat Pumps</em> Offer Efficient Heating and Cooling Without Ductwork"
+        },
+        "url": {
+          "fullyHighlighted": false,
+          "matchLevel": "full",
+          "matchedWords": ["heat", "pumps"],
+          "value": "https://www.wsj.com/business/energy-oil/window-<em>heat-pumps</em>-heating-cooling-fd552926"
+        }
+      },
+      "created_at_i": 1792792402,
+      "objectID": "50215885"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "thelastgallon"
+        },
+        "title": {
+          "fullyHighlighted": false,
+          "matchLevel": "full",
+          "matchedWords": ["heat", "pumps"],
+          "value": "<em>Heat Pumps</em> Are Coming for Coal's Industrial Heat Market"
+        },
+        "url": {
+          "fullyHighlighted": false,
+          "matchLevel": "full",
+          "matchedWords": ["heat", "pumps"],
+          "value": "https://oilprice.com/Energy/Energy-General/<em>Heat-Pumps</em>-Are-Coming-for-Coals-Industrial-Heat-Market.html"
+        }
+      },
+      "created_at_i": 1791901814,
+      "objectID": "50072349"
+    }
+  ],
+  "nbHits": 205,
+  "page": 0,
+  "nbPages": 69,
+  "hitsPerPage": 3
+}

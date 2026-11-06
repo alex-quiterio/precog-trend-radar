@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
-import type { fmtVal, fmtPct, fmtTime, fmtTick, fmtAxis, ago, changeLabel, nf0, nf1 } from './core/format';
-import type { arrowOf, levelOf } from './core/stats';
+import type { fmtVal, fmtPct, fmtTime, fmtTick, fmtAxis, ago, changeLabel, nf0, nf1 } from '@core/format';
+import type { arrowOf, levelOf } from '@core/stats';
 
 declare module '*.vue' {
   import type { DefineComponent } from 'vue';

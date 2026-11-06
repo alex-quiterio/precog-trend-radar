@@ -1,0 +1,30 @@
+{
+  "total_count": 40781,
+  "incomplete_results": false,
+  "items": [
+    {
+      "full_name": "jub0t/Concat",
+      "name": "Concat",
+      "html_url": "https://github.com/jub0t/Concat",
+      "description": "Beta: The truly free, open-source, local-first, cross-platform video editor. Scriptable through a JSON-RPC API & MCP.",
+      "stargazers_count": 14519,
+      "forks_count": 1807,
+      "language": "Rust",
+      "created_at": "2026-08-25T18:34:47Z",
+      "pushed_at": "2026-11-05T13:51:37Z",
+      "fork": false
+    },
+    {
+      "full_name": "peach-mitao/peach",
+      "name": "peach",
+      "html_url": "https://github.com/peach-mitao/peach",
+      "description": "Peach: Local-first video metadata scraper and media manager.",
+      "stargazers_count": 14451,
+      "forks_count": 1670,
+      "language": "Python",
+      "created_at": "2026-08-19T19:48:30Z",
+      "pushed_at": "2026-11-06T08:01:53Z",
+      "fork": false
+    }
+  ]
+}

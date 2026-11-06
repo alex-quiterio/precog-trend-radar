@@ -1,6 +1,6 @@
 // The person filter for forecast questions: topics stay, named people go.
 import { describe, expect, it } from 'vitest';
-import { mentionsPerson } from '../src/sources/manifold';
+import { mentionsPerson } from '@sources/manifold';
 
 describe('mentionsPerson', () => {
   it('keeps questions about topics, places and institutions', () => {

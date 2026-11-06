@@ -76,18 +76,18 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import { activeChannel, channelDatapoints, channels } from './channels';
-import { ui } from './core/ui-store';
-import { activeLens } from './state';
-import AppHeader from './components/AppHeader.vue';
-import MorningBrief from './components/MorningBrief.vue';
-import DatapointsPanel from './components/DatapointsPanel.vue';
-import LensPanel from './components/LensPanel.vue';
-import SignalPanel from './components/SignalPanel.vue';
-import StoriesPanel from './components/StoriesPanel.vue';
-import GitHubPanel from './components/GitHubPanel.vue';
-import GitHubMePanel from './components/GitHubMePanel.vue';
-import RadarPanel from './components/RadarPanel.vue';
+import { activeChannel, channelDatapoints, channels } from '@/channels';
+import { ui } from '@core/ui-store';
+import { activeLens } from '@/state';
+import AppHeader from '@components/AppHeader.vue';
+import MorningBrief from '@components/MorningBrief.vue';
+import DatapointsPanel from '@components/DatapointsPanel.vue';
+import LensPanel from '@components/LensPanel.vue';
+import SignalPanel from '@components/SignalPanel.vue';
+import StoriesPanel from '@components/StoriesPanel.vue';
+import GitHubPanel from '@components/GitHubPanel.vue';
+import GitHubMePanel from '@components/GitHubMePanel.vue';
+import RadarPanel from '@components/RadarPanel.vue';
 
 // PRECOG / Trend Radar · One channel on screen at a time: its gist, trends, streams and context.
 

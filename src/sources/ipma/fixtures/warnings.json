@@ -1,0 +1,50 @@
+[
+  {
+    "text": "",
+    "awarenessTypeName": "Agitação Marítima",
+    "idAreaAviso": "BGC",
+    "startTime": "2026-11-06T07:15:00",
+    "awarenessLevelID": "green",
+    "endTime": "2026-11-09T07:00:00"
+  },
+  {
+    "text": "",
+    "awarenessTypeName": "Nevoeiro",
+    "idAreaAviso": "BGC",
+    "startTime": "2026-11-06T07:15:00",
+    "awarenessLevelID": "green",
+    "endTime": "2026-11-09T07:00:00"
+  },
+  {
+    "text": "",
+    "awarenessTypeName": "Tempo Quente",
+    "idAreaAviso": "BGC",
+    "startTime": "2026-11-06T07:15:00",
+    "awarenessLevelID": "green",
+    "endTime": "2026-11-09T07:00:00"
+  },
+  {
+    "text": "",
+    "awarenessTypeName": "Tempo Frio",
+    "idAreaAviso": "BGC",
+    "startTime": "2026-11-06T07:15:00",
+    "awarenessLevelID": "green",
+    "endTime": "2026-11-09T07:00:00"
+  },
+  {
+    "text": "",
+    "awarenessTypeName": "Precipitação",
+    "idAreaAviso": "BGC",
+    "startTime": "2026-11-06T07:15:00",
+    "awarenessLevelID": "green",
+    "endTime": "2026-11-09T07:00:00"
+  },
+  {
+    "text": "",
+    "awarenessTypeName": "Neve",
+    "idAreaAviso": "BGC",
+    "startTime": "2026-11-06T07:15:00",
+    "awarenessLevelID": "green",
+    "endTime": "2026-11-09T07:00:00"
+  }
+]

@@ -1,0 +1,68 @@
+[
+  {
+    "id": "vZHLcguyXmZDnNlhPQ68",
+    "question": "Will climate change be successfully limited to under 2°C at the end of 2045?",
+    "url": "https://manifold.markets/humblestumble/will-climate-change-be-successfully",
+    "probability": 0.19727396489621774,
+    "uniqueBettorCount": 122,
+    "volume24Hours": 400,
+    "closeTime": 2397160740000,
+    "outcomeType": "BINARY",
+    "isResolved": false
+  },
+  {
+    "id": "SQ77SkhCdjlRQJq62BV7",
+    "question": "Will non violent climate activism be prosecuted as terrorism by 2026?",
+    "url": "https://manifold.markets/MrSr/will-non-violent-climate-activism-b",
+    "probability": 0.2323715762491013,
+    "uniqueBettorCount": 20,
+    "volume24Hours": 0,
+    "closeTime": 1798779540000,
+    "outcomeType": "BINARY",
+    "isResolved": false
+  },
+  {
+    "id": "uNdIq5PZuU",
+    "question": "Will the “Stop climate shakedowns act” pass by the end of 2026?",
+    "url": "https://manifold.markets/projectflourishingbase44a/will-the-stop-climate-shakedowns-ac",
+    "probability": 0.12313835888912425,
+    "uniqueBettorCount": 3,
+    "volume24Hours": 0,
+    "closeTime": 1798761540000,
+    "outcomeType": "BINARY",
+    "isResolved": false
+  },
+  {
+    "id": "i2O9FbjiNroURMTJtPBw",
+    "question": "Will Bryan Caplan win his climate bet with Yoram Bauman?",
+    "url": "https://manifold.markets/dreev/will-bryan-caplan-win-his-climate-b",
+    "probability": 0.009133821465324557,
+    "uniqueBettorCount": 42,
+    "volume24Hours": 0,
+    "closeTime": 1863734340000,
+    "outcomeType": "BINARY",
+    "isResolved": false
+  },
+  {
+    "id": "3Uf28BLA3QdB3jEdynid",
+    "question": "Will climate change decimate humans before 2050?",
+    "url": "https://manifold.markets/Stralor/will-climate-change-decimate-humans",
+    "probability": 0.09613659294550432,
+    "uniqueBettorCount": 155,
+    "volume24Hours": 0,
+    "closeTime": 2524636740000,
+    "outcomeType": "BINARY",
+    "isResolved": false
+  },
+  {
+    "id": "uQCRGsbBi5D5x9Slxg98",
+    "question": "By end of 2030, will I perceive the threat from climate change as being worse than at market creation?",
+    "url": "https://manifold.markets/ManifoldChampion/by-end-of-2030-will-i-perceive-the",
+    "probability": 0.3000000000000002,
+    "uniqueBettorCount": 32,
+    "volume24Hours": 0,
+    "closeTime": 1925020740000,
+    "outcomeType": "BINARY",
+    "isResolved": false
+  }
+]

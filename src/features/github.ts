@@ -2,11 +2,13 @@
 // Two searches per topic (new repos in the last 90 days, and in the 90 days before), cached for 12 h.
 // Search allows ~10 requests a minute (30 with a token), so requests are queued just inside that.
 import { reactive } from 'vue';
-import type { Entry } from '../types';
-import { DAY, HOUR, sleep, store } from '../core/config';
-import { githubHeaders, githubToken, searchGap } from '../sources/github-auth';
-import { HttpError, getJSON, phrase, queryOf } from '../sources/registry';
-import { activeLens, entriesOf } from '../state';
+import { errorText, isAbort } from '@core/errors';
+import type { Entry } from '@/types';
+import { DAY, HOUR, sleep, store } from '@core/config';
+import { githubHeaders, githubToken, searchGap } from '@sources/github/auth';
+import { HttpError, getJSON, phrase, queryOf } from '@sources/registry';
+import { parseRepoSearch } from '@sources/github/parse';
+import { activeLens, entriesOf } from '@/state';
 
 export interface GhRepo {
   name: string;
@@ -43,7 +45,7 @@ export const gh = reactive({
 });
 
 const queue = { last: 0, chain: Promise.resolve() as Promise<unknown> };
-function search(url: string, signal: AbortSignal): Promise<any> {
+function search(url: string, signal: AbortSignal): Promise<unknown> {
   const run = queue.chain.then(async () => {
     const wait = queue.last + searchGap() - Date.now();
     if (wait > 0) await sleep(wait);
@@ -66,28 +68,29 @@ async function topicStats(E: Entry, signal: AbortSignal): Promise<Cached> {
     from = today - PERIOD * DAY,
     prev = from - PERIOD * DAY;
   const base = 'https://api.github.com/search/repositories?per_page=30&sort=stars&order=desc&q=';
-  const recent = await search(base + encodeURIComponent(`${q} created:${ymd(from)}..${ymd(today)}`), signal);
-  const older = await search(
-    'https://api.github.com/search/repositories?per_page=1&q=' +
-      encodeURIComponent(`${q} created:${ymd(prev)}..${ymd(from - DAY)}`),
-    signal,
+  const recent = parseRepoSearch(
+    await search(base + encodeURIComponent(`${q} created:${ymd(from)}..${ymd(today)}`), signal),
   );
-  const now = recent.total_count || 0,
-    before = older.total_count || 0;
-  const top: GhRepo[] = (recent.items || [])
-    .filter(r => !r.fork && r.stargazers_count > 0)
-    .map(r => {
-      const created = Date.parse(r.created_at);
-      return {
-        name: r.full_name,
-        url: r.html_url,
-        desc: String(r.description || '').slice(0, 160),
-        stars: r.stargazers_count,
-        language: r.language,
-        created,
-        pace: r.stargazers_count / Math.max(1, (today - created) / DAY),
-      };
-    });
+  const older = parseRepoSearch(
+    await search(
+      'https://api.github.com/search/repositories?per_page=1&q=' +
+        encodeURIComponent(`${q} created:${ymd(prev)}..${ymd(from - DAY)}`),
+      signal,
+    ),
+  );
+  const now = recent.total,
+    before = older.total;
+  const top: GhRepo[] = recent.repos
+    .filter(r => r.stars > 0 && Number.isFinite(r.created))
+    .map(({ name, url, desc, stars, language, created }) => ({
+      name,
+      url,
+      desc,
+      stars,
+      language,
+      created,
+      pace: stars / Math.max(1, (today - created) / DAY),
+    }));
   const v: Cached = { now, before, growth: before > 0 ? (now - before) / before : null, top };
   store.set(ck, { at: Date.now(), v });
   return v;
@@ -110,13 +113,13 @@ export async function loadGitHub(force = false): Promise<void> {
       if (signal.aborted) return;
       gh.topics = [...gh.topics, { key: E.key, name: E.name, color: E.color, ...v }];
     } catch (e) {
-      if (e.name === 'AbortError') return;
+      if (isAbort(e)) return;
       gh.error =
         e instanceof HttpError && (e.status === 403 || e.status === 429)
           ? githubToken()
             ? 'GitHub search limit reached; the rest fills in on the next refresh'
             : 'GitHub search limit reached; add a GitHub token (Your GitHub → Token) for 3× the speed'
-          : e.message;
+          : errorText(e);
       if (e instanceof HttpError && (e.status === 403 || e.status === 429)) break;
     }
     gh.done++;

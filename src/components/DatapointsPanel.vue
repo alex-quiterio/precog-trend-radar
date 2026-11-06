@@ -33,11 +33,11 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import { activeChannel, channelDatapoints } from '../channels';
-import { ui } from '../core/ui-store';
-import { DATAPOINT_GROUPS, dp } from '../features/datapoints';
-import PanelShell from './PanelShell.vue';
-import Sparkline from './Sparkline.vue';
+import { activeChannel, channelDatapoints } from '@/channels';
+import { ui } from '@core/ui-store';
+import { DATAPOINT_GROUPS, dp, type DatapointRow } from '@features/datapoints';
+import PanelShell from '@components/PanelShell.vue';
+import Sparkline from '@components/Sparkline.vue';
 
 // PRECOG / Trend Radar · Context: the open-data cards the channel on screen picks, updated hourly.
 
@@ -49,7 +49,7 @@ export default defineComponent({
     const view = computed(() => {
       // The channel picks its cards and their order; they're shown under their group headings.
       const ids = channelDatapoints(activeChannel());
-      const rows = ids.map(id => dp.rows.find(r => r.id === id)).filter(Boolean);
+      const rows = ids.map(id => dp.rows.find(r => r.id === id)).filter((r): r is DatapointRow => !!r);
       const order = [...new Set(rows.map(r => r.group))];
       return {
         groups: order.map(id => ({

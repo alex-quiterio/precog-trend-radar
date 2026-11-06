@@ -1,35 +1,35 @@
 // PRECOG / Trend Radar · Boot: restore prefs, mount the Vue app, start the data loop, global keys.
 import { createApp } from 'vue';
-import './styles/tokens.css';
-import './styles/app.css';
-import './styles/print-motion.css';
+import '@/styles/tokens.css';
+import '@/styles/app.css';
+import '@/styles/print-motion.css';
 
 // Trend sources register themselves on import.
-import './sources/wikipedia';
-import './sources/guardian';
-import './sources/hackernews';
+import '@sources/wikipedia';
+import '@sources/guardian';
+import '@sources/hackernews';
 
-import App from './App.vue';
-import StateTag from './components/StateTag.vue';
-import TopicDot from './components/TopicDot.vue';
-import { applyTheme, selectLens, shiftLens, shiftTopic } from './actions';
-import { HOUR, LS, store } from './core/config';
-import { ago, changeLabel, fmtAxis, fmtPct, fmtTick, fmtTime, fmtVal, nf0, nf1 } from './core/format';
-import { looksLikePerson } from './core/guard';
-import { arrowOf, levelOf } from './core/stats';
-import { startClock, ui } from './core/ui-store';
-import { loadDatapoints } from './features/datapoints';
-import { loadGitHub } from './features/github';
-import { loadMyGitHub } from './features/github-me';
-import { activeChannel, channels } from './channels';
-import { saveLook } from './features/brief';
-import { startStoryTimer } from './features/stories';
-import { liveUpdated, loadLive, startLive } from './live';
-import { ADAPTERS, registerAdapter } from './sources/registry';
-import { guardianKey } from './sources/guardian';
-import { githubToken } from './sources/github-auth';
-import { lensById, loadLenses, state } from './state';
-import type { Prefs } from './types';
+import App from '@/App.vue';
+import StateTag from '@components/StateTag.vue';
+import TopicDot from '@components/TopicDot.vue';
+import { applyTheme, selectLens, shiftLens, shiftTopic } from '@/actions';
+import { HOUR, LS, store } from '@core/config';
+import { ago, changeLabel, fmtAxis, fmtPct, fmtTick, fmtTime, fmtVal, nf0, nf1 } from '@core/format';
+import { looksLikePerson } from '@core/guard';
+import { arrowOf, levelOf } from '@core/stats';
+import { startClock, ui } from '@core/ui-store';
+import { loadDatapoints } from '@features/datapoints';
+import { loadGitHub } from '@features/github';
+import { loadMyGitHub } from '@features/github-me';
+import { activeChannel, channels } from '@/channels';
+import { saveLook } from '@features/brief';
+import { startStoryTimer } from '@features/stories';
+import { liveUpdated, loadLive, startLive } from '@/live';
+import { ADAPTERS, registerAdapter } from '@sources/registry';
+import { guardianKey } from '@sources/guardian';
+import { githubToken } from '@sources/github/auth';
+import { lensById, loadLenses, state } from '@/state';
+import type { Prefs } from '@/types';
 
 /** Removes caches written by earlier versions (GDELT, old Reading and Guardian formats) to free storage. */
 function dropOldCaches(): void {
@@ -49,9 +49,10 @@ function boot(): void {
   loadLenses();
   ui.guardian = !!guardianKey();
   ui.ghToken = !!githubToken();
-  state.activeLens = lensById(prefs.activeLens) ? prefs.activeLens : state.lenses[0]?.id || null;
+  state.activeLens = (lensById(prefs.activeLens) && prefs.activeLens) || state.lenses[0]?.id || null;
   state.selectedByLens = prefs.selectedByLens && typeof prefs.selectedByLens === 'object' ? prefs.selectedByLens : {};
-  state.storySrc = ['news', 'forecasts', 'hn'].includes(prefs.storySrc) ? prefs.storySrc : 'reading';
+  const src = prefs.storySrc;
+  state.storySrc = src === 'news' || src === 'forecasts' || src === 'hn' ? src : 'reading';
   state.storyScope = prefs.storyScope === 'topic' ? 'topic' : 'lens';
   state.prevLook = store.get(LS.look, null);
 

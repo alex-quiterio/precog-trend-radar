@@ -11,8 +11,8 @@
 
 <script lang="ts">
 import { ref, computed, defineComponent, type PropType } from 'vue';
-import type { SeriesPoint } from '../types';
-import { pathOf, useWidth } from './helpers';
+import type { SeriesPoint } from '@/types';
+import { pathOf, useWidth } from '@components/helpers';
 
 // PRECOG / Trend Radar · Small-multiple cards (sparkline, value, momentum) for the active lens.
 
@@ -26,7 +26,7 @@ export default defineComponent({
     fit: Boolean,
   },
   setup(props) {
-    const el = ref(null),
+    const el = ref<HTMLElement | null>(null),
       width = useWidth(el, 150);
     const g = computed(() => {
       const s = props.points || [],
@@ -37,8 +37,8 @@ export default defineComponent({
         max = Math.max(...vals),
         min = props.fit ? Math.min(...vals) : 0,
         span = max - min || 1;
-      const X = k => 2 + (k / (s.length - 1)) * (w - 8),
-        Y = v => h - 5 - ((v - min) / span) * (h - 10);
+      const X = (k: number) => 2 + (k / (s.length - 1)) * (w - 8),
+        Y = (v: number) => h - 5 - ((v - min) / span) * (h - 10);
       return {
         w,
         h,

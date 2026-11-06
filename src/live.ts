@@ -1,37 +1,39 @@
 // PRECOG / Trend Radar · Data loop: live fetching, refresh, source switching.
-import { rescanAll } from './alerts';
-import { HISTORY, LIVE_REFRESH_MS } from './core/config';
-import { computeStats } from './core/stats';
+import { rescanAll } from '@/alerts';
+import { HISTORY, LIVE_REFRESH_MS } from '@core/config';
+import { computeStats } from '@core/stats';
 import { markRaw } from 'vue';
-import { ui } from './core/ui-store';
-import { loadStories } from './features/stories';
-import { blendParts } from './sources/blend';
-import { ADAPTERS, SOURCES, pool, queryOf } from './sources/registry';
-import { activeLens, allEntries, entriesOf, state } from './state';
+import { errorText, isAbort } from '@core/errors';
+import { ui } from '@core/ui-store';
+import { loadStories } from '@features/stories';
+import { blendParts } from '@sources/blend';
+import { ADAPTERS, SOURCES, pool, queryOf } from '@sources/registry';
+import type { Entry } from '@/types';
+import { activeLens, allEntries, entriesOf, state } from '@/state';
 
 export const DEFAULT_SOURCE = 'blend';
-export let liveTimer = null,
-  liveAbort = null,
+export let liveTimer: ReturnType<typeof setInterval> | undefined,
+  liveAbort: AbortController | null = null,
   liveUpdated = 0;
-export function setStatus(msg) {
+export function setStatus(msg: string): void {
   ui.status = msg || '';
 }
-export function beat(text) {
+export function beat(text: string): void {
   ui.pulse = text;
   ui.beat++;
 }
 export const liveParts = () => (SOURCES[state.source]?.parts || []).filter(p => ADAPTERS[p]);
 
-export function recompute(E) {
+export function recompute(E: Entry): void {
   const src = SOURCES[state.source],
     parts = liveParts();
   E.liveSeries = markRaw(src.blend ? blendParts(E, parts) : E.parts[parts[0]] || []);
-  const errs = parts.map(p => E.partErr[p] || E.skipped?.[p]).filter(Boolean);
+  const errs = parts.map(p => E.partErr[p] || E.skipped?.[p]).filter((e): e is string => !!e);
   E.liveError = E.liveSeries.length ? null : errs.length === parts.length ? errs[0] : null;
   const st = computeStats(E.liveSeries);
   E.stats = st && markRaw(st);
 }
-export async function fetchPart(E, pid, signal) {
+export async function fetchPart(E: Entry, pid: string, signal: AbortSignal): Promise<void> {
   try {
     const res = await ADAPTERS[pid].fetch(E.name, { signal, query: queryOf(E) });
     if (signal.aborted) return;
@@ -54,9 +56,9 @@ export async function fetchPart(E, pid, signal) {
     if (E.skipped) delete E.skipped[pid];
     if (res.meta) Object.assign(E.meta, res.meta);
   } catch (e) {
-    if (e.name === 'AbortError') return;
+    if (isAbort(e)) return;
     E.parts[pid] = null;
-    E.partErr[pid] = e.message || String(e);
+    E.partErr[pid] = errorText(e);
   }
   recompute(E);
 }
@@ -123,7 +125,7 @@ export function stopLive() {
   if (liveAbort) liveAbort.abort();
   liveAbort = null;
   clearInterval(liveTimer);
-  liveTimer = null;
+  liveTimer = undefined;
 }
 export function startLive() {
   state.liveLoaded = false;

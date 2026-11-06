@@ -18,7 +18,7 @@
       <div class="tile">
         <span class="tile-k">Fastest-growing topic</span>
         <b class="tile-v small">{{ view.fastest ? view.fastest.name : '—' }}</b>
-        <span class="tile-s">{{ view.fastest ? pct(view.fastest.growth) : '' }}</span>
+        <span class="tile-s">{{ view.fastest?.growth != null ? pct(view.fastest.growth) : '' }}</span>
       </div>
       <div class="tile">
         <span class="tile-k">Top language</span>
@@ -108,12 +108,12 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import { ago, nf0, nf1 } from '../core/format';
-import { ui } from '../core/ui-store';
-import { gh, languageMix, loadGitHub, risingRepos, type GhTopic } from '../features/github';
-import { activeLens } from '../state';
-import PanelShell from './PanelShell.vue';
-import TopicDot from './TopicDot.vue';
+import { ago, nf0, nf1 } from '@core/format';
+import { ui } from '@core/ui-store';
+import { gh, languageMix, loadGitHub, risingRepos, type GhTopic } from '@features/github';
+import { activeLens } from '@/state';
+import PanelShell from '@components/PanelShell.vue';
+import TopicDot from '@components/TopicDot.vue';
 
 // PRECOG / Trend Radar · GitHub view: how much is being built around the active lens's topics.
 

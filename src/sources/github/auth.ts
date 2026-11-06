@@ -1,7 +1,7 @@
 // PRECOG / Trend Radar · Optional GitHub token. Without one GitHub allows ~10 searches a minute and
 // 60 other calls an hour; with one, 30 searches a minute and 5,000 calls an hour. A fine-grained
 // token with no permissions at all is enough (public data only). It lives only in this browser.
-import { store } from '../core/config';
+import { store } from '@core/config';
 
 const KEY = 'precog.github.token';
 export const githubToken = (): string => String(store.get(KEY, '') || '').trim();

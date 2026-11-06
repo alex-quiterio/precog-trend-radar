@@ -1,8 +1,11 @@
 // PRECOG / Trend Radar · The Guardian: articles per day naming the topic, and the newest ones to read.
 // Needs a free developer key from https://open-platform.theguardian.com/access/ (about 500 calls a day,
 // one a second). The key lives only in this browser's storage, never in the page source.
-import { DAY, sleep, store } from '../core/config';
-import { HttpError, SKIP, getJSON, iso, phrase, registerAdapter, utcDay } from './registry';
+import { DAY, sleep, store } from '@core/config';
+import { HttpError, SKIP, getJSON, iso, phrase, registerAdapter, utcDay } from '@sources/registry';
+import { parseGuardianPage } from './parse';
+import type { GuardianArticle } from './parse';
+export * from './parse';
 
 const KEY = 'precog.guardian.key';
 export const guardianKey = (): string => String(store.get(KEY, '') || '').trim();
@@ -11,7 +14,7 @@ export function setGuardianKey(k: string): void {
 }
 
 const queue = { last: 0, chain: Promise.resolve() as Promise<unknown> };
-function throttled(url: string, signal: AbortSignal): Promise<any> {
+function throttled(url: string, signal: AbortSignal): Promise<unknown> {
   const run = queue.chain.then(async () => {
     const wait = queue.last + 1100 - Date.now();
     if (wait > 0) await sleep(wait);
@@ -23,14 +26,6 @@ function throttled(url: string, signal: AbortSignal): Promise<any> {
   return run;
 }
 
-/** A Guardian article naming a topic, kept from the same requests that count coverage. */
-export interface GuardianArticle {
-  id: string;
-  title: string;
-  url: string;
-  section: string;
-  t: number;
-}
 const cacheKey = (q: string) => 'precog.guardian.v2.' + phrase(q).toLowerCase();
 /** The newest articles for a topic phrase, from today's cache (filled by the trend fetch). */
 export function guardianArticles(q: string): GuardianArticle[] {
@@ -58,10 +53,10 @@ registerAdapter({
     const days = 45,
       end = utcDay() + DAY,
       from = new Date(end - days * DAY).toISOString().slice(0, 10);
-    const counts = new Array(days).fill(0);
+    const counts: number[] = new Array(days).fill(0);
     // Up to 1,000 articles (5 pages of 200); a topic busier than that is busy enough.
     for (let page = 1, pages = 1; page <= pages && page <= 5; page++) {
-      let j;
+      let j: unknown;
       try {
         j = await throttled(
           `https://content.guardianapis.com/search?q=${encodeURIComponent(q)}&from-date=${from}&order-by=newest&page-size=200&page=${page}&show-fields=none&api-key=${encodeURIComponent(key)}`,
@@ -75,14 +70,13 @@ registerAdapter({
         if (e instanceof TypeError) throw new Error('The Guardian refused the request (most likely the key)');
         throw e;
       }
-      pages = j.response?.pages || 1;
-      (j.response?.results || []).forEach(a => {
-        const t = Date.parse(a.webPublicationDate);
-        const k = Math.floor((t - (end - days * DAY)) / DAY);
+      const reply = parseGuardianPage(j);
+      pages = reply.pages;
+      reply.results.forEach(({ type, ...a }) => {
+        const k = Math.floor((a.t - (end - days * DAY)) / DAY);
         if (k >= 0 && k < days) counts[k]++;
         // Results come newest first: keep the first 20 to list in the News stream.
-        if (articles.length < 20 && a.type === 'article')
-          articles.push({ id: a.id, title: a.webTitle, url: a.webUrl, section: a.sectionName || '', t });
+        if (articles.length < 20 && type === 'article') articles.push(a);
       });
     }
     const points = counts.map((value, k) => ({ t: iso(end - (days - k) * DAY), value }));

@@ -1,0 +1,40 @@
+{
+  "response": {
+    "status": "ok",
+    "userTier": "developer",
+    "total": 612,
+    "startIndex": 1,
+    "pageSize": 200,
+    "currentPage": 1,
+    "pages": 4,
+    "orderBy": "newest",
+    "results": [
+      {
+        "id": "environment/2026/nov/05/heat-pump-installations-record",
+        "type": "article",
+        "sectionId": "environment",
+        "sectionName": "Environment",
+        "webPublicationDate": "2026-11-05T14:02:11Z",
+        "webTitle": "Heat pump installations hit a record as grants expand",
+        "webUrl": "https://www.theguardian.com/environment/2026/nov/05/heat-pump-installations-record",
+        "apiUrl": "https://content.guardianapis.com/environment/2026/nov/05/heat-pump-installations-record",
+        "isHosted": false,
+        "pillarId": "pillar/news",
+        "pillarName": "News"
+      },
+      {
+        "id": "world/live/2026/nov/04/climate-talks-live",
+        "type": "liveblog",
+        "sectionId": "world",
+        "sectionName": "World news",
+        "webPublicationDate": "2026-11-04T09:30:00Z",
+        "webTitle": "Climate talks – live",
+        "webUrl": "https://www.theguardian.com/world/live/2026/nov/04/climate-talks-live",
+        "apiUrl": "https://content.guardianapis.com/world/live/2026/nov/04/climate-talks-live",
+        "isHosted": false,
+        "pillarId": "pillar/news",
+        "pillarName": "News"
+      }
+    ]
+  }
+}

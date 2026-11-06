@@ -1,8 +1,8 @@
 // PRECOG / Trend Radar · Adapter registry, source list and shared fetch helpers. Every adapter registers itself here.
-import type { Adapter, AdapterResult, Entry, Lens, Query, Source } from '../types';
-import { DAY } from '../core/config';
+import type { Adapter, AdapterResult, Entry, Lens, Query, Source } from '@/types';
+import { DAY } from '@core/config';
 import { reactive } from 'vue';
-import { lensById } from '../state';
+import { lensById } from '@/state';
 
 export const ADAPTERS: Record<string, Adapter> = {};
 // Reactive, so a source registered after start-up (e.g. from the console) shows up in the views.
@@ -21,16 +21,17 @@ export function registerAdapter(a: Adapter): void {
     SOURCES[a.id] = { label: a.label || a.id, parts: [a.id], unit: a.unit || '' };
 }
 export const utcDay = (d = Date.now()) => Math.floor(+d / DAY) * DAY;
-export const iso = t => new Date(t).toISOString();
+export const iso = (t: number): string => new Date(t).toISOString();
 export const withTimeout = (signal?: AbortSignal, ms = 25000): AbortSignal | undefined =>
-  AbortSignal.any ? AbortSignal.any([signal, AbortSignal.timeout(ms)].filter(Boolean)) : signal;
+  AbortSignal.any ? AbortSignal.any([signal, AbortSignal.timeout(ms)].filter((s): s is AbortSignal => !!s)) : signal;
 /** An HTTP error that keeps the status, so callers can react to 403/404/429. */
 export class HttpError extends Error {
   constructor(public status: number) {
     super(`HTTP ${status}`);
   }
 }
-export async function getJSON(url: string, signal?: AbortSignal, headers?: HeadersInit): Promise<any> {
+/** Fetches JSON. The reply is `unknown`: read it with the helpers in shape.ts, never by trusting its shape. */
+export async function getJSON(url: string, signal?: AbortSignal, headers?: HeadersInit): Promise<unknown> {
   const r = await fetch(url, { signal: withTimeout(signal), headers });
   if (!r.ok) throw new HttpError(r.status);
   return r.json();

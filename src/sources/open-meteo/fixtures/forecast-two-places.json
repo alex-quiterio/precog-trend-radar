@@ -1,0 +1,41 @@
+[
+  {
+    "latitude": 38.746044,
+    "longitude": -9.175565,
+    "generationtime_ms": 0.042438507080078125,
+    "utc_offset_seconds": 0,
+    "timezone": "Europe/Lisbon",
+    "timezone_abbreviation": "GMT",
+    "elevation": 64.0,
+    "daily_units": {
+      "time": "iso8601",
+      "temperature_2m_max": "°C",
+      "precipitation_sum": "mm"
+    },
+    "daily": {
+      "time": ["2026-11-06"],
+      "temperature_2m_max": [17.3],
+      "precipitation_sum": [0.4]
+    }
+  },
+  {
+    "latitude": 52.366,
+    "longitude": 4.901,
+    "generationtime_ms": 0.028252601623535156,
+    "utc_offset_seconds": 3600,
+    "timezone": "Europe/Amsterdam",
+    "timezone_abbreviation": "GMT+1",
+    "elevation": 11.0,
+    "location_id": 1,
+    "daily_units": {
+      "time": "iso8601",
+      "temperature_2m_max": "°C",
+      "precipitation_sum": "mm"
+    },
+    "daily": {
+      "time": ["2026-11-06"],
+      "temperature_2m_max": [8.4],
+      "precipitation_sum": [0.0]
+    }
+  }
+]

@@ -1,0 +1,55 @@
+{
+  "dataPrev": "2026-11-06",
+  "dataRun": "2026-11-05",
+  "fileDate": "2026-11-06 00:05:02",
+  "local": {
+    "0101": {
+      "data": {
+        "rcm": 3
+      },
+      "dico": "0101",
+      "latitude": 40.58,
+      "longitude": -8.44
+    },
+    "0102": {
+      "data": {
+        "rcm": 2
+      },
+      "dico": "0102",
+      "latitude": 40.6909,
+      "longitude": -8.4784
+    },
+    "0103": {
+      "data": {
+        "rcm": 3
+      },
+      "dico": "0103",
+      "latitude": 40.44,
+      "longitude": -8.44
+    },
+    "0104": {
+      "data": {
+        "rcm": 3
+      },
+      "dico": "0104",
+      "latitude": 40.93,
+      "longitude": -8.26
+    },
+    "0105": {
+      "data": {
+        "rcm": 1
+      },
+      "dico": "0105",
+      "latitude": 40.6413,
+      "longitude": -8.6535
+    },
+    "0106": {
+      "data": {
+        "rcm": 3
+      },
+      "dico": "0106",
+      "latitude": 41.0409,
+      "longitude": -8.2707
+    }
+  }
+}

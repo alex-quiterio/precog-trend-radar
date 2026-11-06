@@ -2,9 +2,15 @@
 // Housing (prices, rents, mortgages) and energy (energy prices, renewable share, sun and wind) included.
 // Cards sit in groups by place: Portugal, Netherlands, Euro area, Planet. No card mixes two countries.
 import { reactive } from 'vue';
-import { nf0, nf1, nf2 } from '../core/format';
-import type { SeriesPoint } from '../types';
-import { getJSON } from '../sources/registry';
+import { at, num } from '@sources/shape';
+import { nf0, nf1, nf2 } from '@core/format';
+import type { SeriesPoint } from '@/types';
+import { getJSON } from '@sources/registry';
+import { parseEcbLatest, parseEcbSeries } from '@sources/ecb/parse';
+import { parseEurostat } from '@sources/eurostat/parse';
+import { parseCo2, parseSeaIce } from '@sources/global-warming/parse';
+import { parseFireRisk, parseWarnings } from '@sources/ipma/parse';
+import { meteoColumn, meteoPlaces, meteoTimes } from '@sources/open-meteo/parse';
 
 export type DatapointGroup = 'pt' | 'nl' | 'ea' | 'planet';
 export const DATAPOINT_GROUPS: { id: DatapointGroup; label: string; hint: string }[] = [
@@ -19,35 +25,6 @@ const AREAS: [string, DatapointGroup, string, string][] = [
   ['NL', 'nl', 'nl', 'Netherlands'],
   ['EA21', 'ea', 'ea', 'Euro area'],
 ];
-/**
- * Reads one series out of a Eurostat JSON-stat reply: pick a value for each dimension you name (geo, siec…);
- * dimensions you don't name must have a single value. Time runs along the last dimension.
- */
-function eurostatSeries(j: any, pick: Record<string, string>): { t: number; value: number }[] {
-  const ids: string[] = j.id,
-    size: number[] = j.size;
-  const times = Object.keys(j.dimension.time.category.index);
-  let base = 0;
-  for (let d = 0; d < ids.length; d++) {
-    if (ids[d] === 'time') continue;
-    const idx = pick[ids[d]] != null ? j.dimension[ids[d]].category.index[pick[ids[d]]] : 0;
-    if (idx == null) return [];
-    base = base * size[d] + idx;
-  }
-  const tIdx = ids.indexOf('time');
-  return times
-    .map((t, i) => {
-      // time is the last dimension in Eurostat replies, so the flat index is base * nTimes + i
-      const v = tIdx === ids.length - 1 ? j.value[String(base * times.length + i)] : undefined;
-      return {
-        t: Date.parse(
-          /Q\d$/.test(t) ? `${t.slice(0, 4)}-${String((+t.slice(-1) - 1) * 3 + 1).padStart(2, '0')}-01` : t + '-01',
-        ),
-        value: v,
-      };
-    })
-    .filter(p => p.value != null);
-}
 const month = (t: number) => new Date(t).toISOString().slice(0, 7);
 const quarter = (t: number) => `${new Date(t).getUTCFullYear()}-Q${Math.floor(new Date(t).getUTCMonth() / 3) + 1}`;
 /** House prices use 'EA' rather than 'EA21'. */
@@ -85,7 +62,7 @@ export const SOIL_PLACES: [string, string, number, number, DatapointGroup][] = [
   ['soil-mafra', 'Mafra', 38.94, -9.33, 'pt'],
   ['soil-amsterdam', 'Amsterdam', 52.37, 4.9, 'nl'],
 ];
-export const aqiWord = v =>
+export const aqiWord = (v: number | null | undefined): string =>
   v == null
     ? ''
     : v <= 20
@@ -99,13 +76,13 @@ export const aqiWord = v =>
             : v <= 100
               ? 'very poor'
               : 'extremely poor';
-export async function loadDatapoints() {
+export async function loadDatapoints(): Promise<void> {
   const rows: DatapointRow[] = [],
     facts: DatapointFacts = {};
-  const task = async fn => {
+  const task = async (fn: () => Promise<void>) => {
     try {
       await fn();
-    } catch (e) {
+    } catch {
       /* one source failing never blocks the others */
     }
   };
@@ -114,9 +91,7 @@ export async function loadDatapoints() {
       const j = await getJSON(
         'https://data-api.ecb.europa.eu/service/data/FM/B.U2.EUR.4F.KR.DFR.LEV?format=jsondata&lastNObservations=1',
       );
-      const s = Object.values(j.dataSets[0].series)[0] as { observations: Record<string, number[]> },
-        obs = Object.values(s.observations)[0][0];
-      const since = j.structure.dimensions.observation[0].values.slice(-1)[0].id;
+      const { value: obs, since } = parseEcbLatest(j);
       rows.push({
         group: 'ea',
         id: 'ecb',
@@ -132,7 +107,7 @@ export async function loadDatapoints() {
         'https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/une_rt_m?geo=PT&geo=NL&geo=EA21&s_adj=SA&age=TOTAL&sex=T&unit=PC_ACT&lastTimePeriod=13',
       );
       AREAS.forEach(([geo, group, suffix, name]) => {
-        const series = eurostatSeries(j, { geo });
+        const series = parseEurostat(j, { geo });
         const last = series[series.length - 1];
         if (!last) return;
         const yearAgo = series[0];
@@ -158,7 +133,7 @@ export async function loadDatapoints() {
         'https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/prc_hicp_minr?geo=PT&geo=NL&geo=EA21&unit=RCH_A&coicop18=TOTAL&lastTimePeriod=13',
       );
       AREAS.forEach(([geo, group, suffix, name]) => {
-        const series = eurostatSeries(j, { geo });
+        const series = parseEurostat(j, { geo });
         const last = series[series.length - 1];
         if (!last) return;
         rows.push({
@@ -176,7 +151,7 @@ export async function loadDatapoints() {
     }),
     task(async () => {
       const j = await getJSON('https://api.ipma.pt/open-data/forecast/meteorology/rcm/rcm-d0.json');
-      const lv = Object.values(j.local as Record<string, { data: { rcm: number } }>).map(x => x.data.rcm);
+      const { levels: lv, day } = parseFireRisk(j);
       const hi = lv.filter(x => x >= 4).length,
         max = lv.filter(x => x === 5).length;
       facts.fire = { hi, max, n: lv.length };
@@ -186,17 +161,16 @@ export async function loadDatapoints() {
         k: 'Fire risk today',
         v: `${hi} of ${lv.length}`,
         sub: 'municipalities very high or maximum',
-        src: `IPMA RCM · ${max} at maximum (5) · ${j.dataPrev}`,
+        src: `IPMA RCM · ${max} at maximum (5) · ${day}`,
         href: 'https://www.ipma.pt/pt/riscoincendio/rcm.pt/',
         o: 3,
       });
     }),
     task(async () => {
       const j = await getJSON('https://api.ipma.pt/open-data/forecast/warnings/warnings_www.json');
-      const now = Date.now(),
-        active = j.filter(w => w.awarenessLevelID !== 'green' && Date.parse(w.endTime) > now);
-      const by = l => active.filter(w => w.awarenessLevelID === l).length;
-      const types = [...new Set(active.map(w => w.awarenessTypeName))].slice(0, 3).join(', ');
+      const active = parseWarnings(j);
+      const by = (l: string) => active.filter(w => w.level === l).length;
+      const types = [...new Set(active.map(w => w.type))].slice(0, 3).join(', ');
       facts.warnings = { red: by('red'), orange: by('orange'), yellow: by('yellow'), types };
       rows.push({
         group: 'pt',
@@ -219,18 +193,19 @@ export async function loadDatapoints() {
           `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=european_aqi`,
         ).catch(() => null),
       ]);
-      const W = Array.isArray(wx) ? wx : [wx],
-        A = aq ? (Array.isArray(aq) ? aq : [aq]) : [];
+      const W = meteoPlaces(wx),
+        A = meteoPlaces(aq);
       PLACES.forEach(([name, , , group], i) => {
-        const d = W[i]?.daily,
-          aqi = A[i]?.current?.european_aqi;
-        if (!d) return;
+        const tmax = meteoColumn(W[i], 'daily', 'temperature_2m_max')[0],
+          rain = meteoColumn(W[i], 'daily', 'precipitation_sum')[0],
+          aqi = num(at(A[i], 'current', 'european_aqi'));
+        if (tmax == null) return;
         rows.push({
           group,
           id: `wx-${String(name).toLowerCase()}`,
           k: `${name} today`,
-          v: `${nf0.format(d.temperature_2m_max[0])}°C`,
-          src: `Open-Meteo · rain ${nf1.format(d.precipitation_sum[0])} mm${aqi != null ? ` · air ${aqi} (${aqiWord(aqi)})` : ''}`,
+          v: `${nf0.format(tmax)}°C`,
+          src: `Open-Meteo · rain ${nf1.format(rain ?? 0)} mm${aqi != null ? ` · air ${aqi} (${aqiWord(aqi)})` : ''}`,
           href: 'https://open-meteo.com/',
           o: 5 + i,
         });
@@ -239,12 +214,10 @@ export async function loadDatapoints() {
     // --- Planet: the slow numbers under everything else -----------------
     task(async () => {
       const j = await getJSON('https://global-warming.org/api/co2-api');
-      const rows_ = (j.co2 || []).map(r => ({
-        t: Date.UTC(+r.year, +r.month - 1, +r.day),
-        value: +r.trend,
-      }));
-      const last = rows_[rows_.length - 1],
-        yearAgo = rows_.find(r => r.t >= last.t - 365 * 86400e3);
+      const rows_ = parseCo2(j);
+      const last = rows_[rows_.length - 1];
+      if (!last) return;
+      const yearAgo = rows_.find(r => r.t >= last.t - 365 * 86400e3);
       rows.push({
         group: 'planet',
         id: 'co2',
@@ -259,12 +232,10 @@ export async function loadDatapoints() {
     }),
     task(async () => {
       const j = await getJSON('https://global-warming.org/api/arctic-api');
-      const data = j.arcticData?.data || {};
-      const months = Object.keys(data)
-        .sort()
-        .filter(m => data[m].value > 0);
-      const m = months[months.length - 1],
-        d = data[m];
+      const months = parseSeaIce(j);
+      const d = months[months.length - 1];
+      if (!d) return;
+      const m = d.month;
       rows.push({
         group: 'planet',
         id: 'seaice',
@@ -275,7 +246,9 @@ export async function loadDatapoints() {
         href: 'https://nsidc.org/sea-ice-today',
         o: 21,
         // the anomaly, so the seasons don't drown the trend
-        spark: months.slice(-60).map(k => ({ t: Date.UTC(+k.slice(0, 4), +k.slice(4) - 1), value: data[k].anom })),
+        spark: months
+          .slice(-60)
+          .map(k => ({ t: Date.UTC(+k.month.slice(0, 4), +k.month.slice(4) - 1), value: k.anom })),
       });
     }),
     // --- Housing: prices, rents, mortgages ------------------------------------
@@ -284,7 +257,7 @@ export async function loadDatapoints() {
         'https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/prc_hpi_q?geo=PT&geo=NL&geo=EA&unit=RCH_A&purchase=TOTAL&lastTimePeriod=12',
       );
       HPI_AREAS.forEach(([geo, group, suffix, name]) => {
-        const series = eurostatSeries(j, { geo });
+        const series = parseEurostat(j, { geo });
         const last = series[series.length - 1];
         if (!last) return;
         rows.push({
@@ -305,7 +278,7 @@ export async function loadDatapoints() {
         'https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/prc_hicp_minr?geo=PT&geo=NL&geo=EA21&unit=RCH_A&coicop18=CP041&lastTimePeriod=13',
       );
       AREAS.forEach(([geo, group, suffix, name]) => {
-        const series = eurostatSeries(j, { geo });
+        const series = parseEurostat(j, { geo });
         const last = series[series.length - 1];
         if (!last) return;
         rows.push({
@@ -325,32 +298,28 @@ export async function loadDatapoints() {
       const j = await getJSON(
         'https://data-api.ecb.europa.eu/service/data/MIR/M.PT+NL+U2.B.A2C.A.R.A.2250.EUR.N?format=jsondata&lastNObservations=13',
       );
-      const areas = j.structure.dimensions.series[1].values.map(v => v.id);
-      const times = j.structure.dimensions.observation[0].values.map(v => Date.parse(v.id + '-01'));
-      Object.entries(j.dataSets[0].series as Record<string, { observations: Record<string, number[]> }>).forEach(
-        ([k, ser]) => {
-          const code = areas[+k.split(':')[1]];
-          const area = { PT: ['pt', 'Portugal'], NL: ['nl', 'Netherlands'], U2: ['ea', 'Euro area'] }[code];
-          if (!area) return;
-          const series = Object.entries(ser.observations)
-            .map(([i, o]) => ({ t: times[+i], value: o[0] }))
-            .filter(p => p.value != null)
-            .sort((a, b) => a.t - b.t);
-          const last = series[series.length - 1];
-          if (!last) return;
-          rows.push({
-            group: area[0] as DatapointGroup,
-            id: `mortgage-${area[0]}`,
-            k: `Mortgage rate · ${area[1]}`,
-            v: `${nf2.format(last.value)}%`,
-            sub: 'new house-purchase loans',
-            src: `ECB MFI interest rates · ${month(last.t)}`,
-            href: 'https://data.ecb.europa.eu/data/datasets/MIR',
-            o: 12,
-            spark: series,
-          });
-        },
-      );
+      const AREA: Record<string, [DatapointGroup, string]> = {
+        PT: ['pt', 'Portugal'],
+        NL: ['nl', 'Netherlands'],
+        U2: ['ea', 'Euro area'],
+      };
+      parseEcbSeries(j, 1).forEach((series, code) => {
+        const area = AREA[code];
+        if (!area) return;
+        const last = series[series.length - 1];
+        if (!last) return;
+        rows.push({
+          group: area[0],
+          id: `mortgage-${area[0]}`,
+          k: `Mortgage rate · ${area[1]}`,
+          v: `${nf2.format(last.value)}%`,
+          sub: 'new house-purchase loans',
+          src: `ECB MFI interest rates · ${month(last.t)}`,
+          href: 'https://data.ecb.europa.eu/data/datasets/MIR',
+          o: 12,
+          spark: series,
+        });
+      });
     }),
     // --- Energy: what powers the grid, and what it costs ------------------------
     task(async () => {
@@ -358,7 +327,7 @@ export async function loadDatapoints() {
         'https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/prc_hicp_minr?geo=PT&geo=NL&geo=EA21&unit=RCH_A&coicop18=NRG&lastTimePeriod=13',
       );
       AREAS.forEach(([geo, group, suffix, name]) => {
-        const series = eurostatSeries(j, { geo });
+        const series = parseEurostat(j, { geo });
         const last = series[series.length - 1];
         if (!last) return;
         rows.push({
@@ -384,14 +353,14 @@ export async function loadDatapoints() {
           ['NL', 'nl', 'Netherlands'],
         ] as [string, DatapointGroup, string][]
       ).forEach(([geo, group, name]) => {
-        const total = eurostatSeries(j, { geo, siec: 'TOTAL' }),
-          ren = eurostatSeries(j, { geo, siec: 'RA000' });
+        const total = parseEurostat(j, { geo, siec: 'TOTAL' }),
+          ren = parseEurostat(j, { geo, siec: 'RA000' });
         const series = ren
           .map(r => {
             const t = total.find(x => x.t === r.t);
-            return t && t.value > 0 ? { t: r.t, value: (r.value / t.value) * 100 } : null;
+            return t && t.value > 0 ? [{ t: r.t, value: (r.value / t.value) * 100 }] : [];
           })
-          .filter(Boolean);
+          .flat();
         const last = series[series.length - 1];
         if (!last) return;
         rows.push({
@@ -417,20 +386,24 @@ export async function loadDatapoints() {
           ['amsterdam', 'Amsterdam', 'nl'],
         ] as [string, string, DatapointGroup][]
       ).forEach(([id, name, group], i) => {
-        const d = (Array.isArray(j) ? j : [j])[i]?.daily;
-        if (!d) return;
-        const sun = d.shortwave_radiation_sum,
+        const place = meteoPlaces(j)[i];
+        const sun = meteoColumn(place, 'daily', 'shortwave_radiation_sum'),
+          wind = meteoColumn(place, 'daily', 'wind_speed_10m_max'),
           n = sun.length;
+        if (!n || sun[n - 1] == null) return;
         rows.push({
           group,
           id: `sun-${id}`,
           k: `Sun and wind · ${name} today`,
-          v: `${nf1.format(sun[n - 1] / 3.6)} kWh/m²`,
-          sub: `solar energy on flat ground · wind up to ${nf0.format(d.wind_speed_10m_max[n - 1])} km/h`,
+          v: `${nf1.format((sun[n - 1] ?? 0) / 3.6)} kWh/m²`,
+          sub: `solar energy on flat ground · wind up to ${nf0.format(wind[n - 1] ?? 0)} km/h`,
           src: 'Open-Meteo · chart: last 30 days',
           href: 'https://open-meteo.com/',
           o: 15,
-          spark: d.time.map((t: string, k: number) => ({ t: Date.parse(t), value: sun[k] / 3.6 })),
+          spark: meteoTimes(place, 'daily').flatMap((t, k) => {
+            const v = sun[k];
+            return v == null ? [] : [{ t: Date.parse(t), value: v / 3.6 }];
+          }),
         });
       });
     }),
@@ -441,8 +414,9 @@ export async function loadDatapoints() {
           `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=soil_moisture_3_to_9cm&daily=precipitation_sum&past_days=60&forecast_days=1&timezone=UTC`,
         );
         const byDay = new Map<string, number[]>();
-        (j.hourly?.time || []).forEach((t: string, k: number) => {
-          const v = j.hourly.soil_moisture_3_to_9cm[k];
+        const soil = meteoColumn(j, 'hourly', 'soil_moisture_3_to_9cm');
+        meteoTimes(j, 'hourly').forEach((t, k) => {
+          const v = soil[k];
           if (v == null) return;
           const d = t.slice(0, 10);
           byDay.set(d, [...(byDay.get(d) || []), v]);
@@ -454,7 +428,9 @@ export async function loadDatapoints() {
         if (days.length < 31) return;
         const now = days[days.length - 1],
           before = days[days.length - 31];
-        const rain = (j.daily?.precipitation_sum || []).slice(-31, -1).reduce((a, b) => a + (b || 0), 0);
+        const rain = meteoColumn(j, 'daily', 'precipitation_sum')
+          .slice(-31, -1)
+          .reduce<number>((a, b) => a + (b ?? 0), 0);
         const change = ((now.value - before.value) / (before.value || 1)) * 100;
         rows.push({
           group,

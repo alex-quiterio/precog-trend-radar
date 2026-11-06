@@ -60,15 +60,15 @@
 
 <script lang="ts">
 import { ref, computed, defineComponent } from 'vue';
-import { focusTopic, markRead } from '../actions';
-import { DAY } from '../core/config';
-import { fmtTime } from '../core/format';
-import { ui } from '../core/ui-store';
-import { briefMarkdown, buildBrief, copyText } from '../features/brief';
-import { state } from '../state';
-import StateTag from './StateTag.vue';
-import TopicDot from './TopicDot.vue';
-import PanelShell from './PanelShell.vue';
+import { focusTopic, markRead } from '@/actions';
+import { DAY } from '@core/config';
+import { fmtTime } from '@core/format';
+import { ui } from '@core/ui-store';
+import { briefMarkdown, buildBrief, copyText, type Scored } from '@features/brief';
+import { state } from '@/state';
+import StateTag from '@components/StateTag.vue';
+import TopicDot from '@components/TopicDot.vue';
+import PanelShell from '@components/PanelShell.vue';
 
 // PRECOG / Trend Radar · Morning brief panel: sentences, top movers, copy as Markdown, mark as read.
 
@@ -89,7 +89,7 @@ export default defineComponent({
             : 'loading…',
       };
     });
-    const bar = E => {
+    const bar = (E: Scored) => {
       const c = Math.max(-100, Math.min(100, E.stats.change ?? 0)),
         w = (Math.abs(c) / 100) * 50;
       return { background: E.color, left: `${c >= 0 ? 50 : 50 - w}%`, width: `${Math.max(w, 1.5)}%` };

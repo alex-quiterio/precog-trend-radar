@@ -1,32 +1,33 @@
 // PRECOG / Trend Radar · Pure statistics: regression forecast, momentum, z-score, alert level.
-import { BASE_N, DAY, FC_STEPS, FIT_N, HOUR, MIN_BASE, Z_ALERT, Z_WATCH } from './config';
+import type { AlertLevel, ForecastPoint, SeriesPoint, Stats } from '@/types';
+import { BASE_N, DAY, FC_STEPS, FIT_N, HOUR, MIN_BASE, Z_ALERT, Z_WATCH } from '@core/config';
 
-export const mean = a => a.reduce((x, y) => x + y, 0) / (a.length || 1);
-export function sd(a) {
+export const mean = (a: number[]): number => a.reduce((x, y) => x + y, 0) / (a.length || 1);
+export function sd(a: number[]): number {
   if (a.length < 2) return 0;
   const m = mean(a);
   return Math.sqrt(a.reduce((s, x) => s + (x - m) ** 2, 0) / (a.length - 1));
 }
-export function median(a) {
+export function median(a: number[]): number {
   if (!a.length) return 0;
   const b = [...a].sort((x, y) => x - y);
   const m = b.length >> 1;
   return b.length % 2 ? b[m] : (b[m - 1] + b[m]) / 2;
 }
-export function quantile(a, q) {
+export function quantile(a: number[], q: number): number {
   if (!a.length) return 0;
   const b = [...a].sort((x, y) => x - y);
   return b[Math.min(b.length - 1, Math.floor(q * b.length))];
 }
 
-export function computeStats(s) {
+export function computeStats(s: SeriesPoint[]): Stats | null {
   const n = s.length;
   if (!n) return null;
   const v = s.map(p => p.value);
   const latest = v[n - 1],
     lt = s[n - 1].t;
   const step = n > 1 ? median(s.slice(1).map((p, i) => p.t - s[i].t)) || HOUR : HOUR;
-  let ref = null;
+  let ref: number | null = null;
   for (let i = n - 2; i >= 0; i--)
     if (lt - s[i].t >= DAY - 1000) {
       ref = v[i];
@@ -51,7 +52,7 @@ export function computeStats(s) {
     icp = ym - slope * xm;
     sigma = Math.sqrt(ys.reduce((acc, y, i) => acc + (y - (icp + slope * i)) ** 2, 0) / (m - 2));
   }
-  const fc = [];
+  const fc: ForecastPoint[] = [];
   for (let k = 1; k <= FC_STEPS; k++) {
     const y = icp + slope * (m - 1 + k);
     fc.push({ t: lt + k * step, value: Math.max(0, y), lo: Math.max(0, y - sigma), hi: Math.max(0, y + sigma) });
@@ -59,7 +60,7 @@ export function computeStats(s) {
   const recentMean = mean(ys);
   const momentum = recentMean > 0 ? (slope / recentMean) * 100 : 0;
   const base = v.slice(Math.max(0, n - 1 - BASE_N), n - 1);
-  let z = null;
+  let z: number | null = null;
   if (base.length >= MIN_BASE) {
     const d = sd(base);
     if (d > 0) z = (latest - mean(base)) / d;
@@ -81,8 +82,9 @@ export function computeStats(s) {
     comp: s[n - 1].comp || null,
   };
 }
-export const levelOf = z => (z == null ? null : z > Z_ALERT ? 'alert' : z > Z_WATCH ? 'watch' : null);
-export function arrowOf(m) {
+export const levelOf = (z: number | null | undefined): AlertLevel | null =>
+  z == null ? null : z > Z_ALERT ? 'alert' : z > Z_WATCH ? 'watch' : null;
+export function arrowOf(m: number): [arrow: string, word: string] {
   if (m > 1.5) return ['↑', 'rising fast'];
   if (m > 0.3) return ['↗', 'rising'];
   if (m < -1.5) return ['↓', 'falling fast'];

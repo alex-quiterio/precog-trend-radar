@@ -1,0 +1,35 @@
+{
+  "error": null,
+  "arcticData": {
+    "description": {
+      "title": "Global Sea Ice Extent (1979-2026)",
+      "basePeriod": "1991-2020",
+      "units": "million square km",
+      "annualMean": 22.76,
+      "decadalTrend": -0.6,
+      "missing": -9999
+    },
+    "data": {
+      "202606": {
+        "value": 22.75,
+        "anom": -2.01,
+        "monthlyMean": 24.76
+      },
+      "202607": {
+        "value": 22.72,
+        "anom": -2.1,
+        "monthlyMean": 24.82
+      },
+      "202608": {
+        "value": 22.02,
+        "anom": -2.25,
+        "monthlyMean": 24.27
+      },
+      "202609": {
+        "value": 22.13,
+        "anom": -2.07,
+        "monthlyMean": 24.2
+      }
+    }
+  }
+}

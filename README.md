@@ -100,7 +100,7 @@ flowchart LR
 - **Attention index:** each source is re-based so **100 = its own 30-day median**, then the sources are averaged with weights. Only days that every source has published are used. Sparse sources get less weight, and low-volume topics never make the gist's headline claims.
 - **Forecast:** linear regression on the last 20 points, projected 12 steps ahead. The band is ±1σ of the residuals.
 - **Running hot:** the latest point against the previous 30. Above 2.5σ is an **alert**, above 1.8σ a **watch**.
-- **Reading:** any WordPress site whose public API allows browser reads works (most do): **follow a site** in the Reading stream. Posts that name a topic in the title rank above those that name it in the text, and a match counts half as much for every six months of age.
+- **Reading:** The Great Simplification and The Marginalian are always followed (they can't be removed). Any other WordPress site whose public API allows browser reads works too (most do): **follow a site** in the Reading stream. Posts that name a topic in the title rank above those that name it in the text, and a match counts half as much for every six months of age.
 - **Channels** are defined in [`src/channels.ts`](src/channels.ts): the lens of topics, the datapoint cards, the streams and the sites each one shows.
 
 ### Sources
@@ -134,16 +134,22 @@ src/
 ├── App.vue                 the channel on screen: hero, gist, trends, builders, streams, context
 ├── channels.ts             channel definitions
 ├── types.ts                shared data shapes (Entry, Stats, Adapter…)
-├── core/                   config and lenses, person guard, statistics, formatting, ui store
-├── sources/                registry, trend adapters (Wikipedia, Guardian, HN), Manifold, Reading
+├── state.ts · live.ts · alerts.ts · actions.ts
+├── core/                   config and lenses, person guard, statistics, formatting, errors, ui store
+├── sources/                one folder per source, plus the registry, blend and reply-reading helpers
+│   ├── wikipedia/          index.ts (fetch + adapter) · parse.ts (read replies) · parse.test.ts · fixtures/
+│   ├── hackernews/ guardian/ manifold/ reading/ github/
+│   └── ecb/ eurostat/ ipma/ open-meteo/ global-warming/     parsers behind the Open data cards
 ├── features/               gist, streams, datapoints, GitHub momentum, your GitHub
 ├── components/             one Vue component per panel, plus PanelShell, Sparkline, tags
-├── state.ts · live.ts · alerts.ts · actions.ts
 └── styles/                 tokens (dark default + light), app, print and reduced motion
-tests/                      Vitest unit tests for the pure logic
+tests/                      Vitest unit tests for the core logic (parser tests sit next to each source)
 ```
 
-The logic modules are plain TypeScript with no DOM access. They change plain state and call `bump()`, which bumps a version counter in one small reactive store. Each Vue component reads that counter and re-renders.
+Imports use path aliases: `@core/…`, `@features/…`, `@sources/…`, `@components/…`, and `@/…` for the top-level
+modules. App state lives in Vue reactive stores (`state.ts` and the feature modules), so each panel re-renders
+when what it reads changes. Every API reply is read through a typed parser that rejects an unexpected shape
+with a clear message, and TypeScript runs in strict mode.
 
 | Script           | Does                                                     |
 | ---------------- | -------------------------------------------------------- |
@@ -157,35 +163,9 @@ Every push to `main` runs lint, tests and the build in GitHub Actions, then depl
 
 ## Add a data source
 
-An adapter returns attention points for one topic. Register it, then add its id to `SOURCES.blend.parts` in `src/sources/registry.ts` to blend it into every channel's trend lines:
-
-```ts
-// src/sources/npm-downloads.ts, then add `import './sources/npm-downloads';` to main.ts
-import { getJSON, registerAdapter } from './registry';
-
-registerAdapter({
-  id: 'npm',
-  label: 'npm downloads / day',
-  unit: 'downloads',
-  weight: 0.2, // optional: weight in a blend
-  minMean: 1, // optional: below this daily mean the source counts as sparse
-  async fetch(topic, { signal, query }) {
-    const j = await getJSON(`https://api.npmjs.org/downloads/range/last-month/${encodeURIComponent(query.q)}`, signal);
-    return {
-      topic,
-      points: j.downloads.map((d: { day: string; downloads: number }) => ({
-        t: `${d.day}T00:00:00Z`,
-        value: d.downloads,
-      })),
-    };
-  },
-});
-```
-
-- Throw an `Error` with a short message when there's no data.
-- Return `{ topic, points: [], skip: 'reason' }` when the source doesn't apply, for example a non-English lens.
-- Respect `signal`.
-- Query by topic only.
+Each source is a folder in `src/sources/` with its fetching (`index.ts`), its reply parsing (`parse.ts`) and tests
+against saved replies. **[docs/ADDING-SOURCES.md](docs/ADDING-SOURCES.md)** walks through the three kinds (a
+trend source for the attention index, an Open data card, a stream) with a worked example of each.
 
 ## License
 

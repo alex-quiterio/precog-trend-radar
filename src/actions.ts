@@ -1,18 +1,19 @@
 // PRECOG / Trend Radar · User actions on lenses and topics: add, remove, select, switch. No DOM.
-import type { TopicDef } from './types';
-import { LS, MAX_LENSES, MAX_TOPICS, slotColor, store } from './core/config';
-import { looksLikePerson } from './core/guard';
-import { levelOf } from './core/stats';
-import { ui } from './core/ui-store';
-import { saveLook } from './features/brief';
-import { loadGitHub } from './features/github';
-import { loadMyGitHub } from './features/github-me';
-import { githubToken, setGithubToken } from './sources/github-auth';
-import { activeChannel } from './channels';
-import { guardianKey, setGuardianKey } from './sources/guardian';
-import { probeSite, readingSites, saveReadingSites } from './sources/reading';
-import { loadStories, stories } from './features/stories';
-import { fetchPart, liveAbort, liveParts, setStatus, startLive } from './live';
+import type { Lens, Prefs, TopicDef } from '@/types';
+import { LS, MAX_LENSES, MAX_TOPICS, slotColor, store } from '@core/config';
+import { errorText } from '@core/errors';
+import { looksLikePerson } from '@core/guard';
+import { levelOf } from '@core/stats';
+import { ui } from '@core/ui-store';
+import { saveLook } from '@features/brief';
+import { loadGitHub } from '@features/github';
+import { loadMyGitHub } from '@features/github-me';
+import { githubToken, setGithubToken } from '@sources/github/auth';
+import { activeChannel } from '@/channels';
+import { guardianKey, setGuardianKey } from '@sources/guardian';
+import { probeSite, readingSites, saveReadingSites } from '@sources/reading';
+import { loadStories, stories } from '@features/stories';
+import { fetchPart, liveAbort, liveParts, setStatus, startLive } from '@/live';
 import {
   activeLens,
   ensureEntry,
@@ -23,7 +24,7 @@ import {
   selectedEntry,
   state,
   syncEntries,
-} from './state';
+} from '@/state';
 
 export function watchMsg(text: string, err = false): void {
   ui.watchMsg = text || '';
@@ -38,7 +39,7 @@ export function parseTopicInput(raw: string): TopicDef {
   });
   return def;
 }
-export function addTopic(raw) {
+export function addTopic(raw: string): boolean {
   const lens = activeLens();
   if (!lens) return false;
   const def = parseTopicInput(raw);
@@ -61,7 +62,7 @@ export function addTopic(raw) {
     return false;
   }
   const used = new Set(lens.topics.map(t => t.slot));
-  def.slot = [...Array(MAX_TOPICS).keys()].find(i => !used.has(i));
+  def.slot = [...Array(MAX_TOPICS).keys()].find(i => !used.has(i)) ?? 0; // a free slot exists: the lens isn't full
   lens.topics.push(def);
   lens.topics.sort((a, b) => a.slot - b.slot);
   const E = ensureEntry(lens, def);
@@ -69,26 +70,27 @@ export function addTopic(raw) {
   saveLenses();
   savePrefs();
   watchMsg(`Tracking “${name}” in ${lens.name}.`);
-  const ctl = liveAbort && !liveAbort.signal.aborted ? liveAbort : new AbortController();
+  const ctl = liveAbort?.signal.aborted === false ? liveAbort : new AbortController();
   Promise.all(liveParts().map(p => fetchPart(E, p, ctl.signal))).then(() => {
     if (E.liveError) setStatus(`No data for ${E.name}: ${E.liveError}`);
   });
   return true;
 }
-export function removeTopic(key) {
+export function removeTopic(key: string): void {
   const E = state.rt.get(key);
   if (!E) return;
   const lens = lensById(E.lensId);
+  if (!lens) return;
   const i = lens.topics.findIndex(t => t.name === E.name);
   lens.topics.splice(i, 1);
   state.rt.delete(key);
   if (state.selectedByLens[lens.id] === E.name)
-    state.selectedByLens[lens.id] = (lens.topics[i] || lens.topics[i - 1] || {}).name || null;
+    state.selectedByLens[lens.id] = (lens.topics[i] || lens.topics[i - 1])?.name ?? '';
   saveLenses();
   savePrefs();
   watchMsg(`Removed “${E.name}” from ${lens.name}.`);
 }
-export function addLens(raw) {
+export function addLens(raw: string): void {
   const name = raw.trim().replace(/\s+/g, ' ').slice(0, 30);
   if (!name) return;
   if (state.lenses.length >= MAX_LENSES) {
@@ -107,7 +109,7 @@ export function addLens(raw) {
   watchMsg(`New lens “${name}”. Add up to ${MAX_TOPICS} topics.`);
   ui.focusAdd++;
 }
-export function removeLens(id) {
+export function removeLens(id: string): void {
   const lens = lensById(id);
   if (!lens || state.lenses.length < 2) return;
   if (!confirm(`Remove the lens “${lens.name}” and its ${lens.topics.length} topics?`)) return;
@@ -117,7 +119,7 @@ export function removeLens(id) {
   saveLenses();
   savePrefs();
 }
-export function selectLens(id) {
+export function selectLens(id: string): void {
   if (!lensById(id) || id === state.activeLens) return;
   state.activeLens = id;
   savePrefs();
@@ -125,7 +127,7 @@ export function selectLens(id) {
   loadStories();
   if (activeChannel().github) loadGitHub();
 }
-export function select(key) {
+export function select(key: string): void {
   const E = state.rt.get(key);
   if (!E) return;
   const changedLens = E.lensId !== state.activeLens;
@@ -137,35 +139,37 @@ export function select(key) {
   if (state.storyScope === 'topic' || changedLens) loadStoriesDebounced();
   if (changedLens && activeChannel().github) loadGitHub();
 }
-export function shiftTopic(d) {
+export function shiftTopic(d: number): void {
   const list = entriesOf(activeLens());
   if (!list.length) return;
-  const i = Math.max(0, list.indexOf(selectedEntry()));
+  const sel = selectedEntry();
+  const i = sel ? Math.max(0, list.indexOf(sel)) : 0;
   select(list[(i + d + list.length) % list.length].key);
 }
-export function shiftLens(d) {
-  const i = state.lenses.indexOf(activeLens());
+export function shiftLens(d: number): void {
+  const a = activeLens();
+  const i = a ? state.lenses.indexOf(a) : 0;
   selectLens(state.lenses[(i + d + state.lenses.length) % state.lenses.length].id);
 }
-export let storyDeb = null;
-export function loadStoriesDebounced() {
+let storyDeb: ReturnType<typeof setTimeout> | undefined;
+export function loadStoriesDebounced(): void {
   clearTimeout(storyDeb);
   storyDeb = setTimeout(loadStories, 500);
 }
 
-export function lensHeat(l) {
+export function lensHeat(l: Lens | undefined): { level: 'alert' | 'watch'; n: number } | null {
   const ls = entriesOf(l)
     .map(E => levelOf(E.stats?.z))
     .filter(Boolean);
   const alert = ls.filter(x => x === 'alert').length;
   return alert ? { level: 'alert', n: alert } : ls.length ? { level: 'watch', n: ls.length } : null;
 }
-export function setStorySource(src) {
+export function setStorySource(src: Prefs['storySrc']): void {
   state.storySrc = src;
   savePrefs();
   if (!stories.at[src]) loadStories();
 }
-export function setStoryScope(scope) {
+export function setStoryScope(scope: Prefs['storyScope']): void {
   state.storyScope = scope;
   savePrefs();
   loadStories();
@@ -174,7 +178,7 @@ export function markRead() {
   saveLook();
   state.prevLook = store.get(LS.look, null);
 }
-export function applyTheme(theme) {
+export function applyTheme(theme: string): void {
   document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
   ui.theme = document.documentElement.dataset.theme;
   state.rt.forEach(E => {
@@ -216,7 +220,7 @@ export async function addReadingSite(raw: string): Promise<string | null> {
     loadStories();
     return null;
   } catch (e) {
-    return e.message;
+    return errorText(e);
   }
 }
 export function removeReadingSite(url: string): void {

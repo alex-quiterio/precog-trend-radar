@@ -2,7 +2,7 @@
   <panel-shell id="p-watch" title="Topics" :meta="view.meta" :index="index">
     <template #controls>
       <button
-        v-if="view.own"
+        v-if="view.own && view.lens"
         class="btn small no-print"
         type="button"
         :aria-label="'Delete channel ' + view.lens.name"
@@ -37,13 +37,14 @@
 
 <script lang="ts">
 import { ref, computed, watch, nextTick, defineComponent } from 'vue';
-import { addTopic, removeLens, removeTopic, select } from '../actions';
-import { CHANNELS } from '../channels';
-import { MAX_TOPICS } from '../core/config';
-import { ui } from '../core/ui-store';
-import { activeLens, entriesOf, selectedEntry } from '../state';
-import TopicDot from './TopicDot.vue';
-import PanelShell from './PanelShell.vue';
+import { addTopic, removeLens, removeTopic, select } from '@/actions';
+import { CHANNELS } from '@/channels';
+import { MAX_TOPICS } from '@core/config';
+import type { Entry } from '@/types';
+import { ui } from '@core/ui-store';
+import { activeLens, entriesOf, selectedEntry } from '@/state';
+import TopicDot from '@components/TopicDot.vue';
+import PanelShell from '@components/PanelShell.vue';
 
 // PRECOG / Trend Radar · Topics of the channel on screen: pick one to chart, add or remove topics.
 
@@ -53,7 +54,7 @@ export default defineComponent({
   components: { PanelShell, TopicDot },
   setup() {
     const newTopic = ref(''),
-      addInput = ref(null);
+      addInput = ref<HTMLInputElement | null>(null);
     const view = computed(() => {
       const lens = activeLens(),
         list = entriesOf(lens);
@@ -66,7 +67,7 @@ export default defineComponent({
         meta: `${list.length} of ${MAX_TOPICS} · click one to chart it`,
       };
     });
-    const chipTitle = E =>
+    const chipTitle = (E: Entry) =>
       [E.def.wiki && `Wikipedia: ${E.def.wiki}`, E.def.q && `search: ${E.def.q}`].filter(Boolean).join(' · ');
     function submitTopic() {
       if (addTopic(newTopic.value)) {

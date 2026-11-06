@@ -1,0 +1,89 @@
+{
+  "hits": [
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Sikul"
+        },
+        "title": {
+          "fullyHighlighted": false,
+          "matchLevel": "full",
+          "matchedWords": ["rust"],
+          "value": "Why Discord is switching from Go to <em>Rust</em>"
+        },
+        "url": {
+          "fullyHighlighted": false,
+          "matchLevel": "full",
+          "matchedWords": ["rust"],
+          "value": "https://blog.discordapp.com/why-discord-is-switching-from-go-to-<em>rust</em>-a190bbca2b1f"
+        }
+      },
+      "created_at_i": 1580837440,
+      "num_comments": 642,
+      "objectID": "22238335",
+      "points": 1582,
+      "title": "Why Discord is switching from Go to Rust",
+      "url": "https://blog.discordapp.com/why-discord-is-switching-from-go-to-rust-a190bbca2b1f"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "darthdeus"
+        },
+        "title": {
+          "fullyHighlighted": false,
+          "matchLevel": "full",
+          "matchedWords": ["rust"],
+          "value": "Leaving <em>Rust</em> gamedev after 3 years"
+        },
+        "url": {
+          "fullyHighlighted": false,
+          "matchLevel": "full",
+          "matchedWords": ["rust"],
+          "value": "https://loglog.games/blog/leaving-<em>rust</em>-gamedev/"
+        }
+      },
+      "created_at_i": 1714152836,
+      "num_comments": 972,
+      "objectID": "40172033",
+      "points": 1484,
+      "title": "Leaving Rust gamedev after 3 years",
+      "url": "https://loglog.games/blog/leaving-rust-gamedev/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "selvan"
+        },
+        "title": {
+          "fullyHighlighted": false,
+          "matchLevel": "full",
+          "matchedWords": ["rust"],
+          "value": "A half-hour to learn <em>Rust</em>"
+        },
+        "url": {
+          "fullyHighlighted": false,
+          "matchLevel": "full",
+          "matchedWords": ["rust"],
+          "value": "https://fasterthanli.me/articles/a-half-hour-to-learn-<em>rust</em>"
+        }
+      },
+      "created_at_i": 1609566639,
+      "num_comments": 330,
+      "objectID": "25610741",
+      "points": 1444,
+      "title": "A half-hour to learn Rust",
+      "url": "https://fasterthanli.me/articles/a-half-hour-to-learn-rust"
+    }
+  ],
+  "nbHits": 61265,
+  "page": 0,
+  "nbPages": 334,
+  "hitsPerPage": 3
+}

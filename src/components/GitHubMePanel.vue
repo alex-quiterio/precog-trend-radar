@@ -112,11 +112,11 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import { ago, nf0 } from '../core/format';
-import { editGithubToken } from '../actions';
-import { ui } from '../core/ui-store';
-import { githubUser, loadMyGitHub, me, setGithubUser } from '../features/github-me';
-import PanelShell from './PanelShell.vue';
+import { ago, nf0 } from '@core/format';
+import { editGithubToken } from '@/actions';
+import { ui } from '@core/ui-store';
+import { githubUser, loadMyGitHub, me, setGithubUser } from '@features/github-me';
+import PanelShell from '@components/PanelShell.vue';
 
 // PRECOG / Trend Radar · Your GitHub: public repos, stars, languages and 30 days of activity.
 

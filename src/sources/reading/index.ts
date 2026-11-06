@@ -2,39 +2,21 @@
 // Works with any WordPress site whose public API allows browser reads (most do), e.g. The Great
 // Simplification and The Marginalian. Each site is read once every 12 h and kept in this browser.
 import { shallowRef } from 'vue';
-import { HOUR, store } from '../core/config';
-import { withTimeout } from './registry';
-
-export interface ReadingSite {
-  /** Site origin, e.g. https://www.themarginalian.org */
-  url: string;
-  name: string;
-  /** WordPress post types to read, with the label each shows as. */
-  types: [string, string][];
-  /** Page slugs to watch for updates (shown with their last-changed date). */
-  pages?: string[];
-}
-export interface ReadingItem {
-  id: string;
-  /** The followed site's origin, used to pick a channel's sites. */
-  origin: string;
-  site: string;
-  kind: string;
-  num: number | null;
-  title: string;
-  url: string;
-  t: number;
-  /** Lower-cased description, used only for matching. */
-  text: string;
-}
+import { HOUR, store } from '@core/config';
+import { errorText, isAbort } from '@core/errors';
+import { withTimeout } from '@sources/registry';
+import { at, isObj, list, str } from '@sources/shape';
+import { parseWpPosts, plain, squash } from './parse';
+import type { ReadingSite, ReadingItem } from './parse';
+export * from './parse';
 
 const SITES_KEY = 'precog.reading.sites.v1';
 const CACHE_KEY = 'precog.reading.v3.';
 const TTL = 12 * HOUR;
-const TEXT_MAX = 1200; // enough to match topics; keeps the cache well inside browser storage
 const PAGES_PER_TYPE = 2; // newest 200 per type: enough to match against, light on the site
 
-export const DEFAULT_SITES: ReadingSite[] = [
+/** Always followed: they can't be removed, and come back for anyone who removed them in an older version. */
+export const BUILT_IN_SITES: ReadingSite[] = [
   {
     url: 'https://www.thegreatsimplification.com',
     name: 'The Great Simplification',
@@ -46,20 +28,22 @@ export const DEFAULT_SITES: ReadingSite[] = [
   },
   { url: 'https://www.themarginalian.org', name: 'The Marginalian', types: [['posts', 'Essay']] },
 ];
+export const isBuiltInSite = (url: string): boolean => BUILT_IN_SITES.some(s => s.url === url);
+const validSite = (s: unknown): s is ReadingSite =>
+  isObj(s) && typeof s.url === 'string' && typeof s.name === 'string' && Array.isArray(s.types);
+/** The sites you added yourself. Storage only ever holds these; the built-in ones are added on read. */
+const ownSites = (stored: unknown): ReadingSite[] =>
+  Array.isArray(stored) ? stored.filter(validSite).filter(s => !isBuiltInSite(s.url)) : [];
 // Held in a ref (and mirrored to storage) so views listing the sites update when you follow one.
-const sites = shallowRef<ReadingSite[]>(store.get(SITES_KEY, DEFAULT_SITES));
-export const readingSites = (): ReadingSite[] => sites.value;
-export function saveReadingSites(list: ReadingSite[]): void {
-  sites.value = list;
-  store.set(SITES_KEY, list);
+const own = shallowRef<ReadingSite[]>(ownSites(store.get<unknown>(SITES_KEY, [])));
+/** Every followed site: the built-in ones first, then yours. */
+export const readingSites = (): ReadingSite[] => [...BUILT_IN_SITES, ...own.value];
+/** Saves the followed sites. Built-in sites are always kept, whatever the list says. */
+export function saveReadingSites(sites: ReadingSite[]): void {
+  own.value = ownSites(sites);
+  store.set(SITES_KEY, own.value);
 }
 
-const plain = (html: string): string => {
-  const s = String(html || '');
-  if (typeof DOMParser === 'undefined') return s.replace(/<[^>]+>/g, ' ');
-  return new DOMParser().parseFromString(s, 'text/html').body.textContent || '';
-};
-const squash = (s: string) => s.replace(/\s+/g, ' ').trim();
 const api = (site: ReadingSite) => `${site.url.replace(/\/+$/, '')}/wp-json/wp/v2/`;
 
 /** Checks a URL is a WordPress site the browser may read, and names it from its own title. */
@@ -74,7 +58,7 @@ export async function probeSite(raw: string, signal?: AbortSignal): Promise<Read
   try {
     const r = await fetch(`${origin}/wp-json/`, { signal: withTimeout(signal, 15000) });
     if (!r.ok) throw new Error();
-    name = squash(plain((await r.json()).name || '')) || name;
+    name = squash(plain(str(at(await r.json(), 'name')))) || name;
   } catch {
     throw new Error(`${name} can't be read from the browser (only WordPress sites with an open API work)`);
   }
@@ -90,25 +74,7 @@ async function fetchType(site: ReadingSite, type: string, label: string, signal:
     );
     if (!r.ok) throw new Error(`${site.name}: HTTP ${r.status}`);
     pages = Number(r.headers.get('X-WP-TotalPages')) || 1;
-    (await r.json()).forEach(p => {
-      const slug =
-        String(p.link || '')
-          .split('/')
-          .filter(Boolean)
-          .pop() || '';
-      const num = /^(\d+)-/.exec(slug);
-      items.push({
-        id: `rd:${site.url}:${type}:${p.id}`,
-        origin: site.url,
-        site: site.name,
-        kind: label,
-        num: num ? +num[1] : null,
-        title: squash(plain(p.title?.rendered)),
-        url: p.link,
-        t: Date.parse(p.date_gmt + 'Z'),
-        text: squash(plain(p.content?.rendered)).slice(0, TEXT_MAX).toLowerCase(),
-      });
-    });
+    items.push(...parseWpPosts(await r.json(), site, type, label));
   }
   return items;
 }
@@ -119,17 +85,16 @@ async function fetchPages(site: ReadingSite, signal: AbortSignal): Promise<Readi
     { signal: withTimeout(signal, 30000) },
   );
   if (!r.ok) return [];
-  return (await r.json()).map(p => ({
-    id: `rd:${site.url}:page:${p.id}`,
-    origin: site.url,
-    site: site.name,
-    kind: 'Page updated',
-    num: null,
-    title: squash(plain(p.title?.rendered)),
-    url: p.link,
-    t: Date.parse(p.modified_gmt + 'Z'),
-    text: squash(plain(p.content?.rendered)).slice(0, TEXT_MAX).toLowerCase(),
-  }));
+  // Pages are listed with their last change, so date_gmt is read from modified_gmt.
+  return parseWpPosts(
+    list(await r.json(), site.name, 'page list').map(p => ({
+      ...(isObj(p) ? p : {}),
+      date_gmt: at(p, 'modified_gmt'),
+    })),
+    site,
+    'page',
+    'Page updated',
+  );
 }
 
 const memory = new Map<string, { at: number; items: ReadingItem[] }>();
@@ -157,18 +122,12 @@ export async function loadReading(signal: AbortSignal): Promise<{ items: Reading
   const errors: string[] = [];
   const lists = await Promise.all(
     readingSites().map(site =>
-      loadSite(site, signal).catch(e => {
-        if (e.name === 'AbortError') throw e;
-        errors.push(`${site.name}: ${e.message}`);
+      loadSite(site, signal).catch((e: unknown) => {
+        if (isAbort(e)) throw e;
+        errors.push(`${site.name}: ${errorText(e)}`);
         return [] as ReadingItem[];
       }),
     ),
   );
   return { items: lists.flat().sort((a, b) => b.t - a.t), errors };
-}
-
-/** How strongly an item matches a topic: 3 for a title hit, 1 for a description hit, 0 for none. */
-export function readingScore(it: { title: string; text: string }, res: RegExp[]): number {
-  if (res.some(re => re.test(it.title))) return 3;
-  return res.some(re => re.test(it.text)) ? 1 : 0;
 }

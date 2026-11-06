@@ -1,7 +1,7 @@
 // Matching topics in text: phrases, whole words, and the Reading score.
 import { describe, expect, it } from 'vitest';
-import { phrase, topicRegex } from '../src/sources/registry';
-import { readingScore } from '../src/sources/reading';
+import { phrase, topicRegex } from '@sources/registry';
+import { readingScore } from '@sources/reading';
 
 describe('phrase', () => {
   it('quotes multi-word topics and leaves query expressions alone', () => {

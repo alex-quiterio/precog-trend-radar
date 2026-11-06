@@ -54,7 +54,7 @@
         :height="geo.H"
         aria-hidden="true"
       >
-        <text v-if="geo.empty" :x="geo.W / 2" :y="geo.H / 2" text-anchor="middle" class="yl" style="font-size: 12px">
+        <text v-if="!geo.ok" :x="geo.W / 2" :y="geo.H / 2" text-anchor="middle" class="yl" style="font-size: 12px">
           {{ geo.empty }}
         </text>
         <template v-else>
@@ -107,7 +107,7 @@
         </template>
       </svg>
       <div v-if="hover" class="tip" :style="hover.style">
-        <b>{{ fmtTime(hover.p.t, geo.step) }}</b>
+        <b>{{ fmtTime(hover.p.t, hover.step) }}</b>
         <br />
         {{ hover.p.fc ? 'forecast ' : '' }}{{ fmtVal(hover.p.value) }}
         <template v-if="hover.p.fc">
@@ -146,18 +146,18 @@
 
 <script lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, defineComponent } from 'vue';
-import type { SeriesPoint } from '../types';
-import { shiftTopic } from '../actions';
-import { compText, niceTicks, pathOf, useWidth } from './helpers';
-import { DAY } from '../core/config';
-import { COMP_LABEL, changeLabel, fmtAxis, fmtPct, fmtTick, fmtVal } from '../core/format';
-import { arrowOf } from '../core/stats';
-import { ui } from '../core/ui-store';
-import { ADAPTERS, SOURCES } from '../sources/registry';
-import { liveParts } from '../live';
-import { activeLens, entriesOf, selectedEntry, series, state } from '../state';
-import TopicDot from './TopicDot.vue';
-import PanelShell from './PanelShell.vue';
+import type { SeriesPoint } from '@/types';
+import { shiftTopic } from '@/actions';
+import { compText, niceTicks, pathOf, useWidth } from '@components/helpers';
+import { DAY } from '@core/config';
+import { COMP_LABEL, changeLabel, fmtAxis, fmtPct, fmtTick, fmtVal } from '@core/format';
+import { arrowOf } from '@core/stats';
+import { ui } from '@core/ui-store';
+import { ADAPTERS, SOURCES } from '@sources/registry';
+import { liveParts } from '@/live';
+import { activeLens, entriesOf, selectedEntry, series, state } from '@/state';
+import TopicDot from '@components/TopicDot.vue';
+import PanelShell from '@components/PanelShell.vue';
 
 // hover crosshair, and swipe/drag (or ←/→) to switch topic.
 
@@ -166,9 +166,9 @@ export default defineComponent({
   props: { index: Number },
   components: { PanelShell, TopicDot },
   setup() {
-    const wrap = ref(null),
+    const wrap = ref<HTMLElement | null>(null),
       width = useWidth(wrap, 640);
-    const hoverX = ref(null),
+    const hoverX = ref<number | null>(null),
       dx = ref(0),
       dragging = ref(false);
 
@@ -181,7 +181,7 @@ export default defineComponent({
       return {
         E,
         st,
-        name: E ? `${E.name} · ${lens.name}` : 'No topic selected',
+        name: E ? `${E.name} · ${lens?.name ?? ''}` : 'No topic selected',
         index: `${E ? list.indexOf(E) + 1 : 0}/${list.length}`,
         meta: st ? `1 step = ${st.step >= 7 * DAY ? '1 week' : '1 day'} · ${unit}` : unit,
         arrow: st ? arrowOf(st.momentum) : ['', ''],
@@ -216,6 +216,7 @@ export default defineComponent({
         H = W < 540 ? 230 : 300;
       if (!E || s.length < 2 || !st)
         return {
+          ok: false as const,
           W,
           H,
           empty: !E
@@ -232,13 +233,14 @@ export default defineComponent({
         t1 = fc[fc.length - 1].t;
       const ticks = niceTicks(Math.max(...s.map(p => p.value), ...fc.map(f => f.hi)) * 1.04),
         ymax = ticks[ticks.length - 1];
-      const x = t => M.l + ((t - t0) / (t1 - t0)) * iw,
-        y = v => M.t + ih - (v / ymax) * ih;
+      const x = (t: number) => M.l + ((t - t0) / (t1 - t0)) * iw,
+        y = (v: number) => M.t + ih - (v / ymax) * ih;
       const last = s[s.length - 1],
         xn = x(last.t),
         all: Array<SeriesPoint & { lo?: number; hi?: number }> = [...s, ...fc],
         nT = Math.max(2, Math.floor(iw / 120));
       return {
+        ok: true as const,
         W,
         H,
         M,
@@ -267,12 +269,14 @@ export default defineComponent({
 
     const hover = computed(() => {
       const g = geo.value;
-      if (hoverX.value == null || !g.pts) return null;
+      const x = hoverX.value;
+      if (x == null || !g.ok) return null;
       let best = g.pts[0];
-      for (const p of g.pts) if (Math.abs(p.x - hoverX.value) < Math.abs(best.x - hoverX.value)) best = p;
+      for (const p of g.pts) if (Math.abs(p.x - x) < Math.abs(best.x - x)) best = p;
       const right = best.x > g.W * 0.62;
       return {
         p: best,
+        step: g.step,
         style: {
           [right ? 'right' : 'left']: `${right ? g.W - best.x + 14 : best.x + 14}px`,
           top: `${Math.max(0, Math.min(best.y - 30, g.H - 80))}px`,
@@ -280,12 +284,12 @@ export default defineComponent({
       };
     });
 
-    let drag = null;
-    const localX = e => e.clientX - wrap.value.getBoundingClientRect().left;
-    function down(e) {
+    let drag: { x: number; y: number; moved: boolean } | null = null;
+    const localX = (e: PointerEvent) => e.clientX - (wrap.value?.getBoundingClientRect().left ?? 0);
+    function down(e: PointerEvent) {
       drag = { x: e.clientX, y: e.clientY, moved: false };
     }
-    function move(e) {
+    function move(e: PointerEvent) {
       if (drag) {
         const d = e.clientX - drag.x;
         if (Math.abs(d) > 8 && Math.abs(d) > Math.abs(e.clientY - drag.y)) {
@@ -298,7 +302,7 @@ export default defineComponent({
       }
       hoverX.value = localX(e);
     }
-    function end(e) {
+    function end(e: PointerEvent) {
       if (!drag) return;
       const d = e.clientX - drag.x,
         dy = e.clientY - drag.y;

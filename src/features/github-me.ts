@@ -2,9 +2,11 @@
 // Reads only public data for the username you set (your own), with three unauthenticated calls,
 // cached for 30 minutes. GitHub allows 60 such calls an hour.
 import { reactive, ref } from 'vue';
-import { DAY, MIN, store } from '../core/config';
-import { githubHeaders } from '../sources/github-auth';
-import { HttpError, getJSON } from '../sources/registry';
+import { errorText } from '@core/errors';
+import { MIN, store } from '@core/config';
+import { githubHeaders } from '@sources/github/auth';
+import { HttpError, getJSON } from '@sources/registry';
+import { parseActivity, parseUser, parseUserRepos } from '@sources/github/parse';
 
 const USER_KEY = 'precog.github.user';
 const CACHE = 'precog.github.me.v1.';
@@ -59,39 +61,26 @@ export async function loadMyGitHub(force = false): Promise<void> {
   me.error = null;
   try {
     const base = `https://api.github.com/users/${encodeURIComponent(login)}`;
-    const [user, repos, events] = await Promise.all([
+    const [userReply, repoReply, events] = await Promise.all([
       getJSON(base, undefined, githubHeaders()),
       getJSON(`${base}/repos?per_page=100&sort=pushed&type=owner`, undefined, githubHeaders()),
       getJSON(`${base}/events/public?per_page=100`, undefined, githubHeaders()).catch(() => []),
     ]);
-    const own: MyRepo[] = (repos || [])
-      .filter(r => !r.fork)
-      .map(r => ({
-        name: r.name,
-        url: r.html_url,
-        desc: String(r.description || '').slice(0, 140),
-        stars: r.stargazers_count || 0,
-        forks: r.forks_count || 0,
-        language: r.language,
-        pushed: Date.parse(r.pushed_at),
-      }));
+    const user = parseUser(userReply);
+    const own: MyRepo[] = parseUserRepos(repoReply).map(({ name, url, desc, stars, forks, language, pushed }) => ({
+      name,
+      url,
+      desc,
+      stars,
+      forks,
+      language,
+      pushed,
+    }));
     const langs = new Map<string, number>();
     own.forEach(r => r.language && langs.set(r.language, (langs.get(r.language) || 0) + 1));
-    const today = Math.floor(Date.now() / DAY) * DAY;
-    const days = Array.from({ length: 30 }, (_, i) => ({ t: today - (29 - i) * DAY, value: 0 }));
-    let pushes = 0;
-    (events || []).forEach(e => {
-      const d = Math.floor(Date.parse(e.created_at) / DAY) * DAY;
-      const slot = days.find(x => x.t === d);
-      if (!slot) return;
-      slot.value++;
-      if (e.type === 'PushEvent') pushes += e.payload?.size || e.payload?.commits?.length || 1;
-    });
+    const { days, pushes } = parseActivity(events);
     const stats: MyStats = {
-      login: user.login,
-      url: user.html_url,
-      publicRepos: user.public_repos || 0,
-      followers: user.followers || 0,
+      ...user,
       stars: own.reduce((a, r) => a + r.stars, 0),
       languages: [...langs.entries()]
         .sort((a, b) => b[1] - a[1])
@@ -113,7 +102,7 @@ export async function loadMyGitHub(force = false): Promise<void> {
           ? 'GitHub rejected the token; change or remove it'
           : e instanceof HttpError && (e.status === 403 || e.status === 429)
             ? 'GitHub rate limit reached; try again in a few minutes, or add a token'
-            : e.message;
+            : errorText(e);
   }
   me.loading = false;
 }
