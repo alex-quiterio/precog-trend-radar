@@ -15,14 +15,16 @@
     </div>
     <div class="controls no-print">
       <button
-        class="btn"
+        class="btn refresh"
         type="button"
         :disabled="ui.loading"
         :aria-busy="ui.loading"
         aria-label="Refresh data now"
+        title="Refresh data now"
         @click="refresh"
       >
-        ↻ {{ ui.loading ? 'Loading…' : 'Refresh' }}
+        <span class="refresh-icon" aria-hidden="true">↻</span>
+        <span class="refresh-label">{{ ui.loading ? 'Loading…' : 'Refresh' }}</span>
       </button>
       <button
         class="btn icon set-toggle"
@@ -522,12 +524,34 @@ h1 .sub {
     top: 4px;
     padding: 10px 12px 0;
     gap: 8px 12px;
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto; /* the two round buttons sit beside the name */
   }
   .controls .btn {
     min-height: 28px;
     padding: 3px 10px;
     font-size: 12px;
+  }
+  /* Refresh: just the ↻, as round as the settings button; it spins while loading */
+  .controls .btn.refresh {
+    width: 32px;
+    min-height: 32px;
+    padding: 0;
+    justify-content: center;
+  }
+  .btn.refresh .refresh-label {
+    display: none;
+  }
+  .btn.refresh .refresh-icon {
+    font-size: 15px;
+  }
+  .btn.refresh[aria-busy='true'] .refresh-icon {
+    display: inline-block;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
   }
   .pulse {
     display: none;
