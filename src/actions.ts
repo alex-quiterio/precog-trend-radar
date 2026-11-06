@@ -164,7 +164,7 @@ export function lensHeat(l: Lens | undefined): { level: 'alert' | 'watch'; n: nu
   const alert = ls.filter(x => x === 'alert').length;
   return alert ? { level: 'alert', n: alert } : ls.length ? { level: 'watch', n: ls.length } : null;
 }
-export function setStorySource(src: Prefs['storySrc']): void {
+export function setStorySource(src: string): void {
   state.storySrc = src;
   savePrefs();
   if (!stories.at[src]) loadStories();

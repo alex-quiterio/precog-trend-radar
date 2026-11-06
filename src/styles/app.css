@@ -951,6 +951,33 @@ select:hover {
   border-radius: 4px;
   background: var(--ink-2);
 }
+/* Phones: the figure moves under the title as one line, so titles get the full width. */
+@media (max-width: 600px) {
+  .story {
+    grid-template-columns: 22px minmax(0, 1fr);
+  }
+  .story .vel {
+    grid-column: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 8px;
+    text-align: left;
+    white-space: normal;
+  }
+  .story .vel b {
+    font-size: 15px;
+  }
+  .story .vel small {
+    display: inline;
+    margin-top: 0;
+  }
+  .story .vel .vbar {
+    width: 56px;
+    margin: 0;
+    align-self: center;
+  }
+}
 .flag {
   font-size: 10px;
   font-weight: 700;

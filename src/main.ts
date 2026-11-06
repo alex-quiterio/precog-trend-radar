@@ -4,10 +4,8 @@ import '@/styles/tokens.css';
 import '@/styles/app.css';
 import '@/styles/print-motion.css';
 
-// Trend sources register themselves on import.
-import '@sources/wikipedia';
-import '@sources/guardian';
-import '@sources/hackernews';
+// Every source registers itself on import: trend sources, streams and open-data cards.
+import '@sources/index';
 
 import App from '@/App.vue';
 import StateTag from '@components/StateTag.vue';
@@ -51,8 +49,8 @@ function boot(): void {
   ui.ghToken = !!githubToken();
   state.activeLens = (lensById(prefs.activeLens) && prefs.activeLens) || state.lenses[0]?.id || null;
   state.selectedByLens = prefs.selectedByLens && typeof prefs.selectedByLens === 'object' ? prefs.selectedByLens : {};
-  const src = prefs.storySrc;
-  state.storySrc = src === 'news' || src === 'forecasts' || src === 'hn' ? src : 'reading';
+  // A stream id; loadStories switches to the channel's first stream if this one isn't shown.
+  state.storySrc = typeof prefs.storySrc === 'string' ? prefs.storySrc : 'reading';
   state.storyScope = prefs.storyScope === 'topic' ? 'topic' : 'lens';
   state.prevLook = store.get(LS.look, null);
 

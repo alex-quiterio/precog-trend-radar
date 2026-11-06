@@ -3,7 +3,7 @@ import { FIT_N, LS, Z_WATCH, store } from '@core/config';
 import { ago, changeLabel, fmtPct, fmtTime, fmtVal, nf0 } from '@core/format';
 import { levelOf } from '@core/stats';
 import { dp } from '@features/datapoints';
-import { stories } from '@features/stories';
+import { hnStories } from '@sources/hackernews/stream';
 import { channelOfLens } from '@/channels';
 import type { Entry, Stats } from '@/types';
 import type { LastLook } from '@/state';
@@ -138,7 +138,7 @@ export function briefMarkdown(): string {
     .join('\n');
   const keys = new Set(b.items.map(E => E.key));
   const rowsDp = dp.rows;
-  const top = [...stories.hn.values()]
+  const top = hnStories()
     .filter(s => s.topics.some(k => keys.has(k)))
     .sort((a, b) => (b.vel ?? 0) - (a.vel ?? 0))
     .slice(0, 5)

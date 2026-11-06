@@ -115,6 +115,7 @@ export interface Prefs {
   selectedByLens: Record<string, string>;
   source: string;
   theme: 'dark' | 'light';
-  storySrc: 'news' | 'reading' | 'forecasts' | 'hn';
+  /** The stream on screen (a registered stream id: 'news', 'reading', 'forecasts', 'hn'…). */
+  storySrc: string;
   storyScope: 'topic' | 'lens';
 }

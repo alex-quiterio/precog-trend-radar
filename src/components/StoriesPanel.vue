@@ -46,114 +46,36 @@
     </div>
 
     <ol class="stories">
-      <template v-if="view.src === 'news'">
-        <li v-for="(it, i) in view.news" :key="it.n.id" class="story">
-          <span class="rank">{{ i + 1 }}</span>
-          <div>
-            <div class="title">
-              <a :href="it.n.url" target="_blank" rel="noopener noreferrer">{{ it.n.title }}</a>
-            </div>
-            <div class="smeta">
-              <span v-for="E in it.topics" :key="E.key" class="stopic">
-                <topic-dot :color="E.color"></topic-dot>
-                {{ E.name }}
-              </span>
-              <span class="site">The Guardian</span>
-              <span v-if="it.n.section">{{ it.n.section }}</span>
-              <span>{{ when(it.n.t) }}</span>
-            </div>
+      <li v-for="(r, i) in view.rows" :key="r.id" class="story">
+        <span class="rank">{{ i + 1 }}</span>
+        <div>
+          <div class="title">
+            <a :href="r.url" target="_blank" rel="noopener noreferrer">{{ r.title }}</a>
           </div>
-          <div class="vel">
-            <b>{{ it.n.topics.length }}</b>
-            {{ it.n.topics.length === 1 ? 'topic' : 'topics' }}
-            <small>newest first</small>
-            <div class="vbar"><i :style="{ width: it.pct.toFixed(1) + '%' }"></i></div>
-          </div>
-        </li>
-      </template>
-      <template v-else-if="view.src === 'reading'">
-        <li v-for="(it, i) in view.reading" :key="it.r.id" class="story">
-          <span class="rank">{{ i + 1 }}</span>
-          <div>
-            <div class="title">
-              <a :href="it.r.url" target="_blank" rel="noopener noreferrer">{{ it.r.title }}</a>
-            </div>
-            <div class="smeta">
-              <span v-for="E in it.topics" :key="E.key" class="stopic">
-                <topic-dot :color="E.color"></topic-dot>
-                {{ E.name }}
-              </span>
-              <span class="site">{{ it.r.site }}</span>
-              <span>{{ it.r.kind }}{{ it.r.num ? ' #' + it.r.num : '' }}</span>
-              <span>{{ when(it.r.t) }}</span>
-            </div>
-          </div>
-          <div class="vel">
-            <template v-if="it.r.topics.length">
-              <b>{{ it.r.topics.length }}</b>
-              {{ it.r.topics.length === 1 ? 'topic' : 'topics' }}
-              <small>{{ it.r.score >= 3 ? 'in the title' : 'in the text' }}</small>
-            </template>
-            <small v-else>new</small>
-            <div class="vbar"><i :style="{ width: it.pct.toFixed(1) + '%' }"></i></div>
-          </div>
-        </li>
-      </template>
-
-      <template v-else-if="view.src === 'forecasts'">
-        <li v-for="(it, i) in view.forecasts" :key="it.f.id" class="story">
-          <span class="rank">{{ i + 1 }}</span>
-          <div>
-            <div class="title">
-              <a :href="it.f.url" target="_blank" rel="noopener noreferrer">{{ it.f.question }}</a>
-            </div>
-            <div class="smeta">
-              <span v-for="E in it.topics" :key="E.key" class="stopic">
-                <topic-dot :color="E.color"></topic-dot>
-                {{ E.name }}
-              </span>
-              <span>{{ nf0.format(it.f.bettors) }} forecasters</span>
-              <span>resolves {{ when(it.f.closes) }}</span>
-            </div>
-          </div>
-          <div class="vel">
-            <b>{{ Math.round(it.f.prob * 100) }}%</b>
-            yes
-            <small>Manifold · {{ nf0.format(it.f.vol24) }} traded today</small>
-            <div class="vbar"><i :style="{ width: it.pct.toFixed(1) + '%' }"></i></div>
-          </div>
-        </li>
-      </template>
-
-      <template v-else>
-        <li v-for="(it, i) in view.hn" :key="it.s.id" class="story">
-          <span class="rank">{{ i + 1 }}</span>
-          <div>
-            <div class="title">
-              <a :href="it.s.url" target="_blank" rel="noopener noreferrer">{{ it.s.title }}</a>
-            </div>
-            <div class="smeta">
-              <span v-for="E in it.topics" :key="E.key" class="stopic">
-                <topic-dot :color="E.color"></topic-dot>
-                {{ E.name }}
-              </span>
-              <span>{{ it.s.domain }}</span>
-              <span>{{ ago(it.s.t) }}</span>
-              <a :href="it.s.discuss" target="_blank" rel="noopener noreferrer">
-                {{ nf0.format(it.s.points) }} pts · {{ nf0.format(it.s.comments) }} comments
+          <div class="smeta">
+            <span v-for="E in topicsOf(r.topics)" :key="E.key" class="stopic">
+              <topic-dot :color="E.color"></topic-dot>
+              {{ E.name }}
+            </span>
+            <template v-for="(p, k) in r.meta" :key="k">
+              <span v-if="typeof p === 'string'">{{ p }}</span>
+              <a v-else-if="p.href" :href="p.href" :class="p.cls" target="_blank" rel="noopener noreferrer">
+                {{ p.text }}
               </a>
-              <span v-if="it.breaking" class="flag">↗ BREAKING OUT</span>
-            </div>
+              <span v-else :class="p.cls">{{ p.text }}</span>
+            </template>
           </div>
-          <div class="vel">
-            <b>{{ nf0.format(it.s.vel) }}</b>
-            /h
-            <small>{{ it.s.measured ? 'measured' : 'avg since posted' }} · ≈{{ nf0.format(it.s.pred24) }} by 24h</small>
-            <div class="vbar"><i :style="{ width: it.pct.toFixed(1) + '%' }"></i></div>
-          </div>
-        </li>
-      </template>
-      <li v-if="!view.count" class="empty">{{ view.empty }}</li>
+        </div>
+        <div class="vel">
+          <template v-if="r.side.big">
+            <b>{{ r.side.big }}</b>
+            {{ r.side.unit }}
+          </template>
+          <small>{{ r.side.note }}</small>
+          <div class="vbar"><i :style="{ width: r.bar.toFixed(1) + '%' }"></i></div>
+        </div>
+      </li>
+      <li v-if="!view.rows.length" class="empty">{{ view.empty }}</li>
       <li v-if="view.warn" class="empty">{{ view.warn }}</li>
     </ol>
   </panel-shell>
@@ -162,47 +84,22 @@
 <script lang="ts">
 import { computed, defineComponent, ref } from 'vue';
 import type { Entry, Prefs } from '@/types';
-import type { ForecastMatch, HNStory, NewsMatch, ReadingMatch, StorySrc } from '@features/stories';
 import { addReadingSite, removeReadingSite, setStoryScope, setStorySource } from '@/actions';
-import { ago } from '@core/format';
-import { quantile } from '@core/stats';
-import { ui } from '@core/ui-store';
-import { stories, storyScopeEntries } from '@features/stories';
+import { channelStreams, stories, streamContext } from '@features/stories';
 import { isBuiltInSite, readingSites } from '@sources/reading';
+import { streamById } from '@sources/streams';
 import { state } from '@/state';
 import { activeChannel } from '@/channels';
 import TopicDot from '@components/TopicDot.vue';
 import PanelShell from '@components/PanelShell.vue';
 
-// PRECOG / Trend Radar · Signals: posts from sites you follow, Manifold forecasts and Hacker News,
-// each matched to the topics in scope.
+// PRECOG / Trend Radar · Streams: one tab per stream the channel shows (news, followed sites, forecasts,
+// Hacker News…), each a ranked list of items naming the topics in scope. Every stream's rows look alike.
 
-/** A row: what it is, the topics in scope it names (two at most), and how full its bar is. */
-interface Row {
-  topics: Entry[];
-  pct: number;
-}
-/** A Hacker News story once its engagement numbers are worked out. */
-type RankedStory = HNStory & { vel: number; age: number; pred24: number };
-interface Rows {
-  news: (Row & { n: NewsMatch })[];
-  reading: (Row & { r: ReadingMatch })[];
-  forecasts: (Row & { f: ForecastMatch })[];
-  hn: (Row & { s: RankedStory; breaking: boolean })[];
-}
-const TABS: [StorySrc, string][] = [
-  ['news', 'The Guardian'],
-  ['reading', 'Reading'],
-  ['forecasts', 'Forecasts'],
-  ['hn', 'Hacker News'],
-];
 const SCOPES: [Prefs['storyScope'], string][] = [
   ['topic', 'This topic'],
   ['lens', 'Whole channel'],
 ];
-const DAY_MS = 86400e3;
-// Recent first: a match counts half as much for every six months of age.
-const fade = (t: number) => 0.5 ** ((ui.now - t) / (182 * DAY_MS));
 
 export default defineComponent({
   name: 'StoriesPanel',
@@ -214,88 +111,31 @@ export default defineComponent({
       adding = ref(false);
     const sites = computed(() => readingSites());
     const view = computed(() => {
-      const src = state.storySrc;
-      const scopeKeys = new Set(storyScopeEntries().map(E => E.key));
-      const topicsOf = (keys: string[]) =>
-        keys
-          .filter(k => scopeKeys.has(k))
-          .map(k => state.rt.get(k))
-          .filter((E): E is Entry => !!E)
-          .slice(0, 2);
-      const loading = stories.loading[src],
-        err = stories.errors[src],
-        at = stories.at[src];
-      const rows: Rows = { news: [], reading: [], forecasts: [], hn: [] };
-      let meta = '',
-        empty = '';
-      if (src === 'news') {
-        // Articles naming more of the channel's topics first, then the newest.
-        const list = [...stories.news.values()]
-          .map(n => ({ ...n, topics: n.topics.filter(k => scopeKeys.has(k)) }))
-          .filter(n => n.topics.length)
-          .sort((a, b) => b.topics.length - a.topics.length || b.t - a.t);
-        const newest = Math.max(...list.map(n => n.t), 0),
-          oldest = Math.min(...list.map(n => n.t), newest);
-        rows.news = list.slice(0, 12).map(n => ({
-          n,
-          topics: topicsOf(n.topics),
-          pct: newest > oldest ? 15 + ((n.t - oldest) / (newest - oldest)) * 85 : 100,
-        }));
-        meta = at ? `checked ${ago(at)} · ${list.length} Guardian articles name your topics` : '';
-        empty = 'No recent Guardian articles name these topics.';
-      } else if (src === 'reading') {
-        // Posts naming a topic rank by match strength; the rest still show, lower, as "new".
-        const rank = (r: ReadingMatch) => {
-          const n = r.topics.filter(k => scopeKeys.has(k)).length;
-          return (n ? r.score : 0.4) * fade(r.t);
-        };
-        const list = [...stories.reading.values()].sort((a, b) => rank(b) - rank(a) || b.t - a.t);
-        const top = Math.max(1e-6, ...list.slice(0, 12).map(rank));
-        const matched = list.filter(r => r.topics.some(k => scopeKeys.has(k))).length;
-        rows.reading = list.slice(0, 12).map(r => ({ r, topics: topicsOf(r.topics), pct: (rank(r) / top) * 100 }));
-        meta = at ? `${matched} of ${stories.readingCount} posts name your topics` : '';
-        empty = 'Nothing from the sites you follow yet.';
-      } else if (src === 'forecasts') {
-        const list = [...stories.forecasts.values()]
-          .filter(f => f.topics.some(k => scopeKeys.has(k)))
-          .sort((a, b) => b.vol24 - a.vol24 || b.bettors - a.bettors);
-        rows.forecasts = list.slice(0, 12).map(f => ({ f, topics: topicsOf(f.topics), pct: f.prob * 100 }));
-        meta = at ? `checked ${ago(at)} · open markets on Manifold` : '';
-        empty = 'No open forecast (10+ forecasters) names these topics.';
-      } else {
-        let list: RankedStory[] = [...stories.hn.values()]
-          .filter(s => s.topics.some(k => scopeKeys.has(k)))
-          .map(s => ({ ...s, vel: s.vel ?? 0, age: s.age ?? 0, pred24: s.pred24 ?? 0 }));
-        list.sort((a, b) => b.vel - a.vel);
-        if (state.storyScope !== 'topic') {
-          const per: Record<string, number> = {};
-          list = list.filter(s => (per[s.topics[0]] = (per[s.topics[0]] || 0) + 1) <= 3);
-        }
-        const p80 = quantile(
-            list.map(s => s.vel),
-            0.8,
-          ),
-          vmax = Math.max(1, ...list.map(s => s.vel));
-        rows.hn = list.slice(0, 12).map(s => ({
-          s,
-          topics: topicsOf(s.topics),
-          breaking: s.age < 8 && s.vel >= p80 && list.length >= 5,
-          pct: (s.vel / vmax) * 100,
-        }));
-        meta = at ? `checked ${ago(at)} · ranked by engagement per hour` : '';
-        empty = 'No Hacker News stories in the last 48 h for these topics (English topics only).';
-      }
-      const count = rows.news.length + rows.reading.length + rows.forecasts.length + rows.hn.length;
+      const src = state.storySrc,
+        stream = streamById(src),
+        ctx = streamContext();
+      const loading = !!stories.loading[src],
+        err = stories.errors[src] || stream?.warning?.() || null,
+        out = stream?.view(ctx, stories.at[src] || 0) ?? { rows: [], meta: '', empty: '' };
+      const n = out.rows.length;
       return {
         src,
         fixedSites: !!activeChannel().sites?.length,
-        ...rows,
-        count,
-        meta: loading ? 'loading…' : meta,
-        empty: loading ? 'Loading…' : err && !count ? `Could not load: ${err}.` : empty,
-        warn: err && count ? `Some sources failed: ${err}.` : '',
+        rows: out.rows,
+        meta: loading ? 'loading…' : out.meta,
+        empty: loading ? 'Loading…' : err && !n ? `Could not load: ${err}.` : out.empty,
+        warn: err && n ? `Some sources failed: ${err}.` : '',
       };
     });
+    /** Up to two topics in scope that an item names, as chips. */
+    const topicsOf = (keys: string[]): Entry[] => {
+      const scope = new Set(streamContext().scopeKeys);
+      return keys
+        .filter(k => scope.has(k))
+        .map(k => state.rt.get(k))
+        .filter((E): E is Entry => !!E)
+        .slice(0, 2);
+    };
     async function follow() {
       if (!newSite.value.trim()) return;
       adding.value = true;
@@ -303,21 +143,12 @@ export default defineComponent({
       adding.value = false;
       if (!siteMsg.value) newSite.value = '';
     }
-    // The Guardian tab appears once a key is set.
+    // One tab per stream the channel shows (a stream can hide itself, e.g. until its API key is set).
     const tabs = computed(() => {
-      const c = activeChannel();
-      // A channel that reads one site names the tab after it ("The Great Simplification").
-      const only = c.sites?.length === 1 ? readingSites().find(x => x.url === c.sites?.[0])?.name : '';
-      return TABS.filter(([id]) => c.streams.includes(id) && (id !== 'news' || ui.guardian))
-        .sort(([a], [b]) => c.streams.indexOf(a) - c.streams.indexOf(b))
-        .map(([id, label]): [StorySrc, string] => [id, id === 'reading' && only ? only : label]);
+      const ctx = streamContext();
+      return channelStreams().map(s => [s.id, s.tabLabel?.(ctx) ?? s.label] as const);
     });
-    const when = (t: number) =>
-      Math.abs(ui.now - t) < 30 * DAY_MS
-        ? ago(t)
-        : new Date(t).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
     return {
-      ui,
       state,
       view,
       sites,
@@ -328,10 +159,10 @@ export default defineComponent({
       follow,
       unfollow: removeReadingSite,
       tabs,
+      topicsOf,
       SCOPES,
       setStorySource,
       setStoryScope,
-      when,
     };
   },
 });

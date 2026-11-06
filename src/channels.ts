@@ -1,7 +1,6 @@
 // PRECOG / Trend Radar · Channels: each one is a whole dashboard for one context.
 // A channel names its lens (the topics whose attention it charts), the datapoints worth knowing in
 // that context, the streams it shows, and any special views (GitHub). Switching channel switches all of it.
-import type { StorySrc } from '@features/stories';
 import { lensById, state } from '@/state';
 
 export interface Channel {
@@ -15,8 +14,8 @@ export interface Channel {
   lensId: string;
   /** Datapoint card ids (see features/datapoints.ts), in display order. */
   datapoints: string[];
-  /** Stream tabs, in order. */
-  streams: StorySrc[];
+  /** Stream tabs, in order, by id (see src/sources/<name>/stream.ts). */
+  streams: string[];
   /** Followed sites to read in this channel (origins); empty means all of them. */
   sites?: string[];
   /** Extra views: the GitHub topic and personal panels. */
@@ -153,7 +152,7 @@ export function channels(): Channel[] {
       kicker: l.desc || 'Your own lens.',
       lensId: l.id,
       datapoints: [],
-      streams: ['reading', 'forecasts', 'hn'] as StorySrc[],
+      streams: ['reading', 'forecasts', 'hn'],
     }));
   return [...CHANNELS.filter(c => lensById(c.lensId)), ...own];
 }

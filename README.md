@@ -136,7 +136,7 @@ src/
 ├── types.ts                shared data shapes (Entry, Stats, Adapter…)
 ├── state.ts · live.ts · alerts.ts · actions.ts
 ├── core/                   config and lenses, person guard, statistics, formatting, errors, ui store
-├── sources/                one folder per source, plus the registry, blend and reply-reading helpers
+├── sources/                one folder per source; index.ts lists them all; registries for adapters, streams, cards
 │   ├── wikipedia/          index.ts (fetch + adapter) · parse.ts (read replies) · parse.test.ts · fixtures/
 │   ├── hackernews/ guardian/ manifold/ reading/ github/
 │   └── ecb/ eurostat/ ipma/ open-meteo/ global-warming/     parsers behind the Open data cards
