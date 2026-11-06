@@ -25,31 +25,29 @@
         ↻ {{ ui.loading ? 'Loading…' : 'Refresh' }}
       </button>
       <button
-        class="btn guardian"
-        :class="ui.guardian ? ui.guardianState : ''"
+        class="btn icon set-toggle"
+        :class="{ on: settingsOpen, warn: ui.guardian && ui.guardianState === 'error' }"
         type="button"
-        :aria-pressed="ui.guardian"
-        :title="
-          ui.guardian
-            ? ui.guardianNote + ' Click to change or remove the key.'
-            : 'Add a free Guardian API key to count news coverage for each topic.'
-        "
-        @click="editGuardianKey"
+        aria-label="Settings"
+        aria-controls="settings"
+        :aria-expanded="settingsOpen"
+        :title="ui.guardian && ui.guardianState === 'error' ? 'Settings: ' + ui.guardianNote : 'Settings'"
+        @click="settingsOpen = !settingsOpen"
       >
-        <template v-if="!ui.guardian">+ Guardian key</template>
-        <template v-else-if="ui.guardianState === 'checking'">Guardian…</template>
-        <template v-else-if="ui.guardianState === 'error'">⚠ Guardian</template>
-        <template v-else>✓ Guardian</template>
-      </button>
-      <button
-        class="btn icon"
-        type="button"
-        :aria-label="ui.theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'"
-        @click="toggleTheme"
-      >
-        ◐
+        <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
+          <path
+            d="M2 4h7M13 4h1M2 12h1M7 12h7"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            fill="none"
+          />
+          <circle cx="11" cy="4" r="2" stroke="currentColor" stroke-width="1.5" fill="none" />
+          <circle cx="5" cy="12" r="2" stroke="currentColor" stroke-width="1.5" fill="none" />
+        </svg>
       </button>
     </div>
+    <settings-bar v-if="settingsOpen" @close="closeSettings"></settings-bar>
     <nav class="channels" aria-label="Channels">
       <button
         v-for="c in view.list"
@@ -103,19 +101,20 @@ import { MAX_LENSES } from '@core/config';
 
 import BrandMark from '@components/BrandMark.vue';
 import ChannelIcon from '@components/ChannelIcon.vue';
+import SettingsBar from '@components/SettingsBar.vue';
 
 // PRECOG / Trend Radar · Header: name, heartbeat, controls, and the channel bar that switches the whole view.
 
 export default defineComponent({
   name: 'AppHeader',
-  components: { BrandMark, ChannelIcon },
+  components: { BrandMark, ChannelIcon, SettingsBar },
   setup() {
     const { app, live, stories: loader, actions, github, myGithub } = useApp();
     const ui = app.ui;
     const gh = github.state;
     const me = myGithub.state;
     const stories = loader.status;
-    const { addLens, editGuardianKey, lensHeat, selectLens, toggleTheme } = actions;
+    const { addLens, lensHeat, selectLens } = actions;
     const { state } = app;
     const view = computed(() => {
       return {
@@ -138,6 +137,12 @@ export default defineComponent({
       adding.value = false;
       name.value = '';
     }
+    // Settings bar (theme, Guardian key): the header's sliders button opens it; ×, Esc or the button closes it.
+    const settingsOpen = ref(false);
+    function closeSettings() {
+      settingsOpen.value = false;
+      nextTick(() => document.querySelector<HTMLElement>('.set-toggle')?.focus());
+    }
     function create() {
       if (name.value.trim()) addLens(name.value.trim());
       cancel();
@@ -146,9 +151,9 @@ export default defineComponent({
       ui,
       view,
       refresh: live.refresh,
-      toggleTheme,
-      editGuardianKey,
       selectLens,
+      settingsOpen,
+      closeSettings,
       adding,
       name,
       nameInput,
@@ -394,13 +399,18 @@ h1 .sub {
   align-items: center;
   gap: 8px;
 }
-/* Guardian key state on the header button */
-.btn.guardian.error {
-  border-color: var(--watch);
-  background: transparent;
+/* Settings button: lit while the bar is open, amber when the Guardian key fails */
+.btn.set-toggle svg {
+  display: block;
+  margin: auto;
 }
-.btn.guardian.checking {
-  opacity: 0.8;
+.btn.set-toggle.on {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.btn.set-toggle.warn {
+  border-color: var(--watch);
+  color: var(--watch);
 }
 /* loading beacon: a beam of light sweeps the header's bottom edge while anything is fetching */
 .beacon {

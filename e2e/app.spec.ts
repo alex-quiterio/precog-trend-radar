@@ -47,11 +47,18 @@ test('switches channel from the channel bar and with number keys, and remembers 
   await expect(heroTitle(page)).toHaveText('Energy & power');
 });
 
-test('switches theme and keeps it after a reload', async ({ page }) => {
+test('switches theme in the settings bar and keeps it after a reload', async ({ page }) => {
   await open(page);
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-  await page.getByRole('button', { name: 'Switch to light theme' }).click();
+  const settings = page.getByRole('region', { name: 'Settings' });
+  await expect(settings).toHaveCount(0);
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await expect(settings.getByText('Not set.')).toBeVisible(); // the Guardian key lives here too
+  await settings.getByRole('button', { name: 'Light' }).click();
+  await expect(settings.getByRole('button', { name: 'Light' })).toHaveAttribute('aria-pressed', 'true');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await settings.press('Escape');
+  await expect(settings).toHaveCount(0);
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 });

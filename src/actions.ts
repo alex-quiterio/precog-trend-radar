@@ -192,9 +192,13 @@ export function createActions(app: AppStore, { live, stories, github, myGithub }
       if (E) a.color = E.color;
     });
   }
-  function toggleTheme() {
-    applyTheme(ui.theme === 'light' ? 'dark' : 'light');
+  /** Switches to this theme and remembers it. */
+  function setTheme(theme: 'light' | 'dark'): void {
+    applyTheme(theme);
     app.savePrefs();
+  }
+  function toggleTheme() {
+    setTheme(ui.theme === 'light' ? 'dark' : 'light');
   }
   /** Asks for a Guardian API key (kept in this browser only), then refetches so news counts join the index. */
   function editGuardianKey(): void {
@@ -280,6 +284,7 @@ export function createActions(app: AppStore, { live, stories, github, myGithub }
     setStoryScope,
     markRead,
     applyTheme,
+    setTheme,
     toggleTheme,
     editGuardianKey,
     addReadingSite,
