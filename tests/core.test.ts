@@ -1,6 +1,7 @@
 // Unit tests for PRECOG's pure logic: the person guard, statistics and the attention blend.
 import { describe, expect, it } from 'vitest';
 import { DAY } from '@core/config';
+import { HM, hhmm } from '@core/format';
 import { looksLikePerson } from '@core/guard';
 import { computeStats, levelOf } from '@core/stats';
 import { blendParts } from '@sources/blend';
@@ -96,5 +97,13 @@ describe('blendParts (world attention index)', () => {
     E.parts.dense = daily(Array(40).fill(500), end);
     blendParts(E, ['dense', 'sparse']);
     expect(E.sparse).toBe(false);
+  });
+});
+
+describe('clock times', () => {
+  it('use a 24-hour clock, midnight as 00, even where the locale prefers 12 hours', () => {
+    expect(hhmm(new Date(2026, 0, 1, 14, 5).getTime())).toMatch(/^14.05$/);
+    expect(hhmm(new Date(2026, 0, 1, 0, 30).getTime())).toMatch(/^00.30$/);
+    expect(new Date(2026, 0, 1, 14, 5).toLocaleTimeString('en-US', HM)).toBe('14:05');
   });
 });

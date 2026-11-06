@@ -5,6 +5,7 @@
 import { markRaw } from 'vue';
 import { HISTORY, LIVE_REFRESH_MS } from '@core/config';
 import { errorText, isAbort } from '@core/errors';
+import { hhmm } from '@core/format';
 import { computeStats } from '@core/stats';
 import { blendParts } from '@sources/blend';
 import { pool, queryOf } from '@sources/registry';
@@ -36,7 +37,6 @@ export interface LoopDeps {
   /** How often to refresh, in ms. */
   every?: number;
 }
-const hhmm = (t: number) => new Date(t).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 
 export function createLiveLoop(deps: LoopDeps) {
   const { adapters, sources, state, ui } = deps;

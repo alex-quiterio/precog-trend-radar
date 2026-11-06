@@ -36,6 +36,7 @@ import { useApp } from '@/context';
 import { computed, defineComponent } from 'vue';
 import { activeChannel, channelDatapoints } from '@/channels';
 import { DATAPOINT_GROUPS, type DatapointRow } from '@features/datapoints';
+import { hhmm } from '@core/format';
 import PanelShell from '@components/PanelShell.vue';
 import Sparkline from '@components/Sparkline.vue';
 
@@ -60,9 +61,7 @@ export default defineComponent({
           rows: rows.filter(r => r.group === id),
         })),
         loaded: !!dp.at,
-        meta: dp.at
-          ? `open data · ${new Date(dp.at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}`
-          : 'open data',
+        meta: dp.at ? `open data · ${hhmm(dp.at)}` : 'open data',
       };
     });
     return { ui, view };

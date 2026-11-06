@@ -17,10 +17,14 @@ export function fmtAxis(v: number): string {
 }
 export const fmtPct = (p: Num): string =>
   p == null || !isFinite(p) ? '—' : (p > 0 ? '+' : p < 0 ? '−' : '±') + nf1.format(Math.abs(p)) + '%';
+/** Hours and minutes on a 24-hour clock ("14:05", never "2:05 PM"), whatever the phone's locale prefers. */
+export const HM: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' };
+/** "14:05". */
+export const hhmm = (t: number): string => new Date(t).toLocaleTimeString(undefined, HM);
 export function fmtTime(t: number, step: number): string {
   const d = new Date(t);
   return step < DAY
-    ? d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+    ? d.toLocaleString(undefined, { month: 'short', day: 'numeric', ...HM })
     : d.toLocaleDateString(undefined, {
         month: 'short',
         day: 'numeric',
@@ -29,9 +33,7 @@ export function fmtTime(t: number, step: number): string {
 }
 export function fmtTick(t: number, step: number): string {
   const d = new Date(t);
-  return step < DAY
-    ? d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
-    : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  return step < DAY ? hhmm(t) : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 /**
  * "5 minutes ago", "3 days ago". Always English, like the rest of the page (the browser's own relative-time
