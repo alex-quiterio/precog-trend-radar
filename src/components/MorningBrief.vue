@@ -59,13 +59,12 @@
 </template>
 
 <script lang="ts">
+import { useApp } from '@/context';
 import { ref, computed, defineComponent } from 'vue';
-import { focusTopic, markRead } from '@/actions';
 import { DAY } from '@core/config';
 import { fmtPct, fmtTime, fmtVal } from '@core/format';
 import { ui } from '@core/ui-store';
 import { briefMarkdown, buildBrief, copyText, type Scored } from '@features/brief';
-import { state } from '@/state';
 import StateTag from '@components/StateTag.vue';
 import TopicDot from '@components/TopicDot.vue';
 import PanelShell from '@components/PanelShell.vue';
@@ -77,8 +76,11 @@ export default defineComponent({
   props: { index: Number },
   components: { PanelShell, StateTag, TopicDot },
   setup() {
+    const { app, actions } = useApp();
+    const { focusTopic, markRead } = actions;
+    const { state } = app;
     const note = ref('');
-    const b = computed(() => buildBrief());
+    const b = computed(() => buildBrief(app));
     const head = computed(() => {
       return {
         title: 'What moved',
@@ -95,7 +97,7 @@ export default defineComponent({
       return { background: E.color, left: `${c >= 0 ? 50 : 50 - w}%`, width: `${Math.max(w, 1.5)}%` };
     };
     async function copy() {
-      note.value = (await copyText(briefMarkdown())) ? 'Copied. Paste into your daily note.' : 'Copy failed.';
+      note.value = (await copyText(briefMarkdown(app))) ? 'Copied. Paste into your daily note.' : 'Copy failed.';
     }
     function read() {
       markRead();

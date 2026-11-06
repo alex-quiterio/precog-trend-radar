@@ -32,6 +32,7 @@
 </template>
 
 <script lang="ts">
+import { useApp } from '@/context';
 import { computed, defineComponent } from 'vue';
 import { activeChannel, channelDatapoints } from '@/channels';
 import { ui } from '@core/ui-store';
@@ -46,9 +47,10 @@ export default defineComponent({
   props: { index: Number },
   components: { PanelShell, Sparkline },
   setup() {
+    const { app } = useApp();
     const view = computed(() => {
       // The channel picks its cards and their order; they're shown under their group headings.
-      const ids = channelDatapoints(activeChannel());
+      const ids = channelDatapoints(activeChannel(app));
       const rows = ids.map(id => dp.rows.find(r => r.id === id)).filter((r): r is DatapointRow => !!r);
       const order = [...new Set(rows.map(r => r.group))];
       return {

@@ -96,18 +96,15 @@
 </template>
 
 <script lang="ts">
+import { useApp } from '@/context';
 import { computed, defineComponent, nextTick, ref } from 'vue';
-import { addLens, editGuardianKey, lensHeat, selectLens, toggleTheme } from '@/actions';
 import { activeChannel, channels } from '@/channels';
 import { MAX_LENSES } from '@core/config';
 import { ui } from '@core/ui-store';
-import { live } from '@/live';
-import { stories } from '@features/stories';
 import { gh } from '@features/github';
 import { me } from '@features/github-me';
 import BrandMark from '@components/BrandMark.vue';
 import ChannelIcon from '@components/ChannelIcon.vue';
-import { lensById, state } from '@/state';
 
 // PRECOG / Trend Radar · Header: name, heartbeat, controls, and the channel bar that switches the whole view.
 
@@ -115,10 +112,14 @@ export default defineComponent({
   name: 'AppHeader',
   components: { BrandMark, ChannelIcon },
   setup() {
+    const { app, live, stories: loader, actions } = useApp();
+    const stories = loader.status;
+    const { addLens, editGuardianKey, lensHeat, selectLens, toggleTheme } = actions;
+    const { state } = app;
     const view = computed(() => {
       return {
-        active: activeChannel()?.id,
-        list: channels().map((c, i) => ({ ...c, n: i + 1, heat: lensHeat(lensById(c.lensId)) })),
+        active: activeChannel(app)?.id,
+        list: channels(app).map((c, i) => ({ ...c, n: i + 1, heat: lensHeat(app.lensById(c.lensId)) })),
         canAdd: state.lenses.length < MAX_LENSES,
         // Anything still fetching lights the beacon: trends, streams, GitHub.
         busy: ui.loading || Object.values(stories.loading).some(Boolean) || gh.loading || me.loading,

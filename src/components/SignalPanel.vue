@@ -145,17 +145,16 @@
 </template>
 
 <script lang="ts">
+import { useApp } from '@/context';
 import { ref, computed, onMounted, onBeforeUnmount, defineComponent } from 'vue';
 import type { SeriesPoint } from '@/types';
-import { shiftTopic } from '@/actions';
 import { compText, niceTicks, pathOf, useWidth } from '@components/helpers';
 import { DAY } from '@core/config';
 import { COMP_LABEL, changeLabel, fmtAxis, fmtPct, fmtTick, fmtTime, fmtVal } from '@core/format';
 import { arrowOf } from '@core/stats';
 import { ui } from '@core/ui-store';
 import { ADAPTERS, SOURCES } from '@sources/registry';
-import { live } from '@/live';
-import { activeLens, entriesOf, selectedEntry, series, state } from '@/state';
+import { series } from '@/state';
 import TopicDot from '@components/TopicDot.vue';
 import PanelShell from '@components/PanelShell.vue';
 
@@ -166,6 +165,9 @@ export default defineComponent({
   props: { index: Number },
   components: { PanelShell, TopicDot },
   setup() {
+    const { app, live, actions } = useApp();
+    const { shiftTopic } = actions;
+    const { state } = app;
     const wrap = ref<HTMLElement | null>(null),
       width = useWidth(wrap, 640);
     const hoverX = ref<number | null>(null),
@@ -173,10 +175,10 @@ export default defineComponent({
       dragging = ref(false);
 
     const head = computed(() => {
-      const E = selectedEntry(),
+      const E = app.selectedEntry(),
         st = E && E.stats,
-        lens = activeLens(),
-        list = entriesOf(lens);
+        lens = app.activeLens(),
+        list = app.entriesOf(lens);
       const unit = SOURCES[state.source]?.unit || '';
       return {
         E,
@@ -209,7 +211,7 @@ export default defineComponent({
     });
 
     const geo = computed(() => {
-      const E = selectedEntry(),
+      const E = app.selectedEntry(),
         st = E && E.stats,
         s = E ? series(E) : [];
       const W = Math.max(280, width.value),

@@ -1,4 +1,5 @@
 // PRECOG / Trend Radar · Constants, lens presets, storage keys and tiny DOM helpers. Loaded first.
+import { ui } from '@core/ui-store';
 
 export const MIN = 60e3,
   HOUR = 3600e3,
@@ -20,8 +21,8 @@ export const PALETTES = {
   dark: ['#3987e5', '#d55181', '#008300', '#9085e9', '#199e70', '#d95926'],
   light: ['#2a78d6', '#e87ba4', '#008300', '#6250d6', '#1baf7a', '#eb6834'],
 };
-const currentTheme = (): 'dark' | 'light' =>
-  typeof document !== 'undefined' && document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+// The theme lives in ui.theme; the page's data-theme attribute mirrors it (see applyTheme in actions.ts).
+const currentTheme = (): 'dark' | 'light' => (ui.theme === 'light' ? 'light' : 'dark');
 export const slotColor = (slot: number): string => PALETTES[currentTheme()][slot];
 export const SLOT_ANGLE = [20, 80, 140, 200, 260, 320];
 

@@ -44,12 +44,11 @@
 </template>
 
 <script lang="ts">
+import { useApp } from '@/context';
 import { reactive, ref, computed, onMounted, onBeforeUnmount, defineComponent } from 'vue';
-import { focusTopic } from '@/actions';
 import { fmtPct, fmtVal } from '@core/format';
 import { arrowOf } from '@core/stats';
 import { ui } from '@core/ui-store';
-import { activeLens, entriesOf } from '@/state';
 import { hasStats } from '@features/brief';
 import PanelShell from '@components/PanelShell.vue';
 
@@ -75,13 +74,15 @@ export default defineComponent({
   props: { index: Number },
   components: { PanelShell },
   setup() {
+    const { app, actions } = useApp();
+    const { focusTopic } = actions;
     const sweep = ref<SVGGElement | null>(null),
       wrap = ref<HTMLElement | null>(null),
       hovered = ref<string | null>(null);
     const flash = reactive<Record<string, number>>({});
     const view = computed(() => {
-      const lens = activeLens(),
-        list = entriesOf(lens).filter(hasStats);
+      const lens = app.activeLens(),
+        list = app.entriesOf(lens).filter(hasStats);
       const mMax = Math.max(2, ...list.map(E => Math.abs(E.stats.momentum)));
       const vMax = Math.max(1e-9, ...list.map(E => E.stats.latest));
       return {

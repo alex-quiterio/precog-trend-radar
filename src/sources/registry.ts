@@ -1,8 +1,7 @@
 // PRECOG / Trend Radar · Adapter registry, source list and shared fetch helpers. Every adapter registers itself here.
-import type { Adapter, AdapterResult, Entry, Lens, Query, Source } from '@/types';
+import type { Adapter, AdapterResult, Entry, Query, Source } from '@/types';
 import { DAY } from '@core/config';
 import { reactive } from 'vue';
-import { lensById } from '@/state';
 
 export const ADAPTERS: Record<string, Adapter> = {};
 // Reactive, so a source registered after start-up (e.g. from the console) shows up in the views.
@@ -55,14 +54,12 @@ export const topicRegex = (q: string): RegExp => {
   const n = String(q).replace(/"/g, '').trim();
   return new RegExp(`(^|[^\\p{L}\\p{N}])${n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?=$|[^\\p{L}\\p{N}])`, 'iu');
 };
-export const queryOf = (E: Entry): Query => {
-  const l: Partial<Lens> = lensById(E.lensId) || {};
-  return {
-    name: E.name,
-    wiki: E.def.wiki || null,
-    q: E.def.q || E.name,
-    lang: l.lang || 'en',
-    country: l.country || null,
-  };
-};
+/** What a source searches for a topic: its query, Wikipedia title, and its lens's language and country. */
+export const queryOf = (E: Entry): Query => ({
+  name: E.name,
+  wiki: E.def.wiki || null,
+  q: E.def.q || E.name,
+  lang: E.lang || 'en',
+  country: E.country ?? null,
+});
 export const SKIP = (topic: string, why: string): AdapterResult => ({ topic, points: [], skip: why });

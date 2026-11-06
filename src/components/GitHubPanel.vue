@@ -107,12 +107,12 @@
 </template>
 
 <script lang="ts">
+import { useApp } from '@/context';
 import './github.css';
 import { computed, defineComponent } from 'vue';
 import { ago, nf0, nf1 } from '@core/format';
 import { ui } from '@core/ui-store';
 import { gh, languageMix, loadGitHub, risingRepos, type GhTopic } from '@features/github';
-import { activeLens } from '@/state';
 import PanelShell from '@components/PanelShell.vue';
 import TopicDot from '@components/TopicDot.vue';
 
@@ -125,6 +125,7 @@ export default defineComponent({
   props: { index: Number },
   components: { PanelShell, TopicDot },
   setup() {
+    const { app } = useApp();
     const view = computed(() => {
       const topics = gh.topics;
       const max = Math.max(1, ...topics.flatMap(t => [t.now, t.before]));
@@ -139,7 +140,7 @@ export default defineComponent({
       const rising = risingRepos(topics);
       const pmax = Math.max(1e-6, ...rising.map(r => r.pace));
       return {
-        lensName: activeLens()?.name || '',
+        lensName: app.activeLens()?.name || '',
         topics,
         total,
         before,
@@ -161,7 +162,7 @@ export default defineComponent({
     const barTip = (t: GhTopic) =>
       `${t.name}: ${t.now} new repos in the last 90 days, ${t.before} in the 90 days before` +
       (t.growth == null ? '' : ` (${pct(t.growth)})`);
-    return { ui, gh, view, pct, barTip, ago, nf0, nf1, reload: () => loadGitHub(true) };
+    return { ui, gh, view, pct, barTip, ago, nf0, nf1, reload: () => loadGitHub(app, true) };
   },
 });
 </script>

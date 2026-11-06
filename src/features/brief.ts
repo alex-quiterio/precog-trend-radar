@@ -6,8 +6,7 @@ import { dp } from '@features/datapoints';
 import { hnStories } from '@sources/hackernews/stream';
 import { channelOfLens } from '@/channels';
 import type { Entry, Stats } from '@/types';
-import type { LastLook } from '@/state';
-import { activeLens, allEntries, entriesOf, lensById, state } from '@/state';
+import type { AppStore, LastLook } from '@/state';
 
 /** A brief sentence: plain text, and topics the reader can click to chart. */
 export type BriefPart = string | { key: string; text: string; color: string };
@@ -38,14 +37,15 @@ const zOf = (E: Scored): number => E.stats.z ?? -Infinity;
 const sigma = (E: Scored): string => (E.stats.z ?? 0).toFixed(1);
 const chg = (E: Scored): number => E.stats.change ?? 0;
 
-export function lensName(E: Entry): string {
-  const l = lensById(E.lensId);
+export function lensName(app: AppStore, E: Entry): string {
+  const l = app.lensById(E.lensId);
   return l ? l.name : '';
 }
 /** The brief for the active lens: its topics, its datapoints, plus one line on what's hot elsewhere. */
-export function buildBrief() {
-  const lens = activeLens();
-  const items = entriesOf(lens).filter(hasStats);
+export function buildBrief(app: AppStore) {
+  const { state } = app;
+  const lens = app.activeLens();
+  const items = app.entriesOf(lens).filter(hasStats);
   const out = { lines: [] as BriefLine[], movers: [] as Scored[], items, lens };
   if (!items.length) return out;
   if (!state.liveLoaded) out.lines.push(ln`Still loading: numbers will settle once every source has answered.`);
@@ -74,21 +74,21 @@ export function buildBrief() {
     );
   // Don't let the focus hide a fire elsewhere: name what's hot in the other lenses.
   // A country channel never mentions another country's channel.
-  const here = lens && channelOfLens(lens.id)?.country;
+  const here = lens && channelOfLens(app, lens.id)?.country;
   const elsewhere = state.lenses
     .filter(l => l !== lens)
     .filter(l => {
-      const there = channelOfLens(l.id)?.country;
+      const there = channelOfLens(app, l.id)?.country;
       return !here || !there || there === here;
     })
-    .flatMap(entriesOf)
+    .flatMap(app.entriesOf)
     .filter(hasStats)
     .filter(E => levelOf(E.stats.z) && !E.sparse)
     .sort((a, b) => zOf(b) - zOf(a));
   if (elsewhere.length)
     out.lines.push(
       ln`Elsewhere: ${join(
-        elsewhere.slice(0, 3).map(E => ln`${E} (${sigma(E)}σ, ${lensName(E)})`),
+        elsewhere.slice(0, 3).map(E => ln`${E} (${sigma(E)}σ, ${lensName(app, E)})`),
       )}${elsewhere.length > 3 ? ` and ${elsewhere.length - 3} more` : ''}.`,
     );
   // Fire and storm warnings matter for the land lens; elsewhere they'd be noise.
@@ -122,8 +122,8 @@ export function buildBrief() {
     .slice(0, 7);
   return out;
 }
-export function briefMarkdown(): string {
-  const b = buildBrief(),
+export function briefMarkdown(app: AppStore): string {
+  const b = buildBrief(app),
     d = new Date().toISOString().slice(0, 10);
   const rows = b.movers
     .map(
@@ -131,7 +131,7 @@ export function briefMarkdown(): string {
         `| ${E.name} | ${fmtVal(E.stats.latest)} | ${fmtPct(E.stats.change)} | ${E.stats.z == null ? '—' : E.stats.z.toFixed(1)} | ${levelOf(E.stats.z) || 'normal'} |`,
     )
     .join('\n');
-  const recent = state.alerts
+  const recent = app.state.alerts
     .filter(a => a.lens === b.lens?.name)
     .slice(0, 8)
     .map(a => `- **${a.level.toUpperCase()}** ${a.topic} (${a.lens}), ${fmtTime(a.t, a.step)}: ${a.text}`)
@@ -151,10 +151,12 @@ export function briefMarkdown(): string {
     (top ? `\n### Rising stories\n${top}\n` : '')
   );
 }
-export function saveLook(): void {
+/** Remembers what each topic looked like now, for "since your last look". */
+export function saveLook(app: AppStore): void {
+  const { state } = app;
   if (!state.liveLoaded) return;
   const items: LastLook['items'] = {};
-  allEntries().forEach(E => {
+  app.allEntries().forEach(E => {
     if (E.stats) items[E.key] = { z: E.stats.z, level: levelOf(E.stats.z), latest: E.stats.latest };
   });
   if (Object.keys(items).length) store.set(LS.look, { at: Date.now(), source: state.source, items });

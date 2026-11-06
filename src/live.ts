@@ -1,17 +1,13 @@
 // PRECOG / Trend Radar · The data loop: fetches every topic from every trend source, keeps what's on screen
 // until new data arrives, refreshes on a timer, and reports progress and failures in the status line.
 // createLiveLoop takes everything it touches as arguments, so it can be tested with fake sources;
-// the app uses one instance, `live`.
+// the app makes one (context.ts).
 import { markRaw } from 'vue';
-import { rescanAll } from '@/alerts';
 import { HISTORY, LIVE_REFRESH_MS } from '@core/config';
 import { errorText, isAbort } from '@core/errors';
 import { computeStats } from '@core/stats';
-import { ui as appUi } from '@core/ui-store';
-import { loadStories } from '@features/stories';
 import { blendParts } from '@sources/blend';
-import { ADAPTERS, SOURCES, pool, queryOf } from '@sources/registry';
-import { activeLens, entriesOf, state as appState } from '@/state';
+import { pool, queryOf } from '@sources/registry';
 import type { Adapter, Alert, Entry, Source } from '@/types';
 
 /** The UI fields the loop reports into. */
@@ -209,17 +205,3 @@ export function createLiveLoop(deps: LoopDeps) {
   };
 }
 export type LiveLoop = ReturnType<typeof createLiveLoop>;
-
-/** The app's data loop: every topic, the channel on screen first. */
-export const live = createLiveLoop({
-  adapters: ADAPTERS,
-  sources: SOURCES,
-  state: appState,
-  ui: appUi,
-  entries: () => {
-    const a = activeLens();
-    return [...entriesOf(a), ...appState.lenses.filter(l => l !== a).flatMap(entriesOf)];
-  },
-  onLoadStart: () => void loadStories(),
-  onLoaded: rescanAll,
-});

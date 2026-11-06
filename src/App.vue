@@ -75,10 +75,10 @@
 </template>
 
 <script lang="ts">
+import { useApp } from '@/context';
 import { computed, defineComponent } from 'vue';
 import { activeChannel, channelDatapoints, channels } from '@/channels';
 import { ui } from '@core/ui-store';
-import { activeLens } from '@/state';
 import AppHeader from '@components/AppHeader.vue';
 import MorningBrief from '@components/MorningBrief.vue';
 import DatapointsPanel from '@components/DatapointsPanel.vue';
@@ -105,13 +105,14 @@ export default defineComponent({
     RadarPanel,
   },
   setup() {
+    const { app } = useApp();
     const view = computed(() => {
-      const channel = activeChannel();
-      const i = channels().findIndex(c => c.id === channel.id);
+      const channel = activeChannel(app);
+      const i = channels(app).findIndex(c => c.id === channel.id);
       return {
         channel,
         no: String(i + 1).padStart(2, '0'),
-        title: activeLens()?.name || channel.label,
+        title: app.activeLens()?.name || channel.label,
         side: channelDatapoints(channel).length > 0,
         updated: new Date(ui.now).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' }),
       };

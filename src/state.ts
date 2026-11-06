@@ -1,105 +1,23 @@
-// PRECOG / Trend Radar · App state: lenses -> topics -> runtime entries, persistence and migrations.
-// `state` is reactive: views re-render on their own when what they read changes. Series and stats are
+// PRECOG / Trend Radar · The app store: lenses -> topics -> runtime entries, the view (channel, topic,
+// stream), alerts, persistence and migrations. createAppStore() makes one; the app makes exactly one (see
+// context.ts) and hands it to every panel, so nothing reads app state from a module-level singleton.
+// The state is reactive: views re-render on their own when what they read changes. Series and stats are
 // replaced whole (never edited in place) and marked raw, so hundreds of points don't each become a proxy.
 import { reactive } from 'vue';
 import type { Alert, Entry, Lens, Prefs, SeriesPoint, TopicDef } from '@/types';
+import { LS, MAX_LENSES, MAX_TOPICS, PRESETS, PRESET_VERSION, SLOT_ANGLE, slotColor, store } from '@core/config';
+import { looksLikePerson } from '@core/guard';
+import { ui } from '@core/ui-store';
+import { type Obj, isObj } from '@sources/shape';
+
 export interface LastLook {
   at: number;
   source: string;
   items: Record<string, { z: number | null; level: string | null; latest: number }>;
 }
-import { LS, MAX_LENSES, MAX_TOPICS, PRESETS, PRESET_VERSION, SLOT_ANGLE, slotColor, store } from '@core/config';
-import { looksLikePerson } from '@core/guard';
-import { type Obj, isObj } from '@sources/shape';
-
-export const state = reactive({
-  source: 'blend',
-  lenses: [] as Lens[],
-  activeLens: null as string | null,
-  selectedByLens: {} as Record<string, string>,
-  rt: new Map<string, Entry>(),
-  alerts: [] as Alert[],
-  alertSeq: 0,
-  storySrc: 'hn' as Prefs['storySrc'],
-  storyScope: 'lens' as Prefs['storyScope'],
-  prevLook: null as LastLook | null,
-  viewStart: Date.now(),
-  liveLoaded: false,
-});
 export const keyOf = (lensId: string, name: string): string => `${lensId}::${name.toLowerCase()}`;
 export const series = (E: Entry): SeriesPoint[] => E.liveSeries;
-export const lensById = (id: string | null | undefined): Lens | undefined => state.lenses.find(l => l.id === id);
-export const activeLens = (): Lens | null => lensById(state.activeLens) || state.lenses[0] || null;
-export const entriesOf = (lens: Lens | null | undefined): Entry[] =>
-  lens ? lens.topics.map(t => state.rt.get(keyOf(lens.id, t.name))).filter((E): E is Entry => !!E) : [];
-export const allEntries = (): Entry[] => state.lenses.flatMap(entriesOf);
-export function selectedEntry(): Entry | null {
-  const lens = activeLens();
-  if (!lens) return null;
-  const list = entriesOf(lens);
-  return list.find(E => E.name === state.selectedByLens[lens.id]) || list[0] || null;
-}
-export function ensureEntry(lens: Lens, def: TopicDef): Entry {
-  const key = keyOf(lens.id, def.name);
-  let E = state.rt.get(key);
-  if (!E) {
-    state.rt.set(key, {
-      key,
-      lensId: lens.id,
-      def,
-      name: def.name,
-      slot: def.slot,
-      color: slotColor(def.slot),
-      angle: SLOT_ANGLE[def.slot],
-      parts: {},
-      partErr: {},
-      meta: {},
-      liveSeries: [],
-      liveError: null,
-      stats: null,
-      lastAlert: null,
-    });
-    E = state.rt.get(key)!; // the reactive view of it, so later edits reach the screen
-  }
-  E.def = def;
-  E.slot = def.slot;
-  E.color = slotColor(def.slot);
-  E.angle = SLOT_ANGLE[def.slot];
-  return E;
-}
-export function syncEntries(): void {
-  const keep = new Set<string>();
-  state.lenses.forEach(l =>
-    l.topics.forEach(t => {
-      keep.add(ensureEntry(l, t).key);
-    }),
-  );
-  [...state.rt.keys()].forEach(k => {
-    if (!keep.has(k)) state.rt.delete(k);
-  });
-}
-export function saveLenses(): void {
-  store.set(
-    LS.lenses,
-    state.lenses.map(l => ({
-      id: l.id,
-      name: l.name,
-      desc: l.desc || '',
-      lang: l.lang,
-      country: l.country,
-      topics: l.topics.map(({ name, slot, wiki, q }) => ({ name, slot, wiki, q })),
-    })),
-  );
-}
-export function savePrefs(): void {
-  store.set(LS.prefs, {
-    activeLens: state.activeLens,
-    selectedByLens: state.selectedByLens,
-    theme: document.documentElement.dataset.theme || 'dark',
-    storySrc: state.storySrc,
-    storyScope: state.storyScope,
-  });
-}
+
 export function presetLenses(): Lens[] {
   return PRESETS.map(p => ({
     id: p.id,
@@ -156,19 +74,132 @@ function storedLens(l: Obj): Lens {
       .slice(0, MAX_TOPICS),
   };
 }
-export function loadLenses(): void {
-  const stored = store.get<unknown>(LS.lenses, null);
-  let lenses: Obj[] = Array.isArray(stored) ? stored.filter(isObj) : [],
-    upgraded = false;
-  if (!lenses.length) {
-    lenses = presetLenses() as unknown as Obj[];
-  } else if ((store.get(LS.presetVer, 1) || 1) < PRESET_VERSION) {
-    const own = lenses.filter(l => !OLD_PRESET_IDS.has(String(l.id)) && !PRESETS.some(p => p.id === l.id));
-    lenses = [...(presetLenses() as unknown as Obj[]), ...own];
-    upgraded = true;
-  }
-  store.set(LS.presetVer, PRESET_VERSION);
-  state.lenses = lenses.slice(0, MAX_LENSES).map(storedLens);
-  if (upgraded) saveLenses(); // persist the upgrade now, not on the next edit
-  syncEntries();
+
+/** A fresh app state: no lenses until loadLenses(), the World attention index, the Reading stream. */
+function initialState() {
+  return reactive({
+    source: 'blend',
+    lenses: [] as Lens[],
+    activeLens: null as string | null,
+    selectedByLens: {} as Record<string, string>,
+    rt: new Map<string, Entry>(),
+    alerts: [] as Alert[],
+    alertSeq: 0,
+    storySrc: 'reading' as Prefs['storySrc'],
+    storyScope: 'lens' as Prefs['storyScope'],
+    prevLook: null as LastLook | null,
+    viewStart: Date.now(),
+    liveLoaded: false,
+  });
 }
+export type AppState = ReturnType<typeof initialState>;
+
+export function createAppStore() {
+  const state = initialState();
+  const lensById = (id: string | null | undefined): Lens | undefined => state.lenses.find(l => l.id === id);
+  const activeLens = (): Lens | null => lensById(state.activeLens) || state.lenses[0] || null;
+  const entriesOf = (lens: Lens | null | undefined): Entry[] =>
+    lens ? lens.topics.map(t => state.rt.get(keyOf(lens.id, t.name))).filter((E): E is Entry => !!E) : [];
+  const allEntries = (): Entry[] => state.lenses.flatMap(entriesOf);
+  /** Every topic, the channel on screen first (the data loop fetches in this order). */
+  const orderedEntries = (): Entry[] => {
+    const a = activeLens();
+    return [...entriesOf(a), ...state.lenses.filter(l => l !== a).flatMap(entriesOf)];
+  };
+  function selectedEntry(): Entry | null {
+    const lens = activeLens();
+    if (!lens) return null;
+    const list = entriesOf(lens);
+    return list.find(E => E.name === state.selectedByLens[lens.id]) || list[0] || null;
+  }
+  function ensureEntry(lens: Lens, def: TopicDef): Entry {
+    const key = keyOf(lens.id, def.name);
+    let E = state.rt.get(key);
+    if (!E) {
+      state.rt.set(key, {
+        key,
+        lensId: lens.id,
+        lang: lens.lang || 'en',
+        country: lens.country ?? null,
+        def,
+        name: def.name,
+        slot: def.slot,
+        color: slotColor(def.slot),
+        angle: SLOT_ANGLE[def.slot],
+        parts: {},
+        partErr: {},
+        meta: {},
+        liveSeries: [],
+        liveError: null,
+        stats: null,
+        lastAlert: null,
+      });
+      E = state.rt.get(key)!; // the reactive view of it, so later edits reach the screen
+    }
+    E.def = def;
+    E.slot = def.slot;
+    E.color = slotColor(def.slot);
+    E.angle = SLOT_ANGLE[def.slot];
+    return E;
+  }
+  function syncEntries(): void {
+    const keep = new Set<string>();
+    state.lenses.forEach(l => l.topics.forEach(t => keep.add(ensureEntry(l, t).key)));
+    [...state.rt.keys()].forEach(k => {
+      if (!keep.has(k)) state.rt.delete(k);
+    });
+  }
+  function saveLenses(): void {
+    store.set(
+      LS.lenses,
+      state.lenses.map(l => ({
+        id: l.id,
+        name: l.name,
+        desc: l.desc || '',
+        lang: l.lang,
+        country: l.country,
+        topics: l.topics.map(({ name, slot, wiki, q }) => ({ name, slot, wiki, q })),
+      })),
+    );
+  }
+  function savePrefs(): void {
+    store.set(LS.prefs, {
+      activeLens: state.activeLens,
+      selectedByLens: state.selectedByLens,
+      theme: ui.theme === 'light' ? 'light' : 'dark',
+      storySrc: state.storySrc,
+      storyScope: state.storyScope,
+    });
+  }
+  function loadLenses(): void {
+    const stored = store.get<unknown>(LS.lenses, null);
+    let lenses: Obj[] = Array.isArray(stored) ? stored.filter(isObj) : [],
+      upgraded = false;
+    if (!lenses.length) {
+      lenses = presetLenses() as unknown as Obj[];
+    } else if ((store.get(LS.presetVer, 1) || 1) < PRESET_VERSION) {
+      const own = lenses.filter(l => !OLD_PRESET_IDS.has(String(l.id)) && !PRESETS.some(p => p.id === l.id));
+      lenses = [...(presetLenses() as unknown as Obj[]), ...own];
+      upgraded = true;
+    }
+    store.set(LS.presetVer, PRESET_VERSION);
+    state.lenses = lenses.slice(0, MAX_LENSES).map(storedLens);
+    if (upgraded) saveLenses(); // persist the upgrade now, not on the next edit
+    syncEntries();
+  }
+  return {
+    state,
+    lensById,
+    activeLens,
+    entriesOf,
+    allEntries,
+    orderedEntries,
+    selectedEntry,
+    ensureEntry,
+    syncEntries,
+    saveLenses,
+    savePrefs,
+    loadLenses,
+  };
+}
+export type AppStore = ReturnType<typeof createAppStore>;

@@ -1,7 +1,7 @@
 // PRECOG / Trend Radar · Channels: each one is a whole dashboard for one context.
 // A channel names its lens (the topics whose attention it charts), the datapoints worth knowing in
 // that context, the streams it shows, and any special views (GitHub). Switching channel switches all of it.
-import { lensById, state } from '@/state';
+import type { AppStore } from '@/state';
 
 export interface Channel {
   id: string;
@@ -142,8 +142,8 @@ export const CHANNELS: Channel[] = [
 ];
 
 /** Channels for every lens: the shipped ones, then a plain channel for each lens you made yourself. */
-export function channels(): Channel[] {
-  const own = state.lenses
+export function channels(app: AppStore): Channel[] {
+  const own = app.state.lenses
     .filter(l => !CHANNELS.some(c => c.lensId === l.id))
     .map(l => ({
       id: l.id,
@@ -154,12 +154,13 @@ export function channels(): Channel[] {
       datapoints: [],
       streams: ['reading', 'forecasts', 'hn'],
     }));
-  return [...CHANNELS.filter(c => lensById(c.lensId)), ...own];
+  return [...CHANNELS.filter(c => app.lensById(c.lensId)), ...own];
 }
 /** The channel showing a lens (undefined for none). */
-export const channelOfLens = (lensId: string): Channel | undefined => channels().find(c => c.lensId === lensId);
+export const channelOfLens = (app: AppStore, lensId: string): Channel | undefined =>
+  channels(app).find(c => c.lensId === lensId);
 /** The channel on screen: the one whose lens is active. */
-export function activeChannel(): Channel {
-  const all = channels();
-  return all.find(c => c.lensId === state.activeLens) || all[0];
+export function activeChannel(app: AppStore): Channel {
+  const all = channels(app);
+  return all.find(c => c.lensId === app.state.activeLens) || all[0];
 }

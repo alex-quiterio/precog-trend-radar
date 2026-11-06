@@ -3,9 +3,11 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { LS } from '@core/config';
 import { memoryBackend, useBackend } from '@core/storage';
-import { loadLenses, state } from '@/state';
+import { createAppStore, type AppStore } from '@/state';
 
 let mem = memoryBackend().data;
+let app: AppStore;
+const loadLenses = () => app.loadLenses();
 
 const saved = (id: string, names: string[]) => ({
   id,
@@ -15,11 +17,14 @@ const saved = (id: string, names: string[]) => ({
 });
 
 describe('lenses', () => {
-  beforeEach(() => void (mem = useBackend(memoryBackend()).data));
+  beforeEach(() => {
+    mem = useBackend(memoryBackend()).data;
+    app = createAppStore(); // a fresh app each time: no shared state between tests
+  });
 
   it('starts a first visit with one lens per channel', () => {
     loadLenses();
-    expect(state.lenses.map(l => l.id)).toEqual([
+    expect(app.state.lenses.map(l => l.id)).toEqual([
       'world',
       'tgs',
       'energy',
@@ -30,7 +35,7 @@ describe('lenses', () => {
       'marginalian',
       'github',
     ]);
-    expect(state.lenses.every(l => l.lang === 'en')).toBe(true);
+    expect(app.state.lenses.every(l => l.lang === 'en')).toBe(true);
   });
 
   it('replaces the old presets on upgrade and keeps lenses the user made', () => {
@@ -45,7 +50,7 @@ describe('lenses', () => {
       ]),
     );
     loadLenses();
-    expect(state.lenses.map(l => l.id)).toEqual([
+    expect(app.state.lenses.map(l => l.id)).toEqual([
       'world',
       'tgs',
       'energy',
@@ -57,14 +62,14 @@ describe('lenses', () => {
       'github',
       'mine',
     ]);
-    expect(state.lenses.at(-1)?.topics.map(t => t.name)).toEqual(['Zig', 'Solarpunk']);
+    expect(app.state.lenses.at(-1)?.topics.map(t => t.name)).toEqual(['Zig', 'Solarpunk']);
   });
 
   it('leaves saved lenses alone once they are on the current version', () => {
     loadLenses();
     mem.set(LS.lenses, JSON.stringify([saved('mine', ['Zig'])]));
     loadLenses();
-    expect(state.lenses.map(l => l.id)).toEqual(['mine']);
+    expect(app.state.lenses.map(l => l.id)).toEqual(['mine']);
   });
 
   it('saves the upgraded lenses straight away', () => {
@@ -83,7 +88,7 @@ describe('lenses', () => {
       ),
     );
     loadLenses();
-    expect(state.lenses.map(l => l.id)).toEqual([
+    expect(app.state.lenses.map(l => l.id)).toEqual([
       'world',
       'tgs',
       'energy',
@@ -95,6 +100,6 @@ describe('lenses', () => {
       'github',
     ]);
     loadLenses(); // and it sticks on the next load
-    expect(state.lenses.map((l: { id: string }) => l.id)).toContain('github');
+    expect(app.state.lenses.map((l: { id: string }) => l.id)).toContain('github');
   });
 });

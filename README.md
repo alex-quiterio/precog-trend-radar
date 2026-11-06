@@ -135,7 +135,11 @@ src/
 ├── App.vue                 the channel on screen: hero, gist, trends, builders, streams, context
 ├── channels.ts             channel definitions
 ├── types.ts                shared data shapes (Entry, Stats, Adapter…)
-├── state.ts · alerts.ts · actions.ts
+├── context.ts              the composition root: makes the app store, data loop, stream loader and actions,
+│                           and provides them to every panel (useApp())
+├── state.ts                createAppStore(): lenses, topics, the view, persistence
+├── actions.ts              createActions(app, services): what the user can do
+├── alerts.ts               alert rules
 ├── live.ts                 the data loop (createLiveLoop: fake sources in, testable)
 ├── core/                   config and lenses, storage (swappable backend), person guard, statistics, formatting
 ├── sources/                one folder per source; index.ts lists them all; registries for adapters, streams, cards
@@ -150,8 +154,10 @@ tests/                      Vitest: core logic, the data loop, stream loader, st
 ```
 
 Imports use path aliases: `@core/…`, `@features/…`, `@sources/…`, `@components/…`, and `@/…` for the top-level
-modules. App state lives in Vue reactive stores (`state.ts` and the feature modules), so each panel re-renders
-when what it reads changes. Every API reply is read through a typed parser that rejects an unexpected shape
+modules. App state lives in one reactive store made by `createAppStore()`. `context.ts` builds it with the
+services that work on it and provides them to every panel, which reads them with `useApp()`; nothing imports
+app state from a module-level singleton, so any panel or action can be tested with its own context. Each
+panel re-renders when what it reads changes. Every API reply is read through a typed parser that rejects an unexpected shape
 with a clear message, and TypeScript runs in strict mode.
 
 | Script           | Does                                                     |

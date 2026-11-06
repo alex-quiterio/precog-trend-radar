@@ -8,7 +8,7 @@ import { DAY, HOUR, sleep, store } from '@core/config';
 import { githubHeaders, githubToken, searchGap } from '@sources/github/auth';
 import { HttpError, getJSON, phrase, queryOf } from '@sources/registry';
 import { parseRepoSearch } from '@sources/github/parse';
-import { activeLens, entriesOf } from '@/state';
+import type { AppStore } from '@/state';
 
 export interface GhRepo {
   name: string;
@@ -98,14 +98,14 @@ async function topicStats(E: Entry, signal: AbortSignal): Promise<Cached> {
 
 let abort: AbortController | null = null;
 /** Loads GitHub stats for the active lens's topics; cached topics appear at once, the rest fill in. */
-export async function loadGitHub(force = false): Promise<void> {
-  const lens = activeLens();
+export async function loadGitHub(app: AppStore, force = false): Promise<void> {
+  const lens = app.activeLens();
   if (!lens) return;
   if (!force && gh.lensId === lens.id && (gh.loading || Date.now() - gh.at < TTL)) return;
   if (abort) abort.abort();
   abort = new AbortController();
   const { signal } = abort;
-  const entries = entriesOf(lens);
+  const entries = app.entriesOf(lens);
   Object.assign(gh, { lensId: lens.id, topics: [], loading: true, done: 0, total: entries.length, error: null });
   for (const E of entries) {
     try {

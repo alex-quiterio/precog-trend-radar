@@ -13,6 +13,8 @@ function entry(name: string): Entry {
   return reactive({
     key: `test::${name.toLowerCase()}`,
     lensId: 'test',
+    lang: 'en',
+    country: null,
     def: { name, slot: 0 },
     name,
     slot: 0,

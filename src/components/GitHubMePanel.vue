@@ -111,10 +111,10 @@
 </template>
 
 <script lang="ts">
+import { useApp } from '@/context';
 import './github.css';
 import { computed, defineComponent } from 'vue';
 import { ago, nf0 } from '@core/format';
-import { editGithubToken } from '@/actions';
 import { ui } from '@core/ui-store';
 import { githubUser, loadMyGitHub, me, setGithubUser } from '@features/github-me';
 import PanelShell from '@components/PanelShell.vue';
@@ -126,6 +126,8 @@ export default defineComponent({
   props: { index: Number },
   components: { PanelShell },
   setup() {
+    const { actions } = useApp();
+    const { editGithubToken } = actions;
     const s = computed(() => me.stats);
     const user = computed(() => githubUser());
     const actMax = computed(() => Math.max(1, ...(s.value?.activity || []).map(d => d.value)));

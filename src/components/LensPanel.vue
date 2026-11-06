@@ -36,13 +36,12 @@
 </template>
 
 <script lang="ts">
+import { useApp } from '@/context';
 import { ref, computed, watch, nextTick, defineComponent } from 'vue';
-import { addTopic, removeLens, removeTopic, select } from '@/actions';
 import { CHANNELS } from '@/channels';
 import { MAX_TOPICS } from '@core/config';
 import type { Entry } from '@/types';
 import { ui } from '@core/ui-store';
-import { activeLens, entriesOf, selectedEntry } from '@/state';
 import TopicDot from '@components/TopicDot.vue';
 import PanelShell from '@components/PanelShell.vue';
 
@@ -53,15 +52,17 @@ export default defineComponent({
   props: { index: Number },
   components: { PanelShell, TopicDot },
   setup() {
+    const { app, actions } = useApp();
+    const { addTopic, removeLens, removeTopic, select } = actions;
     const newTopic = ref(''),
       addInput = ref<HTMLInputElement | null>(null);
     const view = computed(() => {
-      const lens = activeLens(),
-        list = entriesOf(lens);
+      const lens = app.activeLens(),
+        list = app.entriesOf(lens);
       return {
         lens,
         list,
-        sel: selectedEntry(),
+        sel: app.selectedEntry(),
         full: list.length >= MAX_TOPICS,
         own: !!lens && !CHANNELS.some(c => c.lensId === lens.id),
         meta: `${list.length} of ${MAX_TOPICS} · click one to chart it`,

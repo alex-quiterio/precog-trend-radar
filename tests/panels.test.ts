@@ -7,18 +7,24 @@ import DatapointsPanel from '@components/DatapointsPanel.vue';
 import StoriesPanel from '@components/StoriesPanel.vue';
 import { memoryBackend, useBackend } from '@core/storage';
 import { dp, type DatapointRow } from '@features/datapoints';
-import { stories } from '@features/stories';
 import { registerStream, type StreamRow } from '@sources/streams';
-import { entriesOf, loadLenses, lensById, state } from '@/state';
+import { contextPlugin, createContext } from '@/context';
+
+const ctx = createContext();
+const { app } = ctx;
+const { state } = app;
+const stories = ctx.stories.status;
+/** Mounts a panel with this test's own app context. */
+const mountPanel = (c: Parameters<typeof mount>[0]) => mount(c, { global: { plugins: [contextPlugin(ctx)] } });
 
 let topicKey = '';
 const rows: StreamRow[] = [];
 beforeAll(() => {
   vi.stubGlobal('fetch', () => new Promise(() => {})); // no network in tests
   useBackend(memoryBackend());
-  loadLenses();
+  app.loadLenses();
   state.activeLens = 'world'; // shows the news, forecasts, reading and hn streams
-  topicKey = entriesOf(lensById('world'))[0].key;
+  topicKey = app.entriesOf(app.lensById('world'))[0].key;
   // Stand-ins for two streams the World channel lists. The real ones register from sources/index.ts, which
   // these tests don't import (Hacker News is real: the gist imports it).
   registerStream({
@@ -38,7 +44,7 @@ beforeAll(() => {
 describe('the streams panel', () => {
   it('shows one tab per stream the channel lists and that is registered', async () => {
     state.storySrc = 'reading';
-    const w = mount(StoriesPanel);
+    const w = mountPanel(StoriesPanel);
     expect(w.findAll('.seg button').map(b => b.text())).toEqual([
       'Forecasts',
       'Reading',
@@ -63,7 +69,7 @@ describe('the streams panel', () => {
       bar: 50,
     });
     state.storySrc = 'reading';
-    const w = mount(StoriesPanel);
+    const w = mountPanel(StoriesPanel);
     await nextTick();
     const row = w.find('li.story');
     expect(row.find('.title a').attributes('href')).toBe('https://example.org/story');
@@ -76,7 +82,7 @@ describe('the streams panel', () => {
   });
   it('says why a stream is empty: loading, an error, or nothing found', async () => {
     state.storySrc = 'forecasts';
-    const w = mount(StoriesPanel);
+    const w = mountPanel(StoriesPanel);
     expect(w.find('li.empty').text()).toBe('No forecasts.');
     stories.errors.forecasts = 'HTTP 429';
     await nextTick();
@@ -104,7 +110,7 @@ describe('the open-data panel', () => {
       rows: [card('ecb', 'ea', 1), card('co2', 'planet', 20), card('fire', 'pt', 3)],
       at: Date.now(),
     });
-    const w = mount(DatapointsPanel);
+    const w = mountPanel(DatapointsPanel);
     await nextTick();
     const text = w.text();
     expect(text).toContain('Card ecb');

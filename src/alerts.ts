@@ -1,7 +1,7 @@
 // PRECOG / Trend Radar · Pre-cog alert rules: z-score levels, de-duplication and plain-English explanations.
 import { ALERT_CAP, FC_STEPS, MIN_BASE } from '@core/config';
 import { computeStats, levelOf } from '@core/stats';
-import { allEntries, lensById, series, state } from '@/state';
+import { series, type AppStore } from '@/state';
 import type { Alert, Entry, Stats } from '@/types';
 
 /** Why a topic is running hot, in a sentence. Only called with a z-score (an alert needs one). */
@@ -15,7 +15,8 @@ export function explain(name: string, st: Stats & { z: number }): string {
   else tail = 'the underlying trend is flat or falling, so this looks like a short-lived spike';
   return `${head}; ${tail}.`;
 }
-export function evaluate(E: Entry, st: Stats): Alert | null {
+/** An alert for the topic at this point, or null (not hot, or already alerted recently at this level). */
+export function evaluate(app: AppStore, E: Entry, st: Stats): Alert | null {
   const z = st.z;
   if (z == null) return null;
   const level = levelOf(z);
@@ -24,9 +25,9 @@ export function evaluate(E: Entry, st: Stats): Alert | null {
   const escalated = last && last.level === 'watch' && level === 'alert';
   if (last && st.lt - last.t < 6 * st.step && !escalated) return null;
   E.lastAlert = { t: st.lt, level };
-  const lens = lensById(E.lensId);
+  const lens = app.lensById(E.lensId);
   return {
-    id: ++state.alertSeq,
+    id: ++app.state.alertSeq,
     key: E.key,
     lensId: E.lensId,
     lens: lens ? lens.name : '',
@@ -39,24 +40,23 @@ export function evaluate(E: Entry, st: Stats): Alert | null {
     text: explain(E.name, { ...st, z }),
   };
 }
-export function scanHistory(E: Entry): Alert[] {
+/** Every alert the topic's history would have raised, oldest first. */
+export function scanHistory(app: AppStore, E: Entry): Alert[] {
   const s = series(E),
     out: Alert[] = [];
   E.lastAlert = null;
   for (let i = MIN_BASE; i < s.length; i++) {
     const st = computeStats(s.slice(0, i + 1));
-    const a = st && st.z != null && evaluate(E, st);
+    const a = st && st.z != null && evaluate(app, E, st);
     if (a) out.push(a);
   }
   return out;
 }
-export function rescanAll(): void {
-  state.alerts = allEntries()
-    .flatMap(scanHistory)
+/** Rebuilds the alert list from every topic's history, newest first. */
+export function rescanAll(app: AppStore): void {
+  app.state.alerts = app
+    .allEntries()
+    .flatMap(E => scanHistory(app, E))
     .sort((a, b) => b.t - a.t || b.z - a.z)
     .slice(0, ALERT_CAP);
-}
-export function pushAlert(a: Alert): void {
-  state.alerts.unshift(a);
-  state.alerts.length = Math.min(state.alerts.length, ALERT_CAP);
 }

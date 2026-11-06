@@ -49,6 +49,9 @@ export interface Lens {
 export interface Entry {
   key: string;
   lensId: string;
+  /** The lens's language and country, which the sources query in. */
+  lang: string;
+  country: string | null;
   def: TopicDef;
   name: string;
   slot: number;

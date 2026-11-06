@@ -82,13 +82,12 @@
 </template>
 
 <script lang="ts">
+import { useApp } from '@/context';
 import { computed, defineComponent, ref } from 'vue';
 import type { Entry, Prefs } from '@/types';
-import { addReadingSite, removeReadingSite, setStoryScope, setStorySource } from '@/actions';
-import { channelStreams, stories, streamContext } from '@features/stories';
+import { channelStreams, streamContext } from '@features/stories';
 import { isBuiltInSite, readingSites } from '@sources/reading';
 import { streamById } from '@sources/streams';
-import { state } from '@/state';
 import { activeChannel } from '@/channels';
 import TopicDot from '@components/TopicDot.vue';
 import PanelShell from '@components/PanelShell.vue';
@@ -106,6 +105,10 @@ export default defineComponent({
   props: { index: Number },
   components: { PanelShell, TopicDot },
   setup() {
+    const { app, stories: loader, actions } = useApp();
+    const stories = loader.status;
+    const { addReadingSite, removeReadingSite, setStoryScope, setStorySource } = actions;
+    const { state } = app;
     const newSite = ref(''),
       siteMsg = ref(''),
       adding = ref(false);
@@ -113,14 +116,14 @@ export default defineComponent({
     const view = computed(() => {
       const src = state.storySrc,
         stream = streamById(src),
-        ctx = streamContext();
+        ctx = streamContext(app);
       const loading = !!stories.loading[src],
         err = stories.errors[src] || stream?.warning?.() || null,
         out = stream?.view(ctx, stories.at[src] || 0) ?? { rows: [], meta: '', empty: '' };
       const n = out.rows.length;
       return {
         src,
-        fixedSites: !!activeChannel().sites?.length,
+        fixedSites: !!activeChannel(app).sites?.length,
         rows: out.rows,
         meta: loading ? 'loading…' : out.meta,
         empty: loading ? 'Loading…' : err && !n ? `Could not load: ${err}.` : out.empty,
@@ -129,7 +132,7 @@ export default defineComponent({
     });
     /** Up to two topics in scope that an item names, as chips. */
     const topicsOf = (keys: string[]): Entry[] => {
-      const scope = new Set(streamContext().scopeKeys);
+      const scope = new Set(streamContext(app).scopeKeys);
       return keys
         .filter(k => scope.has(k))
         .map(k => state.rt.get(k))
@@ -145,8 +148,8 @@ export default defineComponent({
     }
     // One tab per stream the channel shows (a stream can hide itself, e.g. until its API key is set).
     const tabs = computed(() => {
-      const ctx = streamContext();
-      return channelStreams().map(s => [s.id, s.tabLabel?.(ctx) ?? s.label] as const);
+      const ctx = streamContext(app);
+      return channelStreams(app).map(s => [s.id, s.tabLabel?.(ctx) ?? s.label] as const);
     });
     return {
       state,

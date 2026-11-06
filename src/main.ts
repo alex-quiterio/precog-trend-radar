@@ -1,4 +1,4 @@
-// PRECOG / Trend Radar · Boot: restore the last view, mount the app, start the data loops.
+// PRECOG / Trend Radar · Boot: make the app's context, restore the last view, mount, start the data loops.
 import { createApp } from 'vue';
 import '@/styles/tokens.css';
 import '@/styles/app.css';
@@ -14,25 +14,25 @@ import { installLifecycle } from '@/boot/lifecycle';
 import { restore } from '@/boot/prefs';
 import { installShortcuts } from '@/boot/shortcuts';
 import { activeChannel } from '@/channels';
+import { contextPlugin, createContext } from '@/context';
 import { HOUR } from '@core/config';
 import { startClock } from '@core/ui-store';
 import { loadDatapoints } from '@features/datapoints';
 import { loadGitHub } from '@features/github';
 import { loadMyGitHub } from '@features/github-me';
-import { startStoryTimer } from '@features/stories';
-import { live } from '@/live';
 
-restore();
-createApp(App).mount('#app');
+const ctx = createContext();
+restore(ctx);
+createApp(App).use(contextPlugin(ctx)).mount('#app');
 
 startClock();
-live.start(); // also loads the stream on screen
-if (activeChannel().github) void loadGitHub();
+ctx.live.start(); // also loads the stream on screen
+if (activeChannel(ctx.app).github) void loadGitHub(ctx.app);
 void loadMyGitHub();
 void loadDatapoints();
 setInterval(loadDatapoints, HOUR);
-startStoryTimer();
+ctx.stories.startTimer();
 
-installShortcuts();
-installLifecycle();
+installShortcuts(ctx);
+installLifecycle(ctx);
 exposeConsoleHooks();
