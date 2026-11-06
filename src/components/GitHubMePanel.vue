@@ -96,7 +96,7 @@
             </div>
             <div class="smeta">
               <span v-if="r.language">{{ r.language }}</span>
-              <span>pushed {{ ago(r.pushed) }}</span>
+              <span>pushed {{ ago(r.pushed, ui.now) }}</span>
               <span v-if="r.desc" class="desc">{{ r.desc }}</span>
             </div>
           </div>
@@ -115,8 +115,6 @@ import { useApp } from '@/context';
 import './github.css';
 import { computed, defineComponent } from 'vue';
 import { ago, nf0 } from '@core/format';
-import { ui } from '@core/ui-store';
-import { githubUser, loadMyGitHub, me, setGithubUser } from '@features/github-me';
 import PanelShell from '@components/PanelShell.vue';
 
 // PRECOG / Trend Radar · Your GitHub: public repos, stars, languages and 30 days of activity.
@@ -126,19 +124,21 @@ export default defineComponent({
   props: { index: Number },
   components: { PanelShell },
   setup() {
-    const { actions } = useApp();
+    const { actions, app, myGithub } = useApp();
+    const ui = app.ui;
+    const me = myGithub.state;
     const { editGithubToken } = actions;
     const s = computed(() => me.stats);
-    const user = computed(() => githubUser());
+    const user = computed(() => myGithub.user());
     const actMax = computed(() => Math.max(1, ...(s.value?.activity || []).map(d => d.value)));
     const langMax = computed(() => Math.max(1, ...(s.value?.languages || []).map(l => l.count)));
-    const meta = computed(() => (me.loading ? 'loading…' : me.at ? `checked ${ago(me.at)} · public data` : ''));
+    const meta = computed(() => (me.loading ? 'loading…' : me.at ? `checked ${ago(me.at, ui.now)} · public data` : ''));
     const day = (t: number) => new Date(t).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
     function editUser() {
-      const u = window.prompt('Your GitHub username (public data only):', githubUser());
+      const u = window.prompt('Your GitHub username (public data only):', myGithub.user());
       if (u == null) return;
-      setGithubUser(u);
-      loadMyGitHub(true);
+      myGithub.setUser(u);
+      myGithub.load(true);
     }
     return { ui, me, s, user, actMax, langMax, meta, day, editUser, editGithubToken, ago, nf0 };
   },

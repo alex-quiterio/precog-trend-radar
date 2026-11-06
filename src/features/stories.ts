@@ -1,7 +1,7 @@
 // PRECOG / Trend Radar · Streams under "Matched to your topics": what the streams look at (the topics in
 // scope), and a loader that loads the stream on screen and keeps what is loading, what failed and when each
 // stream last loaded. The app makes one loader (context.ts); the streams register in sources/<name>/stream.ts.
-import { reactive } from 'vue';
+import { markRaw, reactive } from 'vue';
 import { STORY_REFRESH_MS } from '@core/config';
 import { errorText, isAbort } from '@core/errors';
 import { streamsFor, type Stream, type StreamContext } from '@sources/streams';
@@ -21,10 +21,12 @@ export function streamContext(app: AppStore, entries = storyScopeEntries(app)): 
     scopeKeys: new Set(entries.map(E => E.key)),
     scope: app.state.storyScope,
     sites: activeChannel(app).sites,
+    now: app.ui.now,
+    keys: { guardian: app.ui.guardian },
   };
 }
 /** The streams the channel on screen shows. */
-export const channelStreams = (app: AppStore) => streamsFor(activeChannel(app).streams);
+export const channelStreams = (app: AppStore) => streamsFor(activeChannel(app).streams, streamContext(app));
 
 export interface StoryDeps {
   /** The streams the channel on screen shows, in tab order. */
@@ -42,6 +44,8 @@ export interface StoryDeps {
  */
 export function createStoryLoader(deps: StoryDeps) {
   const status = reactive({
+    /** Each stream's last result, as its load returned it (passed back to its view). */
+    data: {} as Record<string, unknown>,
     loading: {} as Record<string, boolean>,
     errors: {} as Record<string, string | null>,
     at: {} as Record<string, number>,
@@ -59,8 +63,11 @@ export function createStoryLoader(deps: StoryDeps) {
       src = stream.id;
     status.loading[src] = true;
     try {
-      await stream.load(deps.context(), signal);
+      const data = await stream.load(deps.context(), signal, partial => {
+        if (!signal.aborted) status.data[src] = markRaw(Object(partial));
+      });
       if (signal.aborted) return;
+      status.data[src] = markRaw(Object(data));
       status.errors[src] = null;
       status.at[src] = Date.now();
     } catch (e) {

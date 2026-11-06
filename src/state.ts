@@ -7,7 +7,7 @@ import { reactive } from 'vue';
 import type { Alert, Entry, Lens, Prefs, SeriesPoint, TopicDef } from '@/types';
 import { LS, MAX_LENSES, MAX_TOPICS, PRESETS, PRESET_VERSION, SLOT_ANGLE, slotColor, store } from '@core/config';
 import { looksLikePerson } from '@core/guard';
-import { ui } from '@core/ui-store';
+import { createUi } from '@core/ui-store';
 import { type Obj, isObj } from '@sources/shape';
 
 export interface LastLook {
@@ -96,6 +96,7 @@ export type AppState = ReturnType<typeof initialState>;
 
 export function createAppStore() {
   const state = initialState();
+  const ui = createUi();
   const lensById = (id: string | null | undefined): Lens | undefined => state.lenses.find(l => l.id === id);
   const activeLens = (): Lens | null => lensById(state.activeLens) || state.lenses[0] || null;
   const entriesOf = (lens: Lens | null | undefined): Entry[] =>
@@ -124,7 +125,7 @@ export function createAppStore() {
         def,
         name: def.name,
         slot: def.slot,
-        color: slotColor(def.slot),
+        color: slotColor(def.slot, ui.theme),
         angle: SLOT_ANGLE[def.slot],
         parts: {},
         partErr: {},
@@ -138,7 +139,7 @@ export function createAppStore() {
     }
     E.def = def;
     E.slot = def.slot;
-    E.color = slotColor(def.slot);
+    E.color = slotColor(def.slot, ui.theme);
     E.angle = SLOT_ANGLE[def.slot];
     return E;
   }
@@ -166,7 +167,7 @@ export function createAppStore() {
     store.set(LS.prefs, {
       activeLens: state.activeLens,
       selectedByLens: state.selectedByLens,
-      theme: ui.theme === 'light' ? 'light' : 'dark',
+      theme: ui.theme,
       storySrc: state.storySrc,
       storyScope: state.storyScope,
     });
@@ -189,6 +190,8 @@ export function createAppStore() {
   }
   return {
     state,
+    /** UI state: status line, theme, key flags, clock. */
+    ui,
     lensById,
     activeLens,
     entriesOf,

@@ -1,6 +1,5 @@
 // PRECOG / Trend Radar · Hacker News stream: stories from the last 48 h naming the topics in scope, ranked by
 // engagement per hour (measured between visits when possible, otherwise averaged since posting).
-import { shallowRef } from 'vue';
 import { HOUR, LS, MIN, store } from '@core/config';
 import { ago, nf0 } from '@core/format';
 import { quantile } from '@core/stats';
@@ -29,9 +28,10 @@ export interface HNStory {
   measured?: boolean;
 }
 export const TAU = 8; // hours; engagement modelled as E(t) = E∞·(1 − e^(−t/τ))
-const found = shallowRef(new Map<string, HNStory>());
-/** The stories from the last load, for the gist's "Rising stories". */
-export const hnStories = (): HNStory[] => [...found.value.values()];
+/** What the stream loads: stories by id. */
+export type HNData = Map<string, HNStory>;
+/** The stories in a Hacker News stream result (as the stream loader keeps it), for the gist's "Rising stories". */
+export const hnStories = (data: unknown): HNStory[] => (data instanceof Map ? [...(data as HNData).values()] : []);
 
 /** A link's host without www, or '' when it isn't a valid URL. */
 const hostOf = (url: string): string => {
@@ -67,10 +67,10 @@ export function observe(id: string, eng: number): number | null {
   return rate;
 }
 
-registerStream({
+registerStream<HNData>({
   id: 'hn',
   label: 'Hacker News',
-  async load(ctx, signal) {
+  async load(ctx, signal, show) {
     const since = Math.floor((Date.now() - 48 * HOUR) / 1000);
     const map = new Map<string, HNStory>();
     await pool(
@@ -101,7 +101,7 @@ registerStream({
             if (!s.topics.includes(E.key)) s.topics.push(E.key);
             map.set(h.objectID, s);
           });
-        found.value = new Map([...found.value, ...map]); // show stories as each topic answers
+        show(new Map(map)); // show stories as each topic answers
       },
     );
     const now = Date.now();
@@ -115,10 +115,10 @@ registerStream({
       s.pred24 = age >= 24 ? eng : einf * (1 - Math.exp(-24 / TAU));
       s.age = age;
     });
-    found.value = map;
+    return map;
   },
-  view(ctx, at) {
-    let list = hnStories().filter(s => inScope(s.topics, ctx).length);
+  view(ctx, data, at) {
+    let list = hnStories(data).filter(s => inScope(s.topics, ctx).length);
     const vel = (s: HNStory) => s.vel ?? 0;
     list.sort((a, b) => vel(b) - vel(a));
     if (ctx.scope !== 'topic') {
@@ -136,7 +136,7 @@ registerStream({
         topics: s.topics,
         meta: [
           s.domain,
-          ago(s.t),
+          ago(s.t, ctx.now),
           { text: `${nf0.format(s.points)} pts · ${nf0.format(s.comments)} comments`, href: s.discuss },
           ...((s.age ?? 99) < 8 && vel(s) >= p80 && list.length >= 5 ? [{ text: '↗ BREAKING OUT', cls: 'flag' }] : []),
         ],
@@ -147,7 +147,7 @@ registerStream({
         },
         bar: (vel(s) / vmax) * 100,
       })),
-      meta: checked(at, 'ranked by engagement per hour'),
+      meta: checked(at, 'ranked by engagement per hour', ctx.now),
       empty: 'No Hacker News stories in the last 48 h for these topics (English topics only).',
     };
   },

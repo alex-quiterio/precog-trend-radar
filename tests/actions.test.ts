@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createActions, parseTopicInput } from '@/actions';
 import { createContext } from '@/context';
 import { memoryBackend, useBackend } from '@core/storage';
-import { ui } from '@core/ui-store';
 import { createAppStore, type AppStore } from '@/state';
 
 let app: AppStore;
@@ -53,18 +52,18 @@ describe('actions', () => {
     expect(lens.topics.map(t => t.name)).toContain('Zig');
     expect(app.selectedEntry()?.name).toBe('Zig');
     expect(live.fetchPart).toHaveBeenCalledTimes(2); // sources a and b
-    expect(ui.watchMsg).toMatch(/Tracking “Zig”/);
+    expect(app.ui.watchMsg).toMatch(/Tracking “Zig”/);
     expect(before).toBeGreaterThan(0);
   });
   it('refuses people, duplicates and a full channel, and says why', () => {
     expect(actions.addTopic('Elon Musk')).toBe(false);
-    expect(ui.watchErr).toBe(true);
-    expect(ui.watchMsg).toMatch(/looks like a person/);
+    expect(app.ui.watchErr).toBe(true);
+    expect(app.ui.watchMsg).toMatch(/looks like a person/);
     const lens = app.activeLens()!;
     expect(actions.addTopic(lens.topics[0].name.toUpperCase())).toBe(false);
-    expect(ui.watchMsg).toMatch(/already in/);
+    expect(app.ui.watchMsg).toMatch(/already in/);
     expect(actions.addTopic('One more')).toBe(false); // presets fill all six slots
-    expect(ui.watchMsg).toMatch(/holds 6 topics/);
+    expect(app.ui.watchMsg).toMatch(/holds 6 topics/);
   });
   it('removes a topic and selects its neighbour', () => {
     const [first, second] = app.entriesOf(app.activeLens());

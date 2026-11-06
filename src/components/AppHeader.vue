@@ -100,9 +100,7 @@ import { useApp } from '@/context';
 import { computed, defineComponent, nextTick, ref } from 'vue';
 import { activeChannel, channels } from '@/channels';
 import { MAX_LENSES } from '@core/config';
-import { ui } from '@core/ui-store';
-import { gh } from '@features/github';
-import { me } from '@features/github-me';
+
 import BrandMark from '@components/BrandMark.vue';
 import ChannelIcon from '@components/ChannelIcon.vue';
 
@@ -112,7 +110,10 @@ export default defineComponent({
   name: 'AppHeader',
   components: { BrandMark, ChannelIcon },
   setup() {
-    const { app, live, stories: loader, actions } = useApp();
+    const { app, live, stories: loader, actions, github, myGithub } = useApp();
+    const ui = app.ui;
+    const gh = github.state;
+    const me = myGithub.state;
     const stories = loader.status;
     const { addLens, editGuardianKey, lensHeat, selectLens, toggleTheme } = actions;
     const { state } = app;

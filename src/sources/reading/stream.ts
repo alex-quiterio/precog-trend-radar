@@ -1,7 +1,5 @@
 // PRECOG / Trend Radar · Reading stream: posts from the sites you follow (and the built-in ones), credited to
 // the topics in scope they name. Posts naming a topic rank by match strength; the rest still show, lower.
-import { ref, shallowRef } from 'vue';
-import { ui } from '@core/ui-store';
 import { queryOf, topicRegex } from '@sources/registry';
 import { inScope, registerStream, when } from '@sources/streams';
 import { loadReading, readingSites } from './index';
@@ -12,14 +10,18 @@ export interface ReadingMatch extends ReadingItem {
   topics: string[];
   score: number;
 }
-const found = shallowRef(new Map<string, ReadingMatch>());
-const seen = ref(0); // posts read from the channel's sites, matched or not
-const failed = ref<string | null>(null); // sites that couldn't be read
+interface Data {
+  found: Map<string, ReadingMatch>;
+  /** Posts read from the channel's sites, matched or not. */
+  seen: number;
+  /** Sites that couldn't be read, if any. */
+  failed: string | null;
+}
 const DAY = 86400e3;
 // Recent first: a match counts half as much for every six months of age.
-const fade = (t: number) => 0.5 ** ((ui.now - t) / (182 * DAY));
+const fade = (t: number, now: number) => 0.5 ** ((now - t) / (182 * DAY));
 
-registerStream({
+registerStream<Data>({
   id: 'reading',
   label: 'Reading',
   // A channel that reads one site names the tab after it ("The Great Simplification").
@@ -47,14 +49,12 @@ registerStream({
       });
       map.set(it.id, { ...it, topics, score });
     });
-    found.value = map;
-    seen.value = items.length;
-    failed.value = errors.length ? errors.join('; ') : null;
+    return { found: map, seen: items.length, failed: errors.length ? errors.join('; ') : null };
   },
-  warning: () => failed.value,
-  view(ctx, at) {
-    const rank = (r: ReadingMatch) => (inScope(r.topics, ctx).length ? r.score : 0.4) * fade(r.t);
-    const list = [...found.value.values()].sort((a, b) => rank(b) - rank(a) || b.t - a.t);
+  warning: data => data?.failed ?? null,
+  view(ctx, data, at) {
+    const rank = (r: ReadingMatch) => (inScope(r.topics, ctx).length ? r.score : 0.4) * fade(r.t, ctx.now);
+    const list = [...(data?.found.values() ?? [])].sort((a, b) => rank(b) - rank(a) || b.t - a.t);
     const top = Math.max(1e-6, ...list.slice(0, 12).map(rank));
     const matched = list.filter(r => inScope(r.topics, ctx).length).length;
     return {
@@ -65,7 +65,7 @@ registerStream({
           title: r.title,
           url: r.url,
           topics: r.topics,
-          meta: [{ text: r.site, cls: 'site' }, `${r.kind}${r.num ? ' #' + r.num : ''}`, when(r.t)],
+          meta: [{ text: r.site, cls: 'site' }, `${r.kind}${r.num ? ' #' + r.num : ''}`, when(r.t, ctx.now)],
           side: n
             ? {
                 big: String(n),
@@ -76,7 +76,7 @@ registerStream({
           bar: (rank(r) / top) * 100,
         };
       }),
-      meta: at ? `${matched} of ${seen.value} posts name your topics` : '',
+      meta: at ? `${matched} of ${data?.seen ?? 0} posts name your topics` : '',
       empty: 'Nothing from the sites you follow yet.',
     };
   },

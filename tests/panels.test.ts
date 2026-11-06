@@ -6,7 +6,7 @@ import { beforeAll, describe, expect, it, vi } from 'vitest';
 import DatapointsPanel from '@components/DatapointsPanel.vue';
 import StoriesPanel from '@components/StoriesPanel.vue';
 import { memoryBackend, useBackend } from '@core/storage';
-import { dp, type DatapointRow } from '@features/datapoints';
+import type { DatapointRow } from '@features/datapoints';
 import { registerStream, type StreamRow } from '@sources/streams';
 import { contextPlugin, createContext } from '@/context';
 
@@ -14,6 +14,7 @@ const ctx = createContext();
 const { app } = ctx;
 const { state } = app;
 const stories = ctx.stories.status;
+const dp = ctx.datapoints.state;
 /** Mounts a panel with this test's own app context. */
 const mountPanel = (c: Parameters<typeof mount>[0]) => mount(c, { global: { plugins: [contextPlugin(ctx)] } });
 

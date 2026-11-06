@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { createStoryLoader } from '@features/stories';
 import type { Stream, StreamContext } from '@sources/streams';
 
-const ctx: StreamContext = { entries: [], scopeKeys: new Set(), scope: 'lens' };
+const ctx: StreamContext = { entries: [], scopeKeys: new Set(), scope: 'lens', now: 0, keys: { guardian: false } };
 const stream = (id: string, load: Stream['load']): Stream => ({
   id,
   label: id,
@@ -64,5 +64,19 @@ describe('the stream loader', () => {
     await Promise.all([first, second]);
     expect(loader.status.errors.b).toBeNull();
     expect(loader.status.loading.b).toBe(false);
+  });
+  it('keeps each stream’s data per loader, showing partial results while loading', async () => {
+    const seen: unknown[] = [];
+    const s = stream('b', async (_ctx, _signal, show) => {
+      show(['first']);
+      seen.push(a.loader.status.data.b);
+      return ['first', 'second'];
+    });
+    const a = setup([s]),
+      b = setup([s]);
+    await a.loader.load();
+    expect(seen).toEqual([['first']]); // the partial result, shown before the load finished
+    expect(a.loader.status.data.b).toEqual(['first', 'second']);
+    expect(b.loader.status.data.b).toBeUndefined(); // another app's loader has its own data
   });
 });

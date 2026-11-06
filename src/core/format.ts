@@ -1,7 +1,6 @@
 // PRECOG / Trend Radar · Number, date and relative-time formatting.
 import { formatDistanceStrict } from 'date-fns';
 import { DAY } from '@core/config';
-import { ui } from '@core/ui-store';
 import type { Stats } from '@/types';
 
 type Num = number | null | undefined;
@@ -36,9 +35,10 @@ export function fmtTick(t: number, step: number): string {
 }
 /**
  * "5 minutes ago", "3 days ago". Always English, like the rest of the page (the browser's own relative-time
- * format follows the phone's language). Reads the minute clock, so a view showing it refreshes as time passes.
+ * format follows the phone's language). Views pass the app's minute clock (app.ui.now) as `now`, so what they
+ * show refreshes as time passes.
  */
-export function ago(t: number, now = ui.now): string {
+export function ago(t: number, now = Date.now()): string {
   // The clock can lag up to a minute: something fetched since its last tick is "just now", not "in 1 minute".
   const ref = Math.max(now, Math.min(t, Date.now()));
   return Math.abs(t - ref) < 60e3 ? 'just now' : formatDistanceStrict(t, ref, { addSuffix: true });

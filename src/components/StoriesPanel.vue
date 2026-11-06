@@ -118,8 +118,9 @@ export default defineComponent({
         stream = streamById(src),
         ctx = streamContext(app);
       const loading = !!stories.loading[src],
-        err = stories.errors[src] || stream?.warning?.() || null,
-        out = stream?.view(ctx, stories.at[src] || 0) ?? { rows: [], meta: '', empty: '' };
+        data = stories.data[src],
+        err = stories.errors[src] || stream?.warning?.(data) || null,
+        out = stream?.view(ctx, data, stories.at[src] || 0) ?? { rows: [], meta: '', empty: '' };
       const n = out.rows.length;
       return {
         src,

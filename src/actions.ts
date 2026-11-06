@@ -6,10 +6,9 @@ import { LS, MAX_LENSES, MAX_TOPICS, slotColor, store } from '@core/config';
 import { errorText } from '@core/errors';
 import { looksLikePerson } from '@core/guard';
 import { levelOf } from '@core/stats';
-import { ui } from '@core/ui-store';
 import { saveLook } from '@features/brief';
-import { loadGitHub } from '@features/github';
-import { loadMyGitHub } from '@features/github-me';
+import type { GitHub } from '@features/github';
+import type { MyGitHub } from '@features/github-me';
 import { githubToken, setGithubToken } from '@sources/github/auth';
 import { activeChannel } from '@/channels';
 import { guardianKey, setGuardianKey } from '@sources/guardian';
@@ -31,9 +30,12 @@ export function parseTopicInput(raw: string): TopicDef {
 export interface ActionDeps {
   live: Pick<LiveLoop, 'signal' | 'parts' | 'fetchPart' | 'setStatus' | 'start'>;
   stories: { load(): Promise<void>; status: { at: Record<string, number> } };
+  /** The GitHub panels' loaders (optional: a test may leave them out). */
+  github?: Pick<GitHub, 'load'>;
+  myGithub?: Pick<MyGitHub, 'load'>;
 }
-export function createActions(app: AppStore, { live, stories }: ActionDeps) {
-  const { state } = app;
+export function createActions(app: AppStore, { live, stories, github, myGithub }: ActionDeps) {
+  const { state, ui } = app;
   function watchMsg(text: string, err = false): void {
     ui.watchMsg = text || '';
     ui.watchErr = !!err;
@@ -125,7 +127,7 @@ export function createActions(app: AppStore, { live, stories }: ActionDeps) {
     app.savePrefs();
     ui.swap++;
     void stories.load();
-    if (activeChannel(app).github) loadGitHub(app);
+    if (activeChannel(app).github) void github?.load();
   }
   function select(key: string): void {
     const E = state.rt.get(key);
@@ -137,7 +139,7 @@ export function createActions(app: AppStore, { live, stories }: ActionDeps) {
     app.savePrefs();
     ui.swap++;
     if (state.storyScope === 'topic' || changedLens) loadStoriesDebounced();
-    if (changedLens && activeChannel(app).github) loadGitHub(app);
+    if (changedLens && activeChannel(app).github) void github?.load();
   }
   function shiftTopic(d: number): void {
     const list = app.entriesOf(app.activeLens());
@@ -183,7 +185,7 @@ export function createActions(app: AppStore, { live, stories }: ActionDeps) {
     ui.theme = theme === 'light' ? 'light' : 'dark';
     if (typeof document !== 'undefined') document.documentElement.dataset.theme = ui.theme;
     state.rt.forEach(E => {
-      E.color = slotColor(E.slot);
+      E.color = slotColor(E.slot, ui.theme);
     });
     state.alerts.forEach(a => {
       const E = state.rt.get(a.key);
@@ -241,8 +243,8 @@ export function createActions(app: AppStore, { live, stories }: ActionDeps) {
     if (t == null || t.trim() === now) return;
     setGithubToken(t);
     ui.ghToken = !!githubToken();
-    void loadMyGitHub(true);
-    if (activeChannel(app).github) loadGitHub(app, true);
+    void myGithub?.load(true);
+    if (activeChannel(app).github) void github?.load(true);
   }
   /**
    * Charts a topic from anywhere (the gist's sentences, the movers table): selects it, switching to its

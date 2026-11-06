@@ -48,7 +48,6 @@ import { useApp } from '@/context';
 import { reactive, ref, computed, onMounted, onBeforeUnmount, defineComponent } from 'vue';
 import { fmtPct, fmtVal } from '@core/format';
 import { arrowOf } from '@core/stats';
-import { ui } from '@core/ui-store';
 import { hasStats } from '@features/brief';
 import PanelShell from '@components/PanelShell.vue';
 
@@ -75,6 +74,7 @@ export default defineComponent({
   components: { PanelShell },
   setup() {
     const { app, actions } = useApp();
+    const ui = app.ui;
     const { focusTopic } = actions;
     const sweep = ref<SVGGElement | null>(null),
       wrap = ref<HTMLElement | null>(null),

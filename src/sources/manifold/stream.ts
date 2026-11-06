@@ -1,5 +1,4 @@
 // PRECOG / Trend Radar · Forecasts stream: open Manifold markets whose question names a topic in scope.
-import { shallowRef } from 'vue';
 import { nf0 } from '@core/format';
 import { pool, queryOf, topicRegex } from '@sources/registry';
 import { checked, inScope, registerStream, when } from '@sources/streams';
@@ -10,12 +9,12 @@ import type { Forecast } from './parse';
 export interface ForecastMatch extends Forecast {
   topics: string[];
 }
-const found = shallowRef(new Map<string, ForecastMatch>());
+type Data = Map<string, ForecastMatch>;
 
-registerStream({
+registerStream<Data>({
   id: 'forecasts',
   label: 'Forecasts',
-  async load(ctx, signal) {
+  async load(ctx, signal, show) {
     const map = new Map<string, ForecastMatch>();
     await pool(ctx.entries, 4, async E => {
       const qq = queryOf(E);
@@ -28,12 +27,12 @@ registerStream({
           if (!m.topics.includes(E.key)) m.topics.push(E.key);
           map.set(f.id, m);
         });
-      found.value = new Map(map);
+      show(new Map(map));
     });
-    found.value = map;
+    return map;
   },
-  view(ctx, at) {
-    const list = [...found.value.values()]
+  view(ctx, data, at) {
+    const list = [...(data?.values() ?? [])]
       .filter(f => inScope(f.topics, ctx).length)
       .sort((a, b) => b.vol24 - a.vol24 || b.bettors - a.bettors);
     return {
@@ -42,7 +41,7 @@ registerStream({
         title: f.question,
         url: f.url,
         topics: f.topics,
-        meta: [`${nf0.format(f.bettors)} forecasters`, `resolves ${when(f.closes)}`],
+        meta: [`${nf0.format(f.bettors)} forecasters`, `resolves ${when(f.closes, ctx.now)}`],
         side: {
           big: `${Math.round(f.prob * 100)}%`,
           unit: 'yes',
@@ -50,7 +49,7 @@ registerStream({
         },
         bar: f.prob * 100,
       })),
-      meta: checked(at, 'open markets on Manifold'),
+      meta: checked(at, 'open markets on Manifold', ctx.now),
       empty: 'No open forecast (10+ forecasters) names these topics.',
     };
   },

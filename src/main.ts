@@ -17,20 +17,17 @@ import { activeChannel } from '@/channels';
 import { contextPlugin, createContext } from '@/context';
 import { HOUR } from '@core/config';
 import { startClock } from '@core/ui-store';
-import { loadDatapoints } from '@features/datapoints';
-import { loadGitHub } from '@features/github';
-import { loadMyGitHub } from '@features/github-me';
 
 const ctx = createContext();
 restore(ctx);
 createApp(App).use(contextPlugin(ctx)).mount('#app');
 
-startClock();
+startClock(ctx.app.ui);
 ctx.live.start(); // also loads the stream on screen
-if (activeChannel(ctx.app).github) void loadGitHub(ctx.app);
-void loadMyGitHub();
-void loadDatapoints();
-setInterval(loadDatapoints, HOUR);
+if (activeChannel(ctx.app).github) void ctx.github.load();
+void ctx.myGithub.load();
+void ctx.datapoints.load();
+setInterval(ctx.datapoints.load, HOUR);
 ctx.stories.startTimer();
 
 installShortcuts(ctx);

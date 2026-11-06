@@ -1,12 +1,14 @@
 // PRECOG / Trend Radar · The composition root: makes the app store and the services that work on it (the
-// data loop, the stream loader, the actions), and hands them to every panel through Vue's provide/inject.
+// data loop, the stream loader, the open-data and GitHub panels' stores, the actions), and hands them to every panel through Vue's provide/inject.
 // Panels call useApp() instead of importing shared state, so a test can mount any panel with its own context.
 import { inject, type App, type InjectionKey } from 'vue';
 import { rescanAll } from '@/alerts';
 import { createActions } from '@/actions';
 import { createLiveLoop } from '@/live';
 import { createAppStore, type AppStore } from '@/state';
-import { ui } from '@core/ui-store';
+import { createDatapoints } from '@features/datapoints';
+import { createGitHub } from '@features/github';
+import { createMyGitHub } from '@features/github-me';
 import { channelStreams, createStoryLoader, streamContext } from '@features/stories';
 import { ADAPTERS, SOURCES } from '@sources/registry';
 
@@ -21,13 +23,16 @@ export function createContext(app: AppStore = createAppStore()) {
     adapters: ADAPTERS,
     sources: SOURCES,
     state: app.state,
-    ui,
+    ui: app.ui,
     entries: app.orderedEntries, // the channel on screen first
     onLoadStart: () => void stories.load(),
     onLoaded: () => rescanAll(app),
   });
-  const actions = createActions(app, { live, stories });
-  return { app, live, stories, actions };
+  const datapoints = createDatapoints();
+  const github = createGitHub(app);
+  const myGithub = createMyGitHub();
+  const actions = createActions(app, { live, stories, github, myGithub });
+  return { app, live, stories, actions, datapoints, github, myGithub };
 }
 export type AppContext = ReturnType<typeof createContext>;
 

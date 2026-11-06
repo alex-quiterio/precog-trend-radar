@@ -78,7 +78,6 @@
 import { useApp } from '@/context';
 import { computed, defineComponent } from 'vue';
 import { activeChannel, channelDatapoints, channels } from '@/channels';
-import { ui } from '@core/ui-store';
 import AppHeader from '@components/AppHeader.vue';
 import MorningBrief from '@components/MorningBrief.vue';
 import DatapointsPanel from '@components/DatapointsPanel.vue';
@@ -106,6 +105,7 @@ export default defineComponent({
   },
   setup() {
     const { app } = useApp();
+    const ui = app.ui;
     const view = computed(() => {
       const channel = activeChannel(app);
       const i = channels(app).findIndex(c => c.id === channel.id);

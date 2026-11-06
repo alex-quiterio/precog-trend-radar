@@ -34,16 +34,7 @@ const PERIOD = 90;
 const TTL = 12 * HOUR;
 const CACHE = 'precog.github.v1.';
 
-export const gh = reactive({
-  lensId: '' as string,
-  topics: [] as GhTopic[],
-  loading: false,
-  done: 0,
-  total: 0,
-  error: null as string | null,
-  at: 0,
-});
-
+// One queue for the whole page: GitHub's search limit is per browser, so every search waits its turn here.
 const queue = { last: 0, chain: Promise.resolve() as Promise<unknown> };
 function search(url: string, signal: AbortSignal): Promise<unknown> {
   const run = queue.chain.then(async () => {
@@ -96,37 +87,51 @@ async function topicStats(E: Entry, signal: AbortSignal): Promise<Cached> {
   return v;
 }
 
-let abort: AbortController | null = null;
-/** Loads GitHub stats for the active lens's topics; cached topics appear at once, the rest fill in. */
-export async function loadGitHub(app: AppStore, force = false): Promise<void> {
-  const lens = app.activeLens();
-  if (!lens) return;
-  if (!force && gh.lensId === lens.id && (gh.loading || Date.now() - gh.at < TTL)) return;
-  if (abort) abort.abort();
-  abort = new AbortController();
-  const { signal } = abort;
-  const entries = app.entriesOf(lens);
-  Object.assign(gh, { lensId: lens.id, topics: [], loading: true, done: 0, total: entries.length, error: null });
-  for (const E of entries) {
-    try {
-      const v = await topicStats(E, signal);
-      if (signal.aborted) return;
-      gh.topics = [...gh.topics, { key: E.key, name: E.name, color: E.color, ...v }];
-    } catch (e) {
-      if (isAbort(e)) return;
-      gh.error =
-        e instanceof HttpError && (e.status === 403 || e.status === 429)
-          ? githubToken()
-            ? 'GitHub search limit reached; the rest fills in on the next refresh'
-            : 'GitHub search limit reached; add a GitHub token (Your GitHub → Token) for 3× the speed'
-          : errorText(e);
-      if (e instanceof HttpError && (e.status === 403 || e.status === 429)) break;
+/** The momentum panel's numbers for the channel on screen, and how to load them. The app makes one (context.ts). */
+export function createGitHub(app: AppStore) {
+  const gh = reactive({
+    lensId: '' as string,
+    topics: [] as GhTopic[],
+    loading: false,
+    done: 0,
+    total: 0,
+    error: null as string | null,
+    at: 0,
+  });
+  let abort: AbortController | null = null;
+  /** Loads GitHub stats for the active lens's topics; cached topics appear at once, the rest fill in. */
+  async function load(force = false): Promise<void> {
+    const lens = app.activeLens();
+    if (!lens) return;
+    if (!force && gh.lensId === lens.id && (gh.loading || Date.now() - gh.at < TTL)) return;
+    if (abort) abort.abort();
+    abort = new AbortController();
+    const { signal } = abort;
+    const entries = app.entriesOf(lens);
+    Object.assign(gh, { lensId: lens.id, topics: [], loading: true, done: 0, total: entries.length, error: null });
+    for (const E of entries) {
+      try {
+        const v = await topicStats(E, signal);
+        if (signal.aborted) return;
+        gh.topics = [...gh.topics, { key: E.key, name: E.name, color: E.color, ...v }];
+      } catch (e) {
+        if (isAbort(e)) return;
+        gh.error =
+          e instanceof HttpError && (e.status === 403 || e.status === 429)
+            ? githubToken()
+              ? 'GitHub search limit reached; the rest fills in on the next refresh'
+              : 'GitHub search limit reached; add a GitHub token (Your GitHub → Token) for 3× the speed'
+            : errorText(e);
+        if (e instanceof HttpError && (e.status === 403 || e.status === 429)) break;
+      }
+      gh.done++;
     }
-    gh.done++;
+    gh.loading = false;
+    gh.at = Date.now();
   }
-  gh.loading = false;
-  gh.at = Date.now();
+  return { state: gh, load };
 }
+export type GitHub = ReturnType<typeof createGitHub>;
 
 /** Repos across the lens, ranked by stars per day since creation (what's rising, not what's old). */
 export function risingRepos(topics: GhTopic[], n = 8): (GhRepo & { topic: GhTopic })[] {

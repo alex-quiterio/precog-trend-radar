@@ -41,7 +41,6 @@ import { ref, computed, watch, nextTick, defineComponent } from 'vue';
 import { CHANNELS } from '@/channels';
 import { MAX_TOPICS } from '@core/config';
 import type { Entry } from '@/types';
-import { ui } from '@core/ui-store';
 import TopicDot from '@components/TopicDot.vue';
 import PanelShell from '@components/PanelShell.vue';
 
@@ -53,6 +52,7 @@ export default defineComponent({
   components: { PanelShell, TopicDot },
   setup() {
     const { app, actions } = useApp();
+    const ui = app.ui;
     const { addTopic, removeLens, removeTopic, select } = actions;
     const newTopic = ref(''),
       addInput = ref<HTMLInputElement | null>(null);

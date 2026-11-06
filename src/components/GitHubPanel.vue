@@ -89,7 +89,7 @@
               {{ r.topic.name }}
             </span>
             <span v-if="r.language">{{ r.language }}</span>
-            <span>created {{ ago(r.created) }}</span>
+            <span>created {{ ago(r.created, ui.now) }}</span>
             <span v-if="r.desc" class="desc">{{ r.desc }}</span>
           </div>
         </div>
@@ -111,8 +111,7 @@ import { useApp } from '@/context';
 import './github.css';
 import { computed, defineComponent } from 'vue';
 import { ago, nf0, nf1 } from '@core/format';
-import { ui } from '@core/ui-store';
-import { gh, languageMix, loadGitHub, risingRepos, type GhTopic } from '@features/github';
+import { languageMix, risingRepos, type GhTopic } from '@features/github';
 import PanelShell from '@components/PanelShell.vue';
 import TopicDot from '@components/TopicDot.vue';
 
@@ -125,7 +124,9 @@ export default defineComponent({
   props: { index: Number },
   components: { PanelShell, TopicDot },
   setup() {
-    const { app } = useApp();
+    const { app, github } = useApp();
+    const ui = app.ui;
+    const gh = github.state;
     const view = computed(() => {
       const topics = gh.topics;
       const max = Math.max(1, ...topics.flatMap(t => [t.now, t.before]));
@@ -154,7 +155,7 @@ export default defineComponent({
         meta: gh.loading
           ? `counting… ${gh.done}/${gh.total} topics (GitHub allows ${ui.ghToken ? '~30' : '~10'} searches a minute)`
           : gh.at
-            ? `counted ${ago(gh.at)} · GitHub search`
+            ? `counted ${ago(gh.at, ui.now)} · GitHub search`
             : '',
         empty: gh.loading ? 'Counting repositories…' : 'No repositories found for these topics.',
       };
@@ -162,7 +163,7 @@ export default defineComponent({
     const barTip = (t: GhTopic) =>
       `${t.name}: ${t.now} new repos in the last 90 days, ${t.before} in the 90 days before` +
       (t.growth == null ? '' : ` (${pct(t.growth)})`);
-    return { ui, gh, view, pct, barTip, ago, nf0, nf1, reload: () => loadGitHub(app, true) };
+    return { ui, gh, view, pct, barTip, ago, nf0, nf1, reload: () => github.load(true) };
   },
 });
 </script>

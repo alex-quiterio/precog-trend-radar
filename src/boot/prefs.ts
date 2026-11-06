@@ -2,7 +2,6 @@
 // before use, and the caches older versions wrote, dropped to free storage.
 import { LS, store } from '@core/config';
 import { dropKeys } from '@core/storage';
-import { ui } from '@core/ui-store';
 import { githubToken } from '@sources/github/auth';
 import { guardianKey } from '@sources/guardian';
 import type { AppContext } from '@/context';
@@ -13,7 +12,7 @@ export const OLD_CACHES = /^precog\.(gdelt|reading\.v[12]\.|guardian\.v1\.|tgs\.
 
 /** Restores the lenses and the last view from storage; anything unusable falls back to a default. */
 export function restore({ app, actions }: AppContext): void {
-  const { state } = app;
+  const { state, ui } = app;
   dropKeys(OLD_CACHES);
   const prefs = store.get<Partial<Prefs>>(LS.prefs, {});
   actions.applyTheme(prefs.theme || 'dark');

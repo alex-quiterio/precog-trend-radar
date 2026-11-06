@@ -28,10 +28,30 @@ describe('streams', () => {
     registerStream({ id: 'test-a', label: 'A', ...base });
     registerStream({ id: 'test-b', label: 'B', ...base });
     registerStream({ id: 'test-off', label: 'Off', available: () => false, ...base });
-    expect(streamsFor(['test-b', 'nope', 'test-off', 'test-a']).map(s => s.id)).toEqual(['test-b', 'test-a']);
+    expect(
+      streamsFor(['test-b', 'nope', 'test-off', 'test-a'], {
+        entries: [],
+        scopeKeys: new Set(),
+        scope: 'lens',
+        now: 0,
+        keys: { guardian: false },
+      }).map(s => s.id),
+    ).toEqual(['test-b', 'test-a']);
     expect(streamById('test-a')?.label).toBe('A');
   });
   it('refuses a stream registered twice', () => {
     expect(() => registerStream({ id: 'test-a', label: 'A again', ...base })).toThrow(/twice/);
+  });
+});
+
+describe('open-data stores', () => {
+  it('are per app: each runs its own loaders and keeps its own cards', async () => {
+    const { createDatapoints } = await import('@features/datapoints');
+    const a = createDatapoints([{ id: 'x', load: async () => [card('only-a', 1)] }]),
+      b = createDatapoints([]);
+    await Promise.all([a.load(), b.load()]);
+    expect(a.state.rows.map(r => r.id)).toEqual(['only-a']);
+    expect(b.state.rows).toEqual([]);
+    expect(a.state.at).toBeGreaterThan(0);
   });
 });

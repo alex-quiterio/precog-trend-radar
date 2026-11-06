@@ -2,7 +2,7 @@
 import { FIT_N, LS, Z_WATCH, store } from '@core/config';
 import { ago, changeLabel, fmtPct, fmtTime, fmtVal, nf0 } from '@core/format';
 import { levelOf } from '@core/stats';
-import { dp } from '@features/datapoints';
+import type { DatapointFacts, DatapointRow } from '@features/datapoints';
 import { hnStories } from '@sources/hackernews/stream';
 import { channelOfLens } from '@/channels';
 import type { Entry, Stats } from '@/types';
@@ -42,7 +42,8 @@ export function lensName(app: AppStore, E: Entry): string {
   return l ? l.name : '';
 }
 /** The brief for the active lens: its topics, its datapoints, plus one line on what's hot elsewhere. */
-export function buildBrief(app: AppStore) {
+/** The gist for the channel on screen. `facts` are the open-data facts it mentions (fire risk, warnings). */
+export function buildBrief(app: AppStore, facts: DatapointFacts = {}) {
   const { state } = app;
   const lens = app.activeLens();
   const items = app.entriesOf(lens).filter(hasStats);
@@ -92,7 +93,7 @@ export function buildBrief(app: AppStore) {
       )}${elsewhere.length > 3 ? ` and ${elsewhere.length - 3} more` : ''}.`,
     );
   // Fire and storm warnings matter for the land lens; elsewhere they'd be noise.
-  const f = lens?.id === 'portugal' ? dp.facts : {};
+  const f = lens?.id === 'portugal' ? facts : {};
   if (f.fire && f.fire.hi)
     out.lines.push(
       ln`Portugal fire risk today: ${f.fire.hi} of ${f.fire.n} municipalities at very high or maximum risk (IPMA).`,
@@ -113,7 +114,7 @@ export function buildBrief(app: AppStore) {
       return p && p.level && !levelOf(E.stats.z);
     });
     out.lines.push(
-      ln`Since your last look ${ago(prev.at)}: ${newly.length ? ln`newly hot: ${join(newly.map(E => ln`${E}`))}` : 'nothing new turned hot'}${cooled.length ? ln`; cooled down: ${join(cooled.map(E => ln`${E}`))}` : ''}.`,
+      ln`Since your last look ${ago(prev.at, app.ui.now)}: ${newly.length ? ln`newly hot: ${join(newly.map(E => ln`${E}`))}` : 'nothing new turned hot'}${cooled.length ? ln`; cooled down: ${join(cooled.map(E => ln`${E}`))}` : ''}.`,
     );
   }
   out.movers = items
@@ -122,8 +123,14 @@ export function buildBrief(app: AppStore) {
     .slice(0, 7);
   return out;
 }
-export function briefMarkdown(app: AppStore): string {
-  const b = buildBrief(app),
+/** The gist as Markdown, with the movers, recent alerts, the cards and rising stories. */
+export function briefMarkdown(
+  app: AppStore,
+  cards: { rows: DatapointRow[]; facts: DatapointFacts },
+  /** The Hacker News stream's last result, for "Rising stories". */
+  hn?: unknown,
+): string {
+  const b = buildBrief(app, cards.facts),
     d = new Date().toISOString().slice(0, 10);
   const rows = b.movers
     .map(
@@ -137,8 +144,8 @@ export function briefMarkdown(app: AppStore): string {
     .map(a => `- **${a.level.toUpperCase()}** ${a.topic} (${a.lens}), ${fmtTime(a.t, a.step)}: ${a.text}`)
     .join('\n');
   const keys = new Set(b.items.map(E => E.key));
-  const rowsDp = dp.rows;
-  const top = hnStories()
+  const rowsDp = cards.rows;
+  const top = hnStories(hn)
     .filter(s => s.topics.some(k => keys.has(k)))
     .sort((a, b) => (b.vel ?? 0) - (a.vel ?? 0))
     .slice(0, 5)

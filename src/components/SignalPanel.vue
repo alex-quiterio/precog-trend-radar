@@ -152,7 +152,6 @@ import { compText, niceTicks, pathOf, useWidth } from '@components/helpers';
 import { DAY } from '@core/config';
 import { COMP_LABEL, changeLabel, fmtAxis, fmtPct, fmtTick, fmtTime, fmtVal } from '@core/format';
 import { arrowOf } from '@core/stats';
-import { ui } from '@core/ui-store';
 import { ADAPTERS, SOURCES } from '@sources/registry';
 import { series } from '@/state';
 import TopicDot from '@components/TopicDot.vue';
@@ -166,6 +165,7 @@ export default defineComponent({
   components: { PanelShell, TopicDot },
   setup() {
     const { app, live, actions } = useApp();
+    const ui = app.ui;
     const { shiftTopic } = actions;
     const { state } = app;
     const wrap = ref<HTMLElement | null>(null),

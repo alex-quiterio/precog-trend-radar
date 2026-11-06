@@ -165,31 +165,34 @@ one: `manifold/stream.ts` (a keyless search API) or `reading/stream.ts` (a list 
 
 1. **Parse** the search reply in `src/sources/<name>/parse.ts`, and fetch it in `index.ts` with a short
    in-memory or `localStorage` cache.
-2. **Register the stream** in `src/sources/<name>/stream.ts`. It keeps what it loads in its own `shallowRef`, and
-   its `view` turns that into rows:
+2. **Register the stream** in `src/sources/<name>/stream.ts`. A stream keeps no state of its own: `load`
+   returns what it found, the stream loader keeps that (one per app), and `view` gets it back to turn into rows:
 
    ```ts
-   registerStream({
+   type Papers = Map<string, Paper & { topics: string[] }>;
+
+   registerStream<Papers>({
      id: 'papers',
      label: 'Papers',
-     // available: () => ui.someKey, // hide the tab until it can work
-     async load(ctx, signal) {
+     // available: ctx => ctx.keys.someKey, // hide the tab until it can work
+     async load(ctx, signal, show) {
        // ctx.entries: the topics in scope. Search each, keep matches with the topic keys they name.
-       found.value = await searchPapers(ctx.entries, signal);
+       // Call show(partial) to show results as they arrive; return the full result.
+       return searchPapers(ctx.entries, signal, show);
      },
-     view(ctx, at) {
-       const list = [...found.value.values()].filter(p => inScope(p.topics, ctx).length);
+     view(ctx, data, at) {
+       const list = [...(data?.values() ?? [])].filter(p => inScope(p.topics, ctx).length);
        return {
          rows: list.slice(0, 12).map(p => ({
            id: p.id,
            title: p.title,
            url: p.url,
            topics: p.topics, // the panel shows up to two in scope as chips
-           meta: [{ text: p.journal, cls: 'site' }, when(p.t)], // labels under the title
+           meta: [{ text: p.journal, cls: 'site' }, when(p.t, ctx.now)], // labels under the title
            side: { big: String(p.citations), unit: 'cites', note: 'Crossref' }, // the figure on the right
            bar: 100, // 0–100
          })),
-         meta: checked(at, 'papers naming your topics'),
+         meta: checked(at, 'papers naming your topics', ctx.now),
          empty: 'No recent papers name these topics.',
        };
      },
@@ -197,8 +200,9 @@ one: `manifold/stream.ts` (a keyless search API) or `reading/stream.ts` (a list 
    ```
 
    Match items to topics with `topicRegex(queryOf(E).q)` and record `E.key` for each topic an item names.
-   Throw from `load` to show "Could not load: …"; return a partial failure from `warning()` to show it under the
-   rows. Loading, errors and timing are handled for you in `features/stories.ts`.
+   Throw from `load` to show "Could not load: …"; return a partial failure from `warning(data)` to show it under
+   the rows. Times come from `ctx.now` (the app's minute clock), so rows refresh as it ticks. Loading, errors and
+   timing are handled for you by the stream loader in `features/stories.ts`.
 
 3. **Register the module**: add `import '@sources/<name>/stream';` to `src/sources/index.ts`.
 4. **Show it** in `src/channels.ts`: add the id to the `streams` of the channels that should show it, in the

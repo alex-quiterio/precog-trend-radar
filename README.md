@@ -154,10 +154,12 @@ tests/                      Vitest: core logic, the data loop, stream loader, st
 ```
 
 Imports use path aliases: `@core/…`, `@features/…`, `@sources/…`, `@components/…`, and `@/…` for the top-level
-modules. App state lives in one reactive store made by `createAppStore()`. `context.ts` builds it with the
-services that work on it and provides them to every panel, which reads them with `useApp()`; nothing imports
-app state from a module-level singleton, so any panel or action can be tested with its own context. Each
-panel re-renders when what it reads changes. Every API reply is read through a typed parser that rejects an unexpected shape
+modules. App state, including the UI state (status line, theme, clock), lives in one reactive store made by
+`createAppStore()`. `context.ts` builds it with everything that works on it (the data loop, the stream loader,
+the open-data and GitHub panels' stores, the actions) and provides that to every panel through `useApp()`.
+Nothing keeps app state in a module, so any panel, action or loader can be tested with its own context. Only
+what is page-wide by nature is shared: the lists of registered sources, the followed sites (a setting kept in
+storage), and the queue that keeps GitHub searches inside the browser's rate limit. Each panel re-renders when what it reads changes. Every API reply is read through a typed parser that rejects an unexpected shape
 with a clear message, and TypeScript runs in strict mode.
 
 | Script           | Does                                                     |

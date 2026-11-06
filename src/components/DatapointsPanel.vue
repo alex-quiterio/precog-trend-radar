@@ -35,8 +35,7 @@
 import { useApp } from '@/context';
 import { computed, defineComponent } from 'vue';
 import { activeChannel, channelDatapoints } from '@/channels';
-import { ui } from '@core/ui-store';
-import { DATAPOINT_GROUPS, dp, type DatapointRow } from '@features/datapoints';
+import { DATAPOINT_GROUPS, type DatapointRow } from '@features/datapoints';
 import PanelShell from '@components/PanelShell.vue';
 import Sparkline from '@components/Sparkline.vue';
 
@@ -47,7 +46,9 @@ export default defineComponent({
   props: { index: Number },
   components: { PanelShell, Sparkline },
   setup() {
-    const { app } = useApp();
+    const { app, datapoints } = useApp();
+    const ui = app.ui;
+    const dp = datapoints.state;
     const view = computed(() => {
       // The channel picks its cards and their order; they're shown under their group headings.
       const ids = channelDatapoints(activeChannel(app));
