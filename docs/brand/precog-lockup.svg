@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 72" fill="none">
+  <title>PRECOG / Trend Radar</title>
+  <rect width="360" height="72" rx="16" fill="#0a0f16"/>
+  <g transform="translate(8 4)">
+    <defs>
+      <clipPath id="lid"><path d="M5 32C15 15 49 15 59 32C49 49 15 49 5 32Z"/></clipPath>
+      <linearGradient id="sweep" x1="32" y1="32" x2="36" y2="18" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#5fd4c1" stop-opacity="0"/>
+        <stop offset="1" stop-color="#5fd4c1" stop-opacity="0.55"/>
+      </linearGradient>
+    </defs>
+    <path d="M5 32C15 15 49 15 59 32C49 49 15 49 5 32Z" stroke="#5fd4c1" stroke-width="3" stroke-linejoin="round"/>
+    <g clip-path="url(#lid)">
+      <circle cx="32" cy="32" r="13" stroke="#5fd4c1" stroke-width="2"/>
+      <circle cx="32" cy="32" r="7" stroke="#5fd4c1" stroke-width="1.5" stroke-opacity="0.5"/>
+      <path d="M32 32V19A13 13 0 0 1 41.19 22.81Z" fill="url(#sweep)"/>
+      <path d="M32 32L41.19 22.81" stroke="#5fd4c1" stroke-width="2" stroke-linecap="round"/>
+    </g>
+    <circle cx="32" cy="32" r="2.6" fill="#5fd4c1"/>
+    <circle cx="36.6" cy="23" r="2" fill="#e7ecf3"/>
+  </g>
+  <text x="84" y="45" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="26" letter-spacing="0.5" fill="#e7ecf3"><tspan font-weight="600">PRECOG</tspan><tspan fill="#5fd4c1" dx="6">/</tspan><tspan fill="#adb7c6" dx="6">Trend Radar</tspan></text>
+</svg>

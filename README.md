@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="docs/brand/precog-icon.svg" alt="" width="96">
+
 # PRECOG / Trend Radar
 
 **A personal situation room: pick a channel, get the gist.**

@@ -251,6 +251,16 @@ h1 {
   font: 600 24px/1.1 var(--sans);
   letter-spacing: 0.02em;
 }
+h1 .mark {
+  width: 1.45em;
+  height: 1.45em;
+  margin-right: 0.3em;
+  vertical-align: -0.38em;
+  color: var(--accent);
+}
+h1 .mark .blip {
+  fill: var(--ink);
+}
 h1 .slash {
   color: var(--accent);
   font-weight: 400;

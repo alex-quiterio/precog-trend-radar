@@ -3,6 +3,7 @@
     <span class="beacon" aria-hidden="true"></span>
     <div class="brand">
       <h1>
+        <BrandMark />
         PRECOG
         <span class="slash">/</span>
         <span class="sub">Trend Radar</span>
@@ -104,6 +105,7 @@ import { refresh } from '../live';
 import { stories } from '../features/stories';
 import { gh } from '../features/github';
 import { me } from '../features/github-me';
+import BrandMark from './BrandMark.vue';
 import ChannelIcon from './ChannelIcon.vue';
 import { lensById, state } from '../state';
 
@@ -111,7 +113,7 @@ import { lensById, state } from '../state';
 
 export default defineComponent({
   name: 'AppHeader',
-  components: { ChannelIcon },
+  components: { BrandMark, ChannelIcon },
   setup() {
     const view = computed(() => {
       ui.v;
