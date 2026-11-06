@@ -55,8 +55,12 @@ Make your own channel with **+ channel**: give it a name and up to six topics. D
 World's topics aren't fixed: each morning PRECOG picks the six that stand out, so at a glance you see what the
 internet is talking about today. Candidates come from Wikipedia's **In the news** stories (chosen by its
 editors) and its **most read** articles (counted by how far above their usual they are). A candidate gains weight
-for every other place it shows up: the **Hacker News** front page, **Manifold**'s busiest markets, and the
-**Guardian**'s newest articles once you add a key. Pages of one story fold into one topic (all the US election
+for every other place it shows up: the **Hacker News** front page and **Manifold**'s busiest markets.
+
+With a Guardian key, the **Guardian**'s front joins in too: the topics its editors' picks and most-viewed
+articles keep coming back to (their keyword tags, such as "Ukraine" or "Binance") become candidates, matched to
+their Wikipedia articles, and its headlines count as echoes. That's two calls a day (one to the Guardian, one to
+Wikipedia), plus a Wikipedia search for up to eight tags that don't match an article title. Pages of one story fold into one topic (all the US election
 pages become "United States elections"). People, sport, films and shows are left out.
 
 Under the topics, the selected one shows where it is echoing and why it was picked, for example

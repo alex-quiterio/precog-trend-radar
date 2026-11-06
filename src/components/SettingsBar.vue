@@ -32,7 +32,11 @@ export default defineComponent({
     const { app, actions } = useApp();
     const ui = app.ui;
     const guardian = computed(() => {
-      if (!ui.guardian) return { cls: '', text: 'Not set. A free key adds news coverage to each topic.' };
+      if (!ui.guardian)
+        return {
+          cls: '',
+          text: 'Not set. A free key adds news coverage to each topic, and the Guardian’s front to World’s daily pick.',
+        };
       if (ui.guardianState === 'checking') return { cls: 'checking', text: 'Checking…' };
       if (ui.guardianState === 'error') return { cls: 'error', text: '⚠ ' + ui.guardianNote };
       return { cls: 'ok', text: '✓ ' + (ui.guardianNote || 'Key saved.') };

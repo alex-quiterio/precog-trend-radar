@@ -1,0 +1,18 @@
+{
+  "batchcomplete": "",
+  "query": {
+    "redirects": [
+      { "from": "COP31 / CMP21 / CMA8", "to": "United Nations Climate Change Conference", "tofragment": "2026" }
+    ],
+    "pages": {
+      "38755144": {
+        "pageid": 38755144,
+        "ns": 0,
+        "title": "United Nations Climate Change Conference",
+        "pageprops": { "wikibase_item": "Q7888355" },
+        "description": "Annual climate change conferences",
+        "descriptionsource": "local"
+      }
+    }
+  }
+}

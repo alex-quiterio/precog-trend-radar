@@ -70,8 +70,92 @@ export const parseManifoldQuestions = (reply: unknown): string[] =>
   listOr(reply)
     .map(m => str(at(m, 'question')))
     .filter(Boolean);
-/** Guardian headlines (content search). */
-export const parseGuardianHeadlines = (reply: unknown): string[] =>
-  listOr(at(reply, 'response', 'results'))
-    .map(r => str(at(r, 'webTitle')))
-    .filter(Boolean);
+/** A Guardian article with its keyword tags (what it is about). */
+export interface GuardianItem {
+  title: string;
+  tags: { id: string; title: string; section: string }[];
+}
+/** The Guardian front's two lists: what its editors chose, and what readers read most. */
+export interface GuardianFront {
+  picks: GuardianItem[];
+  viewed: GuardianItem[];
+}
+const guardianItem = (v: unknown): GuardianItem => ({
+  title: str(at(v, 'webTitle')),
+  tags: listOr(at(v, 'tags'))
+    .filter(t => str(at(t, 'type')) === 'keyword')
+    .map(t => ({ id: str(at(t, 'id')), title: str(at(t, 'webTitle')), section: str(at(t, 'sectionId')) }))
+    .filter(t => t.id && t.title),
+});
+/** A Guardian edition front (/international?show-editors-picks=true&show-most-viewed=true&show-tags=keyword). */
+export function parseGuardianFront(reply: unknown): GuardianFront {
+  const r = at(reply, 'response');
+  return {
+    picks: listOr(at(r, 'editorsPicks'))
+      .map(guardianItem)
+      .filter(i => i.title),
+    viewed: listOr(at(r, 'mostViewed'))
+      .map(guardianItem)
+      .filter(i => i.title),
+  };
+}
+/** Guardian sections whose tags are sport, culture or lifestyle: popular, but not the news World is for. */
+const GUARDIAN_SKIP_SECTIONS = new Set(
+  'sport football culture film music tv-and-radio books stage artanddesign games fashion lifeandstyle food travel crosswords theguardian commentisfree media'.split(
+    ' ',
+  ),
+);
+/**
+ * The topics the Guardian's front keeps coming back to: keyword tags on at least two of its editors' picks
+ * and most-viewed articles, most first. Section tags ("World news", id world/world) and sport or culture
+ * tags are left out.
+ */
+export function guardianTags(front: GuardianFront): { title: string; picks: number; viewed: number }[] {
+  const count = new Map<string, { title: string; picks: number; viewed: number }>();
+  const tally = (items: GuardianItem[], key: 'picks' | 'viewed') =>
+    items.forEach(i =>
+      new Set(
+        i.tags
+          .filter(t => !GUARDIAN_SKIP_SECTIONS.has(t.section))
+          .filter(t => {
+            const [a, b] = t.id.split('/');
+            return a !== b; // world/world, uk/uk: a whole section, not a topic
+          })
+          .map(t => t.title),
+      ).forEach(title => {
+        const c = count.get(title) ?? { title, picks: 0, viewed: 0 };
+        c[key]++;
+        count.set(title, c);
+      }),
+    );
+  tally(front.picks, 'picks');
+  tally(front.viewed, 'viewed');
+  return [...count.values()]
+    .filter(c => c.picks + c.viewed >= 2)
+    .sort((a, b) => b.picks + b.viewed - (a.picks + a.viewed));
+}
+/**
+ * Wikipedia articles for a batch of titles (action=query&prop=pageprops|description), by the title asked
+ * for, following redirects. Titles without an article are missing from the map.
+ */
+export function parseWikiPages(reply: unknown): Map<string, FeedArticle> {
+  const q = objOr(at(reply, 'query'));
+  const hops = new Map<string, string>();
+  [...listOr(q.normalized), ...listOr(q.redirects)].forEach(r => hops.set(str(at(r, 'from')), str(at(r, 'to'))));
+  const byTitle = new Map<string, FeedArticle>();
+  Object.values(objOr(q.pages)).forEach(p => {
+    const page = objOr(p);
+    if ('missing' in page || 'invalid' in page || num(page.ns) !== 0) return;
+    const title = str(page.title);
+    byTitle.set(title, { title, description: str(page.description), qid: str(at(page, 'pageprops', 'wikibase_item')) });
+  });
+  const out = new Map<string, FeedArticle>();
+  const asked = new Set([...hops.keys(), ...byTitle.keys()]);
+  asked.forEach(a => {
+    let t = a;
+    for (let i = 0; i < 3 && hops.has(t); i++) t = hops.get(t)!;
+    const page = byTitle.get(t);
+    if (page) out.set(a, page);
+  });
+  return out;
+}

@@ -1,0 +1,78 @@
+{
+  "batchcomplete": "",
+  "query": {
+    "redirects": [
+      { "from": "Cryptocurrencies", "to": "Cryptocurrency" },
+      { "from": "Israel-Gaza war", "to": "Gaza war" },
+      { "from": "2026 United States midterm elections", "to": "2026 United States elections" }
+    ],
+    "pages": {
+      "-1": { "ns": 0, "title": "US midterm elections 2026", "missing": "" },
+      "-2": { "ns": 0, "title": "Cop31", "missing": "" },
+      "56180153": {
+        "pageid": 56180153,
+        "ns": 0,
+        "title": "Binance",
+        "pageprops": { "wikibase_item": "Q51403327" },
+        "description": "International cryptocurrency exchange",
+        "descriptionsource": "local"
+      },
+      "17987598": {
+        "pageid": 17987598,
+        "ns": 0,
+        "title": "Climate crisis",
+        "pageprops": { "wikibase_item": "Q60933643" },
+        "description": "Term for the threat of climate change",
+        "descriptionsource": "local"
+      },
+      "4848272": {
+        "pageid": 4848272,
+        "ns": 0,
+        "title": "Donald Trump",
+        "pageprops": { "wikibase_item": "Q22686" },
+        "description": "President of the United States (2017\u20132021; since 2025)",
+        "descriptionsource": "local"
+      },
+      "25391": {
+        "pageid": 25391,
+        "ns": 0,
+        "title": "Russia",
+        "pageprops": { "wikibase_item": "Q159" },
+        "description": "Country in Eastern Europe and North Asia",
+        "descriptionsource": "local"
+      },
+      "31750": {
+        "pageid": 31750,
+        "ns": 0,
+        "title": "Ukraine",
+        "pageprops": { "wikibase_item": "Q212" },
+        "description": "Country in Eastern Europe",
+        "descriptionsource": "local"
+      },
+      "70357296": {
+        "pageid": 70357296,
+        "ns": 0,
+        "title": "2026 United States elections",
+        "pageprops": { "wikibase_item": "Q115857612" },
+        "description": "",
+        "descriptionsource": "local"
+      },
+      "36662188": {
+        "pageid": 36662188,
+        "ns": 0,
+        "title": "Cryptocurrency",
+        "pageprops": { "wikibase_item": "Q13479982" },
+        "description": "Digital asset using a distributed ledger",
+        "descriptionsource": "local"
+      },
+      "74998519": {
+        "pageid": 74998519,
+        "ns": 0,
+        "title": "Gaza war",
+        "pageprops": { "wikibase_item": "Q122962941" },
+        "description": "Ongoing armed conflict in the Middle East",
+        "descriptionsource": "local"
+      }
+    }
+  }
+}

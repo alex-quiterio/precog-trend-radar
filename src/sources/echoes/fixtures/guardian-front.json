@@ -1,0 +1,425 @@
+{
+  "response": {
+    "status": "ok",
+    "userTier": "developer",
+    "total": 1,
+    "edition": {
+      "id": "international",
+      "webTitle": "new guardian international front page",
+      "code": "international"
+    },
+    "results": [],
+    "editorsPicks": [
+      {
+        "id": "technology/2026/nov/06/x",
+        "type": "article",
+        "sectionId": "technology",
+        "webTitle": "Binance hit by $400m hack as crypto prices slide",
+        "webPublicationDate": "2026-11-06T07:00:00Z",
+        "webUrl": "https://www.theguardian.com/x",
+        "tags": [
+          {
+            "id": "technology/binance",
+            "type": "keyword",
+            "sectionId": "technology",
+            "webTitle": "Binance",
+            "webUrl": "https://www.theguardian.com/technology/binance",
+            "apiUrl": "https://content.guardianapis.com/technology/binance"
+          },
+          {
+            "id": "technology/cryptocurrencies",
+            "type": "keyword",
+            "sectionId": "technology",
+            "webTitle": "Cryptocurrencies",
+            "webUrl": "https://www.theguardian.com/technology/cryptocurrencies",
+            "apiUrl": "https://content.guardianapis.com/technology/cryptocurrencies"
+          },
+          {
+            "id": "business/business",
+            "type": "keyword",
+            "sectionId": "business",
+            "webTitle": "Business",
+            "webUrl": "https://www.theguardian.com/business/business",
+            "apiUrl": "https://content.guardianapis.com/business/business"
+          }
+        ]
+      },
+      {
+        "id": "world/2026/nov/06/x",
+        "type": "article",
+        "sectionId": "world",
+        "webTitle": "Poland’s constitutional tribunal crisis deepens",
+        "webPublicationDate": "2026-11-06T07:00:00Z",
+        "webUrl": "https://www.theguardian.com/x",
+        "tags": [
+          {
+            "id": "world/poland",
+            "type": "keyword",
+            "sectionId": "world",
+            "webTitle": "Poland",
+            "webUrl": "https://www.theguardian.com/world/poland",
+            "apiUrl": "https://content.guardianapis.com/world/poland"
+          },
+          {
+            "id": "world/europe-news",
+            "type": "keyword",
+            "sectionId": "world",
+            "webTitle": "Europe",
+            "webUrl": "https://www.theguardian.com/world/europe-news",
+            "apiUrl": "https://content.guardianapis.com/world/europe-news"
+          }
+        ]
+      },
+      {
+        "id": "us-news/2026/nov/06/x",
+        "type": "article",
+        "sectionId": "us-news",
+        "webTitle": "Democrats sweep governor races in midterm upset",
+        "webPublicationDate": "2026-11-06T07:00:00Z",
+        "webUrl": "https://www.theguardian.com/x",
+        "tags": [
+          {
+            "id": "us-news/us-midterm-elections-2026",
+            "type": "keyword",
+            "sectionId": "us-news",
+            "webTitle": "US midterm elections 2026",
+            "webUrl": "https://www.theguardian.com/us-news/us-midterm-elections-2026",
+            "apiUrl": "https://content.guardianapis.com/us-news/us-midterm-elections-2026"
+          },
+          {
+            "id": "us-news/democrats",
+            "type": "keyword",
+            "sectionId": "us-news",
+            "webTitle": "Democrats",
+            "webUrl": "https://www.theguardian.com/us-news/democrats",
+            "apiUrl": "https://content.guardianapis.com/us-news/democrats"
+          },
+          {
+            "id": "us-news/us-news",
+            "type": "keyword",
+            "sectionId": "us-news",
+            "webTitle": "US news",
+            "webUrl": "https://www.theguardian.com/us-news/us-news",
+            "apiUrl": "https://content.guardianapis.com/us-news/us-news"
+          }
+        ]
+      },
+      {
+        "id": "environment/2026/nov/06/x",
+        "type": "article",
+        "sectionId": "environment",
+        "webTitle": "Cop31 opens with pledges falling short",
+        "webPublicationDate": "2026-11-06T07:00:00Z",
+        "webUrl": "https://www.theguardian.com/x",
+        "tags": [
+          {
+            "id": "environment/cop31",
+            "type": "keyword",
+            "sectionId": "environment",
+            "webTitle": "Cop31",
+            "webUrl": "https://www.theguardian.com/environment/cop31",
+            "apiUrl": "https://content.guardianapis.com/environment/cop31"
+          },
+          {
+            "id": "environment/climate-crisis",
+            "type": "keyword",
+            "sectionId": "environment",
+            "webTitle": "Climate crisis",
+            "webUrl": "https://www.theguardian.com/environment/climate-crisis",
+            "apiUrl": "https://content.guardianapis.com/environment/climate-crisis"
+          }
+        ]
+      },
+      {
+        "id": "world/2026/nov/06/x",
+        "type": "article",
+        "sectionId": "world",
+        "webTitle": "Ukraine braces for a winter of blackouts",
+        "webPublicationDate": "2026-11-06T07:00:00Z",
+        "webUrl": "https://www.theguardian.com/x",
+        "tags": [
+          {
+            "id": "world/ukraine",
+            "type": "keyword",
+            "sectionId": "world",
+            "webTitle": "Ukraine",
+            "webUrl": "https://www.theguardian.com/world/ukraine",
+            "apiUrl": "https://content.guardianapis.com/world/ukraine"
+          },
+          {
+            "id": "world/russia",
+            "type": "keyword",
+            "sectionId": "world",
+            "webTitle": "Russia",
+            "webUrl": "https://www.theguardian.com/world/russia",
+            "apiUrl": "https://content.guardianapis.com/world/russia"
+          },
+          {
+            "id": "environment/energy",
+            "type": "keyword",
+            "sectionId": "environment",
+            "webTitle": "Energy",
+            "webUrl": "https://www.theguardian.com/environment/energy",
+            "apiUrl": "https://content.guardianapis.com/environment/energy"
+          }
+        ]
+      },
+      {
+        "id": "film/2026/nov/06/x",
+        "type": "article",
+        "sectionId": "film",
+        "webTitle": "Ramayana breaks Indian box-office records",
+        "webPublicationDate": "2026-11-06T07:00:00Z",
+        "webUrl": "https://www.theguardian.com/x",
+        "tags": [
+          {
+            "id": "film/bollywood",
+            "type": "keyword",
+            "sectionId": "film",
+            "webTitle": "Bollywood",
+            "webUrl": "https://www.theguardian.com/film/bollywood",
+            "apiUrl": "https://content.guardianapis.com/film/bollywood"
+          },
+          {
+            "id": "film/film",
+            "type": "keyword",
+            "sectionId": "film",
+            "webTitle": "Film",
+            "webUrl": "https://www.theguardian.com/film/film",
+            "apiUrl": "https://content.guardianapis.com/film/film"
+          }
+        ]
+      },
+      {
+        "id": "football/2026/nov/06/x",
+        "type": "article",
+        "sectionId": "football",
+        "webTitle": "Ronaldo scores twice",
+        "webPublicationDate": "2026-11-06T07:00:00Z",
+        "webUrl": "https://www.theguardian.com/x",
+        "tags": [
+          {
+            "id": "football/cristiano-ronaldo",
+            "type": "keyword",
+            "sectionId": "football",
+            "webTitle": "Cristiano Ronaldo",
+            "webUrl": "https://www.theguardian.com/football/cristiano-ronaldo",
+            "apiUrl": "https://content.guardianapis.com/football/cristiano-ronaldo"
+          }
+        ]
+      },
+      {
+        "id": "world/2026/nov/06/x",
+        "type": "article",
+        "sectionId": "world",
+        "webTitle": "Gaza ceasefire talks resume in Cairo",
+        "webPublicationDate": "2026-11-06T07:00:00Z",
+        "webUrl": "https://www.theguardian.com/x",
+        "tags": [
+          {
+            "id": "world/israel-gaza-war",
+            "type": "keyword",
+            "sectionId": "world",
+            "webTitle": "Israel-Gaza war",
+            "webUrl": "https://www.theguardian.com/world/israel-gaza-war",
+            "apiUrl": "https://content.guardianapis.com/world/israel-gaza-war"
+          },
+          {
+            "id": "world/gaza",
+            "type": "keyword",
+            "sectionId": "world",
+            "webTitle": "Gaza",
+            "webUrl": "https://www.theguardian.com/world/gaza",
+            "apiUrl": "https://content.guardianapis.com/world/gaza"
+          }
+        ]
+      }
+    ],
+    "mostViewed": [
+      {
+        "id": "us-news/2026/nov/06/x",
+        "type": "article",
+        "sectionId": "us-news",
+        "webTitle": "What the midterm results mean for Trump",
+        "webPublicationDate": "2026-11-06T07:00:00Z",
+        "webUrl": "https://www.theguardian.com/x",
+        "tags": [
+          {
+            "id": "us-news/us-midterm-elections-2026",
+            "type": "keyword",
+            "sectionId": "us-news",
+            "webTitle": "US midterm elections 2026",
+            "webUrl": "https://www.theguardian.com/us-news/us-midterm-elections-2026",
+            "apiUrl": "https://content.guardianapis.com/us-news/us-midterm-elections-2026"
+          },
+          {
+            "id": "us-news/donaldtrump",
+            "type": "keyword",
+            "sectionId": "us-news",
+            "webTitle": "Donald Trump",
+            "webUrl": "https://www.theguardian.com/us-news/donaldtrump",
+            "apiUrl": "https://content.guardianapis.com/us-news/donaldtrump"
+          }
+        ]
+      },
+      {
+        "id": "technology/2026/nov/06/x",
+        "type": "article",
+        "sectionId": "technology",
+        "webTitle": "How hackers drained Binance",
+        "webPublicationDate": "2026-11-06T07:00:00Z",
+        "webUrl": "https://www.theguardian.com/x",
+        "tags": [
+          {
+            "id": "technology/binance",
+            "type": "keyword",
+            "sectionId": "technology",
+            "webTitle": "Binance",
+            "webUrl": "https://www.theguardian.com/technology/binance",
+            "apiUrl": "https://content.guardianapis.com/technology/binance"
+          },
+          {
+            "id": "technology/cryptocurrencies",
+            "type": "keyword",
+            "sectionId": "technology",
+            "webTitle": "Cryptocurrencies",
+            "webUrl": "https://www.theguardian.com/technology/cryptocurrencies",
+            "apiUrl": "https://content.guardianapis.com/technology/cryptocurrencies"
+          }
+        ]
+      },
+      {
+        "id": "us-news/2026/nov/06/x",
+        "type": "article",
+        "sectionId": "us-news",
+        "webTitle": "Trump claims fraud in Senate races",
+        "webPublicationDate": "2026-11-06T07:00:00Z",
+        "webUrl": "https://www.theguardian.com/x",
+        "tags": [
+          {
+            "id": "us-news/donaldtrump",
+            "type": "keyword",
+            "sectionId": "us-news",
+            "webTitle": "Donald Trump",
+            "webUrl": "https://www.theguardian.com/us-news/donaldtrump",
+            "apiUrl": "https://content.guardianapis.com/us-news/donaldtrump"
+          },
+          {
+            "id": "us-news/us-politics",
+            "type": "keyword",
+            "sectionId": "us-news",
+            "webTitle": "US politics",
+            "webUrl": "https://www.theguardian.com/us-news/us-politics",
+            "apiUrl": "https://content.guardianapis.com/us-news/us-politics"
+          }
+        ]
+      },
+      {
+        "id": "world/2026/nov/06/x",
+        "type": "article",
+        "sectionId": "world",
+        "webTitle": "Kyiv blackouts as Russia strikes the grid",
+        "webPublicationDate": "2026-11-06T07:00:00Z",
+        "webUrl": "https://www.theguardian.com/x",
+        "tags": [
+          {
+            "id": "world/ukraine",
+            "type": "keyword",
+            "sectionId": "world",
+            "webTitle": "Ukraine",
+            "webUrl": "https://www.theguardian.com/world/ukraine",
+            "apiUrl": "https://content.guardianapis.com/world/ukraine"
+          },
+          {
+            "id": "world/russia",
+            "type": "keyword",
+            "sectionId": "world",
+            "webTitle": "Russia",
+            "webUrl": "https://www.theguardian.com/world/russia",
+            "apiUrl": "https://content.guardianapis.com/world/russia"
+          }
+        ]
+      },
+      {
+        "id": "environment/2026/nov/06/x",
+        "type": "article",
+        "sectionId": "environment",
+        "webTitle": "Climate pledges at Cop31: what’s on the table",
+        "webPublicationDate": "2026-11-06T07:00:00Z",
+        "webUrl": "https://www.theguardian.com/x",
+        "tags": [
+          {
+            "id": "environment/climate-crisis",
+            "type": "keyword",
+            "sectionId": "environment",
+            "webTitle": "Climate crisis",
+            "webUrl": "https://www.theguardian.com/environment/climate-crisis",
+            "apiUrl": "https://content.guardianapis.com/environment/climate-crisis"
+          },
+          {
+            "id": "environment/cop31",
+            "type": "keyword",
+            "sectionId": "environment",
+            "webTitle": "Cop31",
+            "webUrl": "https://www.theguardian.com/environment/cop31",
+            "apiUrl": "https://content.guardianapis.com/environment/cop31"
+          }
+        ]
+      },
+      {
+        "id": "uk-news/2026/nov/06/x",
+        "type": "article",
+        "sectionId": "uk-news",
+        "webTitle": "Bonfire night across the UK",
+        "webPublicationDate": "2026-11-06T07:00:00Z",
+        "webUrl": "https://www.theguardian.com/x",
+        "tags": [
+          {
+            "id": "uk-news/bonfire-night",
+            "type": "keyword",
+            "sectionId": "uk-news",
+            "webTitle": "Bonfire night",
+            "webUrl": "https://www.theguardian.com/uk-news/bonfire-night",
+            "apiUrl": "https://content.guardianapis.com/uk-news/bonfire-night"
+          }
+        ]
+      },
+      {
+        "id": "world/2026/nov/06/x",
+        "type": "article",
+        "sectionId": "world",
+        "webTitle": "Aid convoys reach northern Gaza",
+        "webPublicationDate": "2026-11-06T07:00:00Z",
+        "webUrl": "https://www.theguardian.com/x",
+        "tags": [
+          {
+            "id": "world/israel-gaza-war",
+            "type": "keyword",
+            "sectionId": "world",
+            "webTitle": "Israel-Gaza war",
+            "webUrl": "https://www.theguardian.com/world/israel-gaza-war",
+            "apiUrl": "https://content.guardianapis.com/world/israel-gaza-war"
+          }
+        ]
+      },
+      {
+        "id": "film/2026/nov/06/x",
+        "type": "article",
+        "sectionId": "film",
+        "webTitle": "Film of the week",
+        "webPublicationDate": "2026-11-06T07:00:00Z",
+        "webUrl": "https://www.theguardian.com/x",
+        "tags": [
+          {
+            "id": "film/film",
+            "type": "keyword",
+            "sectionId": "film",
+            "webTitle": "Film",
+            "webUrl": "https://www.theguardian.com/film/film",
+            "apiUrl": "https://content.guardianapis.com/film/film"
+          }
+        ]
+      }
+    ]
+  }
+}

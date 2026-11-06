@@ -272,3 +272,29 @@ describe('the World pick, with a fake network', () => {
     });
   });
 });
+
+describe('with the Guardian front', () => {
+  const g = (title: string, description: string, qid: string, picks: number, viewed: number) => ({
+    article: { title, description, qid },
+    picks,
+    viewed,
+  });
+  const withGuardian = (): EchoSignals => ({
+    ...signals({ guardian: ['How hackers drained Binance', 'Kyiv blackouts as Russia strikes the grid'] }),
+    guardian: [
+      g('Binance', 'International cryptocurrency exchange', 'Q51403327', 1, 1),
+      g('Ukraine', 'Country in Eastern Europe', 'Q212', 1, 1),
+      g('Donald Trump', 'President of the United States (2017–2021; since 2025)', 'Q22686', 0, 2),
+      g('Gaza war', 'Armed conflict since 2023', 'Q122964573', 1, 1),
+    ],
+  });
+  it('its topics join the candidates; one Wikipedia already has gains the Guardian’s echo', () => {
+    const c = candidatesOf(withGuardian(), PEOPLE);
+    const binance = c.find(x => x.name === 'Binance hack')!;
+    expect(binance.echoes).toEqual(['news', 'guardian']);
+    expect(binance.notes).toEqual(['Guardian: 1 editors’ pick, 1 most viewed']);
+    expect(c.map(x => x.name)).toEqual(expect.arrayContaining(['Ukraine', 'Gaza war']));
+    expect(c.map(x => x.name)).not.toContain('Donald Trump');
+    expect(c.find(x => x.name === 'Ukraine')!.echoes).toEqual(['manifold', 'guardian']); // and a Donbas market
+  });
+});

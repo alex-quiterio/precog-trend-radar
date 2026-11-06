@@ -1,5 +1,6 @@
 // PRECOG / Trend Radar · Hot topics: the World channel's topics, picked each day from what the internet is
-// echoing. Candidates come from Wikipedia's "In the news" stories and most-read articles; each gains weight
+// echoing. Candidates come from Wikipedia's "In the news" stories and most-read articles, and (with a key) the
+// topics the Guardian's editors' picks and most-viewed articles share; each gains weight
 // for every other place it shows up (Hacker News's front page, Manifold's busiest markets, the Guardian's
 // newest articles). People, sport, films and shows are left out. A pick stays a few days unless it cools,
 // so the chart doesn't reshuffle on every visit, and a topic you pin stays until you unpin it.
@@ -23,7 +24,7 @@ export const ECHO_LABEL: Record<Echo, string> = {
   read: 'Most read on Wikipedia',
   hn: 'On the Hacker News front page',
   manifold: 'Among Manifold’s busiest markets',
-  guardian: 'In the Guardian’s newest articles',
+  guardian: 'On the Guardian’s front: its editors’ picks and most viewed',
 };
 /** A picked topic. */
 export interface HotPick {
@@ -200,6 +201,21 @@ export function candidatesOf(s: EchoSignals, people: Set<string> | null, skip: S
     const note = `${fmtViews(a.views ?? 0)} reads yesterday${surge >= 1.5 ? `, ${surge >= 10 ? Math.round(surge) : surge.toFixed(1)}× usual` : ''}`;
     add(a, 1 + Math.min(3, Math.log2(Math.max(surge, 1))) + (rank <= 10 ? 1 : 0), 'read', note);
   });
+  // The Guardian's front (with a key): the topics its editors' picks and most-viewed articles share.
+  (s.guardian ?? []).forEach(g => {
+    if (!ok(g.article)) return;
+    const n = g.picks + g.viewed;
+    const parts = [
+      g.picks && `${g.picks} editors’ pick${g.picks > 1 ? 's' : ''}`,
+      g.viewed && `${g.viewed} most viewed`,
+    ].filter(Boolean);
+    add(
+      g.article,
+      Math.min(3.5, 1 + 0.75 * (n - 1)) + (g.picks ? 0.5 : 0),
+      'guardian',
+      `Guardian: ${parts.join(', ')}`,
+    );
+  });
   // Echoes elsewhere: the name, or another article of the same story, in a headline or market question.
   (['hn', 'manifold', 'guardian'] as const).forEach(where => {
     const lines = s.elsewhere[where];
@@ -213,7 +229,7 @@ export function candidatesOf(s: EchoSignals, people: Set<string> | null, skip: S
           : where === 'manifold'
             ? `${n} market${n > 1 ? 's' : ''} on Manifold`
             : `${n} in the Guardian`;
-      c.best[where] = { score: 1.5, note };
+      if ((c.best[where]?.score ?? 0) < 1.5) c.best[where] = { score: 1.5, note };
     });
   });
   return out
@@ -365,7 +381,7 @@ export function createHotTopics({
     state.error = '';
     try {
       const s = await fetchSignals(signal);
-      const all = [...s.feed.news.flat(), ...s.feed.mostRead];
+      const all = [...s.feed.news.flat(), ...s.feed.mostRead, ...(s.guardian ?? []).map(g => g.article)];
       // Wikidata says who is a person; if it can't answer, the descriptions and the titles' words still do.
       const humans = await people(
         all.map(a => a.qid),
