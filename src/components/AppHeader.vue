@@ -1,5 +1,5 @@
 <template>
-  <header class="topbar" :class="{ busy: view.busy }" :data-tick="ui.v" :aria-busy="view.busy">
+  <header class="topbar" :class="{ busy: view.busy }" :aria-busy="view.busy">
     <span class="beacon" aria-hidden="true"></span>
     <div class="brand">
       <h1>
@@ -116,7 +116,6 @@ export default defineComponent({
   components: { BrandMark, ChannelIcon },
   setup() {
     const view = computed(() => {
-      ui.v;
       return {
         active: activeChannel()?.id,
         list: channels().map((c, i) => ({ ...c, n: i + 1, heat: lensHeat(lensById(c.lensId)) })),

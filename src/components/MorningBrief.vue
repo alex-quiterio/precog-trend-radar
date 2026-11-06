@@ -1,5 +1,5 @@
 <template>
-  <panel-shell id="p-brief" :title="head.title" :meta="head.meta" :index="index" :data-tick="ui.v">
+  <panel-shell id="p-brief" :title="head.title" :meta="head.meta" :index="index">
     <ul v-if="b.lines.length" class="brief-list">
       <li v-for="(l, i) in b.lines" :key="i">
         <template v-for="(p, j) in l" :key="j">
@@ -27,7 +27,7 @@
             <th scope="col">Top movers</th>
             <th scope="col">Now</th>
             <th scope="col">Change</th>
-            <th scope="col">z</th>
+            <th scope="col" class="col-z">z</th>
             <th scope="col">State</th>
           </tr>
         </thead>
@@ -44,7 +44,7 @@
               <span class="mbar" aria-hidden="true"><i :style="bar(E)"></i></span>
               {{ fmtPct(E.stats.change) }}
             </td>
-            <td>{{ E.stats.z == null ? '—' : E.stats.z.toFixed(1) }}</td>
+            <td class="col-z">{{ E.stats.z == null ? '—' : E.stats.z.toFixed(1) }}</td>
             <td><state-tag :st="E.stats"></state-tag></td>
           </tr>
         </tbody>
@@ -78,9 +78,8 @@ export default defineComponent({
   components: { PanelShell, StateTag, TopicDot },
   setup() {
     const note = ref('');
-    const b = computed(() => (ui.v, buildBrief()));
+    const b = computed(() => buildBrief());
     const head = computed(() => {
-      ui.v;
       return {
         title: 'What moved',
         meta: state.liveLoaded

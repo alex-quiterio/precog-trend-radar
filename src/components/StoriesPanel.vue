@@ -1,5 +1,5 @@
 <template>
-  <panel-shell id="p-stories" title="Matched to your topics" :meta="view.meta" :index="index" :data-tick="ui.v">
+  <panel-shell id="p-stories" title="Matched to your topics" :meta="view.meta" :index="index">
     <template #controls>
       <span class="seg no-print" role="group" aria-label="Signal source">
         <button
@@ -191,9 +191,8 @@ export default defineComponent({
     const newSite = ref(''),
       siteMsg = ref(''),
       adding = ref(false);
-    const sites = computed(() => (ui.v, readingSites()));
+    const sites = computed(() => readingSites());
     const view = computed(() => {
-      ui.v;
       const src = state.storySrc;
       const scopeKeys = new Set(storyScopeEntries().map(E => E.key));
       const topicsOf = (keys: string[]) =>
@@ -291,7 +290,6 @@ export default defineComponent({
     ];
     // The Guardian tab appears once a key is set.
     const tabs = computed(() => {
-      ui.v;
       const c = activeChannel();
       // A channel that reads one site names the tab after it ("The Great Simplification").
       const only = c.sites?.length === 1 ? readingSites().find(x => x.url === c.sites[0])?.name : '';

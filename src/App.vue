@@ -1,5 +1,5 @@
 <template>
-  <div class="page" :data-tick="ui.v">
+  <div class="page">
     <app-header></app-header>
 
     <section class="channel-hero" :key="view.channel.id" aria-labelledby="ch-title">
@@ -106,7 +106,6 @@ export default defineComponent({
   },
   setup() {
     const view = computed(() => {
-      ui.v;
       const channel = activeChannel();
       const i = channels().findIndex(c => c.id === channel.id);
       return {
@@ -114,7 +113,7 @@ export default defineComponent({
         no: String(i + 1).padStart(2, '0'),
         title: activeLens()?.name || channel.label,
         side: channelDatapoints(channel).length > 0,
-        updated: new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' }),
+        updated: new Date(ui.now).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' }),
       };
     });
     return { ui, view };

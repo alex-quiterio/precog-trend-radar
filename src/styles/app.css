@@ -633,6 +633,23 @@ select:hover {
   height: 8px;
   border-radius: 4px;
 }
+/* Phones: drop the bar and z (State says the same thing), let long names wrap, so nothing scrolls sideways. */
+@media (max-width: 600px) {
+  .movers .mbar,
+  .movers .col-z {
+    display: none;
+  }
+  .movers td,
+  .movers th {
+    padding: 6px 4px;
+  }
+  .movers td:first-child {
+    white-space: normal;
+  }
+  .movers .topic {
+    text-align: left;
+  }
+}
 .brief-actions {
   display: flex;
   flex-wrap: wrap;

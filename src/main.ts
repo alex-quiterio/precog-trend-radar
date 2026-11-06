@@ -17,7 +17,7 @@ import { HOUR, LS, store } from './core/config';
 import { ago, changeLabel, fmtAxis, fmtPct, fmtTick, fmtTime, fmtVal, nf0, nf1 } from './core/format';
 import { looksLikePerson } from './core/guard';
 import { arrowOf, levelOf } from './core/stats';
-import { bump, ui } from './core/ui-store';
+import { startClock, ui } from './core/ui-store';
 import { loadDatapoints } from './features/datapoints';
 import { loadGitHub } from './features/github';
 import { loadMyGitHub } from './features/github-me';
@@ -73,6 +73,7 @@ function boot(): void {
   app.component('TopicDot', TopicDot);
   app.mount('#app');
 
+  startClock();
   startLive();
   if (activeChannel().github) loadGitHub();
   loadMyGitHub();
@@ -104,7 +105,6 @@ document.addEventListener('keydown', e => {
     shiftTopic(e.key === 'ArrowRight' ? 1 : -1);
   }
 });
-window.addEventListener('beforeprint', bump);
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && Date.now() - liveUpdated > HOUR) loadLive();
   if (document.visibilityState === 'hidden' && Date.now() - state.viewStart > 20e3) saveLook();

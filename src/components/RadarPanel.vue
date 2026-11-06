@@ -1,5 +1,5 @@
 <template>
-  <panel-shell id="p-radar" :title="view.title" meta="closer = rising faster" :index="index" :data-tick="ui.v">
+  <panel-shell id="p-radar" :title="view.title" meta="closer = rising faster" :index="index">
     <div ref="wrap" class="radar-wrap">
       <svg id="radar" viewBox="0 0 300 300" role="img" :aria-label="view.label">
         <circle v-for="r in S.rings" :key="r" class="ring" :cx="RC" :cy="RC" :r="r" />
@@ -76,7 +76,6 @@ export default defineComponent({
       hovered = ref(null);
     const flash = reactive({});
     const view = computed(() => {
-      ui.v;
       const lens = activeLens(),
         list = entriesOf(lens).filter(E => E.stats);
       const mMax = Math.max(2, ...list.map(E => Math.abs(E.stats.momentum)));

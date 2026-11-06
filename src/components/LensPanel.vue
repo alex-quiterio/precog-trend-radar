@@ -1,5 +1,5 @@
 <template>
-  <panel-shell id="p-watch" title="Topics" :meta="view.meta" :index="index" :data-tick="ui.v">
+  <panel-shell id="p-watch" title="Topics" :meta="view.meta" :index="index">
     <template #controls>
       <button
         v-if="view.own"
@@ -55,7 +55,6 @@ export default defineComponent({
     const newTopic = ref(''),
       addInput = ref(null);
     const view = computed(() => {
-      ui.v;
       const lens = activeLens(),
         list = entriesOf(lens);
       return {

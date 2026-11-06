@@ -1,5 +1,6 @@
 // PRECOG / Trend Radar · Number, date and relative-time formatting.
 import { DAY } from './config';
+import { ui } from './ui-store';
 
 export const nf0 = new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 });
 export const nf1 = new Intl.NumberFormat(undefined, { maximumFractionDigits: 1 });
@@ -30,8 +31,10 @@ export function fmtTick(t, step) {
     : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 export const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' });
-export function ago(t) {
-  const s = (t - Date.now()) / 1000,
+/** "3 minutes ago". Reads the minute clock, so a view showing it refreshes as time passes. */
+export function ago(t: number, now = ui.now): string {
+  // The clock can lag up to a minute: something fetched since its last tick is "just now", not "in 1 minute".
+  const s = (t - Math.max(now, Math.min(t, Date.now()))) / 1000,
     a = Math.abs(s);
   if (a < 60) return 'just now';
   if (a < 3600) return rtf.format(Math.round(s / 60), 'minute');

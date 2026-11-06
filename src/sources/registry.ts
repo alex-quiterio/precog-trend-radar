@@ -1,27 +1,24 @@
 // PRECOG / Trend Radar · Adapter registry, source list and shared fetch helpers. Every adapter registers itself here.
 import type { Adapter, AdapterResult, Entry, Lens, Query, Source } from '../types';
 import { DAY } from '../core/config';
-import { bump } from '../core/ui-store';
+import { reactive } from 'vue';
 import { lensById } from '../state';
 
 export const ADAPTERS: Record<string, Adapter> = {};
-export const SOURCES: Record<string, Source> = {
+// Reactive, so a source registered after start-up (e.g. from the console) shows up in the views.
+export const SOURCES: Record<string, Source> = reactive({
   blend: {
     label: 'World attention index',
     parts: ['wikipedia', 'guardian', 'hn'],
     unit: 'index · 100 = 30-day norm',
     blend: true,
   },
-};
-export function addSourceOption(id) {
-  if (typeof bump === 'function') bump(); // the source <select> is rendered from SOURCES
-}
+});
 export function registerAdapter(a: Adapter): void {
   if (!a || !a.id || typeof a.fetch !== 'function') throw new Error('Adapter needs id and fetch()');
   ADAPTERS[a.id] = a;
   if (!SOURCES[a.id] || !SOURCES[a.id].blend)
     SOURCES[a.id] = { label: a.label || a.id, parts: [a.id], unit: a.unit || '' };
-  addSourceOption(a.id);
 }
 export const utcDay = (d = Date.now()) => Math.floor(+d / DAY) * DAY;
 export const iso = t => new Date(t).toISOString();

@@ -1,9 +1,9 @@
 // PRECOG / Trend Radar · GitHub: how much is being built around each topic, and what's rising.
 // Two searches per topic (new repos in the last 90 days, and in the 90 days before), cached for 12 h.
 // Search allows ~10 requests a minute (30 with a token), so requests are queued just inside that.
+import { reactive } from 'vue';
 import type { Entry } from '../types';
 import { DAY, HOUR, sleep, store } from '../core/config';
-import { bump } from '../core/ui-store';
 import { githubHeaders, githubToken, searchGap } from '../sources/github-auth';
 import { HttpError, getJSON, phrase, queryOf } from '../sources/registry';
 import { activeLens, entriesOf } from '../state';
@@ -32,7 +32,7 @@ const PERIOD = 90;
 const TTL = 12 * HOUR;
 const CACHE = 'precog.github.v1.';
 
-export const gh = {
+export const gh = reactive({
   lensId: '' as string,
   topics: [] as GhTopic[],
   loading: false,
@@ -40,7 +40,7 @@ export const gh = {
   total: 0,
   error: null as string | null,
   at: 0,
-};
+});
 
 const queue = { last: 0, chain: Promise.resolve() as Promise<unknown> };
 function search(url: string, signal: AbortSignal): Promise<any> {
@@ -104,7 +104,6 @@ export async function loadGitHub(force = false): Promise<void> {
   const { signal } = abort;
   const entries = entriesOf(lens);
   Object.assign(gh, { lensId: lens.id, topics: [], loading: true, done: 0, total: entries.length, error: null });
-  bump();
   for (const E of entries) {
     try {
       const v = await topicStats(E, signal);
@@ -121,11 +120,9 @@ export async function loadGitHub(force = false): Promise<void> {
       if (e instanceof HttpError && (e.status === 403 || e.status === 429)) break;
     }
     gh.done++;
-    bump();
   }
   gh.loading = false;
   gh.at = Date.now();
-  bump();
 }
 
 /** Repos across the lens, ranked by stars per day since creation (what's rising, not what's old). */

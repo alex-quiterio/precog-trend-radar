@@ -1,7 +1,6 @@
 // PRECOG / Trend Radar · Pre-cog alert rules: z-score levels, de-duplication and plain-English explanations.
 import { ALERT_CAP, FC_STEPS, MIN_BASE } from './core/config';
 import { computeStats, levelOf } from './core/stats';
-import { bump } from './core/ui-store';
 import { allEntries, lensById, series, state } from './state';
 
 export function explain(name, st) {
@@ -52,10 +51,8 @@ export function rescanAll() {
     .flatMap(scanHistory)
     .sort((a, b) => b.t - a.t || b.z - a.z)
     .slice(0, ALERT_CAP);
-  bump();
 }
 export function pushAlert(a) {
   state.alerts.unshift(a);
   state.alerts.length = Math.min(state.alerts.length, ALERT_CAP);
-  bump();
 }

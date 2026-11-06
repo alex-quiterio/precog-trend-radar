@@ -1,11 +1,8 @@
-// PRECOG / Trend Radar · The bridge between plain-JS logic and Vue.
-// Logic modules mutate plain state, then call bump(). Every component's render
-// reads ui.v, so one bump re-renders whatever is on screen. Everything the UI
-// shows that is not derived from state (status line, pulse, focus requests) lives here.
+// PRECOG / Trend Radar · UI state that is not derived from the data: status line, pulse, focus requests, clock.
+// App data lives in reactive stores (state.ts and the feature modules); Vue tracks what each view reads.
 import { reactive } from 'vue';
 
 export const ui = reactive({
-  v: 0, // render version: bumped after every state change
   status: '', // status line under the header
   loading: false, // a live fetch is in flight
   offline: false, // the last fetch reached no source at all
@@ -20,7 +17,12 @@ export const ui = reactive({
   guardianState: 'off' as 'off' | 'checking' | 'ok' | 'error',
   guardianNote: '', // what the Guardian button's tooltip says
   ghToken: false, // a GitHub token is set
+  now: Date.now(), // a clock that ticks every minute, so "5 minutes ago" stays true
 });
-export function bump() {
-  ui.v++;
+
+let clock: ReturnType<typeof setInterval> | undefined;
+/** Starts the minute clock that relative times ("3 minutes ago") read. */
+export function startClock(): void {
+  clearInterval(clock);
+  clock = setInterval(() => (ui.now = Date.now()), 60e3);
 }

@@ -1,5 +1,5 @@
 <template>
-  <panel-shell id="p-github" title="Open-source momentum" :meta="view.meta" :index="index" :data-tick="ui.v">
+  <panel-shell id="p-github" title="Open-source momentum" :meta="view.meta" :index="index">
     <template #controls>
       <button class="btn small no-print" type="button" :disabled="gh.loading" @click="reload">↻ Recount</button>
     </template>
@@ -125,7 +125,6 @@ export default defineComponent({
   components: { PanelShell, TopicDot },
   setup() {
     const view = computed(() => {
-      ui.v;
       const topics = gh.topics;
       const max = Math.max(1, ...topics.flatMap(t => [t.now, t.before]));
       const sum = (f: (t: GhTopic) => number) => topics.reduce((a, t) => a + f(t), 0);

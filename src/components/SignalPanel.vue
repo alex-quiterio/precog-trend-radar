@@ -1,5 +1,5 @@
 <template>
-  <panel-shell id="p-signal" title="Signal" :meta="head.meta" :index="index" :data-tick="ui.v">
+  <panel-shell id="p-signal" title="Signal" :meta="head.meta" :index="index">
     <div class="signal-top">
       <div>
         <div class="sel-name">
@@ -173,7 +173,6 @@ export default defineComponent({
       dragging = ref(false);
 
     const head = computed(() => {
-      ui.v;
       const E = selectedEntry(),
         st = E && E.stats,
         lens = activeLens(),
@@ -210,7 +209,6 @@ export default defineComponent({
     });
 
     const geo = computed(() => {
-      ui.v;
       const E = selectedEntry(),
         st = E && E.stats,
         s = E ? series(E) : [];

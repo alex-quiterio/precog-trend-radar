@@ -2,7 +2,8 @@
 import { rescanAll } from './alerts';
 import { HISTORY, LIVE_REFRESH_MS } from './core/config';
 import { computeStats } from './core/stats';
-import { bump, ui } from './core/ui-store';
+import { markRaw } from 'vue';
+import { ui } from './core/ui-store';
 import { loadStories } from './features/stories';
 import { blendParts } from './sources/blend';
 import { ADAPTERS, SOURCES, pool, queryOf } from './sources/registry';
@@ -11,8 +12,7 @@ import { activeLens, allEntries, entriesOf, state } from './state';
 export const DEFAULT_SOURCE = 'blend';
 export let liveTimer = null,
   liveAbort = null,
-  liveUpdated = 0,
-  renderQueued = false;
+  liveUpdated = 0;
 export function setStatus(msg) {
   ui.status = msg || '';
 }
@@ -20,23 +20,16 @@ export function beat(text) {
   ui.pulse = text;
   ui.beat++;
 }
-export function scheduleRender() {
-  if (renderQueued) return;
-  renderQueued = true;
-  requestAnimationFrame(() => {
-    renderQueued = false;
-    bump();
-  });
-}
 export const liveParts = () => (SOURCES[state.source]?.parts || []).filter(p => ADAPTERS[p]);
 
 export function recompute(E) {
   const src = SOURCES[state.source],
     parts = liveParts();
-  E.liveSeries = src.blend ? blendParts(E, parts) : E.parts[parts[0]] || [];
+  E.liveSeries = markRaw(src.blend ? blendParts(E, parts) : E.parts[parts[0]] || []);
   const errs = parts.map(p => E.partErr[p] || E.skipped?.[p]).filter(Boolean);
   E.liveError = E.liveSeries.length ? null : errs.length === parts.length ? errs[0] : null;
-  E.stats = computeStats(E.liveSeries);
+  const st = computeStats(E.liveSeries);
+  E.stats = st && markRaw(st);
 }
 export async function fetchPart(E, pid, signal) {
   try {
@@ -50,11 +43,13 @@ export async function fetchPart(E, pid, signal) {
       recompute(E);
       return;
     }
-    E.parts[pid] = (res.points || [])
-      .map(p => ({ t: typeof p.t === 'number' ? p.t : Date.parse(p.t), value: +p.value }))
-      .filter(p => isFinite(p.t) && isFinite(p.value))
-      .sort((a, b) => a.t - b.t)
-      .slice(-HISTORY);
+    E.parts[pid] = markRaw(
+      (res.points || [])
+        .map(p => ({ t: typeof p.t === 'number' ? p.t : Date.parse(p.t), value: +p.value }))
+        .filter(p => isFinite(p.t) && isFinite(p.value))
+        .sort((a, b) => a.t - b.t)
+        .slice(-HISTORY),
+    );
     E.partErr[pid] = E.parts[pid].length ? null : 'no data returned';
     if (E.skipped) delete E.skipped[pid];
     if (res.meta) Object.assign(E.meta, res.meta);
@@ -88,10 +83,7 @@ export async function loadLive() {
         if (signal.aborted) return;
         await fetchPart(E, pid, signal);
         done++;
-        if (!signal.aborted) {
-          setStatus(`Fetching attention data… ${done}/${total}`);
-          scheduleRender();
-        }
+        if (!signal.aborted) setStatus(`Fetching attention data… ${done}/${total}`);
       }),
     ),
   );
@@ -101,7 +93,6 @@ export async function loadLive() {
   state.liveLoaded = true;
   rescanAll();
   reportGuardian();
-  bump();
   beat(`updated ${new Date(liveUpdated).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}`);
   const all = allEntries(),
     failed = all.filter(E => E.liveError),
@@ -145,7 +136,6 @@ export function startLive() {
   });
   state.alerts = [];
   beat('connecting…');
-  bump();
   loadLive();
   clearInterval(liveTimer);
   liveTimer = setInterval(loadLive, LIVE_REFRESH_MS);

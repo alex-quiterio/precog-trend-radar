@@ -1,5 +1,5 @@
 <template>
-  <panel-shell id="p-data" title="Open data" :meta="view.meta" :index="index" :data-tick="ui.v">
+  <panel-shell id="p-data" title="Open data" :meta="view.meta" :index="index">
     <div v-if="view.groups.length" class="dp-groups">
       <section v-for="g in view.groups" :key="g.id" class="dp-group" :aria-labelledby="'dp-' + g.id">
         <header>
@@ -47,7 +47,6 @@ export default defineComponent({
   components: { PanelShell, Sparkline },
   setup() {
     const view = computed(() => {
-      ui.v;
       // The channel picks its cards and their order; they're shown under their group headings.
       const ids = channelDatapoints(activeChannel());
       const rows = ids.map(id => dp.rows.find(r => r.id === id)).filter(Boolean);

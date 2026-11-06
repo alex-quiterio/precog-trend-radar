@@ -1,8 +1,8 @@
 // PRECOG / Trend Radar · Datapoints panel: ECB, Eurostat, IPMA, Open-Meteo, NOAA CO₂ and NSIDC sea ice.
 // Housing (prices, rents, mortgages) and energy (energy prices, renewable share, sun and wind) included.
 // Cards sit in groups by place: Portugal, Netherlands, Euro area, Planet. No card mixes two countries.
+import { reactive } from 'vue';
 import { nf0, nf1, nf2 } from '../core/format';
-import { bump } from '../core/ui-store';
 import type { SeriesPoint } from '../types';
 import { getJSON } from '../sources/registry';
 
@@ -74,7 +74,7 @@ export interface DatapointFacts {
   fire?: { hi: number; max: number; n: number };
   warnings?: { red: number; orange: number; yellow: number; types: string };
 }
-export const dp = { rows: [] as DatapointRow[], at: 0, facts: {} as DatapointFacts };
+export const dp = reactive({ rows: [] as DatapointRow[], at: 0, facts: {} as DatapointFacts });
 export const PLACES: [string, number, number, DatapointGroup][] = [
   ['Lisbon', 38.72, -9.14, 'pt'],
   ['Porto', 41.15, -8.61, 'pt'],
@@ -473,5 +473,4 @@ export async function loadDatapoints() {
   dp.rows = rows.sort((a, b) => a.o - b.o);
   dp.facts = facts;
   dp.at = Date.now();
-  bump();
 }

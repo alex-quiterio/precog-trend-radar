@@ -1,8 +1,8 @@
 // PRECOG / Trend Radar · Streams: the news (The Guardian), what you're reading (followed sites), what
 // forecasters expect (Manifold) and what's spreading among builders (Hacker News), matched to your topics.
+import { reactive } from 'vue';
 import type { Entry } from '../types';
 import { HOUR, LS, MIN, STORY_REFRESH_MS, store } from '../core/config';
-import { bump } from '../core/ui-store';
 import type { Forecast } from '../sources/manifold';
 import { searchForecasts } from '../sources/manifold';
 import type { ReadingItem } from '../sources/reading';
@@ -44,7 +44,7 @@ export interface ForecastMatch extends Forecast {
   topics: string[];
 }
 export type StorySrc = 'news' | 'reading' | 'forecasts' | 'hn';
-export const stories = {
+export const stories = reactive({
   hn: new Map<string, HNStory>(),
   forecasts: new Map<string, ForecastMatch>(),
   news: new Map<string, NewsMatch>(),
@@ -53,7 +53,7 @@ export const stories = {
   loading: { hn: false, forecasts: false, reading: false, news: false },
   errors: { hn: null, forecasts: null, reading: null, news: null },
   at: { hn: 0, forecasts: 0, reading: 0, news: 0 },
-};
+});
 export let storyTimer = null,
   storyAbort = null;
 export const TAU = 8; // hours; engagement modelled as E(t) = E∞·(1 − e^(−t/τ))
@@ -110,7 +110,6 @@ export async function loadHNStories(entries: Entry[], signal: AbortSignal): Prom
           found.set(h.objectID, s);
         });
       stories.hn = new Map([...stories.hn, ...found]);
-      if (!signal.aborted) bump();
     },
   );
   const now = Date.now();
@@ -168,7 +167,6 @@ export async function loadForecastStories(entries: Entry[], signal: AbortSignal)
         found.set(f.id, m);
       });
     stories.forecasts = new Map(found);
-    if (!signal.aborted) bump();
   });
   stories.forecasts = found;
 }
@@ -189,7 +187,6 @@ export async function loadNewsStories(entries: Entry[], signal: AbortSignal): Pr
       found.set(a.id, m);
     });
     stories.news = new Map(found);
-    bump();
   }
 }
 export async function loadStories() {
@@ -201,7 +198,6 @@ export async function loadStories() {
     src = state.storySrc,
     entries = storyScopeEntries();
   stories.loading[src] = true;
-  bump();
   try {
     if (src === 'hn') await loadHNStories(entries, signal);
     else if (src === 'forecasts') await loadForecastStories(entries, signal);
@@ -213,7 +209,6 @@ export async function loadStories() {
     if (e.name !== 'AbortError') stories.errors[src] = e.message;
   }
   stories.loading[src] = false;
-  if (!signal.aborted) bump();
 }
 export function startStoryTimer(): void {
   clearInterval(storyTimer);

@@ -1,6 +1,7 @@
 // PRECOG / Trend Radar · Reading: posts from sites you follow, matched to your topics.
 // Works with any WordPress site whose public API allows browser reads (most do), e.g. The Great
 // Simplification and The Marginalian. Each site is read once every 12 h and kept in this browser.
+import { shallowRef } from 'vue';
 import { HOUR, store } from '../core/config';
 import { withTimeout } from './registry';
 
@@ -45,9 +46,12 @@ export const DEFAULT_SITES: ReadingSite[] = [
   },
   { url: 'https://www.themarginalian.org', name: 'The Marginalian', types: [['posts', 'Essay']] },
 ];
-export const readingSites = (): ReadingSite[] => store.get(SITES_KEY, DEFAULT_SITES);
-export function saveReadingSites(sites: ReadingSite[]): void {
-  store.set(SITES_KEY, sites);
+// Held in a ref (and mirrored to storage) so views listing the sites update when you follow one.
+const sites = shallowRef<ReadingSite[]>(store.get(SITES_KEY, DEFAULT_SITES));
+export const readingSites = (): ReadingSite[] => sites.value;
+export function saveReadingSites(list: ReadingSite[]): void {
+  sites.value = list;
+  store.set(SITES_KEY, list);
 }
 
 const plain = (html: string): string => {

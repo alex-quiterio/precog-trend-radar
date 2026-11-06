@@ -3,7 +3,7 @@ import type { TopicDef } from './types';
 import { LS, MAX_LENSES, MAX_TOPICS, slotColor, store } from './core/config';
 import { looksLikePerson } from './core/guard';
 import { levelOf } from './core/stats';
-import { bump, ui } from './core/ui-store';
+import { ui } from './core/ui-store';
 import { saveLook } from './features/brief';
 import { loadGitHub } from './features/github';
 import { loadMyGitHub } from './features/github-me';
@@ -69,11 +69,9 @@ export function addTopic(raw) {
   saveLenses();
   savePrefs();
   watchMsg(`Tracking “${name}” in ${lens.name}.`);
-  bump();
   const ctl = liveAbort && !liveAbort.signal.aborted ? liveAbort : new AbortController();
   Promise.all(liveParts().map(p => fetchPart(E, p, ctl.signal))).then(() => {
     if (E.liveError) setStatus(`No data for ${E.name}: ${E.liveError}`);
-    bump();
   });
   return true;
 }
@@ -89,7 +87,6 @@ export function removeTopic(key) {
   saveLenses();
   savePrefs();
   watchMsg(`Removed “${E.name}” from ${lens.name}.`);
-  bump();
 }
 export function addLens(raw) {
   const name = raw.trim().replace(/\s+/g, ' ').slice(0, 30);
@@ -109,7 +106,6 @@ export function addLens(raw) {
   savePrefs();
   watchMsg(`New lens “${name}”. Add up to ${MAX_TOPICS} topics.`);
   ui.focusAdd++;
-  bump();
 }
 export function removeLens(id) {
   const lens = lensById(id);
@@ -120,14 +116,12 @@ export function removeLens(id) {
   state.activeLens = state.lenses[0].id;
   saveLenses();
   savePrefs();
-  bump();
 }
 export function selectLens(id) {
   if (!lensById(id) || id === state.activeLens) return;
   state.activeLens = id;
   savePrefs();
   ui.swap++;
-  bump();
   loadStories();
   if (activeChannel().github) loadGitHub();
 }
@@ -140,7 +134,6 @@ export function select(key) {
   state.selectedByLens[E.lensId] = E.name;
   savePrefs();
   ui.swap++;
-  bump();
   if (state.storyScope === 'topic' || changedLens) loadStoriesDebounced();
   if (changedLens && activeChannel().github) loadGitHub();
 }
@@ -170,19 +163,16 @@ export function lensHeat(l) {
 export function setStorySource(src) {
   state.storySrc = src;
   savePrefs();
-  bump();
   if (!stories.at[src]) loadStories();
 }
 export function setStoryScope(scope) {
   state.storyScope = scope;
   savePrefs();
-  bump();
   loadStories();
 }
 export function markRead() {
   saveLook();
   state.prevLook = store.get(LS.look, null);
-  bump();
 }
 export function applyTheme(theme) {
   document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
@@ -198,7 +188,6 @@ export function applyTheme(theme) {
 export function toggleTheme() {
   applyTheme(ui.theme === 'light' ? 'dark' : 'light');
   savePrefs();
-  bump();
 }
 /** Asks for a Guardian API key (kept in this browser only), then refetches so news counts join the index. */
 export function editGuardianKey(): void {

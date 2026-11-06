@@ -1,11 +1,5 @@
 <template>
-  <panel-shell
-    id="p-me"
-    :title="'Your GitHub' + (s ? ' · @' + s.login : '')"
-    :meta="meta"
-    :index="index"
-    :data-tick="ui.v"
-  >
+  <panel-shell id="p-me" :title="'Your GitHub' + (s ? ' · @' + s.login : '')" :meta="meta" :index="index">
     <template #controls>
       <button
         class="btn small no-print"
@@ -131,11 +125,11 @@ export default defineComponent({
   props: { index: Number },
   components: { PanelShell },
   setup() {
-    const s = computed(() => (ui.v, me.stats));
-    const user = computed(() => (ui.v, githubUser()));
+    const s = computed(() => me.stats);
+    const user = computed(() => githubUser());
     const actMax = computed(() => Math.max(1, ...(s.value?.activity || []).map(d => d.value)));
     const langMax = computed(() => Math.max(1, ...(s.value?.languages || []).map(l => l.count)));
-    const meta = computed(() => (ui.v, me.loading ? 'loading…' : me.at ? `checked ${ago(me.at)} · public data` : ''));
+    const meta = computed(() => (me.loading ? 'loading…' : me.at ? `checked ${ago(me.at)} · public data` : ''));
     const day = (t: number) => new Date(t).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
     function editUser() {
       const u = window.prompt('Your GitHub username (public data only):', githubUser());

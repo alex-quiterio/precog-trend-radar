@@ -1,4 +1,7 @@
 // PRECOG / Trend Radar · App state: lenses -> topics -> runtime entries, persistence and migrations.
+// `state` is reactive: views re-render on their own when what they read changes. Series and stats are
+// replaced whole (never edited in place) and marked raw, so hundreds of points don't each become a proxy.
+import { reactive } from 'vue';
 import type { Alert, Entry, Lens, Prefs, SeriesPoint, TopicDef } from './types';
 export interface LastLook {
   at: number;
@@ -8,7 +11,7 @@ export interface LastLook {
 import { LS, MAX_LENSES, MAX_TOPICS, PRESETS, PRESET_VERSION, SLOT_ANGLE, slotColor, store } from './core/config';
 import { looksLikePerson } from './core/guard';
 
-export const state = {
+export const state = reactive({
   source: 'blend',
   lenses: [] as Lens[],
   activeLens: null as string | null,
@@ -21,7 +24,7 @@ export const state = {
   prevLook: null as LastLook | null,
   viewStart: Date.now(),
   liveLoaded: false,
-};
+});
 export const keyOf = (lensId: string, name: string): string => `${lensId}::${name.toLowerCase()}`;
 export const series = (E: Entry): SeriesPoint[] => E.liveSeries;
 export const lensById = (id: string | null | undefined): Lens | undefined => state.lenses.find(l => l.id === id);
@@ -56,6 +59,7 @@ export function ensureEntry(lens: Lens, def: TopicDef): Entry {
       lastAlert: null,
     };
     state.rt.set(key, E);
+    E = state.rt.get(key); // the reactive view of it, so later edits reach the screen
   }
   E.def = def;
   E.slot = def.slot;
