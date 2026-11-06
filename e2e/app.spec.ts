@@ -1,0 +1,92 @@
+// PRECOG / Trend Radar · The built app in a real browser, at phone and desktop widths, with every outside API
+// answered from fixtures (see mock-apis.ts). Runs in CI after the build.
+import { expect, test, type Page } from '@playwright/test';
+import { SPIKING, mockApis } from './mock-apis';
+
+/** Opens the app and waits until the first data load has finished. */
+async function open(page: Page) {
+  await mockApis(page);
+  await page.goto('/');
+  await expect(page.locator('.status')).toContainText('Live · updated', { timeout: 30_000 });
+}
+const heroTitle = (page: Page) => page.locator('.channel-hero h2');
+const stories = (page: Page) => page.locator('#p-stories');
+
+test('loads every panel with data', async ({ page }) => {
+  await open(page);
+  await expect(heroTitle(page)).toHaveText('World');
+  await expect(page.locator('#p-brief .brief-list li').first()).toBeVisible();
+  await expect(page.locator('#p-brief .movers tbody tr')).toHaveCount(6);
+  await expect(page.locator('#p-signal svg path').first()).toBeVisible(); // the trend line
+  await expect(page.locator('#p-radar .blip')).toHaveCount(6);
+  await expect(page.locator('#p-data')).toContainText('ECB deposit rate');
+  await expect(page.locator('#p-data')).toContainText('CO₂ in the air');
+});
+
+test('flags the topic that spikes, in the gist and the movers table', async ({ page }) => {
+  await open(page);
+  await expect(page.locator('#p-brief .brief-list')).toContainText(`running hot: ${SPIKING}`);
+  await expect(page.locator('#p-brief .movers tbody tr').filter({ hasText: SPIKING })).toContainText('ALERT');
+});
+
+test('never scrolls sideways', async ({ page }) => {
+  await open(page);
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  );
+  expect(overflow).toBeLessThanOrEqual(0);
+});
+
+test('switches channel from the channel bar and with number keys, and remembers it', async ({ page }) => {
+  await open(page);
+  await page.locator('.channels .channel').nth(1).click();
+  await expect(heroTitle(page)).toHaveText('The Great Simplification');
+  await page.locator('body').press('3');
+  await expect(heroTitle(page)).toHaveText('Energy & power');
+  await page.reload();
+  await expect(heroTitle(page)).toHaveText('Energy & power');
+});
+
+test('switches theme and keeps it after a reload', async ({ page }) => {
+  await open(page);
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await page.getByRole('button', { name: 'Switch to light theme' }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+});
+
+test('shows each stream’s items, matched to the channel’s topics', async ({ page }) => {
+  await open(page);
+  const tab = (name: string) => stories(page).locator('.seg button', { hasText: name });
+  await tab('Forecasts').click();
+  await expect(stories(page).locator('li.story').first()).toContainText('Will');
+  await tab('Hacker News').click();
+  await expect(stories(page).locator('li.story').first()).toContainText('story');
+  await expect(stories(page).locator('li.story .stopic').first()).toBeVisible(); // the topic it names
+  await tab('Reading').click();
+  await expect(stories(page).locator('li.story').first()).toBeVisible();
+});
+
+test('always follows the built-in sites: they cannot be removed', async ({ page }) => {
+  await open(page);
+  await stories(page).locator('.seg button', { hasText: 'Reading' }).click();
+  const chips = stories(page).locator('.site-chip');
+  await expect(chips).toHaveCount(2);
+  await expect(chips).toContainText(['The Great Simplification', 'The Marginalian']);
+  await expect(chips.locator('button')).toHaveCount(0);
+});
+
+test('adds a topic, and refuses a person', async ({ page }) => {
+  await open(page);
+  const topics = page.locator('#p-watch');
+  await topics.getByRole('button', { name: 'Remove NATO' }).click(); // the World channel is full: make room
+  const input = topics.locator('#add-input');
+  await input.fill('Elon Musk');
+  await input.press('Enter');
+  await expect(topics.locator('.watch-msg')).toContainText('looks like a person');
+  await input.fill('Heat pumps');
+  await input.press('Enter');
+  await expect(topics.locator('.chip', { hasText: 'Heat pumps' })).toBeVisible();
+  await expect(page.locator('#p-signal')).toContainText('Heat pumps'); // charted straight away
+});

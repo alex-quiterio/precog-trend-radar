@@ -162,15 +162,18 @@ what is page-wide by nature is shared: the lists of registered sources, the foll
 storage), and the queue that keeps GitHub searches inside the browser's rate limit. Each panel re-renders when what it reads changes. Every API reply is read through a typed parser that rejects an unexpected shape
 with a clear message, and TypeScript runs in strict mode.
 
-| Script           | Does                                                     |
-| ---------------- | -------------------------------------------------------- |
-| `npm run dev`    | Vite dev server with hot reload                          |
-| `npm run build`  | type-check, then build the single-file `dist/index.html` |
-| `npm test`       | Vitest unit tests                                        |
-| `npm run lint`   | `vue-tsc` type-check and Prettier check                  |
-| `npm run format` | Prettier, configured in `.prettierrc`                    |
+| Script             | Does                                                                              |
+| ------------------ | --------------------------------------------------------------------------------- |
+| `npm run dev`      | Vite dev server with hot reload                                                   |
+| `npm run build`    | type-check, then build the single-file `dist/index.html`                          |
+| `npm test`         | Vitest unit tests                                                                 |
+| `npm run test:e2e` | the built app in Chromium at phone and desktop widths (run `npm run build` first) |
+| `npm run lint`     | `vue-tsc` type-check and Prettier check                                           |
+| `npm run format`   | Prettier, configured in `.prettierrc`                                             |
 
-Every push to `main` runs lint, tests and the build in GitHub Actions, then deploys `dist/` to GitHub Pages.
+Every push to `main` runs lint, unit tests and the build in GitHub Actions, then the browser tests against the
+build (Chromium, phone and desktop widths, every outside API answered from fixtures so they never depend on the
+network), then deploys `dist/` to GitHub Pages.
 
 ## Add a data source
 

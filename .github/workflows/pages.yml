@@ -1,4 +1,4 @@
-# Type-check, test and build PRECOG, then publish dist/ to GitHub Pages.
+# Type-check, test and build PRECOG, test the build in a browser, then publish dist/ to GitHub Pages.
 name: Build and deploy to GitHub Pages
 
 on:
@@ -33,6 +33,17 @@ jobs:
         run: npm test
       - name: Build single-file dashboard
         run: npm run build
+      - name: Install Chromium for the browser tests
+        run: npx playwright install --with-deps chromium
+      - name: Browser tests (phone and desktop, APIs answered from fixtures)
+        run: npm run test:e2e
+      - name: Keep traces of failed browser tests
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: test-results
+          retention-days: 7
       - uses: actions/configure-pages@v5
         if: github.event_name != 'pull_request'
       - uses: actions/upload-pages-artifact@v3
