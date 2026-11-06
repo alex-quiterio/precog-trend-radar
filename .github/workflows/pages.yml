@@ -12,8 +12,10 @@ permissions:
   pages: write
   id-token: write
 
+# A newer push cancels an older build of the same branch (pull requests get their own group, so a
+# Dependabot PR never cancels a main build). Deploys are serialised separately below and never cancelled.
 concurrency:
-  group: pages
+  group: build-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -55,6 +57,11 @@ jobs:
     if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
+    # One deploy at a time, and never cancelled midway: a cancelled deploy-pages leaves the Pages deployment
+    # open, and the next one sits in "deployment_queued" until GitHub gives up on the old one.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
