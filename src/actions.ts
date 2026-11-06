@@ -10,7 +10,7 @@ import { saveLook } from '@features/brief';
 import type { GitHub } from '@features/github';
 import type { MyGitHub } from '@features/github-me';
 import { githubToken, setGithubToken } from '@sources/github/auth';
-import { activeChannel } from '@/channels';
+import { activeChannel, channels, isBuiltInLens } from '@/channels';
 import { guardianKey, setGuardianKey } from '@sources/guardian';
 import { probeSite, readingSites, saveReadingSites } from '@sources/reading';
 import type { LiveLoop } from '@/live';
@@ -111,15 +111,28 @@ export function createActions(app: AppStore, { live, stories, github, myGithub }
     watchMsg(`New lens “${name}”. Add up to ${MAX_TOPICS} topics.`);
     ui.focusAdd++;
   }
-  function removeLens(id: string): void {
+  /**
+   * Deletes a channel you made, with its topics, after asking. Built-in channels can't be deleted. If it was on
+   * screen, the channel before it in the bar takes its place.
+   */
+  function removeLens(id: string, ask: (q: string) => boolean = q => window.confirm(q)): boolean {
     const lens = app.lensById(id);
-    if (!lens || state.lenses.length < 2) return;
-    if (!confirm(`Remove the lens “${lens.name}” and its ${lens.topics.length} topics?`)) return;
+    if (!lens || isBuiltInLens(id) || state.lenses.length < 2) return false;
+    const n = lens.topics.length;
+    if (!ask(`Delete the channel “${lens.name}”${n ? ` and its ${n} topic${n === 1 ? '' : 's'}` : ''}?`)) return false;
+    const list = channels(app);
+    const before = list[Math.max(0, list.findIndex(c => c.lensId === id) - 1)];
     state.lenses = state.lenses.filter(l => l !== lens);
     app.syncEntries();
-    state.activeLens = state.lenses[0].id;
+    if (state.activeLens === id) {
+      state.activeLens = app.lensById(before.lensId) ? before.lensId : state.lenses[0].id;
+      ui.swap++;
+      void stories.load();
+    }
     app.saveLenses();
     app.savePrefs();
+    watchMsg(`Deleted the channel “${lens.name}”.`);
+    return true;
   }
   function selectLens(id: string): void {
     if (!app.lensById(id) || id === state.activeLens) return;

@@ -38,7 +38,7 @@
 <script lang="ts">
 import { useApp } from '@/context';
 import { ref, computed, watch, nextTick, defineComponent } from 'vue';
-import { CHANNELS } from '@/channels';
+import { isBuiltInLens } from '@/channels';
 import { MAX_TOPICS } from '@core/config';
 import type { Entry } from '@/types';
 import TopicDot from '@components/TopicDot.vue';
@@ -64,7 +64,7 @@ export default defineComponent({
         list,
         sel: app.selectedEntry(),
         full: list.length >= MAX_TOPICS,
-        own: !!lens && !CHANNELS.some(c => c.lensId === lens.id),
+        own: !!lens && !isBuiltInLens(lens.id),
         meta: `${list.length} of ${MAX_TOPICS} · click one to chart it`,
       };
     });

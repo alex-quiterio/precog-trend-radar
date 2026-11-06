@@ -20,6 +20,8 @@ export interface Channel {
   sites?: string[];
   /** Extra views: the GitHub topic and personal panels. */
   github?: boolean;
+  /** A channel you made yourself (from the "+" in the channel bar): only these can be deleted. */
+  own?: boolean;
   /** A country channel. It never shows another country's data or topics, not even in "Elsewhere". */
   country?: 'pt' | 'nl';
 }
@@ -153,9 +155,12 @@ export function channels(app: AppStore): Channel[] {
       lensId: l.id,
       datapoints: [],
       streams: ['reading', 'forecasts', 'hn'],
+      own: true,
     }));
   return [...CHANNELS.filter(c => app.lensById(c.lensId)), ...own];
 }
+/** True for a lens PRECOG ships with (its channel can't be deleted). */
+export const isBuiltInLens = (lensId: string): boolean => CHANNELS.some(c => c.lensId === lensId);
 /** The channel showing a lens (undefined for none). */
 export const channelOfLens = (app: AppStore, lensId: string): Channel | undefined =>
   channels(app).find(c => c.lensId === lensId);

@@ -103,3 +103,24 @@ describe('contexts', () => {
     expect(a.app.state).not.toBe(b.app.state);
   });
 });
+
+describe('deleting channels', () => {
+  it('deletes a channel you made, after asking, and shows the one before it', () => {
+    actions.addLens('Bikes');
+    const id = app.state.activeLens as string;
+    expect(actions.removeLens(id, () => false)).toBe(false); // you said no
+    expect(app.lensById(id)).toBeTruthy();
+    const ask = vi.fn(() => true);
+    expect(actions.removeLens(id, ask)).toBe(true);
+    expect(ask).toHaveBeenCalledWith('Delete the channel “Bikes”?');
+    expect(app.lensById(id)).toBeUndefined();
+    expect(app.state.activeLens).toBe('github'); // the last built-in channel, just before it in the bar
+    expect(stories.load).toHaveBeenCalled();
+  });
+  it('never deletes a built-in channel', () => {
+    const ask = vi.fn(() => true);
+    expect(actions.removeLens('world', ask)).toBe(false);
+    expect(ask).not.toHaveBeenCalled();
+    expect(app.lensById('world')).toBeTruthy();
+  });
+});

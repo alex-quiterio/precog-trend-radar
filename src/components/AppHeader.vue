@@ -49,22 +49,34 @@
     </div>
     <settings-bar v-if="settingsOpen" @close="closeSettings"></settings-bar>
     <nav class="channels" aria-label="Channels">
-      <button
-        v-for="c in view.list"
-        :key="c.id"
-        type="button"
-        class="channel"
-        :class="{ on: c.id === view.active }"
-        :aria-current="c.id === view.active ? 'page' : undefined"
-        :aria-label="c.label + (c.heat ? `, ${c.heat.n} ${c.heat.level}` : '')"
-        :aria-keyshortcuts="c.n <= 9 ? String(c.n) : undefined"
-        :title="c.n <= 9 ? `${c.label} (press ${c.n})` : c.label"
-        @click="selectLens(c.lensId)"
-      >
-        <channel-icon :name="c.icon"></channel-icon>
-        <span class="ch-label">{{ c.label }}</span>
-        <span v-if="c.heat" :class="['heat', c.heat.level]" aria-hidden="true">{{ c.heat.n }}</span>
-      </button>
+      <template v-for="c in view.list" :key="c.id">
+        <button
+          type="button"
+          class="channel"
+          :class="{ on: c.id === view.active }"
+          :aria-current="c.id === view.active ? 'page' : undefined"
+          :aria-label="c.label + (c.heat ? `, ${c.heat.n} ${c.heat.level}` : '')"
+          :aria-keyshortcuts="c.n <= 9 ? String(c.n) : undefined"
+          :title="c.n <= 9 ? `${c.label} (press ${c.n})` : c.label"
+          @click="selectLens(c.lensId)"
+        >
+          <channel-icon :name="c.icon"></channel-icon>
+          <span class="ch-label">{{ c.label }}</span>
+          <span v-if="c.heat" :class="['heat', c.heat.level]" aria-hidden="true">{{ c.heat.n }}</span>
+        </button>
+        <button
+          v-if="c.own && c.id === view.active"
+          type="button"
+          class="ch-del no-print"
+          :aria-label="'Delete channel ' + c.label"
+          :title="'Delete channel ' + c.label"
+          @click="removeLens(c.lensId)"
+        >
+          <svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true">
+            <path d="M2.5 2.5l7 7M9.5 2.5l-7 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+          </svg>
+        </button>
+      </template>
       <form v-if="view.canAdd && adding" class="ch-new" autocomplete="off" @submit.prevent="create">
         <label class="sr-only" for="ch-name">New channel name</label>
         <input
@@ -114,7 +126,7 @@ export default defineComponent({
     const gh = github.state;
     const me = myGithub.state;
     const stories = loader.status;
-    const { addLens, lensHeat, selectLens } = actions;
+    const { addLens, lensHeat, removeLens, selectLens } = actions;
     const { state } = app;
     const view = computed(() => {
       return {
@@ -152,6 +164,7 @@ export default defineComponent({
       view,
       refresh: live.refresh,
       selectLens,
+      removeLens: (id: string) => void removeLens(id),
       settingsOpen,
       closeSettings,
       adding,
@@ -268,6 +281,33 @@ export default defineComponent({
 }
 .channel.on::after {
   transform: scaleX(1);
+}
+/* Delete: a small × right after the active channel, only for channels you made */
+.ch-del {
+  align-self: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin: 0 6px 0 -4px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+.ch-del svg {
+  display: block;
+}
+.ch-del:hover,
+.ch-del:focus-visible {
+  color: var(--alert);
+  background: var(--accent-soft);
 }
 .ch-add {
   align-self: center;
