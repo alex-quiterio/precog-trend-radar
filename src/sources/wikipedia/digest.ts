@@ -3,6 +3,10 @@
 //   news      Wikipedia's "In the news" names it: the sentence its editors wrote, with the day.
 //   headline  no such story, but in the last two days the Guardian ran an article on it (from the trend
 //             fetch's cache, so no extra call): that headline.
+// With a Guardian key, a topic in the news that the Guardian wrote about in the last two days leads with that
+// headline (hours old), and keeps "In the news" (often days old) as its second line. The newest Guardian
+// articles across the topics are listed below the stories (guardianLatest), all from that same cache.
+// Fresh headlines come first, then news without one, then quiet topics.
 //   quiet     neither: only what the topic is (its Wikipedia description). Its attention moved, but there is
 //             no fresh story to tell, and an encyclopedia lead is not news.
 // A channel can scope its stories to its own sites (`stories` in channels.ts): then neither "In the news" nor
@@ -123,10 +127,40 @@ export interface DigestItem {
   now: number | null;
   week: number | null;
   coverage: string;
+  /** A headline's second telling: the "In the news" story on the same topic, when there is one. */
+  also?: { text: string; url: string; source: string; t: number | null } | null;
 }
-const RANK = { news: 0, headline: 1, quiet: 2 };
+/** The Guardian's articles on a topic from the last two days, newest first (from the trend fetch's cache). */
+const freshGuardian = (E: Entry, now: number) =>
+  guardianArticles(queryOf(E).q)
+    .filter(a => now - a.t < 2 * DAY)
+    .sort((a, b) => b.t - a.t);
 /**
- * The digest for these topics: the news, then fresh headlines, then quiet ones; within each, the biggest move
+ * The newest Guardian articles naming any of these topics in the last two days, as headlines for the list under
+ * the stories, leaving out the ones in `skip` (already told). Empty without a Guardian key (nothing is cached).
+ */
+export function guardianLatest(entries: Entry[], skip: Set<string>, now = Date.now(), n = 4): ReadingItem[] {
+  const seen = new Set(skip);
+  return entries
+    .flatMap(E => freshGuardian(E, now))
+    .sort((a, b) => b.t - a.t)
+    .filter(a => !seen.has(a.url) && seen.add(a.url))
+    .slice(0, n)
+    .map(a => ({
+      id: a.id,
+      origin: 'https://www.theguardian.com',
+      site: 'The Guardian',
+      kind: a.section,
+      num: null,
+      title: a.title,
+      url: a.url,
+      t: a.t,
+      text: '',
+    }));
+}
+const RANK = { headline: 0, news: 1, quiet: 2 };
+/**
+ * The digest for these topics: fresh headlines, then the news, then quiet ones; within each, the biggest move
  * first. With a scope, headlines come only from its sites' posts (fresh for `days`), never the Guardian.
  */
 export function digestItems(
@@ -143,10 +177,7 @@ export function digestItems(
         ? s.post && now - s.post.t < scope.days * DAY
           ? { title: s.post.title, url: s.post.url, t: s.post.t, source: s.post.site }
           : undefined
-        : guardianArticles(queryOf(E).q)
-            .filter(a => now - a.t < 2 * DAY)
-            .sort((a, b) => b.t - a.t)
-            .map(a => ({ title: a.title, url: a.url, t: a.t, source: 'The Guardian' }))[0];
+        : freshGuardian(E, now).map(a => ({ title: a.title, url: a.url, t: a.t, source: 'The Guardian' }))[0];
       const base = {
         key: E.key,
         wiki: s.summary.url,
@@ -154,17 +185,26 @@ export function digestItems(
         week: weekChange(E.liveSeries),
         coverage: coverageUrl(queryOf(E).q),
       };
-      const item: DigestItem = s.news
+      const news = s.news
         ? {
-            ...base,
-            kind: 'news',
             text: s.news.text,
             url: s.summary.url,
             source: `In the news${s.news.day ? ' · ' + s.news.day : ''}`,
             t: null,
           }
-        : fresh
-          ? { ...base, kind: 'headline', text: fresh.title, url: fresh.url, source: fresh.source, t: fresh.t }
+        : null;
+      const item: DigestItem = fresh
+        ? {
+            ...base,
+            kind: 'headline',
+            text: fresh.title,
+            url: fresh.url,
+            source: fresh.source,
+            t: fresh.t,
+            also: news,
+          }
+        : news
+          ? { ...base, kind: 'news', ...news }
           : {
               ...base,
               kind: 'quiet',

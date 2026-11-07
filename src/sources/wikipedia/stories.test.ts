@@ -6,7 +6,7 @@ import { memoryBackend, useBackend } from '@core/storage';
 import { utcDay } from '@sources/registry';
 import type { Entry } from '@/types';
 import type { ReadingItem } from '@sources/reading';
-import { type DigestData, digestItems, latestPosts, postFor, storyFor, weekChange } from './digest';
+import { type DigestData, digestItems, guardianLatest, latestPosts, postFor, storyFor, weekChange } from './digest';
 
 const DAY = 86400e3;
 
@@ -58,7 +58,7 @@ describe('Wikipedia stories', () => {
     expect(weekChange(series.slice(-3))).toBeNull();
     expect(weekChange([])).toBeNull();
   });
-  it('tells the news, then fresh headlines, and never passes an article lead off as a story', () => {
+  it('tells fresh headlines, then the news, and never passes an article lead off as a story', () => {
     const now = Date.now();
     // A Guardian article on "Gaza war" from an hour ago, as the trend fetch caches it.
     useBackend(
@@ -94,17 +94,18 @@ describe('Wikipedia stories', () => {
     ]);
     const items = digestItems(entries, data, now);
     expect(items.map(d => [d.key, d.kind])).toEqual([
-      ['a', 'news'],
       ['b', 'headline'],
+      ['a', 'news'],
       ['c', 'quiet'],
     ]);
-    expect(items[0].source).toBe('In the news · Nov 3');
-    expect(items[0].week).toBeCloseTo(200);
-    expect(items[1]).toMatchObject({
+    expect(items[0]).toMatchObject({
       text: 'Ceasefire talks resume',
       url: 'https://gu.com/g1',
       source: 'The Guardian',
+      also: null,
     });
+    expect(items[1].source).toBe('In the news · Nov 3');
+    expect(items[1].week).toBeCloseTo(200);
     expect(items[2].text).toBe('A quiet thing');
   });
 
@@ -181,5 +182,48 @@ describe('Wikipedia stories', () => {
     const posts = [item('a', 1), item('b', 3), item('c', 2), item('old', 72), item('d', 4), item('e', 5)];
     const told = new Set(['https://www.dutchnews.nl/c']);
     expect(latestPosts(posts, told, now).map(p => p.title)).toEqual(['a', 'b', 'd', 'e']);
+  });
+  it('with a Guardian key, leads a story in the news with its fresh headline and lists its newest below', () => {
+    const now = Date.now();
+    const art = (id: string, title: string, hoursAgo: number) => ({
+      id,
+      title,
+      url: `https://gu.com/${id}`,
+      section: 'World',
+      t: now - hoursAgo * 3600e3,
+    });
+    useBackend(
+      memoryBackend({
+        'precog.guardian.v2."binance hack"': {
+          day: utcDay(now),
+          articles: [art('b1', 'Binance hackers launder the loot', 2), art('b0', 'Older take', 70)],
+        },
+        'precog.guardian.v2."gaza war"': {
+          day: utcDay(now),
+          articles: [art('g1', 'Ceasefire talks resume', 1), art('b1', 'Binance hackers launder the loot', 2)],
+        },
+      }),
+    );
+    const entry = (key: string, name: string) =>
+      ({ key, name, def: { name, slot: 0 }, lang: 'en', country: null, meta: {}, liveSeries: [] }) as unknown as Entry;
+    const entries = [entry('a', 'Binance hack'), entry('b', 'Gaza war')];
+    const sum = parseSummary(summary);
+    const data: DigestData = new Map([['a', { key: 'a', summary: sum, news: parseNewsStories(feed)[0] }]]);
+    const [lead] = digestItems(entries, data, now);
+    // Hours old beats "In the news" (days old): the Guardian's headline leads, the news is its second line.
+    expect(lead).toMatchObject({ kind: 'headline', source: 'The Guardian', text: 'Binance hackers launder the loot' });
+    expect(lead.also).toMatchObject({ source: 'In the news · Nov 3', t: null });
+    // Newest first, each once, the old one out, and what a story already tells left out.
+    expect(guardianLatest(entries, new Set(), now).map(a => a.title)).toEqual([
+      'Ceasefire talks resume',
+      'Binance hackers launder the loot',
+    ]);
+    expect(guardianLatest(entries, new Set(['https://gu.com/b1']), now).map(a => a.title)).toEqual([
+      'Ceasefire talks resume',
+    ]);
+    // Without a key nothing is cached, so there is nothing to add.
+    useBackend(memoryBackend({}));
+    expect(digestItems(entries, data, now)[0]).toMatchObject({ kind: 'news', source: 'In the news · Nov 3' });
+    expect(guardianLatest(entries, new Set(), now)).toEqual([]);
   });
 });

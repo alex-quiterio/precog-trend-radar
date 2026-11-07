@@ -13,6 +13,10 @@
             <week-move :d="d"></week-move>
           </div>
           <a class="dg-text" :href="d.url" target="_blank" rel="noopener noreferrer">{{ d.text }}</a>
+          <p v-if="d.also" class="dg-also">
+            <span class="dg-when">{{ d.also.source }}{{ d.also.t ? ' · ' + ago(d.also.t, ui.now) : '' }}</span>
+            <a :href="d.also.url" target="_blank" rel="noopener noreferrer">{{ d.also.text }}</a>
+          </p>
           <div class="dg-foot">
             <span v-if="d.why">{{ d.why }}</span>
             <a v-if="d.kind === 'headline'" :href="d.wiki" target="_blank" rel="noopener noreferrer">Background ↗</a>
@@ -21,6 +25,16 @@
         </div>
       </li>
     </ol>
+
+    <template v-if="latest.length">
+      <h4 class="dg-sub">{{ latestTitle }}</h4>
+      <ul class="dg dg-latest">
+        <li v-for="p in latest" :key="p.id">
+          <a class="dg-head" :href="p.url" target="_blank" rel="noopener noreferrer">{{ p.title }}</a>
+          <span class="dg-when">{{ p.site }} · {{ ago(p.t, ui.now) }}</span>
+        </li>
+      </ul>
+    </template>
 
     <template v-if="quiet.length">
       <h4 class="dg-sub">{{ stories.length ? 'Also moving, no fresh story' : 'Moving, but no fresh story yet' }}</h4>
@@ -32,16 +46,6 @@
           </button>
           <a class="dg-what" :href="d.url" target="_blank" rel="noopener noreferrer">{{ d.text }}</a>
           <week-move :d="d"></week-move>
-        </li>
-      </ul>
-    </template>
-
-    <template v-if="latest.length">
-      <h4 class="dg-sub">{{ latestTitle }}</h4>
-      <ul class="dg dg-latest">
-        <li v-for="p in latest" :key="p.id">
-          <a class="dg-head" :href="p.url" target="_blank" rel="noopener noreferrer">{{ p.title }}</a>
-          <span class="dg-when">{{ p.site }} · {{ ago(p.t, ui.now) }}</span>
         </li>
       </ul>
     </template>
@@ -68,6 +72,7 @@ import {
   type DigestItem,
   type StoryScope,
   digestItems,
+  guardianLatest,
   latestPosts,
   loadDigest,
   sitePosts,
@@ -174,15 +179,18 @@ export default defineComponent({
     const meta = computed(() => (at.value ? `checked ${ago(at.value, ui.now)}` : loading.value ? 'reading…' : ''));
     const latest = computed(() => {
       const st = channel.value.stories;
-      if (!st?.latest) return [];
-      const told = new Set(items.value.filter(d => d.kind !== 'quiet').map(d => d.url));
-      return latestPosts(posts.value, told, ui.now, st.days ?? 2);
+      const told = new Set(items.value.flatMap(d => (d.kind === 'quiet' ? [] : [d.url, d.also?.url ?? ''])));
+      // The world's channels list the Guardian's newest on their topics (only with a key: nothing is cached without).
+      if (!st) return guardianLatest(entries(), told, ui.now);
+      return st.latest ? latestPosts(posts.value, told, ui.now, st.days ?? 2) : [];
     });
     return {
       ui,
       items,
       latest,
-      latestTitle: computed(() => channel.value.stories?.latest?.title ?? ''),
+      latestTitle: computed(() =>
+        channel.value.stories ? (channel.value.stories.latest?.title ?? '') : 'Today in the Guardian',
+      ),
       stories: computed(() => items.value.filter(d => d.kind !== 'quiet')),
       quiet: computed(() => items.value.filter(d => d.kind === 'quiet')),
       loading,
@@ -354,6 +362,26 @@ export default defineComponent({
 }
 .dg-wait i + i {
   width: 70%;
+}
+.dg-also {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  margin: 6px 0 0;
+  padding-left: 10px;
+  border-left: 2px solid var(--hair);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.dg-also a {
+  color: var(--ink-2);
+  text-decoration: none;
+}
+.dg-also a:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 3px;
 }
 .dg-latest li {
   display: flex;

@@ -59,15 +59,18 @@ voice:
 
 | Channel                  | Stories from                                                          | Fresh for | Listed below                         |
 | ------------------------ | --------------------------------------------------------------------- | --------- | ------------------------------------ |
-| World, Markets           | Wikipedia's **In the news**, then the **Guardian** (with a key)       | 2 days    | —                                    |
+| World, Markets           | Wikipedia's **In the news**, and the **Guardian** first (with a key)  | 2 days    | Today in the Guardian (with a key)   |
 | The Great Simplification | its episodes and Frankly                                              | 30 days   | New from The Great Simplification    |
 | The Marginalian          | its essays                                                            | 30 days   | New on The Marginalian               |
 | Portugal & the land      | Wilder, Green Savers, Agroportal, matched in Portuguese               | 2 days    | Today on the land in Portugal        |
 | Alternative Amsterdam    | DutchNews.nl, and Commons Network and Repair Café (born in Amsterdam) | 2 days    | Today in the Netherlands (DutchNews) |
 
-On World and Markets, a topic in **In the news** gets that story as its editors wrote it, with the day; without
-one, a Guardian article from the last two days gives the headline. On the others, a post naming the topic in its
-title is its story, and the newest headlines from those sites are listed below, whatever they name. A topic
+On World and Markets, a topic in **In the news** gets that story as its editors wrote it, with the day. With a
+Guardian key, a topic the Guardian wrote about in the last two days leads with that headline instead (hours old,
+where an In the news entry can be a week old), with the In the news sentence beneath it; those fresh headlines
+come first, and **Today in the Guardian** lists its newest articles on the channel's topics (from the trend
+fetch, so no extra calls). On the others, a post naming the topic in its title is its story, and the newest
+headlines from those sites are listed below the stories, whatever they name. A topic
 with no story is listed apart, in one line saying only what it is: its attention moved, but there is no fresh
 story to tell, and an encyclopedia's opening paragraph is not news. Each story shows how far the topic's
 attention moved in a week (▲ +120% week), why it was picked, and a link to a week of coverage.

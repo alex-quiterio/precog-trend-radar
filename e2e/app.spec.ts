@@ -144,6 +144,19 @@ test('World opens with today’s stories: the news told in a sentence, quiet top
   await expect(digest.locator('.dg-quiet li').first()).toContainText('About');
 });
 
+test('with a Guardian key, World leads with fresh Guardian headlines and lists the newest', async ({ page }) => {
+  // The Guardian is read a call a second (its rate limit), so the whole load takes a minute: World's topics come
+  // first, and the test waits for those rather than for every channel.
+  await mockApis(page, { echoes: true, guardian: true });
+  await page.goto('/');
+  const digest = page.locator('#p-digest');
+  // Hours-old headlines come before "In the news", which stays as the story's second line.
+  await expect(digest.locator('.dg-item').first()).toContainText('The Guardian', { timeout: 45_000 });
+  await expect(digest.locator('.dg-also').first()).toContainText('In the news');
+  await expect(digest.locator('.dg-sub').first()).toHaveText('Today in the Guardian');
+  await expect(digest.locator('.dg-latest li').first()).toContainText('The Guardian');
+});
+
 test('Portugal opens with today’s stories and shows what a litre of fuel costs, from DGEG', async ({ page }) => {
   await open(page);
   await page.locator('body').press('5');

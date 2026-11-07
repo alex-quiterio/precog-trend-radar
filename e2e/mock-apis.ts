@@ -68,11 +68,36 @@ function markets(url: URL) {
 }
 
 /**
+ * Guardian articles naming the searched phrase: one a day for the 45 days asked for, and two in the last few
+ * hours, newest first (the search's order-by=newest). Generated, so every topic has fresh headlines.
+ */
+function guardianSearch(url: URL) {
+  const q = (url.searchParams.get('q') || '').replace(/"/g, '');
+  const now = Date.now();
+  const at = (t: number, i: number) => ({
+    id: `world/${q}-${i}`.replace(/\W+/g, '-'),
+    type: 'article',
+    sectionId: 'world',
+    sectionName: 'World news',
+    webPublicationDate: new Date(t).toISOString().replace(/\.\d+Z$/, 'Z'),
+    webTitle: i === 0 ? `Guardian: what's new on ${q}` : `${q}: report ${i}`,
+    webUrl: `https://www.theguardian.com/world/${encodeURIComponent(q)}/${i}`,
+    apiUrl: '',
+    isHosted: false,
+  });
+  const results = [at(now - 2 * 3600e3, 0), at(now - 5 * 3600e3, 1)];
+  for (let d = 1; d < 45; d++) results.push(at(now - d * DAY, d + 1));
+  return { response: { status: 'ok', total: results.length, pages: 1, currentPage: 1, results } };
+}
+
+/**
  * Answers every outside request. With `echoes`, World's daily pick gets the saved replies of 6 Nov 2026
  * (Wikipedia's feed, Wikidata, Hacker News's front page, Manifold's busiest markets); without, Wikipedia's
  * feed is missing, so World keeps its shipped topics and the other tests can rely on them.
  */
-export async function mockApis(page: Page, { echoes = false } = {}): Promise<void> {
+export async function mockApis(page: Page, { echoes = false, guardian = false } = {}): Promise<void> {
+  // With `guardian`, a key is set before the app starts, so the trend fetch reads the Guardian below.
+  if (guardian) await page.addInitScript(() => localStorage.setItem('precog.guardian.key', JSON.stringify('test-key')));
   await page.route(
     url => !/^(localhost|127\.0\.0\.1)$/.test(new URL(url).hostname),
     async route => {
@@ -115,6 +140,11 @@ export async function mockApis(page: Page, { echoes = false } = {}): Promise<voi
       if (h === 'hn.algolia.com')
         return json(route, p.includes('search_by_date') ? { hits: [], nbHits: 0 } : hnStories(url));
       if (h === 'api.manifold.markets') return json(route, markets(url));
+      if (h === 'content.guardianapis.com')
+        return json(
+          route,
+          p === '/search' ? guardianSearch(url) : { response: { status: 'ok', editorsPicks: [], mostViewed: [] } },
+        );
       if (p.includes('/wp-json/wp/v2/pages')) return json(route, []);
       if (p.includes('/wp-json/')) return json(route, fixture('reading', 'wp-posts'));
       if (h === 'data-api.ecb.europa.eu')
