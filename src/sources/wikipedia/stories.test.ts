@@ -5,7 +5,8 @@ import { lead, parseNewsStories, parseSummary, plainText } from './parse';
 import { memoryBackend, useBackend } from '@core/storage';
 import { utcDay } from '@sources/registry';
 import type { Entry } from '@/types';
-import { type DigestData, digestItems, storyFor, weekChange } from './digest';
+import type { ReadingItem } from '@sources/reading';
+import { type DigestData, digestItems, latestPosts, postFor, storyFor, weekChange } from './digest';
 
 const DAY = 86400e3;
 
@@ -105,5 +106,80 @@ describe('Wikipedia stories', () => {
       source: 'The Guardian',
     });
     expect(items[2].text).toBe('A quiet thing');
+  });
+
+  it("on a scoped channel, tells stories from its own sites only, in Portuguese too, never the Guardian's", () => {
+    const now = Date.now();
+    // A Guardian article on "wildfire" from an hour ago: a scoped channel leaves it out.
+    useBackend(
+      memoryBackend({
+        'precog.guardian.v2.wildfire': {
+          day: utcDay(now),
+          articles: [
+            { id: 'g2', title: 'Fires in California', url: 'https://gu.com/g2', section: 'US', t: now - 3600e3 },
+          ],
+        },
+      }),
+    );
+    const post = (title: string, hoursAgo: number, site = 'Agroportal'): ReadingItem => ({
+      id: title,
+      origin: 'https://www.agroportal.pt',
+      site,
+      kind: 'News',
+      num: null,
+      title,
+      url: `https://www.agroportal.pt/${encodeURIComponent(title)}`,
+      t: now - hoursAgo * 3600e3,
+      text: '',
+    });
+    const fires = {
+      key: 'portugal::wildfires',
+      lensId: 'portugal',
+      name: 'Wildfires',
+      def: { name: 'Wildfires', slot: 0, wiki: 'Wildfire', q: 'wildfire' },
+      lang: 'en',
+      country: null,
+      meta: {},
+      liveSeries: [],
+    } as unknown as Entry;
+    const posts = [
+      post('Incêndios: Douro propõe 52 projetos', 20),
+      post('Incêndios: balanço de 2025', 60), // older than two days
+      post('Apoios à agricultura batem recorde', 1), // names it nowhere in the title
+      post('Proteção Civil reforça meios contra fogos florestais', 5, 'Green Savers'),
+    ];
+    expect(postFor(posts, fires, now)?.title).toBe('Proteção Civil reforça meios contra fogos florestais');
+    expect(postFor(posts.slice(1, 3), fires, now)).toBeNull();
+    expect(postFor(posts.slice(1, 3), fires, now, 30)?.title).toBe('Incêndios: balanço de 2025'); // a monthly window
+
+    const sum = parseSummary(summary);
+    const data: DigestData = new Map([[fires.key, { key: fires.key, summary: sum, news: null, post: posts[0] }]]);
+    expect(digestItems([fires], data, now, { days: 2 })[0]).toMatchObject({
+      kind: 'headline',
+      text: 'Incêndios: Douro propõe 52 projetos',
+      source: 'Agroportal',
+    });
+    // Without a scope it's the world's: the Guardian's headline, and the site's post isn't read.
+    expect(digestItems([fires], data, now)[0]).toMatchObject({ source: 'The Guardian', text: 'Fires in California' });
+    // A post older than the window is no story.
+    const stale = new Map([[fires.key, { key: fires.key, summary: sum, news: null, post: posts[1] }]]);
+    expect(digestItems([fires], stale, now, { days: 2 })[0].kind).toBe('quiet');
+  });
+  it('lists the newest headlines, leaving out the ones already told as a topic’s story', () => {
+    const now = Date.now();
+    const item = (title: string, hoursAgo: number): ReadingItem => ({
+      id: title,
+      origin: 'https://www.dutchnews.nl',
+      site: 'DutchNews.nl',
+      kind: 'News',
+      num: null,
+      title,
+      url: `https://www.dutchnews.nl/${title}`,
+      t: now - hoursAgo * 3600e3,
+      text: '',
+    });
+    const posts = [item('a', 1), item('b', 3), item('c', 2), item('old', 72), item('d', 4), item('e', 5)];
+    const told = new Set(['https://www.dutchnews.nl/c']);
+    expect(latestPosts(posts, told, now).map(p => p.title)).toEqual(['a', 'b', 'd', 'e']);
   });
 });

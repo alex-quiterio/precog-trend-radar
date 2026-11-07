@@ -1,6 +1,6 @@
 // PRECOG / Trend Radar · Adapter registry, source list and shared fetch helpers. Every adapter registers itself here.
 import type { Adapter, AdapterResult, Entry, Query, Source } from '@/types';
-import { DAY } from '@core/config';
+import { DAY, otherNames } from '@core/config';
 import { reactive } from 'vue';
 
 export const ADAPTERS: Record<string, Adapter> = {};
@@ -62,4 +62,18 @@ export const queryOf = (E: Entry): Query => ({
   lang: E.lang || 'en',
   country: E.country ?? null,
 });
+/**
+ * Every name text can call a topic by: its query, display name, Wikipedia title, and the other names it goes by
+ * (its Portuguese ones, see `also` in core/config.ts). The Reading stream and Today's stories match posts on these.
+ */
+export function topicTerms(E: Entry): string[] {
+  const qq = queryOf(E);
+  return [
+    ...new Set(
+      [qq.q, E.name, qq.wiki, ...otherNames(E.lensId, E.name)]
+        .filter((t): t is string => !!t)
+        .map(t => t.replace(/"/g, '').trim()),
+    ),
+  ].filter(t => t.length >= 2);
+}
 export const SKIP = (topic: string, why: string): AdapterResult => ({ topic, points: [], skip: why });

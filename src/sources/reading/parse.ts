@@ -11,6 +11,10 @@ export interface ReadingSite {
   types: [string, string][];
   /** Page slugs to watch for updates (shown with their last-changed date). */
   pages?: string[];
+  /** How long its posts are kept before reading it again, in hours (12 by default; a news site needs less). */
+  ttlHours?: number;
+  /** Pages of 100 posts to read per type (2 by default; a busy news site needs only the newest 100). */
+  depth?: number;
 }
 export interface ReadingItem {
   id: string;

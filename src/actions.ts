@@ -178,9 +178,10 @@ export function createActions(app: AppStore, { live, stories, github, myGithub, 
     select(list[(i + d + list.length) % list.length].key);
   }
   function shiftLens(d: number): void {
-    const a = app.activeLens();
-    const i = a ? state.lenses.indexOf(a) : 0;
-    selectLens(state.lenses[(i + d + state.lenses.length) % state.lenses.length].id);
+    // In the channel bar's order, which isn't the order the lenses are stored in.
+    const all = channels(app);
+    const i = Math.max(0, all.indexOf(activeChannel(app)));
+    selectLens(all[(i + d + all.length) % all.length].lensId);
   }
   let storyDeb: ReturnType<typeof setTimeout> | undefined;
   function loadStoriesDebounced(): void {

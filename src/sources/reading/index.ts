@@ -46,7 +46,12 @@ export const PORTUGAL_SITES: ReadingSite[] = [
   { url: 'https://greensavers.sapo.pt', name: 'Green Savers', types: [['posts', 'Article']] },
   { url: 'https://www.agroportal.pt', name: 'Agroportal', types: [['posts', 'News']] },
 ];
-export const CHANNEL_SITES: ReadingSite[] = [...AMSTERDAM_SITES, ...PORTUGAL_SITES];
+/** News sites that tell a channel's Today's stories (see `stories` in channels.ts); they aren't Reading stream sites. */
+export const NEWS_SITES: ReadingSite[] = [
+  // English-language news about the Netherlands, a dozen posts a day: the newest 100, read every two hours.
+  { url: 'https://www.dutchnews.nl', name: 'DutchNews.nl', types: [['posts', 'News']], ttlHours: 2, depth: 1 },
+];
+export const CHANNEL_SITES: ReadingSite[] = [...AMSTERDAM_SITES, ...PORTUGAL_SITES, ...NEWS_SITES];
 /** A followed or channel site by its origin. */
 export const siteByUrl = (url: string): ReadingSite | undefined =>
   [...readingSites(), ...CHANNEL_SITES].find(s => s.url === url);
@@ -92,7 +97,7 @@ export async function probeSite(raw: string, signal?: AbortSignal): Promise<Read
 
 async function fetchType(site: ReadingSite, type: string, label: string, signal: AbortSignal) {
   const items: ReadingItem[] = [];
-  for (let page = 1, pages = 1; page <= pages && page <= PAGES_PER_TYPE; page++) {
+  for (let page = 1, pages = 1; page <= pages && page <= (site.depth ?? PAGES_PER_TYPE); page++) {
     const r = await fetch(
       `${api(site)}${type}?per_page=100&page=${page}&orderby=date&order=desc&_fields=id,date_gmt,link,title,content`,
       { signal: withTimeout(signal, 30000) },
@@ -125,10 +130,11 @@ async function fetchPages(site: ReadingSite, signal: AbortSignal): Promise<Readi
 const memory = new Map<string, { at: number; items: ReadingItem[] }>();
 async function loadSite(site: ReadingSite, signal: AbortSignal): Promise<ReadingItem[]> {
   const key = CACHE_KEY + site.url;
+  const ttl = site.ttlHours ? site.ttlHours * HOUR : TTL;
   const m = memory.get(key);
-  if (m && Date.now() - m.at < TTL) return m.items;
+  if (m && Date.now() - m.at < ttl) return m.items;
   const c = store.get<{ at: number; items: ReadingItem[] } | null>(key, null);
-  if (c && Date.now() - c.at < TTL && c.items?.length) {
+  if (c && Date.now() - c.at < ttl && c.items?.length) {
     memory.set(key, c);
     return c.items;
   }

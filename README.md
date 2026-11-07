@@ -28,20 +28,20 @@ What's moving in the topics you care about, the numbers worth knowing, and what'
 
 PRECOG shows one **channel** at a time. A channel is a whole dashboard for one context: switching it switches the topics, the chart, the open data alongside and the streams below.
 
-| Channel                      | Topics it charts                                                                                  | Context (open data)                                                                                                                                         | Streams                                                                          |
-| ---------------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| **World**                    | Picked daily from what the internet is echoing, leaning toward what you track                     | inflation, ECB rate, unemployment, CO₂                                                                                                                      | **Today's stories**, then Guardian, Forecasts, Hacker News, Reading              |
-| **The Great Simplification** | climate change, peak oil, degrowth, overshoot, biodiversity loss, Hormuz                          | CO₂, sea ice                                                                                                                                                | its episodes and Frankly, Forecasts                                              |
-| **Energy & power**           | renewable energy, solar, wind, energy storage, heat pumps, nuclear                                | renewable share and household energy prices (PT, NL, euro area), **diesel and petrol prices in Portugal (DGEG)**, sun and wind in Lisbon and Amsterdam, CO₂ | Forecasts, The Great Simplification, Hacker News                                 |
-| **Portugal & the land**      | wildfires, desertification, rainwater harvesting, agroforestry, permaculture, ecovillages         | IPMA fire risk and warnings, soil in Mafra, Lisbon and Porto weather, **diesel and petrol prices (DGEG)**, Portuguese inflation and unemployment            | Wilder, Green Savers, Agroportal (matched in Portuguese), Forecasts              |
-| **Housing**                  | housing crisis, affordable housing, rent control, mortgages, gentrification, short-term rentals   | house prices, rents and mortgage rates for Portugal, the Netherlands and the euro area (separate groups), ECB rate                                          | Reading, Forecasts, Hacker News                                                  |
-| **Circular economy**         | circular economy, recycling, PPWR, producer responsibility, food waste, CSRD                      | inflation, ECB rate, unemployment                                                                                                                           | Reading, Hacker News, Forecasts                                                  |
-| **Alternative Amsterdam**    | Picked daily from what is moving in the scene (co-ops, commons, land trusts, repair, mutual aid…) | Dutch house prices, rents, mortgage rates, renewables and energy prices; Amsterdam soil and weather; Dutch inflation and unemployment                       | Commons Network, Shareable, Repair Café, Resilience; links to Hipsy's gatherings |
-| **Markets**                  | S&P 500, Treasury yields, oil prices, gold, Bitcoin, recession                                    | **real prices** of oil, US stocks and AI leaders, AI tokens, crypto, gold and currencies; the euro area's 10-year yield, ECB rate, inflation                | **Today's stories**, then Guardian, Forecasts, Hacker News                       |
-| **The Marginalian**          | poetry, Taoism, Jungian psychology, mysticism, grief, meaning of life                             | —                                                                                                                                                           | The Marginalian's essays, matched to these topics                                |
-| **GitHub**                   | AI agents, MCP, Rust, TypeScript, Vue, local-first                                                | new-repo trends, rising projects, **your own stats**                                                                                                        | Hacker News                                                                      |
+| Channel                      | Topics it charts                                                                                  | Context (open data)                                                                                                                                         | Streams                                                                                                    |
+| ---------------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| **World**                    | Picked daily from what the internet is echoing, leaning toward what you track                     | inflation, ECB rate, unemployment, CO₂                                                                                                                      | **Today's stories**, then Guardian, Forecasts, Hacker News, Reading                                        |
+| **The Great Simplification** | climate change, peak oil, degrowth, overshoot, biodiversity loss, Hormuz                          | CO₂, sea ice                                                                                                                                                | **Today's stories**, then its episodes and Frankly, Forecasts                                              |
+| **The Marginalian**          | poetry, Taoism, Jungian psychology, mysticism, grief, meaning of life                             | —                                                                                                                                                           | **Today's stories**, then The Marginalian's essays, matched to these topics                                |
+| **Energy & power**           | renewable energy, solar, wind, energy storage, heat pumps, nuclear                                | renewable share and household energy prices (PT, NL, euro area), **diesel and petrol prices in Portugal (DGEG)**, sun and wind in Lisbon and Amsterdam, CO₂ | Forecasts, The Great Simplification, Hacker News                                                           |
+| **Portugal & the land**      | wildfires, desertification, rainwater harvesting, agroforestry, permaculture, ecovillages         | IPMA fire risk and warnings, soil in Mafra, Lisbon and Porto weather, **diesel and petrol prices (DGEG)**, Portuguese inflation and unemployment            | **Today's stories**, then Wilder, Green Savers, Agroportal (matched in Portuguese), Forecasts              |
+| **Housing**                  | housing crisis, affordable housing, rent control, mortgages, gentrification, short-term rentals   | house prices, rents and mortgage rates for Portugal, the Netherlands and the euro area (separate groups), ECB rate                                          | Reading, Forecasts, Hacker News                                                                            |
+| **Circular economy**         | circular economy, recycling, PPWR, producer responsibility, food waste, CSRD                      | inflation, ECB rate, unemployment                                                                                                                           | Reading, Hacker News, Forecasts                                                                            |
+| **Alternative Amsterdam**    | Picked daily from what is moving in the scene (co-ops, commons, land trusts, repair, mutual aid…) | Dutch house prices, rents, mortgage rates, renewables and energy prices; Amsterdam soil and weather; Dutch inflation and unemployment                       | **Today's stories**, then Commons Network, Shareable, Repair Café, Resilience; links to Hipsy's gatherings |
+| **Markets**                  | S&P 500, Treasury yields, oil prices, gold, Bitcoin, recession                                    | **real prices** of oil, US stocks and AI leaders, AI tokens, crypto, gold and currencies; the euro area's 10-year yield, ECB rate, inflation                | **Today's stories**, then Guardian, Forecasts, Hacker News                                                 |
+| **GitHub**                   | AI agents, MCP, Rust, TypeScript, Vue, local-first                                                | new-repo trends, rising projects, **your own stats**                                                                                                        | Hacker News                                                                                                |
 
-Every channel has the same four parts (World opens with a fifth, **Today's stories**):
+Every channel has the same four parts, and most open with a fifth, [**Today's stories**](#todays-stories):
 
 - **Gist:** what's running hot, the biggest moves, the steadiest climb, one line on what's hot in the other channels, and what changed since your last look. Copy it as Markdown for a daily note.
 - **Trends:** the selected topic's attention, day by day (100 = its own 30-day norm), with a 12-step forecast and a ±1σ band. Add or remove topics; `←` `→` switch topic; `1`–`9` jump to that channel, and `[` `]` step through them.
@@ -51,14 +51,26 @@ Every channel has the same four parts (World opens with a fifth, **Today's stori
 
 Make your own channel with **+ channel**: give it a name and up to six topics. Delete it with the **×** next to its tab.
 
-### Today's stories (World)
+### Today's stories
 
-World opens with what is actually happening with each of its topics, in a sentence, like a daily digest. A
-topic in Wikipedia's **In the news** gets that story as its editors wrote it, with the day. Without one, a
-**Guardian** article on it from the last two days (with a key) gives the headline. A topic with neither is
-listed apart, in one line saying only what it is: its attention moved, but there is no fresh story to tell,
-and an encyclopedia's opening paragraph is not news. Each story shows how far the topic's attention moved in a
-week (▲ +120% week), why it was picked, and a link to a week of coverage.
+Every channel but Housing, Circular economy, Energy & power and GitHub opens with what is actually happening
+with each of its topics, in a sentence, like a daily digest. Each channel tells its stories from its own place or
+voice:
+
+| Channel                  | Stories from                                                          | Fresh for | Listed below                         |
+| ------------------------ | --------------------------------------------------------------------- | --------- | ------------------------------------ |
+| World, Markets           | Wikipedia's **In the news**, then the **Guardian** (with a key)       | 2 days    | —                                    |
+| The Great Simplification | its episodes and Frankly                                              | 30 days   | New from The Great Simplification    |
+| The Marginalian          | its essays                                                            | 30 days   | New on The Marginalian               |
+| Portugal & the land      | Wilder, Green Savers, Agroportal, matched in Portuguese               | 2 days    | Today on the land in Portugal        |
+| Alternative Amsterdam    | DutchNews.nl, and Commons Network and Repair Café (born in Amsterdam) | 2 days    | Today in the Netherlands (DutchNews) |
+
+On World and Markets, a topic in **In the news** gets that story as its editors wrote it, with the day; without
+one, a Guardian article from the last two days gives the headline. On the others, a post naming the topic in its
+title is its story, and the newest headlines from those sites are listed below, whatever they name. A topic
+with no story is listed apart, in one line saying only what it is: its attention moved, but there is no fresh
+story to tell, and an encyclopedia's opening paragraph is not news. Each story shows how far the topic's
+attention moved in a week (▲ +120% week), why it was picked, and a link to a week of coverage.
 
 ### World: what the internet is echoing
 
@@ -188,7 +200,7 @@ flowchart TB
 
   CH --> CA["Open-data cards<br/>ECB · Eurostat · IPMA · DGEG<br/>Open-Meteo · NOAA · NSIDC"] --> GI
   T --> ST["Streams<br/>Guardian · Reading · Forecasts · HN"]
-  T -. digest .-> DG["Today's stories<br/>Wikipedia · Guardian"]
+  T -. digest .-> DG["Today's stories<br/>the world's news, or the channel's own sites"]
   T -. github .-> GH["Builders<br/>GitHub search + your profile"]
 ```
 
@@ -223,6 +235,7 @@ fire risk and warnings from them). The **streams** look up the channel's topics,
 | Manifold                              | open prediction markets, with probability                                           | 10+ forecasters; questions naming a person are dropped.              |
 | Wikipedia feed · Wikidata             | World's daily topics: In the news, most read                                        | Once a day. Wikidata says which articles are about people.           |
 | WordPress sites you follow            | posts matched to the channel's topics                                               | Cached for 12 h.                                                     |
+| DutchNews.nl                          | Alternative Amsterdam's Today's stories: news about the Netherlands                 | The newest 100 posts; cached for 2 h.                                |
 | GitHub search and users API           | new repos per topic, rising repos, your public stats                                | ~10 searches a minute unauthenticated; cached for 12 h / 30 min.     |
 | ECB · Eurostat                        | deposit rate, inflation (HICP), unemployment                                        | PT, NL and the euro area.                                            |
 | ECB exchange rates and yield curve    | the euro against USD, GBP, JPY, CNY, CHF; 10-year euro-area yield                   | Daily.                                                               |

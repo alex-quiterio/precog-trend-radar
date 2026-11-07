@@ -42,9 +42,9 @@ test('switches channel from the channel bar and with number keys, and remembers 
   await page.locator('.channels .channel').nth(1).click();
   await expect(heroTitle(page)).toHaveText('The Great Simplification');
   await page.locator('body').press('3');
-  await expect(heroTitle(page)).toHaveText('Energy & power');
+  await expect(heroTitle(page)).toHaveText('The Marginalian');
   await page.reload();
-  await expect(heroTitle(page)).toHaveText('Energy & power');
+  await expect(heroTitle(page)).toHaveText('The Marginalian');
 });
 
 test('switches theme in the settings bar and keeps it after a reload', async ({ page }) => {
@@ -144,17 +144,19 @@ test('World opens with today’s stories: the news told in a sentence, quiet top
   await expect(digest.locator('.dg-quiet li').first()).toContainText('About');
 });
 
-test('Portugal shows what a litre of fuel costs, from DGEG', async ({ page }) => {
+test('Portugal opens with today’s stories and shows what a litre of fuel costs, from DGEG', async ({ page }) => {
   await open(page);
-  await page.locator('body').press('4');
+  await page.locator('body').press('5');
   await expect(heroTitle(page)).toHaveText('Portugal & the land');
+  await expect(page.locator('#b-today')).toContainText('Today');
+  await expect(page.locator('#p-digest .dg-quiet li, #p-digest .dg-item').first()).toBeVisible();
   await expect(page.locator('#p-data')).toContainText('Diesel · Portugal');
   await expect(page.locator('#p-data')).toContainText('2,205 €/L');
 });
 
 test('Alt Amsterdam picks its topics from its scene, reads its own sites, and links to Hipsy', async ({ page }) => {
   await open(page);
-  await page.locator('body').press('7');
+  await page.locator('body').press('8');
   await expect(heroTitle(page)).toHaveText('Alternative Amsterdam');
   await expect(page.locator('#p-watch')).toContainText('Picked today from what is moving in the scene');
   await expect(page.locator('#p-watch .chip .name')).toHaveCount(6);
@@ -164,7 +166,7 @@ test('Alt Amsterdam picks its topics from its scene, reads its own sites, and li
 
 test('Markets shows real prices and plain takeaways, not attention charts', async ({ page }) => {
   await open(page);
-  await page.locator('.channels .channel').nth(7).click();
+  await page.locator('.channels .channel').nth(8).click();
   await expect(heroTitle(page)).toHaveText('Markets');
   const prices = page.locator('#p-markets');
   await expect(prices.locator('.mk-notes')).toContainText('Brent is $107.03 a barrel');

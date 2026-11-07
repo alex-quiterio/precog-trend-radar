@@ -2,7 +2,16 @@
 // A channel names its lens (the topics whose attention it charts), the datapoints worth knowing in
 // that context, the streams it shows, and any special views (GitHub). Switching channel switches all of it.
 import type { AppStore } from '@/state';
-import { AMSTERDAM_SITES, PORTUGAL_SITES } from '@sources/reading';
+import { AMSTERDAM_SITES, NEWS_SITES, PORTUGAL_SITES } from '@sources/reading';
+
+export interface StorySources {
+  /** Sites (origins) whose posts can be a topic's story when they name it in the title. */
+  sites: string[];
+  /** How many days a post stays a fresh story (2 by default; a site that posts weekly needs longer). */
+  days?: number;
+  /** The newest headlines from these sites, listed under the topics' stories whatever they name. */
+  latest?: { title: string; sites: string[] };
+}
 
 export interface Channel {
   id: string;
@@ -21,6 +30,11 @@ export interface Channel {
   sites?: string[];
   /** Opens with Today's stories: what is happening with each topic, in a sentence (components/DigestPanel.vue). */
   digest?: boolean;
+  /**
+   * Where its Today's stories come from. Left out, they're the world's: Wikipedia's "In the news" and the
+   * Guardian. Set, only these sites tell them, so a channel's stories stay in its own place or voice.
+   */
+  stories?: StorySources;
   /** Opens with real prices (components/MarketsPanel.vue) and charts no attention: no Signal, gist or radar. */
   prices?: boolean;
   /** Links out shown under the channel's name (places with no API the page could read). */
@@ -38,6 +52,8 @@ export const channelDatapoints = (c: Channel): string[] => c.datapoints;
 
 const TGS = 'https://www.thegreatsimplification.com';
 const MARGINALIAN = 'https://www.themarginalian.org';
+const DUTCHNEWS = NEWS_SITES[0].url;
+const site = (sites: { url: string; name: string }[], name: string) => sites.find(s => s.name === name)!.url;
 
 export const CHANNELS: Channel[] = [
   {
@@ -59,6 +75,22 @@ export const CHANNELS: Channel[] = [
     datapoints: ['co2', 'seaice'],
     streams: ['reading', 'news', 'forecasts'],
     sites: [TGS],
+    digest: true,
+    // Its own episodes and Frankly only. It publishes weekly, so a story stays fresh for a month.
+    stories: { sites: [TGS], days: 30, latest: { title: 'New from The Great Simplification', sites: [TGS] } },
+  },
+  {
+    id: 'marginalian',
+    icon: 'book',
+    label: 'Marginalian',
+    kicker: 'Art, science, poetry and philosophy, matched to what you’re watching.',
+    lensId: 'marginalian',
+    datapoints: [],
+    streams: ['reading'],
+    sites: [MARGINALIAN],
+    digest: true,
+    // Its own essays only. It posts a few times a week, so a story stays fresh for a month.
+    stories: { sites: [MARGINALIAN], days: 30, latest: { title: 'New on The Marginalian', sites: [MARGINALIAN] } },
   },
   {
     id: 'energy',
@@ -100,6 +132,12 @@ export const CHANNELS: Channel[] = [
     ],
     streams: ['news', 'reading', 'forecasts'],
     sites: PORTUGAL_SITES.map(s => s.url),
+    digest: true,
+    // Portuguese sources only, matched in Portuguese.
+    stories: {
+      sites: PORTUGAL_SITES.map(s => s.url),
+      latest: { title: 'Today on the land in Portugal', sites: PORTUGAL_SITES.map(s => s.url) },
+    },
     country: 'pt',
   },
   {
@@ -150,6 +188,12 @@ export const CHANNELS: Channel[] = [
     ],
     streams: ['reading', 'news', 'forecasts'],
     sites: AMSTERDAM_SITES.map(s => s.url),
+    digest: true,
+    // Dutch news, and the scene sites rooted in Amsterdam (Shareable and Resilience are international).
+    stories: {
+      sites: [DUTCHNEWS, site(AMSTERDAM_SITES, 'Commons Network'), site(AMSTERDAM_SITES, 'Repair Café')],
+      latest: { title: 'Today in the Netherlands', sites: [DUTCHNEWS] },
+    },
     links: [
       { label: 'Gatherings this weekend on Hipsy', href: 'https://hipsy.nl/events?period=current_weekend' },
       { label: 'Workshops', href: 'https://hipsy.nl/events/workshops' },
@@ -166,16 +210,6 @@ export const CHANNELS: Channel[] = [
     streams: ['news', 'forecasts', 'hn'],
     prices: true,
     digest: true,
-  },
-  {
-    id: 'marginalian',
-    icon: 'book',
-    label: 'Marginalian',
-    kicker: 'Art, science, poetry and philosophy, matched to what you’re watching.',
-    lensId: 'marginalian',
-    datapoints: [],
-    streams: ['reading'],
-    sites: [MARGINALIAN],
   },
   {
     id: 'github',

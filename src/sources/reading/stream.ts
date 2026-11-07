@@ -1,7 +1,6 @@
 // PRECOG / Trend Radar · Reading stream: posts from the sites you follow (and the built-in ones), credited to
 // the topics in scope they name. Posts naming a topic rank by match strength; the rest still show, lower.
-import { otherNames } from '@core/config';
-import { queryOf, topicRegex } from '@sources/registry';
+import { topicRegex, topicTerms } from '@sources/registry';
 import { inScope, registerStream, when } from '@sources/streams';
 import { loadReading, readingSites, siteByUrl } from './index';
 import { readingScore, type ReadingItem } from './parse';
@@ -33,17 +32,7 @@ registerStream<Data>({
       ? ctx.sites.map(siteByUrl).filter((x): x is NonNullable<typeof x> => !!x)
       : readingSites();
     const { items, errors } = await loadReading(signal, sites);
-    const matchers = ctx.entries.map(E => {
-      const qq = queryOf(E);
-      const terms = [
-        ...new Set(
-          [qq.q, E.name, qq.wiki, ...otherNames(E.lensId, E.name)]
-            .filter((t): t is string => !!t)
-            .map(t => t.replace(/"/g, '').trim()),
-        ),
-      ];
-      return { key: E.key, res: terms.filter(t => t.length >= 2).map(topicRegex) };
-    });
+    const matchers = ctx.entries.map(E => ({ key: E.key, res: topicTerms(E).map(topicRegex) }));
     const map = new Map<string, ReadingMatch>();
     items.forEach(it => {
       let score = 0;

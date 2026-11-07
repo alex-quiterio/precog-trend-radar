@@ -36,13 +36,23 @@
       </ul>
     </template>
 
+    <template v-if="latest.length">
+      <h4 class="dg-sub">{{ latestTitle }}</h4>
+      <ul class="dg dg-latest">
+        <li v-for="p in latest" :key="p.id">
+          <a class="dg-head" :href="p.url" target="_blank" rel="noopener noreferrer">{{ p.title }}</a>
+          <span class="dg-when">{{ p.site }} · {{ ago(p.t, ui.now) }}</span>
+        </li>
+      </ul>
+    </template>
+
     <ul v-if="!items.length && loading" class="dg dg-wait" aria-label="Loading today’s stories">
       <li v-for="n in 3" :key="n">
         <i></i>
         <i></i>
       </li>
     </ul>
-    <p v-else-if="!items.length" class="dg-empty">
+    <p v-else-if="!items.length && !latest.length" class="dg-empty">
       {{ error ? 'Could not load: ' + error : 'No stories for these topics yet.' }}
     </p>
   </panel-shell>
@@ -53,12 +63,22 @@ import { useApp } from '@/context';
 import { computed, defineComponent, h, onBeforeUnmount, onMounted, ref, shallowRef, watch, type PropType } from 'vue';
 import { errorText, isAbort } from '@core/errors';
 import { ago, nf0 } from '@core/format';
-import { type DigestData, type DigestItem, digestItems, loadDigest } from '@sources/wikipedia/digest';
+import {
+  type DigestData,
+  type DigestItem,
+  type StoryScope,
+  digestItems,
+  latestPosts,
+  loadDigest,
+  sitePosts,
+} from '@sources/wikipedia/digest';
+import { type ReadingItem, siteByUrl } from '@sources/reading';
+import { activeChannel } from '@/channels';
 import PanelShell from '@components/PanelShell.vue';
 import TopicDot from '@components/TopicDot.vue';
 
 // PRECOG / Trend Radar · Today's stories: what is happening with each of the channel's topics. Stories (from
-// Wikipedia's "In the news", or a fresh Guardian headline) are told in a sentence, the lead one set large;
+// Wikipedia's "In the news", or a fresh Guardian headline; on a scoped channel, a post from its own sites) are told in a sentence, the lead one set large;
 // topics whose attention moved without a fresh story get one quiet line saying what they are. Each says how
 // far its attention moved in a week and, on World, why it was picked.
 
@@ -88,6 +108,14 @@ export default defineComponent({
     const { app, hot, actions } = useApp();
     const ui = app.ui;
     const data = shallowRef<DigestData>();
+    const posts = shallowRef<ReadingItem[]>([]);
+    const channel = computed(() => activeChannel(app));
+    const toSites = (urls: string[]) => urls.map(siteByUrl).filter(s => !!s);
+    /** The channel's own story sources, if it scopes its stories (see `stories` in channels.ts). */
+    const scope = (): StoryScope | undefined => {
+      const st = channel.value.stories;
+      return st ? { sites: toSites(st.sites), days: st.days ?? 2 } : undefined;
+    };
     const loading = ref(false),
       error = ref(''),
       at = ref(0);
@@ -99,10 +127,22 @@ export default defineComponent({
       const ac = (abort = new AbortController());
       loading.value = true;
       try {
-        const out = await loadDigest(entries(), ac.signal, partial => {
-          if (!ac.signal.aborted) data.value = partial;
-        });
+        const sc = scope();
+        const latestSites = toSites(channel.value.stories?.latest?.sites ?? []);
+        posts.value = [];
+        const [out, latest] = await Promise.all([
+          loadDigest(
+            entries(),
+            ac.signal,
+            partial => {
+              if (!ac.signal.aborted) data.value = partial;
+            },
+            sc,
+          ),
+          sitePosts(latestSites, ac.signal),
+        ]);
         if (ac.signal.aborted) return;
+        posts.value = latest;
         data.value = out;
         error.value = '';
         at.value = Date.now();
@@ -125,16 +165,24 @@ export default defineComponent({
     const items = computed(() => {
       const list = entries();
       const byKey = new Map(list.map(E => [E.key, E]));
-      return digestItems(list, data.value, ui.now).map(d => {
+      return digestItems(list, data.value, ui.now, scope()).map(d => {
         const E = byKey.get(d.key)!;
         const pick = hot.for(E.lensId)?.pickOf(E.name);
         return { ...d, E, why: pick?.why && pick.echoes.length ? `Picked for: ${pick.why}` : '' };
       });
     });
     const meta = computed(() => (at.value ? `checked ${ago(at.value, ui.now)}` : loading.value ? 'reading…' : ''));
+    const latest = computed(() => {
+      const st = channel.value.stories;
+      if (!st?.latest) return [];
+      const told = new Set(items.value.filter(d => d.kind !== 'quiet').map(d => d.url));
+      return latestPosts(posts.value, told, ui.now, st.days ?? 2);
+    });
     return {
       ui,
       items,
+      latest,
+      latestTitle: computed(() => channel.value.stories?.latest?.title ?? ''),
       stories: computed(() => items.value.filter(d => d.kind !== 'quiet')),
       quiet: computed(() => items.value.filter(d => d.kind === 'quiet')),
       loading,
@@ -306,6 +354,31 @@ export default defineComponent({
 }
 .dg-wait i + i {
   width: 70%;
+}
+.dg-latest li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+  padding: 6px 0;
+}
+.dg-head {
+  flex: 1 1 260px;
+  min-width: 0;
+  color: var(--ink);
+  font-size: 13.5px;
+  line-height: 1.4;
+  text-decoration: none;
+}
+.dg-head:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 3px;
+}
+.dg-when {
+  color: var(--muted);
+  font-size: 11.5px;
+  white-space: nowrap;
 }
 .dg-empty {
   margin: 0;
