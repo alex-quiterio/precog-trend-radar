@@ -1,6 +1,6 @@
 // PRECOG / Trend Radar · The Open data panel's store: runs every registered card loader (see
 // src/sources/<provider>/cards.ts) and keeps the cards, the facts the gist reads, and when they were fetched.
-// Cards sit in groups by place: Portugal, Netherlands, Euro area, Planet. No card mixes two countries.
+// Cards sit in groups: Portugal, Netherlands, Euro area, Markets, Planet. No card mixes two countries.
 import { reactive } from 'vue';
 import {
   loadCards,
@@ -15,6 +15,7 @@ export const DATAPOINT_GROUPS: { id: DatapointGroup; label: string; hint: string
   { id: 'pt', label: 'Portugal', hint: 'Land, weather, prices, jobs' },
   { id: 'nl', label: 'Netherlands', hint: 'Land, weather, prices, jobs' },
   { id: 'ea', label: 'Euro area', hint: 'Rates, prices, jobs' },
+  { id: 'mkt', label: 'Markets', hint: 'The euro, bonds, gold, Bitcoin' },
   { id: 'planet', label: 'Planet', hint: 'The slow numbers' },
 ];
 /** The panel's cards, and how to fetch them. The app makes one (context.ts); a test can pass its own loaders. */

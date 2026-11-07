@@ -4,6 +4,7 @@ import { nf2 } from '@core/format';
 import { getJSON } from '@sources/registry';
 import { parseEcbLatest, parseEcbSeries } from './parse';
 import { month } from '@core/dates';
+import { monthMove } from '@sources/markets';
 
 registerCards({
   id: 'ecb-deposit-rate',
@@ -56,5 +57,31 @@ registerCards({
       });
     });
     return rows;
+  },
+});
+
+/** The euro area's 10-year government bond yield (AAA-rated issuers' curve), daily. */
+registerCards({
+  id: 'ecb-bond-yield',
+  async load() {
+    const j = await getJSON(
+      'https://data-api.ecb.europa.eu/service/data/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.SR_10Y?format=jsondata&lastNObservations=90',
+    );
+    const series = [...parseEcbSeries(j, 0).values()][0] ?? [];
+    const last = series[series.length - 1];
+    if (!last) return [];
+    return [
+      {
+        group: 'mkt',
+        id: 'yield-ea-10y',
+        k: '10-year bond yield · euro area',
+        v: `${last.value.toFixed(2)}%`,
+        sub: monthMove(series, 'pts'),
+        src: `ECB yield curve, AAA issuers · ${new Date(last.t).toISOString().slice(0, 10)}`,
+        href: 'https://www.ecb.europa.eu/stats/financial_markets_and_interest_rates/euro_area_yield_curves/html/index.en.html',
+        o: 25,
+        spark: series,
+      },
+    ];
   },
 });

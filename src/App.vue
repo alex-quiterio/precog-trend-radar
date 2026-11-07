@@ -21,6 +21,13 @@
 
     <div class="layout" :key="'l-' + view.channel.id">
       <div class="main">
+        <section v-if="view.channel.prices" class="block" aria-labelledby="b-prices">
+          <h3 id="b-prices" class="block-head">
+            <span>{{ view.n('prices') }}</span>
+            Prices
+          </h3>
+          <markets-panel :index="0"></markets-panel>
+        </section>
         <section v-if="view.channel.digest" class="block" aria-labelledby="b-today">
           <h3 id="b-today" class="block-head">
             <span>{{ view.n('today') }}</span>
@@ -28,7 +35,7 @@
           </h3>
           <digest-panel :index="0"></digest-panel>
         </section>
-        <section class="block" aria-labelledby="b-gist">
+        <section v-if="!view.channel.prices" class="block" aria-labelledby="b-gist">
           <h3 id="b-gist" class="block-head">
             <span>{{ view.n('gist') }}</span>
             Gist
@@ -38,10 +45,11 @@
         <section class="block" aria-labelledby="b-trends">
           <h3 id="b-trends" class="block-head">
             <span>{{ view.n('trends') }}</span>
-            Trends
+            {{ view.channel.prices ? 'Topics' : 'Trends' }}
           </h3>
           <div class="stack">
-            <signal-panel :index="1"></signal-panel>
+            <!-- A price channel charts real prices above, not attention. -->
+            <signal-panel v-if="!view.channel.prices" :index="1"></signal-panel>
             <lens-panel :index="2"></lens-panel>
           </div>
         </section>
@@ -71,17 +79,19 @@
           </h3>
           <datapoints-panel :index="1"></datapoints-panel>
         </template>
-        <h3 class="block-head">
-          <span>◇</span>
-          Radar
-        </h3>
-        <radar-panel :index="2"></radar-panel>
+        <template v-if="!view.channel.prices">
+          <h3 class="block-head">
+            <span>◇</span>
+            Radar
+          </h3>
+          <radar-panel :index="2"></radar-panel>
+        </template>
       </aside>
     </div>
 
     <footer class="foot">
       PRECOG tracks topics, never people · Wikipedia · The Guardian · Hacker News · Manifold · GitHub · ECB · Eurostat ·
-      IPMA · Open-Meteo · NOAA · NSIDC · DGEG
+      IPMA · Open-Meteo · NOAA · NSIDC · DGEG · CoinGecko · EIA · alternative.me
     </footer>
   </div>
 </template>
@@ -93,6 +103,7 @@ import { activeChannel, channelDatapoints, channels } from '@/channels';
 import AppHeader from '@components/AppHeader.vue';
 import MorningBrief from '@components/MorningBrief.vue';
 import DigestPanel from '@components/DigestPanel.vue';
+import MarketsPanel from '@components/MarketsPanel.vue';
 import DatapointsPanel from '@components/DatapointsPanel.vue';
 import LensPanel from '@components/LensPanel.vue';
 import SignalPanel from '@components/SignalPanel.vue';
@@ -109,6 +120,7 @@ export default defineComponent({
     AppHeader,
     MorningBrief,
     DigestPanel,
+    MarketsPanel,
     DatapointsPanel,
     LensPanel,
     SignalPanel,
@@ -124,9 +136,14 @@ export default defineComponent({
       const channel = activeChannel(app);
       const i = channels(app).findIndex(c => c.id === channel.id);
       // The main column's sections, numbered in the order they show.
-      const blocks = [channel.digest && 'today', 'gist', 'trends', channel.github && 'build', 'streams'].filter(
-        Boolean,
-      );
+      const blocks = [
+        channel.prices && 'prices',
+        channel.digest && 'today',
+        !channel.prices && 'gist',
+        'trends',
+        channel.github && 'build',
+        'streams',
+      ].filter(Boolean);
       return {
         n: (b: string) => String(blocks.indexOf(b) + 1).padStart(2, '0'),
         channel,

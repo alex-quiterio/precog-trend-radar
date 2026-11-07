@@ -37,6 +37,7 @@ PRECOG shows one **channel** at a time. A channel is a whole dashboard for one c
 | **Housing**                  | housing crisis, affordable housing, rent control, mortgages, gentrification, short-term rentals   | house prices, rents and mortgage rates for Portugal, the Netherlands and the euro area (separate groups), ECB rate                                          | Reading, Forecasts, Hacker News                                                  |
 | **Circular economy**         | circular economy, recycling, PPWR, producer responsibility, food waste, CSRD                      | inflation, ECB rate, unemployment                                                                                                                           | Reading, Hacker News, Forecasts                                                  |
 | **Alternative Amsterdam**    | Picked daily from what is moving in the scene (co-ops, commons, land trusts, repair, mutual aid…) | Dutch house prices, rents, mortgage rates, renewables and energy prices; Amsterdam soil and weather; Dutch inflation and unemployment                       | Commons Network, Shareable, Repair Café, Resilience; links to Hipsy's gatherings |
+| **Markets**                  | S&P 500, Treasury yields, oil prices, gold, Bitcoin, recession                                    | **real prices** of oil, US stocks and AI leaders, AI tokens, crypto, gold and currencies; the euro area's 10-year yield, ECB rate, inflation                | **Today's stories**, then Guardian, Forecasts, Hacker News                       |
 | **The Marginalian**          | poetry, Taoism, Jungian psychology, mysticism, grief, meaning of life                             | —                                                                                                                                                           | The Marginalian's essays, matched to these topics                                |
 | **GitHub**                   | AI agents, MCP, Rust, TypeScript, Vue, local-first                                                | new-repo trends, rising projects, **your own stats**                                                                                                        | Hacker News                                                                      |
 
@@ -98,6 +99,26 @@ sites, which load only on this channel.
 its [API](https://docs.hipsy.nl/api-reference/list-events) lists one organisation's events, with that
 organiser's key. So the channel links to this weekend's gatherings and workshops there instead.
 
+### Markets: real prices, not attention
+
+Markets charts what things cost, not how much they are talked about. It opens with **Prices**: a few
+plain sentences on what moved (facts, no forecasts), then a tile per instrument with its price, its real
+price curve over the last one or two weeks with the low and high, and its day, week and month moves:
+
+- **Energy:** Brent and WTI crude, $ a barrel (EIA daily spot, a few days behind).
+- **Stocks & AI:** the S&P 500 and Nasdaq-100 (SPY and QQQ ETF shares), Nvidia, Microsoft, Alphabet.
+- **AI tokens:** Bittensor, Render, NEAR.
+- **Crypto:** Bitcoin, Ethereum, Solana, the whole market's value and Bitcoin's share, and the Fear & Greed index.
+- **Gold:** $ an ounce.
+- **Currencies:** the euro against the dollar, pound, yen, yuan and Swiss franc, and the dollar against the yen
+  (ECB reference rates).
+
+US shares and indices are priced through tokenized shares (xStocks on CoinGecko), which trade around the clock
+and track the listed price; there is no keyless stock-market feed a browser may read. A tokenized oil fund was
+left out on purpose: it trades a few dollars a day and its price was far from the real one. Then come Today's
+stories and the news, as on World; the attention chart, gist and radar are left out. Five calls a load, each
+cached (CoinGecko for ten minutes, as it throttles keyless callers).
+
 ### GitHub
 
 The GitHub channel adds a **Builders** section:
@@ -153,20 +174,24 @@ flowchart LR
 
 ### Sources
 
-| Source                                | Gives                                                   | Notes                                                                |
-| ------------------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------- |
-| Wikipedia pageviews                   | daily views of each topic's English article             | Titles resolve automatically, or set one with `Name \| wiki: Title`. |
-| The Guardian                          | articles per day naming the topic                       | Needs your free key. Cached for the day.                             |
-| Hacker News (Algolia)                 | stories per day; stories ranked by engagement per hour  | Cached per day.                                                      |
-| Manifold                              | open prediction markets, with probability               | 10+ forecasters; questions naming a person are dropped.              |
-| Wikipedia feed · Wikidata             | World's daily topics: In the news, most read            | Once a day. Wikidata says which articles are about people.           |
-| WordPress sites you follow            | posts matched to the channel's topics                   | Cached for 12 h.                                                     |
-| GitHub search and users API           | new repos per topic, rising repos, your public stats    | ~10 searches a minute unauthenticated; cached for 12 h / 30 min.     |
-| ECB · Eurostat                        | deposit rate, inflation (HICP), unemployment            | PT, NL and the euro area.                                            |
-| DGEG (precoscombustiveis.dgeg.gov.pt) | daily average price of diesel and petrol 95 in Portugal | Across ~1,700 stations; 100 days of history.                         |
-| Wikipedia page summaries              | Today's stories: each topic's description               | Cached for the day; "In the news" from the daily feed.               |
-| IPMA · Open-Meteo                     | fire risk, warnings, soil moisture, weather, air        | Portugal (Mafra, Lisbon, Porto) and Amsterdam.                       |
-| NOAA · NSIDC (via global-warming.org) | CO₂ at Mauna Loa, global sea ice extent                 | With history for the small charts.                                   |
+| Source                                | Gives                                                                               | Notes                                                                |
+| ------------------------------------- | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Wikipedia pageviews                   | daily views of each topic's English article                                         | Titles resolve automatically, or set one with `Name \| wiki: Title`. |
+| The Guardian                          | articles per day naming the topic                                                   | Needs your free key. Cached for the day.                             |
+| Hacker News (Algolia)                 | stories per day; stories ranked by engagement per hour                              | Cached per day.                                                      |
+| Manifold                              | open prediction markets, with probability                                           | 10+ forecasters; questions naming a person are dropped.              |
+| Wikipedia feed · Wikidata             | World's daily topics: In the news, most read                                        | Once a day. Wikidata says which articles are about people.           |
+| WordPress sites you follow            | posts matched to the channel's topics                                               | Cached for 12 h.                                                     |
+| GitHub search and users API           | new repos per topic, rising repos, your public stats                                | ~10 searches a minute unauthenticated; cached for 12 h / 30 min.     |
+| ECB · Eurostat                        | deposit rate, inflation (HICP), unemployment                                        | PT, NL and the euro area.                                            |
+| ECB exchange rates and yield curve    | the euro against USD, GBP, JPY, CNY, CHF; 10-year euro-area yield                   | Daily.                                                               |
+| CoinGecko                             | crypto, AI tokens, tokenized US shares and ETFs, gold (PAX Gold), the crypto market | Keyless, one call for all quotes; cached ten minutes.                |
+| EIA                                   | Brent and WTI spot prices, $ a barrel                                               | Its public demo key; cached six hours.                               |
+| alternative.me                        | the Crypto Fear & Greed index                                                       | Daily.                                                               |
+| DGEG (precoscombustiveis.dgeg.gov.pt) | daily average price of diesel and petrol 95 in Portugal                             | Across ~1,700 stations; 100 days of history.                         |
+| Wikipedia page summaries              | Today's stories: each topic's description                                           | Cached for the day; "In the news" from the daily feed.               |
+| IPMA · Open-Meteo                     | fire risk, warnings, soil moisture, weather, air                                    | Portugal (Mafra, Lisbon, Porto) and Amsterdam.                       |
+| NOAA · NSIDC (via global-warming.org) | CO₂ at Mauna Loa, global sea ice extent                                             | With history for the small charts.                                   |
 
 ## Privacy and scope
 

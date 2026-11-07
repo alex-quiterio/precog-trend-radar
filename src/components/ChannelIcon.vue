@@ -41,6 +41,11 @@
       <path d="M12 6.5C10 5 7 4.5 4 4.5v14c3 0 6 .5 8 2 2-1.5 5-2 8-2v-14c-3 0-6 .5-8 2z" />
       <path d="M12 6.5v14" />
     </template>
+    <template v-else-if="name === 'candles'">
+      <path d="M7 3v4M7 15v6M17 3v8M17 17v4" />
+      <rect x="5" y="7" width="4" height="8" rx="1" />
+      <rect x="15" y="11" width="4" height="6" rx="1" />
+    </template>
     <path v-else-if="name === 'code'" d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 4l-3 16" />
     <path v-else d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6l-5.4 2.9 1.2-6-4.5-4.2 6.1-.7z" />
   </svg>

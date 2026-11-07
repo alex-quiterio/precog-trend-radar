@@ -32,6 +32,7 @@ describe('lenses', () => {
       'housing',
       'circular',
       'amsterdam',
+      'markets',
       'marginalian',
       'github',
     ]);
@@ -58,6 +59,7 @@ describe('lenses', () => {
       'housing',
       'circular',
       'amsterdam',
+      'markets',
       'marginalian',
       'github',
       'mine',
@@ -96,6 +98,7 @@ describe('lenses', () => {
       'housing',
       'circular',
       'amsterdam',
+      'markets',
       'marginalian',
       'github',
     ]);

@@ -161,3 +161,20 @@ test('Alt Amsterdam picks its topics from its scene, reads its own sites, and li
   await expect(page.locator('.ch-links')).toContainText('Hipsy');
   await expect(page.locator('#p-data')).toContainText('Netherlands');
 });
+
+test('Markets shows real prices and plain takeaways, not attention charts', async ({ page }) => {
+  await open(page);
+  await page.locator('.channels .channel').nth(7).click();
+  await expect(heroTitle(page)).toHaveText('Markets');
+  const prices = page.locator('#p-markets');
+  await expect(prices.locator('.mk-notes')).toContainText('Brent is $107.03 a barrel');
+  await expect(prices.locator('.mk-tile', { hasText: 'Brent crude' })).toContainText('$107.03 – $120.15');
+  await expect(prices.locator('.mk-tile', { hasText: 'Nvidia' })).toContainText('$187.69');
+  await expect(prices.locator('.mk-tile', { hasText: 'Fear & Greed' })).toContainText('Extreme Fear');
+  await expect(prices.locator('.mk-tile', { hasText: '€ → US dollar' })).toContainText('1.1165');
+  // Prices, not attention: no attention chart, gist or radar on this channel.
+  await expect(page.locator('#p-signal')).toHaveCount(0);
+  await expect(page.locator('#p-brief')).toHaveCount(0);
+  await expect(page.locator('#p-radar')).toHaveCount(0);
+  await expect(page.locator('#p-data')).toContainText('10-year bond yield');
+});

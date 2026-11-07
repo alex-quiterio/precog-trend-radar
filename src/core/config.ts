@@ -4,7 +4,7 @@ export const MIN = 60e3,
   HOUR = 3600e3,
   DAY = 86400e3;
 export const MAX_TOPICS = 6,
-  MAX_LENSES = 10,
+  MAX_LENSES = 14,
   HISTORY = 90,
   FC_STEPS = 12,
   FIT_N = 20,
@@ -120,6 +120,19 @@ export const PRESETS = [
     ],
   },
   {
+    id: 'markets',
+    name: 'Markets',
+    desc: 'International markets: stocks, bonds, currencies, oil, gold and crypto, and the fear of a downturn.',
+    topics: [
+      ['S&P 500', { q: 'S&P 500' }],
+      ['Treasury yields', { wiki: 'United States Treasury security', q: 'Treasury yields' }],
+      ['Oil prices', { wiki: 'Price of oil', q: 'oil prices' }],
+      ['Gold', { wiki: 'Gold as an investment', q: 'gold price' }],
+      ['Bitcoin'],
+      ['Recession'],
+    ],
+  },
+  {
     id: 'marginalian',
     name: 'The Marginalian',
     desc: 'Art, science, poetry and philosophy: what it means to live a decent, substantive, rewarding life.',
@@ -150,7 +163,8 @@ export const PRESETS = [
 // v9 adds Energy & power and Housing.
 // v10 tunes Portugal & the land (water, agroforestry, ecovillages), Alt Amsterdam (mutual aid) and The Marginalian
 // (Taoism, Jungian psychology, mysticism).
-export const PRESET_VERSION = 10;
+// v11 adds Markets.
+export const PRESET_VERSION = 11;
 /** Lenses whose topics are picked each day rather than shipped (see features/hot-topics.ts). */
 export const PICKED_LENSES = ['world', 'amsterdam'];
 export const LS = {

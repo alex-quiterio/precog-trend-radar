@@ -21,6 +21,8 @@ export interface Channel {
   sites?: string[];
   /** Opens with Today's stories: what is happening with each topic, in a sentence (components/DigestPanel.vue). */
   digest?: boolean;
+  /** Opens with real prices (components/MarketsPanel.vue) and charts no attention: no Signal, gist or radar. */
+  prices?: boolean;
   /** Links out shown under the channel's name (places with no API the page could read). */
   links?: { label: string; href: string }[];
   /** Extra views: the GitHub topic and personal panels. */
@@ -152,6 +154,17 @@ export const CHANNELS: Channel[] = [
       { label: 'Workshops', href: 'https://hipsy.nl/events/workshops' },
     ],
     country: 'nl',
+  },
+  {
+    id: 'markets',
+    icon: 'candles',
+    label: 'Markets',
+    kicker: 'Real prices: oil, US stocks and AI leaders, crypto, gold and currencies, and what moved this week.',
+    lensId: 'markets',
+    datapoints: ['yield-ea-10y', 'ecb', 'inflation-ea', 'unemployment-ea'],
+    streams: ['news', 'forecasts', 'hn'],
+    prices: true,
+    digest: true,
   },
   {
     id: 'marginalian',

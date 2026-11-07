@@ -98,6 +98,12 @@ export async function mockApis(page: Page, { echoes = false } = {}): Promise<voi
         });
       }
       if (h === 'precoscombustiveis.dgeg.gov.pt') return json(route, fixture('dgeg', 'pmd'));
+      if (h === 'api.coingecko.com')
+        return json(route, fixture('coingecko', p.endsWith('/global') ? 'global' : 'coin-markets'));
+      if (h === 'api.alternative.me') return json(route, fixture('feargreed', 'fng'));
+      if (h === 'api.eia.gov') return json(route, fixture('eia', 'spot'));
+      if (h === 'data-api.ecb.europa.eu' && p.includes('/EXR/')) return json(route, fixture('ecb', 'fx-rates'));
+      if (h === 'data-api.ecb.europa.eu' && p.includes('/YC/')) return json(route, fixture('ecb', 'bond-yield'));
       if (h.endsWith('wikipedia.org')) {
         const title = url.searchParams.get('titles') || url.searchParams.get('search') || 'Topic';
         return json(

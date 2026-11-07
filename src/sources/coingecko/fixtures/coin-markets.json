@@ -1,0 +1,55 @@
+[
+  {
+    "id": "bitcoin",
+    "symbol": "btc",
+    "name": "Bitcoin",
+    "current_price": 75947,
+    "market_cap": 1527227389096,
+    "total_volume": 25404708859,
+    "last_updated": "2026-11-07T07:16:53.000Z",
+    "price_change_percentage_24h_in_currency": 0.78972,
+    "price_change_percentage_7d_in_currency": -1.5732,
+    "price_change_percentage_30d_in_currency": -8.0551,
+    "sparkline_in_7d": {
+      "price": [
+        75835.82860683581, 75975.13660087364, 75973.40366164315, 75815.45412050362, 75837.57519284275, 75961.91762700927
+      ]
+    }
+  },
+  {
+    "id": "pax-gold",
+    "symbol": "paxg",
+    "name": "PAX Gold",
+    "current_price": 4061.61,
+    "market_cap": 1818483357,
+    "total_volume": 126063441,
+    "last_updated": "2026-11-07T07:16:53.000Z",
+    "price_change_percentage_24h_in_currency": 0.53425,
+    "price_change_percentage_7d_in_currency": 4.3184,
+    "price_change_percentage_30d_in_currency": -1.5301,
+    "sparkline_in_7d": {
+      "price": [
+        4058.4966363176136, 4065.3673034224316, 4067.881265425456, 4066.905276045271, 4066.4408911086507,
+        4062.877620122212
+      ]
+    }
+  },
+  {
+    "id": "nvidia-xstock",
+    "symbol": "nvdax",
+    "name": "NVIDIA xStock",
+    "current_price": 187.69,
+    "market_cap": 52112197,
+    "total_volume": 10668629,
+    "last_updated": "2026-11-07T07:16:53.000Z",
+    "price_change_percentage_24h_in_currency": 1.17521,
+    "price_change_percentage_7d_in_currency": -8.2959,
+    "price_change_percentage_30d_in_currency": -20.8481,
+    "sparkline_in_7d": {
+      "price": [
+        188.82776545842523, 188.73210558403542, 188.25675005193182, 187.91221110576828, 187.86096945536403,
+        187.74742791981004
+      ]
+    }
+  }
+]
