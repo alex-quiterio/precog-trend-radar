@@ -7,7 +7,7 @@
 import { DAY, store } from '@core/config';
 import { getJSON, pool as inPool, topicRegex } from '@sources/registry';
 import { parsePageviews } from '@sources/wikipedia/parse';
-import { CHANNEL_SITES, loadReading } from '@sources/reading';
+import { AMSTERDAM_SITES, loadReading } from '@sources/reading';
 import type { ReadingItem } from '@sources/reading/parse';
 import type { Candidate, Echo } from './hot-topics';
 
@@ -156,7 +156,7 @@ export function sceneSource(lensTopics: () => { name: string; wiki?: string; q?:
         signal,
         t,
       ),
-      loadReading(signal, CHANNEL_SITES).catch(() => ({ items: [] as ReadingItem[], errors: [] })),
+      loadReading(signal, AMSTERDAM_SITES).catch(() => ({ items: [] as ReadingItem[], errors: [] })),
     ]);
     const recent = reading.items.filter(it => t - it.t < 60 * DAY);
     return sceneCandidates(pool, surge, recent, t, skip);

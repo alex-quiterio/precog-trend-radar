@@ -31,14 +31,22 @@ export const BUILT_IN_SITES: ReadingSite[] = [
 export const isBuiltInSite = (url: string): boolean => BUILT_IN_SITES.some(s => s.url === url);
 /**
  * Sites a channel reads without you following them (see `sites` in channels.ts): they load only on that
- * channel, so other channels never pay for them. Alt Amsterdam reads the commons and repair movement.
+ * channel, so other channels never pay for them. Alt Amsterdam reads the commons and repair movement (and
+ * scores its daily topics on them, see features/scene-topics.ts).
  */
-export const CHANNEL_SITES: ReadingSite[] = [
+export const AMSTERDAM_SITES: ReadingSite[] = [
   { url: 'https://www.commonsnetwork.org', name: 'Commons Network', types: [['posts', 'Post']] },
   { url: 'https://www.shareable.net', name: 'Shareable', types: [['posts', 'Story']] },
   { url: 'https://www.repaircafe.org', name: 'Repair Café', types: [['posts', 'News']] },
   { url: 'https://www.resilience.org', name: 'Resilience', types: [['posts', 'Article']] },
 ];
+/** Portugal & the land reads Portuguese nature, environment and farming news (matched by the topics' `also` names). */
+export const PORTUGAL_SITES: ReadingSite[] = [
+  { url: 'https://wilder.pt', name: 'Wilder', types: [['posts', 'Story']] },
+  { url: 'https://greensavers.sapo.pt', name: 'Green Savers', types: [['posts', 'Article']] },
+  { url: 'https://www.agroportal.pt', name: 'Agroportal', types: [['posts', 'News']] },
+];
+export const CHANNEL_SITES: ReadingSite[] = [...AMSTERDAM_SITES, ...PORTUGAL_SITES];
 /** A followed or channel site by its origin. */
 export const siteByUrl = (url: string): ReadingSite | undefined =>
   [...readingSites(), ...CHANNEL_SITES].find(s => s.url === url);

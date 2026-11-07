@@ -24,7 +24,8 @@ export const PALETTES = {
 export const slotColor = (slot: number, theme: 'dark' | 'light' = 'dark'): string => PALETTES[theme][slot];
 export const SLOT_ANGLE = [20, 80, 140, 200, 260, 320];
 
-// Each topic: [display name, { wiki: exact article title, q: search phrase for news and stories }]
+// Each topic: [display name, { wiki: exact article title, q: search phrase for news and stories,
+// also: other names the Reading stream matches, such as the Portuguese ones the channel's sites write in }]
 // One lens per channel (see channels.ts). English Wikipedia throughout: Portuguese and Dutch articles on
 // these subjects get too few views (1-20 a day) for a trend to mean anything.
 export const PRESETS = [
@@ -72,12 +73,19 @@ export const PRESETS = [
     name: 'Portugal & the land',
     desc: 'Fire and water in the interior, and the practices behind a rural, closed-loop life on the land.',
     topics: [
-      ['Wildfires', { wiki: 'Wildfire', q: 'wildfire' }],
-      ['Desertification'],
-      ['Rainwater harvesting'],
-      ['Agroforestry'],
-      ['Permaculture'],
-      ['Ecovillage', { q: 'ecovillage' }],
+      [
+        'Wildfires',
+        {
+          wiki: 'Wildfire',
+          q: 'wildfire',
+          also: ['incêndios', 'incêndio rural', 'incêndio florestal', 'fogos florestais', 'fogo florestal'],
+        },
+      ],
+      ['Desertification', { also: ['desertificação'] }],
+      ['Rainwater harvesting', { also: ['água da chuva', 'águas pluviais'] }],
+      ['Agroforestry', { also: ['agrofloresta', 'agroflorestal', 'agroflorestais', 'montado'] }],
+      ['Permaculture', { also: ['permacultura'] }],
+      ['Ecovillage', { q: 'ecovillage', also: ['ecoaldeia', 'ecoaldeias', 'eco-aldeia'] }],
     ],
   },
   {
@@ -159,6 +167,16 @@ export const PRESETS = [
     ],
   },
 ];
+/**
+ * Other names a shipped topic goes by in its lens (`also` above), for matching text written in them. Read from
+ * the presets rather than storage, so saved lenses pick them up without an upgrade.
+ */
+export function otherNames(lensId: string, name: string): string[] {
+  const n = name.toLowerCase();
+  const t = PRESETS.find(p => p.id === lensId)?.topics.find(t => String(t[0]).toLowerCase() === n);
+  const o = t?.[1];
+  return typeof o === 'object' && o && 'also' in o && Array.isArray(o.also) ? o.also : [];
+}
 // v8 re-ran the upgrade for browsers that versions 5-7 marked as upgraded without saving the new lenses.
 // v9 adds Energy & power and Housing.
 // v10 tunes Portugal & the land (water, agroforestry, ecovillages), Alt Amsterdam (mutual aid) and The Marginalian

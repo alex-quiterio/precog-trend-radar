@@ -2,7 +2,7 @@
 // A channel names its lens (the topics whose attention it charts), the datapoints worth knowing in
 // that context, the streams it shows, and any special views (GitHub). Switching channel switches all of it.
 import type { AppStore } from '@/state';
-import { CHANNEL_SITES } from '@sources/reading';
+import { AMSTERDAM_SITES, PORTUGAL_SITES } from '@sources/reading';
 
 export interface Channel {
   id: string;
@@ -99,6 +99,7 @@ export const CHANNELS: Channel[] = [
       'unemployment-pt',
     ],
     streams: ['news', 'reading', 'forecasts'],
+    sites: PORTUGAL_SITES.map(s => s.url),
     country: 'pt',
   },
   {
@@ -148,7 +149,7 @@ export const CHANNELS: Channel[] = [
       'unemployment-nl',
     ],
     streams: ['reading', 'news', 'forecasts'],
-    sites: CHANNEL_SITES.map(s => s.url),
+    sites: AMSTERDAM_SITES.map(s => s.url),
     links: [
       { label: 'Gatherings this weekend on Hipsy', href: 'https://hipsy.nl/events?period=current_weekend' },
       { label: 'Workshops', href: 'https://hipsy.nl/events/workshops' },
