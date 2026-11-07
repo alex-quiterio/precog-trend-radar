@@ -15,16 +15,15 @@
     </div>
     <div class="controls no-print">
       <button
-        class="btn refresh"
+        class="btn icon refresh"
         type="button"
         :disabled="ui.loading"
         :aria-busy="ui.loading"
-        aria-label="Refresh data now"
-        title="Refresh data now"
+        :aria-label="ui.loading ? 'Loading…' : 'Refresh data now'"
+        :title="ui.loading ? 'Loading…' : 'Refresh data now'"
         @click="refresh"
       >
         <span class="refresh-icon" aria-hidden="true">↻</span>
-        <span class="refresh-label">{{ ui.loading ? 'Loading…' : 'Refresh' }}</span>
       </button>
       <button
         class="btn icon set-toggle"
@@ -442,6 +441,27 @@ h1 .sub {
   gap: 8px;
 }
 /* Settings button: lit while the bar is open, amber when the Guardian key fails */
+/* Refresh: just the ↻, as round as the settings button; it spins while loading */
+.btn.refresh {
+  justify-content: center;
+}
+.btn.refresh .refresh-icon {
+  font-size: 15px;
+}
+.btn.refresh[aria-busy='true'] .refresh-icon {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn.refresh[aria-busy='true'] .refresh-icon {
+    animation: none;
+  }
+}
 .btn.set-toggle svg {
   display: block;
   margin: auto;
@@ -531,27 +551,9 @@ h1 .sub {
     padding: 3px 10px;
     font-size: 12px;
   }
-  /* Refresh: just the ↻, as round as the settings button; it spins while loading */
   .controls .btn.refresh {
-    width: 32px;
     min-height: 32px;
     padding: 0;
-    justify-content: center;
-  }
-  .btn.refresh .refresh-label {
-    display: none;
-  }
-  .btn.refresh .refresh-icon {
-    font-size: 15px;
-  }
-  .btn.refresh[aria-busy='true'] .refresh-icon {
-    display: inline-block;
-    animation: spin 1s linear infinite;
-  }
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
   }
   .pulse {
     display: none;
