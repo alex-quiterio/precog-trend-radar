@@ -149,28 +149,69 @@ Or use the [hosted version](https://alex-quiterio.github.io/precog-trend-radar/)
 
 ## How it works
 
+A channel is four things, set in [`src/channels.ts`](src/channels.ts):
+
+- **Topics** (its lens): what the trend sources, the radar, the streams and the GitHub searches look up. Most
+  channels have a fixed list; World and Alternative Amsterdam pick theirs each day.
+- **Cards:** the open-data cards it shows, by id.
+- **Streams:** the tabs below the chart, and the sites its Reading stream follows.
+- **Sections** it turns on or off: `digest` adds Today's stories, `prices` puts the Prices panel in place of the
+  gist, chart and radar, `github` adds Builders, `country` keeps a country channel to its own country's data,
+  and `links` adds outside links (Hipsy).
+
+Switching channels switches all four. From there, data takes up to three paths:
+
 ```mermaid
-flowchart LR
-  subgraph Trend["Trend sources"]
-    W[Wikipedia pageviews]
-    G[The Guardian<br/>with your key]
-    H[Hacker News]
+flowchart TB
+  CH[(Channel)]
+
+  subgraph P1["1 · Topics"]
+    FX["Fixed list"]
+    EC["Echoes<br/>Wikipedia In the news + most read<br/>HN front page · Manifold · Guardian front"] --> HP["World's daily pick"]
+    SC["The scene<br/>Wikipedia reads · Commons Network<br/>Shareable · Repair Café · Resilience"] --> SP["Alt Amsterdam's daily pick"]
   end
-  subgraph Context["Context and streams"]
-    D[ECB · Eurostat · IPMA · DGEG<br/>Open-Meteo · NOAA · NSIDC]
-    R[Followed WordPress sites]
-    M[Manifold]
-    GH[GitHub search + your profile]
+  CH --> FX
+  CH -. World .-> HP
+  CH -. Alt Amsterdam .-> SP
+  FX & HP & SP --> T["Topics"]
+
+  subgraph P2["2 · Attention"]
+    W["Wikipedia pageviews"] & G["The Guardian<br/>with your key"] & H["Hacker News"] --> B["Blend<br/>100 = 30-day norm"] --> S["Stats<br/>forecast · momentum · z"]
   end
-  W & G & H --> B[Blend<br/>100 = 30-day norm] --> S[Stats<br/>forecast · momentum · z] --> GI[Gist]
-  CH[(Channel)] --> GI & D & R & M & GH
+  T --> W & G & H
+  S --> GI["Gist"] & TR["Trends chart"] & RA["Radar"] & AL["Alerts"]
+
+  subgraph P3["3 · Prices (Markets)"]
+    PR["CoinGecko · EIA<br/>alternative.me · ECB FX"] --> PT["Price tiles<br/>+ what moved"]
+  end
+  CH -. prices .-> PR
+
+  CH --> CA["Open-data cards<br/>ECB · Eurostat · IPMA · DGEG<br/>Open-Meteo · NOAA · NSIDC"] --> GI
+  T --> ST["Streams<br/>Guardian · Reading · Forecasts · HN"]
+  T -. digest .-> DG["Today's stories<br/>Wikipedia · Guardian"]
+  T -. github .-> GH["Builders<br/>GitHub search + your profile"]
 ```
+
+1. **Topics.** A fixed channel uses its list as is. World scores what the internet is echoing today, and Alt
+   Amsterdam scores its pool of scene subjects (both explained above). The best six become the channel's topics,
+   and your pins, additions and removals apply on top. Everything below runs on these topics, so on those two
+   channels the chart, the streams and the stories change with the day.
+2. **Attention.** Each topic is fetched from every trend source, blended into one index and scored. That score
+   is what the gist, the trends chart, the radar and the alerts show. The data loop refreshes every 30 minutes
+   and keeps what is on screen until new data arrives.
+3. **Prices.** Markets doesn't use attention at all. Its quotes go straight to price tiles and a few plain
+   sentences on what moved. It still has topics, for its stories and streams.
+
+Alongside these, the **cards** load the open data the channel lists (on Portugal & the land the gist mentions
+fire risk and warnings from them). The **streams** look up the channel's topics, or only the selected one.
+**Today's stories** gives each topic its news of the day, and **Builders** searches GitHub per topic.
+
+### The numbers
 
 - **Attention index:** each source is re-based so **100 = its own 30-day median**, then the sources are averaged with weights. Only days that every source has published are used. Sparse sources get less weight, and low-volume topics never make the gist's headline claims.
 - **Forecast:** linear regression on the last 20 points, projected 12 steps ahead. The band is ±1σ of the residuals.
 - **Running hot:** the latest point against the previous 30. Above 2.5σ is an **alert**, above 1.8σ a **watch**.
 - **Reading:** The Great Simplification and The Marginalian are always followed (they can't be removed). Any other WordPress site whose public API allows browser reads works too (most do): **follow a site** in the Reading stream. Posts that name a topic in the title rank above those that name it in the text, and a match counts half as much for every six months of age.
-- **Channels** are defined in [`src/channels.ts`](src/channels.ts): the lens of topics, the datapoint cards, the streams and the sites each one shows.
 
 ### Sources
 
