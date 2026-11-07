@@ -1,0 +1,12 @@
+{
+  "type": "standard",
+  "title": "2026 Binance hack",
+  "description": "Cryptocurrency theft",
+  "extract": "On 29 October 2026, 6.3 billion US dollars worth of digital currency was stolen from Binance, a cryptocurrency exchange, allegedly by the North Korea-linked hacking group TraderTraitor. The exchange hack is the largest-ever cryptocurrency heist, surpassing the $1.5 billion Bybit hack in 2025, with the most affected blockchains being Ethereum and Bitcoin. On the day of the heist, approximately $3 billion of the stolen stablecoins were frozen. North Korea has since denied being behind the theft.",
+  "timestamp": "2026-11-06T20:26:37Z",
+  "content_urls": {
+    "desktop": {
+      "page": "https://en.wikipedia.org/wiki/2026_Binance_hack"
+    }
+  }
+}

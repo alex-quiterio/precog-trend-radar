@@ -12,19 +12,22 @@ import { looksLikePerson } from '@core/guard';
 import { nf0 } from '@core/format';
 import { type EchoSignals, type FeedArticle, fetchEchoSignals, peopleAmong } from '@sources/echoes';
 import { isObj } from '@sources/shape';
+import { topicRegex } from '@sources/registry';
 import type { AppStore } from '@/state';
 import type { TopicDef } from '@/types';
 
 /** The lens whose topics are picked each day. */
 export const HOT_LENS = 'world';
 /** Where a topic was seen today. */
-export type Echo = 'news' | 'read' | 'hn' | 'manifold' | 'guardian';
+export type Echo = 'news' | 'read' | 'hn' | 'manifold' | 'guardian' | 'views' | 'sites';
 export const ECHO_LABEL: Record<Echo, string> = {
   news: 'In the news on Wikipedia',
   read: 'Most read on Wikipedia',
   hn: 'On the Hacker News front page',
   manifold: 'Among Manifold’s busiest markets',
   guardian: 'On the Guardian’s front: its editors’ picks and most viewed',
+  views: 'Its Wikipedia article is read more this week than in the month before',
+  sites: 'In recent posts from the channel’s sites',
 };
 /** A picked topic. */
 export interface HotPick {
@@ -125,6 +128,42 @@ export function headlineRegex(title: string): RegExp | null {
   return new RegExp(`(^|[^\\p{L}\\p{N}])${src}(?=$|[^\\p{L}\\p{N}])`, 'iu');
 }
 
+// --- Your interests ----------------------------------------------------
+/** A topic you track in another channel, as a phrase a candidate can name. */
+export interface Interest {
+  re: RegExp;
+  /** The channel it comes from, for the "why" line. */
+  channel: string;
+}
+/**
+ * What you track outside World: every topic of every other channel (its search phrase and its name). A
+ * candidate naming one gets a lift, so World leans toward what you care about, and leans further as you add
+ * topics anywhere. It only lifts what the internet is already echoing; it never invents a topic.
+ */
+export function interestsOf(lenses: { id: string; name: string; topics: TopicDef[] }[]): Interest[] {
+  return lenses
+    .filter(l => l.id !== HOT_LENS)
+    .flatMap(l =>
+      l.topics.flatMap(t =>
+        [
+          ...new Set(
+            [t.q || t.name, t.name, t.wiki || ''].map(p =>
+              p
+                .replace(/"/g, '')
+                .replace(/\s*\([^)]*\)/g, '')
+                .trim(),
+            ),
+          ),
+        ]
+          // Short or boolean phrases ("AI", "a OR b") match too much to say anything.
+          .filter(p => p.replace(/\s/g, '').length >= 4 && !/\bOR\b/.test(p))
+          .map(p => ({ re: topicRegex(p), channel: l.name })),
+      ),
+    );
+}
+/** The lift a candidate gets for naming something you track: about as much as a second place echoing it. */
+export const INTEREST_LIFT = 2;
+
 // --- Candidates and scores ---------------------------------------------
 /** The middle value of a list (0 for none). */
 const median = (xs: number[]): number => {
@@ -147,10 +186,17 @@ const fmtViews = (n: number) =>
  * `people` holds the Wikidata ids known to be people, or null when Wikidata couldn't say (then the title's
  * words are checked too). `skip` names topics to leave out (ones you removed).
  */
-export function candidatesOf(s: EchoSignals, people: Set<string> | null, skip: Set<string> = new Set()): Candidate[] {
+export function candidatesOf(
+  s: EchoSignals,
+  people: Set<string> | null,
+  skip: Set<string> = new Set(),
+  interests: Interest[] = [],
+): Candidate[] {
   type Work = Candidate & {
     best: Partial<Record<Echo, { score: number; note: string; own?: boolean }>>;
     related: number;
+    /** What the articles behind it say they are, for matching your interests. */
+    descs: string[];
   };
   const out: Work[] = [];
   const ok = (a: FeedArticle) =>
@@ -169,9 +215,11 @@ export function candidatesOf(s: EchoSignals, people: Set<string> | null, skip: S
         notes: [],
         best: {},
         related: 0,
+        descs: [],
       };
       out.push(c);
     } else if (echo === 'read') c.related++;
+    if (a.description && !c.descs.includes(a.description)) c.descs.push(a.description);
     // The strongest echo counts; the line quotes the topic's own article when it has one.
     const was = c.best[echo];
     const own = a.title === c.wiki;
@@ -233,9 +281,13 @@ export function candidatesOf(s: EchoSignals, people: Set<string> | null, skip: S
     });
   });
   return out
-    .map(({ best, related, ...c }) => {
+    .map(({ best, related, descs, ...c }) => {
       const echoes = (Object.keys(ECHO_LABEL) as Echo[]).filter(e => best[e]);
       const notes = echoes.map(e => best[e]!.note).filter(Boolean);
+      // Close to something you track in another channel: a lift, and the line says which channel.
+      const texts = [c.wiki, ...c.aliases, ...descs];
+      const near = [...new Set(interests.filter(i => texts.some(t => i.re.test(t))).map(i => i.channel))];
+      if (near.length) notes.push(`near your ${near.slice(0, 2).join(' and ')} channel${near.length > 1 ? 's' : ''}`);
       if (related)
         notes.splice(
           echoes.includes('news') ? 0 : 1,
@@ -246,7 +298,10 @@ export function candidatesOf(s: EchoSignals, people: Set<string> | null, skip: S
         ...c,
         echoes,
         notes,
-        score: echoes.reduce((t, e) => t + best[e]!.score, 0) + Math.min(1, related * 0.25),
+        score:
+          echoes.reduce((t, e) => t + best[e]!.score, 0) +
+          Math.min(1, related * 0.25) +
+          (near.length ? INTEREST_LIFT : 0),
       };
     })
     .sort((a, b) => b.score - a.score);
@@ -315,8 +370,8 @@ interface Saved {
   /** Topic names you removed (lower case) → the day they may come back. */
   dismissed: Record<string, string>;
 }
-function loadSaved(): Saved {
-  const v = store.get<unknown>(LS.hot, null);
+function loadSaved(key: string): Saved {
+  const v = store.get<unknown>(key, null);
   const empty: Saved = { day: '', first: '', picks: [], dismissed: {} };
   if (!isObj(v)) return empty;
   const picks = (Array.isArray(v.picks) ? v.picks : []).filter(
@@ -333,21 +388,47 @@ function loadSaved(): Saved {
 
 export interface HotDeps {
   app: AppStore;
+  /** The lens whose topics are picked (World by default), and where its picks are kept. */
+  lensId?: string;
+  storageKey?: string;
+  /** Where its topics come from, in a phrase for the topics panel ("what the internet is echoing"). */
+  from?: string;
+  /**
+   * Today's candidates, best first, leaving out `skip` (topics you removed). By default World's: what the
+   * internet is echoing, leaning toward what you track elsewhere.
+   */
+  candidates?: (signal: AbortSignal, skip: Set<string>) => Promise<Candidate[]>;
   fetchSignals?: (signal: AbortSignal) => Promise<EchoSignals>;
   people?: (qids: string[], signal: AbortSignal) => Promise<Set<string>>;
   now?: () => number;
 }
 export function createHotTopics({
   app,
+  lensId = HOT_LENS,
+  storageKey = LS.hot,
+  from = 'what the internet is echoing',
   fetchSignals = fetchEchoSignals,
   people = peopleAmong,
+  candidates,
   now = Date.now,
 }: HotDeps) {
-  const state = reactive({ ...loadSaved(), loading: false, error: '' });
+  /** World's candidates: the day's echoes, people left out, lifted where they touch your other channels. */
+  async function echoCandidates(signal: AbortSignal, skip: Set<string>): Promise<Candidate[]> {
+    const s = await fetchSignals(signal);
+    const all = [...s.feed.news.flat(), ...s.feed.mostRead, ...(s.guardian ?? []).map(g => g.article)];
+    // Wikidata says who is a person; if it can't answer, the descriptions and the titles' words still do.
+    const humans = await people(
+      all.map(a => a.qid),
+      signal,
+    ).catch(() => null);
+    return candidatesOf(s, humans, skip, interestsOf(app.state.lenses));
+  }
+  const pick = candidates ?? echoCandidates;
+  const state = reactive({ ...loadSaved(storageKey), loading: false, error: '' });
   let abort: AbortController | null = null;
   const save = () =>
-    store.set(LS.hot, { day: state.day, first: state.first, picks: state.picks, dismissed: state.dismissed });
-  const lens = () => app.lensById(HOT_LENS);
+    store.set(storageKey, { day: state.day, first: state.first, picks: state.picks, dismissed: state.dismissed });
+  const lens = () => app.lensById(lensId);
   const pickOf = (name: string) => state.picks.find(p => p.name.toLowerCase() === name.toLowerCase());
 
   /** Rewrites the World lens's topics from the picks. */
@@ -380,15 +461,8 @@ export function createHotTopics({
     state.loading = true;
     state.error = '';
     try {
-      const s = await fetchSignals(signal);
-      const all = [...s.feed.news.flat(), ...s.feed.mostRead, ...(s.guardian ?? []).map(g => g.article)];
-      // Wikidata says who is a person; if it can't answer, the descriptions and the titles' words still do.
-      const humans = await people(
-        all.map(a => a.qid),
-        signal,
-      ).catch(() => null);
       Object.entries(state.dismissed).forEach(([k, until]) => until <= today && delete state.dismissed[k]);
-      const cands = candidatesOf(s, humans, new Set(Object.keys(state.dismissed)));
+      const cands = await pick(signal, new Set(Object.keys(state.dismissed)));
       if (cands.length < 3) throw new Error('too few topics stood out today');
       const before = current();
       state.picks = choosePicks(before, cands, today);
@@ -452,8 +526,10 @@ export function createHotTopics({
     adopt,
     dismiss,
     makeRoom,
-    /** True for the lens whose topics are picked each day. */
-    owns: (lensId: string | null | undefined): boolean => lensId === HOT_LENS,
+    lensId,
+    from,
+    /** True for the lens whose topics this store picks. */
+    owns: (id: string | null | undefined): boolean => id === lensId,
     pickOf,
     /** True for a topic picked today for the first time (not on the very first day, nor one kept as filler). */
     isNew: (p: HotPick | undefined, today: string): boolean =>
@@ -462,3 +538,19 @@ export function createHotTopics({
   };
 }
 export type HotTopics = ReturnType<typeof createHotTopics>;
+
+/** Every channel whose topics are picked each day (World, Alt Amsterdam), found by lens. */
+export function createPickers(list: HotTopics[]) {
+  const by = (id: string | null | undefined) => list.find(p => p.owns(id));
+  return {
+    list,
+    /** The store picking this lens's topics, or undefined for a lens you curate yourself. */
+    for: by,
+    owns: (id: string | null | undefined): boolean => !!by(id),
+    /** Picks every channel's topics (once a day). True when any changed. */
+    refresh: async (force = false): Promise<boolean> =>
+      (await Promise.all(list.map(p => p.refresh(force)))).some(Boolean),
+    stop: () => list.forEach(p => p.stop()),
+  };
+}
+export type Pickers = ReturnType<typeof createPickers>;

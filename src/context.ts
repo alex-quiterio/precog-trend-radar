@@ -1,5 +1,5 @@
 // PRECOG / Trend Radar · The composition root: makes the app store and the services that work on it (the
-// data loop, the stream loader, the open-data and GitHub panels' stores, World's daily topic pick, the actions), and hands them to every panel through Vue's provide/inject.
+// data loop, the stream loader, the open-data and GitHub panels' stores, the daily topic picks, the actions), and hands them to every panel through Vue's provide/inject.
 // Panels call useApp() instead of importing shared state, so a test can mount any panel with its own context.
 import { inject, type App, type InjectionKey } from 'vue';
 import { rescanAll } from '@/alerts';
@@ -9,7 +9,8 @@ import { createAppStore, type AppStore } from '@/state';
 import { createDatapoints } from '@features/datapoints';
 import { createGitHub } from '@features/github';
 import { createMyGitHub } from '@features/github-me';
-import { createHotTopics } from '@features/hot-topics';
+import { createHotTopics, createPickers } from '@features/hot-topics';
+import { SCENE_KEY, SCENE_LENS, sceneSource } from '@features/scene-topics';
 import { channelStreams, createStoryLoader, streamContext } from '@features/stories';
 import { ADAPTERS, SOURCES } from '@sources/registry';
 
@@ -32,7 +33,18 @@ export function createContext(app: AppStore = createAppStore()) {
   const datapoints = createDatapoints();
   const github = createGitHub(app);
   const myGithub = createMyGitHub();
-  const hot = createHotTopics({ app });
+  // Channels whose topics are picked each day: World from what the internet is echoing, Alt Amsterdam from
+  // what is moving in its scene.
+  const hot = createPickers([
+    createHotTopics({ app }),
+    createHotTopics({
+      app,
+      lensId: SCENE_LENS,
+      storageKey: SCENE_KEY,
+      from: 'what is moving in the scene',
+      candidates: sceneSource(() => app.lensById(SCENE_LENS)?.topics ?? []),
+    }),
+  ]);
   const actions = createActions(app, { live, stories, github, myGithub, hot });
   return { app, live, stories, actions, datapoints, github, myGithub, hot };
 }

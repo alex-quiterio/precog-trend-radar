@@ -1,0 +1,118 @@
+{
+  "news": [
+    {
+      "story": "<!--Nov 3-->In the United States, the <a rel=\"mw:WikiLink\" href=\"./Democratic_Party_(United_States)\" title=\"Democratic Party (United States)\" id=\"mwBg\">Democratic Party</a> wins a majority in both the <a rel=\"mw:WikiLink\" href=\"./United_States_House_of_Representatives\" title=\"United States House of Representatives\" id=\"mwBw\">House of Representatives</a> and the <a rel=\"mw:WikiLink\" href=\"./United_States_Senate\" title=\"United States Senate\" id=\"mwCA\">Senate</a> in <b id=\"mwCQ\"><a rel=\"mw:WikiLink\" href=\"./2026_United_States_elections\" title=\"2026 United States elections\" id=\"mwCg\">the midterm elections</a></b>.",
+      "links": [
+        {
+          "type": "standard",
+          "title": "2026_United_States_elections",
+          "normalizedtitle": "2026 United States elections",
+          "description": "",
+          "wikibase_item": "Q115857612",
+          "namespace": {
+            "id": 0,
+            "text": ""
+          }
+        },
+        {
+          "type": "standard",
+          "title": "Democratic_Party_(United_States)",
+          "normalizedtitle": "Democratic Party (United States)",
+          "description": "Political party",
+          "wikibase_item": "Q29552",
+          "namespace": {
+            "id": 0,
+            "text": ""
+          }
+        },
+        {
+          "type": "standard",
+          "title": "United_States_House_of_Representatives",
+          "normalizedtitle": "United States House of Representatives",
+          "description": "Lower house of the U.S. Congress",
+          "wikibase_item": "Q11701",
+          "namespace": {
+            "id": 0,
+            "text": ""
+          }
+        }
+      ]
+    },
+    {
+      "story": "<!--Nov 1-->In <a rel=\"mw:WikiLink\" href=\"./Motorsport\" title=\"Motorsport\" id=\"mwDA\">motorsport</a>, <a rel=\"mw:WikiLink\" href=\"./Kimi_Antonelli\" title=\"Kimi Antonelli\" id=\"mwDQ\">Kimi Antonelli</a> <i id=\"mwDg\"></i> becomes the youngest winner of <b id=\"mwDw\"><a rel=\"mw:WikiLink\" href=\"./2026_Formula_One_World_Championship\" title=\"2026 Formula One World Championship\" id=\"mwEA\">the Formula One World Championship.</a></b>",
+      "links": [
+        {
+          "type": "standard",
+          "title": "2026_Formula_One_World_Championship",
+          "normalizedtitle": "2026 Formula One World Championship",
+          "description": "Formula One season",
+          "wikibase_item": "Q115942640",
+          "namespace": {
+            "id": 0,
+            "text": ""
+          }
+        },
+        {
+          "type": "standard",
+          "title": "Motorsport",
+          "normalizedtitle": "Motorsport",
+          "description": "Sport primarily involving the use of motorised vehicles",
+          "wikibase_item": "Q5367",
+          "namespace": {
+            "id": 0,
+            "text": ""
+          }
+        },
+        {
+          "type": "standard",
+          "title": "Kimi_Antonelli",
+          "normalizedtitle": "Kimi Antonelli",
+          "description": "Italian racing driver (born 2006)",
+          "wikibase_item": "Q112073790",
+          "namespace": {
+            "id": 0,
+            "text": ""
+          }
+        }
+      ]
+    },
+    {
+      "story": "<!--Oct 31-->The <a rel=\"mw:WikiLink\" href=\"./Constitutional_Tribunal_(Poland)#Polish_Constitutional_Tribunal_crisis\" title=\"Constitutional Tribunal (Poland)\" id=\"mwEg\">Polish Constitutional Tribunal crisis</a> escalates with <a rel=\"mw:WikiLink\" href=\"./2026_Polish_Constitutional_Tribunal_crisis\" title=\"2026 Polish Constitutional Tribunal crisis\" id=\"mwEw\"><b id=\"mwFA\">the suspension</b></a> of tribunal head <a rel=\"mw:WikiLink\" href=\"./Bogdan_Święczkowski\" title=\"Bogdan Święczkowski\" id=\"mwFQ\">Bogdan Święczkowski</a><span typeof=\"mw:Entity\" id=\"mwFg\">&nbsp;</span>and deputy head <a rel=\"mw:WikiLink\" href=\"./Bartłomiej_Sochański\" title=\"Bartłomiej Sochański\" id=\"mwFw\">Bartłomiej Sochański</a> by judge <a rel=\"mw:WikiLink\" href=\"./Anna_Korwin-Piotrowska\" title=\"Anna Korwin-Piotrowska\" id=\"mwGA\">Anna Korwin-Piotrowska</a>.",
+      "links": [
+        {
+          "type": "standard",
+          "title": "Constitutional_Tribunal_(Poland)",
+          "normalizedtitle": "Constitutional Tribunal (Poland)",
+          "description": "Constitutional court of Poland",
+          "wikibase_item": "Q1636999",
+          "namespace": {
+            "id": 0,
+            "text": ""
+          }
+        },
+        {
+          "type": "standard",
+          "title": "2026_Polish_Constitutional_Tribunal_crisis",
+          "normalizedtitle": "2026 Polish Constitutional Tribunal crisis",
+          "description": "Suspension of the tribunal's president",
+          "wikibase_item": "Q141945180",
+          "namespace": {
+            "id": 0,
+            "text": ""
+          }
+        },
+        {
+          "type": "standard",
+          "title": "Bogdan_Święczkowski",
+          "normalizedtitle": "Bogdan Święczkowski",
+          "description": "Polish jurist and prosecutor (born 1970)",
+          "wikibase_item": "Q9175413",
+          "namespace": {
+            "id": 0,
+            "text": ""
+          }
+        }
+      ]
+    }
+  ]
+}

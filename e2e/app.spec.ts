@@ -133,3 +133,31 @@ test('World picks its topics from what the internet is echoing, and a pin keeps 
   await page.reload();
   await expect(page.locator('#p-watch').getByRole('button', { name: 'Unpin .xyz' })).toBeVisible();
 });
+
+test('World opens with today’s stories: the news told in a sentence, quiet topics in a line', async ({ page }) => {
+  await open(page, { echoes: true });
+  const digest = page.locator('#p-digest');
+  await expect(page.locator('#b-today')).toContainText('Today');
+  await expect(digest.locator('.dg-item').first()).toContainText('In the news');
+  await expect(digest).toContainText('the Democratic Party wins a majority');
+  // A topic with no story says only what it is, never an encyclopedia lead passed off as news.
+  await expect(digest.locator('.dg-quiet li').first()).toContainText('About');
+});
+
+test('Portugal shows what a litre of fuel costs, from DGEG', async ({ page }) => {
+  await open(page);
+  await page.locator('body').press('4');
+  await expect(heroTitle(page)).toHaveText('Portugal & the land');
+  await expect(page.locator('#p-data')).toContainText('Diesel · Portugal');
+  await expect(page.locator('#p-data')).toContainText('2,205 €/L');
+});
+
+test('Alt Amsterdam picks its topics from its scene, reads its own sites, and links to Hipsy', async ({ page }) => {
+  await open(page);
+  await page.locator('body').press('7');
+  await expect(heroTitle(page)).toHaveText('Alternative Amsterdam');
+  await expect(page.locator('#p-watch')).toContainText('Picked today from what is moving in the scene');
+  await expect(page.locator('#p-watch .chip .name')).toHaveCount(6);
+  await expect(page.locator('.ch-links')).toContainText('Hipsy');
+  await expect(page.locator('#p-data')).toContainText('Netherlands');
+});

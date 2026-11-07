@@ -30,6 +30,35 @@ export default defineComponent({
   animation: enter 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   animation-delay: calc(var(--i, 0) * 70ms);
 }
+/* Brackets at the four corners, like a reticle. */
+.panel::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: var(--radius);
+  pointer-events: none;
+  --b: var(--bracket);
+  background:
+    linear-gradient(var(--b), var(--b)) top left / 14px 1px no-repeat,
+    linear-gradient(var(--b), var(--b)) top left / 1px 14px no-repeat,
+    linear-gradient(var(--b), var(--b)) top right / 14px 1px no-repeat,
+    linear-gradient(var(--b), var(--b)) top right / 1px 14px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom left / 14px 1px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom left / 1px 14px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom right / 14px 1px no-repeat,
+    linear-gradient(var(--b), var(--b)) bottom right / 1px 14px no-repeat;
+}
+/* A thin line of light along the top edge. */
+.panel::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 18px;
+  right: 18px;
+  height: 1px;
+  background: var(--edge);
+  pointer-events: none;
+}
 @keyframes enter {
   from {
     opacity: 0;
@@ -51,9 +80,10 @@ export default defineComponent({
   margin: 0;
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--ink-2);
+  color: var(--accent);
+  text-shadow: var(--glow);
 }
 .panel-head .meta {
   margin-left: auto;

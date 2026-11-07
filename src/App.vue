@@ -10,22 +10,34 @@
         </p>
         <h2 id="ch-title">{{ view.title }}</h2>
         <p class="ch-desc">{{ view.channel.kicker }}</p>
+        <p v-if="view.channel.links?.length" class="ch-links">
+          <a v-for="l in view.channel.links" :key="l.href" :href="l.href" target="_blank" rel="noopener noreferrer">
+            {{ l.label }} ↗
+          </a>
+        </p>
       </div>
       <p class="status" role="status">{{ ui.status }}</p>
     </section>
 
     <div class="layout" :key="'l-' + view.channel.id">
       <div class="main">
+        <section v-if="view.channel.digest" class="block" aria-labelledby="b-today">
+          <h3 id="b-today" class="block-head">
+            <span>{{ view.n('today') }}</span>
+            Today
+          </h3>
+          <digest-panel :index="0"></digest-panel>
+        </section>
         <section class="block" aria-labelledby="b-gist">
           <h3 id="b-gist" class="block-head">
-            <span>01</span>
+            <span>{{ view.n('gist') }}</span>
             Gist
           </h3>
           <morning-brief :index="0"></morning-brief>
         </section>
         <section class="block" aria-labelledby="b-trends">
           <h3 id="b-trends" class="block-head">
-            <span>02</span>
+            <span>{{ view.n('trends') }}</span>
             Trends
           </h3>
           <div class="stack">
@@ -35,7 +47,7 @@
         </section>
         <section v-if="view.channel.github" class="block" aria-labelledby="b-build">
           <h3 id="b-build" class="block-head">
-            <span>03</span>
+            <span>{{ view.n('build') }}</span>
             Builders
           </h3>
           <div class="stack">
@@ -45,7 +57,7 @@
         </section>
         <section class="block" aria-labelledby="b-streams">
           <h3 id="b-streams" class="block-head">
-            <span>{{ view.channel.github ? '04' : '03' }}</span>
+            <span>{{ view.n('streams') }}</span>
             Streams
           </h3>
           <stories-panel :index="5"></stories-panel>
@@ -69,7 +81,7 @@
 
     <footer class="foot">
       PRECOG tracks topics, never people · Wikipedia · The Guardian · Hacker News · Manifold · GitHub · ECB · Eurostat ·
-      IPMA · Open-Meteo · NOAA · NSIDC
+      IPMA · Open-Meteo · NOAA · NSIDC · DGEG
     </footer>
   </div>
 </template>
@@ -80,6 +92,7 @@ import { computed, defineComponent } from 'vue';
 import { activeChannel, channelDatapoints, channels } from '@/channels';
 import AppHeader from '@components/AppHeader.vue';
 import MorningBrief from '@components/MorningBrief.vue';
+import DigestPanel from '@components/DigestPanel.vue';
 import DatapointsPanel from '@components/DatapointsPanel.vue';
 import LensPanel from '@components/LensPanel.vue';
 import SignalPanel from '@components/SignalPanel.vue';
@@ -95,6 +108,7 @@ export default defineComponent({
   components: {
     AppHeader,
     MorningBrief,
+    DigestPanel,
     DatapointsPanel,
     LensPanel,
     SignalPanel,
@@ -109,7 +123,12 @@ export default defineComponent({
     const view = computed(() => {
       const channel = activeChannel(app);
       const i = channels(app).findIndex(c => c.id === channel.id);
+      // The main column's sections, numbered in the order they show.
+      const blocks = [channel.digest && 'today', 'gist', 'trends', channel.github && 'build', 'streams'].filter(
+        Boolean,
+      );
       return {
+        n: (b: string) => String(blocks.indexOf(b) + 1).padStart(2, '0'),
         channel,
         no: String(i + 1).padStart(2, '0'),
         title: app.activeLens()?.name || channel.label,
@@ -132,6 +151,25 @@ export default defineComponent({
 }
 
 /* channel hero */
+.ch-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  margin: 10px 0 0;
+}
+.ch-links a {
+  padding: 4px 10px;
+  border: 1px solid var(--glass-border);
+  border-radius: 99px;
+  background: var(--card);
+  color: var(--ink-2);
+  font-size: 12px;
+  text-decoration: none;
+}
+.ch-links a:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
 .channel-hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -153,8 +191,14 @@ export default defineComponent({
 }
 .channel-hero h2 {
   margin: 0;
-  font: 600 34px/1.1 var(--sans);
-  letter-spacing: -0.02em;
+  font: 300 42px/1.05 var(--sans);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--title);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 18px var(--accent-soft));
 }
 .ch-desc {
   margin: 8px 0 0;
@@ -210,12 +254,13 @@ export default defineComponent({
 .block-head span {
   color: var(--accent);
   font-weight: 500;
+  text-shadow: 0 0 12px var(--accent-soft);
 }
 .block-head::after {
   content: '';
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, var(--hair), transparent);
+  background: linear-gradient(90deg, var(--accent-soft), var(--hair) 30%, transparent);
 }
 .stack {
   display: flex;
@@ -239,7 +284,8 @@ export default defineComponent({
     padding-top: 20px;
   }
   .channel-hero h2 {
-    font-size: 26px;
+    font-size: 28px;
+    letter-spacing: 0.04em;
   }
   .channel-hero .status {
     text-align: left;

@@ -19,3 +19,4 @@ import '@sources/eurostat/cards';
 import '@sources/ipma/cards';
 import '@sources/open-meteo/cards';
 import '@sources/global-warming/cards';
+import '@sources/dgeg/cards';

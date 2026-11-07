@@ -11,7 +11,10 @@ import {
   candidatesOf,
   choosePicks,
   createHotTopics,
+  createPickers,
   headlineRegex,
+  interestsOf,
+  INTEREST_LIFT,
   leftOut,
   sameStory,
   topicName,
@@ -111,6 +114,27 @@ describe('candidates from today’s replies', () => {
     expect(after.echoes).toEqual(['news', 'hn', 'guardian']);
     expect(after.score).toBe(before.score + 3);
     expect(after.notes).toEqual(['1 on Hacker News', '1 in the Guardian']);
+  });
+  it('leans toward what you track in other channels, and says which', () => {
+    const lenses = [
+      { id: 'world', name: 'World', topics: [{ name: 'Binance', slot: 0 }] },
+      {
+        id: 'tech',
+        name: 'Money tech',
+        topics: [
+          { name: 'Crypto', slot: 0, q: 'Cryptocurrency' },
+          { name: 'AI', slot: 1 },
+        ],
+      },
+    ];
+    const interests = interestsOf(lenses);
+    // World's own topics don't count, and phrases too short to mean anything ("AI") are left out.
+    expect(interests.map(i => i.re.test('Cryptocurrency theft'))).toEqual([true, false]);
+    expect(interests).toHaveLength(2);
+    const before = candidatesOf(signals(), PEOPLE).find(x => x.name === 'Binance hack')!;
+    const after = candidatesOf(signals(), PEOPLE, new Set(), interests).find(x => x.name === 'Binance hack')!;
+    expect(after.score).toBe(before.score + INTEREST_LIFT);
+    expect(after.notes.at(-1)).toBe('near your Money tech channel');
   });
   it('leaves out topics you removed', () => {
     expect(candidatesOf(signals(), PEOPLE, new Set(['binance hack'])).map(x => x.name)).not.toContain('Binance hack');
@@ -233,7 +257,7 @@ describe('the World pick, with a fake network', () => {
     const fakeStories = () => ({ load: vi.fn(async () => {}), status: { at: {} } });
     it('pins a topic so the next day’s pick keeps it', async () => {
       const hot = make();
-      const actions = createActions(app, { live: fakeLive(), stories: fakeStories(), hot });
+      const actions = createActions(app, { live: fakeLive(), stories: fakeStories(), hot: createPickers([hot]) });
       await hot.refresh();
       actions.togglePin('world::.xyz');
       expect(hot.pickOf('.xyz')?.pinned).toBe(true);
@@ -247,7 +271,7 @@ describe('the World pick, with a fake network', () => {
     });
     it('a topic you add is pinned, and takes the weakest pick’s place when World is full', async () => {
       const hot = make();
-      const actions = createActions(app, { live: fakeLive(), stories: fakeStories(), hot });
+      const actions = createActions(app, { live: fakeLive(), stories: fakeStories(), hot: createPickers([hot]) });
       app.state.activeLens = 'world';
       await hot.refresh();
       expect(worldTopics()).toHaveLength(6);
@@ -258,7 +282,7 @@ describe('the World pick, with a fake network', () => {
     });
     it('a topic you remove stays out of the picks for a week', async () => {
       const hot = make();
-      const actions = createActions(app, { live: fakeLive(), stories: fakeStories(), hot });
+      const actions = createActions(app, { live: fakeLive(), stories: fakeStories(), hot: createPickers([hot]) });
       await hot.refresh();
       actions.removeTopic('world::binance hack');
       expect(app.ui.watchMsg).toContain('won’t be picked again'.replace('’', "'"));

@@ -1,18 +1,28 @@
 /* Design tokens. Dark is the default; [data-theme="light"] overrides. Alert red/amber are reserved for alerts. */
 :root {
-  --bg: #0a0f16;
+  /* Precog HUD: holographic ice-blue light on near-black glass. */
+  --bg: #02060c;
   --bg-glow:
-    radial-gradient(1200px 600px at 12% -10%, rgba(64, 196, 178, 0.1), transparent 60%),
-    radial-gradient(900px 600px at 100% 0%, rgba(106, 120, 255, 0.09), transparent 60%);
-  --accent: #5fd4c1;
-  --accent-soft: rgba(95, 212, 193, 0.14);
-  --surface-gap: #121a25;
-  --glass: rgba(20, 28, 40, 0.62);
-  --glass-strong: rgba(28, 38, 54, 0.92);
-  --glass-border: rgba(160, 190, 230, 0.13);
-  --hair: rgba(190, 210, 240, 0.12);
-  --ink: #e7ecf3;
-  --ink-2: #adb7c6;
+    radial-gradient(1000px 560px at 50% -14%, rgba(90, 190, 255, 0.16), transparent 64%),
+    radial-gradient(800px 600px at 0% 10%, rgba(40, 120, 255, 0.09), transparent 60%),
+    radial-gradient(800px 600px at 100% 30%, rgba(60, 220, 255, 0.07), transparent 60%);
+  /* The faint grid of a situation room, fading out towards the bottom, and its scanlines. */
+  --bg-grid: rgba(120, 200, 255, 0.055);
+  --scan: rgba(140, 210, 255, 0.025);
+  --accent: #7fd6ff;
+  --accent-2: #3b9dff;
+  --accent-soft: rgba(127, 214, 255, 0.13);
+  --glow: 0 0 14px rgba(127, 214, 255, 0.45);
+  --edge: linear-gradient(90deg, transparent, rgba(127, 214, 255, 0.7), rgba(59, 157, 255, 0.4), transparent);
+  --bracket: rgba(127, 214, 255, 0.55);
+  --title: linear-gradient(180deg, #ffffff 20%, #a9e4ff 75%, #5fb8ff);
+  --surface-gap: #08121f;
+  --glass: rgba(8, 20, 36, 0.5);
+  --glass-strong: rgba(10, 24, 42, 0.94);
+  --glass-border: rgba(120, 200, 255, 0.18);
+  --hair: rgba(140, 200, 255, 0.12);
+  --ink: #e6f3ff;
+  --ink-2: #a3bdd6;
   --muted: #8792a4;
   --grid: #212b39;
   --axis: #3b4759;
@@ -39,12 +49,19 @@
   --radius: 16px;
 }
 :root[data-theme='light'] {
-  --bg: #f3f5f8;
+  --bg: #eef3f8;
   --bg-glow:
-    radial-gradient(1200px 600px at 12% -10%, rgba(20, 150, 132, 0.1), transparent 60%),
-    radial-gradient(900px 600px at 100% 0%, rgba(80, 96, 230, 0.08), transparent 60%);
-  --accent: #0d7f72;
-  --accent-soft: rgba(13, 127, 114, 0.1);
+    radial-gradient(1100px 620px at 8% -12%, rgba(40, 170, 220, 0.14), transparent 62%),
+    radial-gradient(900px 640px at 96% -6%, rgba(110, 90, 240, 0.1), transparent 60%);
+  --bg-grid: rgba(30, 80, 140, 0.05);
+  --scan: transparent;
+  --accent: #0a6fa8;
+  --accent-2: #1f58d6;
+  --accent-soft: rgba(10, 111, 168, 0.1);
+  --glow: none;
+  --edge: linear-gradient(90deg, transparent, rgba(10, 111, 168, 0.4), rgba(31, 88, 214, 0.25), transparent);
+  --bracket: rgba(10, 111, 168, 0.45);
+  --title: linear-gradient(180deg, #0b1626 40%, #0a5f92);
   --surface-gap: #ffffff;
   --glass: rgba(255, 255, 255, 0.62);
   --glass-strong: rgba(255, 255, 255, 0.86);

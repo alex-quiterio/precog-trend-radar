@@ -70,6 +70,41 @@ a:hover {
   color: var(--alert);
 }
 
+/* The grid behind everything, fading out down the page. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--bg-grid) 1px, transparent 1px), linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: linear-gradient(180deg, #000, transparent 70%);
+  mask-image: linear-gradient(180deg, #000, transparent 70%);
+}
+
+/* Scanlines over the page, and a slow band of light sweeping down it (off with reduced motion). */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, transparent 0, var(--accent-soft) 50%, transparent 100%) 0 -30vh / 100% 30vh no-repeat,
+    repeating-linear-gradient(180deg, var(--scan) 0 1px, transparent 1px 3px);
+  opacity: 0.55;
+  animation: hud-sweep 9s linear infinite;
+}
+@keyframes hud-sweep {
+  to {
+    background-position:
+      0 130vh,
+      0 0;
+  }
+}
+
 /* glass */
 .panel,
 .topbar {

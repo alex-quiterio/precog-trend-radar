@@ -70,14 +70,14 @@ export const PRESETS = [
   {
     id: 'portugal',
     name: 'Portugal & the land',
-    desc: 'The interior, fire and water, and the practices behind a rural, closed-loop life.',
+    desc: 'Fire and water in the interior, and the practices behind a rural, closed-loop life on the land.',
     topics: [
-      ['Alentejo'],
       ['Wildfires', { wiki: 'Wildfire', q: 'wildfire' }],
       ['Desertification'],
-      ['Rural flight'],
+      ['Rainwater harvesting'],
+      ['Agroforestry'],
       ['Permaculture'],
-      ['Regenerative agriculture'],
+      ['Ecovillage', { q: 'ecovillage' }],
     ],
   },
   {
@@ -109,12 +109,12 @@ export const PRESETS = [
   {
     id: 'amsterdam',
     name: 'Alternative Amsterdam',
-    desc: 'The cooperative, regenerative city: doughnut economics, housing co-ops, squats and urban farms.',
+    desc: 'The cooperative, regenerative city: doughnut economics, housing co-ops, mutual aid and urban farms.',
     topics: [
       ['Doughnut economics', { wiki: 'Doughnut (economic model)', q: 'doughnut economics' }],
       ['Housing cooperative'],
       ['Community land trust'],
-      ['Squatting'],
+      ['Mutual aid', { wiki: 'Mutual aid (organization theory)', q: 'mutual aid' }],
       ['Urban agriculture'],
       ['Repair Café', { q: 'repair cafe' }],
     ],
@@ -123,7 +123,14 @@ export const PRESETS = [
     id: 'marginalian',
     name: 'The Marginalian',
     desc: 'Art, science, poetry and philosophy: what it means to live a decent, substantive, rewarding life.',
-    topics: [['Poetry'], ['Consciousness'], ['Stoicism'], ['Grief'], ['Solitude'], ['Meaning of life']],
+    topics: [
+      ['Poetry'],
+      ['Taoism', { q: 'Tao' }],
+      ['Jungian psychology', { wiki: 'Analytical psychology', q: 'Jungian' }],
+      ['Mysticism'],
+      ['Grief'],
+      ['Meaning of life'],
+    ],
   },
   {
     id: 'github',
@@ -141,7 +148,11 @@ export const PRESETS = [
 ];
 // v8 re-ran the upgrade for browsers that versions 5-7 marked as upgraded without saving the new lenses.
 // v9 adds Energy & power and Housing.
-export const PRESET_VERSION = 9;
+// v10 tunes Portugal & the land (water, agroforestry, ecovillages), Alt Amsterdam (mutual aid) and The Marginalian
+// (Taoism, Jungian psychology, mysticism).
+export const PRESET_VERSION = 10;
+/** Lenses whose topics are picked each day rather than shipped (see features/hot-topics.ts). */
+export const PICKED_LENSES = ['world', 'amsterdam'];
 export const LS = {
   presetVer: 'precog.presetver',
   lenses: 'precog.lenses.v1',
@@ -152,6 +163,8 @@ export const LS = {
   wikiTitles: 'precog.wikititle.v1',
   storyObs: 'precog.storyobs.v1',
   hot: 'precog.hot.v1',
+  wikiNews: 'precog.wikinews.v1',
+  wikiSummaries: 'precog.wikisum.v1',
 };
 
 // Storage lives in core/storage.ts; re-exported here because most modules import it with the keys above.

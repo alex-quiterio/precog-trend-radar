@@ -1,0 +1,79 @@
+{
+  "status": true,
+  "mensagem": "sucesso",
+  "resultado": [
+    {
+      "Data": "2026-11-06",
+      "TipoCombustivel": "Gasóleo simples",
+      "UnidadeMedida": "litro",
+      "NumPostos": 1658,
+      "PrecoMedio": "2,205 €",
+      "PrecoMedioSDesc": "2,263 €",
+      "DescPadrao": "0,069 €",
+      "PrecoMin": "1,929 €",
+      "PrecoMax": "2,469 €",
+      "PrecoMedioC4": "2,2050 €"
+    },
+    {
+      "Data": "2026-11-06",
+      "TipoCombustivel": "Gasolina simples 95",
+      "UnidadeMedida": "litro",
+      "NumPostos": 1778,
+      "PrecoMedio": "1,999 €",
+      "PrecoMedioSDesc": "2,031 €",
+      "DescPadrao": "0,065 €",
+      "PrecoMin": "1,769 €",
+      "PrecoMax": "2,339 €",
+      "PrecoMedioC4": "1,9989 €"
+    },
+    {
+      "Data": "2026-11-05",
+      "TipoCombustivel": "Gasóleo simples",
+      "UnidadeMedida": "litro",
+      "NumPostos": 1663,
+      "PrecoMedio": "2,205 €",
+      "PrecoMedioSDesc": "2,263 €",
+      "DescPadrao": "0,069 €",
+      "PrecoMin": "1,969 €",
+      "PrecoMax": "2,469 €",
+      "PrecoMedioC4": "2,2054 €"
+    },
+    {
+      "Data": "2026-11-05",
+      "TipoCombustivel": "Gasolina simples 95",
+      "UnidadeMedida": "litro",
+      "NumPostos": 1783,
+      "PrecoMedio": "2,000 €",
+      "PrecoMedioSDesc": "2,032 €",
+      "DescPadrao": "0,065 €",
+      "PrecoMin": "1,875 €",
+      "PrecoMax": "2,339 €",
+      "PrecoMedioC4": "1,9999 €"
+    },
+    {
+      "Data": "2026-08-01",
+      "TipoCombustivel": "Gasóleo simples",
+      "UnidadeMedida": "litro",
+      "NumPostos": 1878,
+      "PrecoMedio": "2,039 €",
+      "PrecoMedioSDesc": "2,097 €",
+      "DescPadrao": "0,072 €",
+      "PrecoMin": "1,779 €",
+      "PrecoMax": "2,299 €",
+      "PrecoMedioC4": "2,0391 €"
+    },
+    {
+      "Data": "2026-08-01",
+      "TipoCombustivel": "Gasolina simples 95",
+      "UnidadeMedida": "litro",
+      "NumPostos": 1991,
+      "PrecoMedio": "1,989 €",
+      "PrecoMedioSDesc": "2,022 €",
+      "DescPadrao": "0,067 €",
+      "PrecoMin": "1,759 €",
+      "PrecoMax": "2,244 €",
+      "PrecoMedioC4": "1,9893 €"
+    }
+  ],
+  "token": null
+}

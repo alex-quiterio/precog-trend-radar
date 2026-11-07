@@ -2,7 +2,7 @@
 // the topics in scope they name. Posts naming a topic rank by match strength; the rest still show, lower.
 import { queryOf, topicRegex } from '@sources/registry';
 import { inScope, registerStream, when } from '@sources/streams';
-import { loadReading, readingSites } from './index';
+import { loadReading, readingSites, siteByUrl } from './index';
 import { readingScore, type ReadingItem } from './parse';
 
 /** A post, with the topic keys it names and how strongly. */
@@ -25,10 +25,13 @@ registerStream<Data>({
   id: 'reading',
   label: 'Reading',
   // A channel that reads one site names the tab after it ("The Great Simplification").
-  tabLabel: ctx => (ctx.sites?.length === 1 && readingSites().find(s => s.url === ctx.sites?.[0])?.name) || 'Reading',
+  tabLabel: ctx => (ctx.sites?.length === 1 && siteByUrl(ctx.sites[0])?.name) || 'Reading',
   async load(ctx, signal) {
-    const { items: all, errors } = await loadReading(signal);
-    const items = ctx.sites?.length ? all.filter(it => ctx.sites?.includes(it.origin)) : all;
+    // A channel with its own sites reads only those (followed or not); any other reads every followed site.
+    const sites = ctx.sites?.length
+      ? ctx.sites.map(siteByUrl).filter((x): x is NonNullable<typeof x> => !!x)
+      : readingSites();
+    const { items, errors } = await loadReading(signal, sites);
     const matchers = ctx.entries.map(E => {
       const qq = queryOf(E);
       const terms = [

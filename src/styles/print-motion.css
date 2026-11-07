@@ -9,6 +9,11 @@
 }
 
 @media print {
+  body::before,
+  body::after,
+  .panel::after {
+    display: none;
+  }
   :root,
   :root[data-theme] {
     --bg: #eef2f6;

@@ -2,6 +2,7 @@
 // A channel names its lens (the topics whose attention it charts), the datapoints worth knowing in
 // that context, the streams it shows, and any special views (GitHub). Switching channel switches all of it.
 import type { AppStore } from '@/state';
+import { CHANNEL_SITES } from '@sources/reading';
 
 export interface Channel {
   id: string;
@@ -18,6 +19,10 @@ export interface Channel {
   streams: string[];
   /** Followed sites to read in this channel (origins); empty means all of them. */
   sites?: string[];
+  /** Opens with Today's stories: what is happening with each topic, in a sentence (components/DigestPanel.vue). */
+  digest?: boolean;
+  /** Links out shown under the channel's name (places with no API the page could read). */
+  links?: { label: string; href: string }[];
   /** Extra views: the GitHub topic and personal panels. */
   github?: boolean;
   /** A channel you made yourself (from the "+" in the channel bar): only these can be deleted. */
@@ -40,7 +45,8 @@ export const CHANNELS: Channel[] = [
     kicker: 'What the internet is echoing today, what forecasters expect, and the money underneath.',
     lensId: 'world',
     datapoints: ['inflation-ea', 'ecb', 'unemployment-ea', 'co2'],
-    streams: ['news', 'forecasts', 'reading', 'hn'],
+    streams: ['news', 'forecasts', 'hn', 'reading'],
+    digest: true,
   },
   {
     id: 'tgs',
@@ -61,6 +67,8 @@ export const CHANNELS: Channel[] = [
     datapoints: [
       'renew-pt',
       'energyinfl-pt',
+      'diesel-pt',
+      'petrol-pt',
       'sun-lisbon',
       'renew-nl',
       'energyinfl-nl',
@@ -77,7 +85,17 @@ export const CHANNELS: Channel[] = [
     label: 'Portugal & land',
     kicker: 'Fire, water and soil in the interior, and the practices of a rural, closed-loop life.',
     lensId: 'portugal',
-    datapoints: ['fire', 'warnings', 'soil-mafra', 'wx-lisbon', 'wx-porto', 'inflation-pt', 'unemployment-pt'],
+    datapoints: [
+      'fire',
+      'warnings',
+      'soil-mafra',
+      'wx-lisbon',
+      'wx-porto',
+      'diesel-pt',
+      'petrol-pt',
+      'inflation-pt',
+      'unemployment-pt',
+    ],
     streams: ['news', 'reading', 'forecasts'],
     country: 'pt',
   },
@@ -114,11 +132,25 @@ export const CHANNELS: Channel[] = [
     id: 'amsterdam',
     icon: 'bike',
     label: 'Alt Amsterdam',
-    kicker: 'The cooperative, regenerative city.',
+    kicker: 'The cooperative, regenerative city: what is moving in its scene, picked each day.',
     lensId: 'amsterdam',
-    datapoints: ['soil-amsterdam', 'wx-amsterdam', 'inflation-nl', 'unemployment-nl'],
-    streams: ['news', 'reading', 'hn'],
-    sites: [MARGINALIAN, TGS],
+    datapoints: [
+      'hpi-nl',
+      'rent-nl',
+      'mortgage-nl',
+      'renew-nl',
+      'energyinfl-nl',
+      'soil-amsterdam',
+      'wx-amsterdam',
+      'inflation-nl',
+      'unemployment-nl',
+    ],
+    streams: ['reading', 'news', 'forecasts'],
+    sites: CHANNEL_SITES.map(s => s.url),
+    links: [
+      { label: 'Gatherings this weekend on Hipsy', href: 'https://hipsy.nl/events?period=current_weekend' },
+      { label: 'Workshops', href: 'https://hipsy.nl/events/workshops' },
+    ],
     country: 'nl',
   },
   {

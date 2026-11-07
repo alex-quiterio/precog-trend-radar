@@ -28,19 +28,19 @@ What's moving in the topics you care about, the numbers worth knowing, and what'
 
 PRECOG shows one **channel** at a time. A channel is a whole dashboard for one context: switching it switches the topics, the chart, the open data alongside and the streams below.
 
-| Channel                      | Topics it charts                                                                                | Context (open data)                                                                                                               | Streams                                           |
-| ---------------------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| **World**                    | Picked daily from what the internet is echoing                                                  | inflation, ECB rate, unemployment, CO₂                                                                                            | Forecasts, Reading, Hacker News                   |
-| **The Great Simplification** | climate change, peak oil, degrowth, overshoot, biodiversity loss, Hormuz                        | CO₂, sea ice                                                                                                                      | its episodes and Frankly, Forecasts               |
-| **Energy & power**           | renewable energy, solar, wind, energy storage, heat pumps, nuclear                              | renewable share of electricity and household energy prices (PT, NL, euro area), today's sun and wind in Lisbon and Amsterdam, CO₂ | Forecasts, The Great Simplification, Hacker News  |
-| **Portugal & the land**      | Alentejo, wildfires, desertification, rural flight, permaculture, regen. ag.                    | IPMA fire risk and warnings, soil in Mafra, Lisbon and Porto weather, Portuguese inflation and unemployment                       | Reading, Forecasts                                |
-| **Housing**                  | housing crisis, affordable housing, rent control, mortgages, gentrification, short-term rentals | house prices, rents and mortgage rates for Portugal, the Netherlands and the euro area (separate groups), ECB rate                | Reading, Forecasts, Hacker News                   |
-| **Circular economy**         | circular economy, recycling, PPWR, producer responsibility, food waste, CSRD                    | inflation, ECB rate, unemployment                                                                                                 | Reading, Hacker News, Forecasts                   |
-| **Alternative Amsterdam**    | doughnut economics, housing co-ops, land trusts, squatting, urban farms, repair cafés           | Amsterdam soil and weather, Dutch inflation and unemployment                                                                      | Reading, Hacker News                              |
-| **The Marginalian**          | poetry, consciousness, Stoicism, grief, solitude, meaning of life                               | —                                                                                                                                 | The Marginalian's essays, matched to these topics |
-| **GitHub**                   | AI agents, MCP, Rust, TypeScript, Vue, local-first                                              | new-repo trends, rising projects, **your own stats**                                                                              | Hacker News                                       |
+| Channel                      | Topics it charts                                                                                  | Context (open data)                                                                                                                                         | Streams                                                                          |
+| ---------------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| **World**                    | Picked daily from what the internet is echoing, leaning toward what you track                     | inflation, ECB rate, unemployment, CO₂                                                                                                                      | **Today's stories**, then Guardian, Forecasts, Hacker News, Reading              |
+| **The Great Simplification** | climate change, peak oil, degrowth, overshoot, biodiversity loss, Hormuz                          | CO₂, sea ice                                                                                                                                                | its episodes and Frankly, Forecasts                                              |
+| **Energy & power**           | renewable energy, solar, wind, energy storage, heat pumps, nuclear                                | renewable share and household energy prices (PT, NL, euro area), **diesel and petrol prices in Portugal (DGEG)**, sun and wind in Lisbon and Amsterdam, CO₂ | Forecasts, The Great Simplification, Hacker News                                 |
+| **Portugal & the land**      | wildfires, desertification, rainwater harvesting, agroforestry, permaculture, ecovillages         | IPMA fire risk and warnings, soil in Mafra, Lisbon and Porto weather, **diesel and petrol prices (DGEG)**, Portuguese inflation and unemployment            | Reading, Forecasts                                                               |
+| **Housing**                  | housing crisis, affordable housing, rent control, mortgages, gentrification, short-term rentals   | house prices, rents and mortgage rates for Portugal, the Netherlands and the euro area (separate groups), ECB rate                                          | Reading, Forecasts, Hacker News                                                  |
+| **Circular economy**         | circular economy, recycling, PPWR, producer responsibility, food waste, CSRD                      | inflation, ECB rate, unemployment                                                                                                                           | Reading, Hacker News, Forecasts                                                  |
+| **Alternative Amsterdam**    | Picked daily from what is moving in the scene (co-ops, commons, land trusts, repair, mutual aid…) | Dutch house prices, rents, mortgage rates, renewables and energy prices; Amsterdam soil and weather; Dutch inflation and unemployment                       | Commons Network, Shareable, Repair Café, Resilience; links to Hipsy's gatherings |
+| **The Marginalian**          | poetry, Taoism, Jungian psychology, mysticism, grief, meaning of life                             | —                                                                                                                                                           | The Marginalian's essays, matched to these topics                                |
+| **GitHub**                   | AI agents, MCP, Rust, TypeScript, Vue, local-first                                                | new-repo trends, rising projects, **your own stats**                                                                                                        | Hacker News                                                                      |
 
-Every channel has the same four parts:
+Every channel has the same four parts (World opens with a fifth, **Today's stories**):
 
 - **Gist:** what's running hot, the biggest moves, the steadiest climb, one line on what's hot in the other channels, and what changed since your last look. Copy it as Markdown for a daily note.
 - **Trends:** the selected topic's attention, day by day (100 = its own 30-day norm), with a 12-step forecast and a ±1σ band. Add or remove topics; `←` `→` switch topic; `1`–`9` jump to that channel, and `[` `]` step through them.
@@ -49,6 +49,15 @@ Every channel has the same four parts:
 - **Streams:** **The Guardian** (the newest articles naming the channel's topics, once you add a key), **Reading** (posts from sites you follow, matched to the channel's topics), **Forecasts** (open [Manifold](https://manifold.markets/) markets with the crowd's probability) and **Hacker News** (stories ranked by engagement per hour).
 
 Make your own channel with **+ channel**: give it a name and up to six topics. Delete it with the **×** next to its tab.
+
+### Today's stories (World)
+
+World opens with what is actually happening with each of its topics, in a sentence, like a daily digest. A
+topic in Wikipedia's **In the news** gets that story as its editors wrote it, with the day. Without one, a
+**Guardian** article on it from the last two days (with a key) gives the headline. A topic with neither is
+listed apart, in one line saying only what it is: its attention moved, but there is no fresh story to tell,
+and an encyclopedia's opening paragraph is not news. Each story shows how far the topic's attention moved in a
+week (▲ +120% week), why it was picked, and a link to a week of coverage.
 
 ### World: what the internet is echoing
 
@@ -63,11 +72,31 @@ their Wikipedia articles, and its headlines count as echoes. That's two calls a 
 Wikipedia), plus a Wikipedia search for up to eight tags that don't match an article title. Pages of one story fold into one topic (all the US election
 pages become "United States elections"). People, sport, films and shows are left out.
 
+**It leans toward you.** A candidate that names a topic you track in any other channel (or whose Wikipedia
+description does) gets a lift worth about one more place echoing it, and the line says so ("near your
+Energy & power channel"). It only lifts what the internet is already echoing; it never invents a topic. The
+more you track elsewhere, the more World leans your way.
+
 Under the topics, the selected one shows where it is echoing and why it was picked, for example
 `In the news · Most read · Manifold — +8 related pages in the most read · 356k reads yesterday · 4 markets on Manifold`.
 A pick keeps a head start for three days so the chart doesn't reshuffle on every visit; topics that are new
 today say **new**. **Pin** a topic to keep it; one you add yourself is pinned. One you remove stays out of the
 picks for a week. If the pick fails (offline, Wikipedia down), World keeps the topics it had.
+
+### Alternative Amsterdam: what is moving in the scene
+
+Alt Amsterdam picks its topics each day too, from a pool of about two dozen subjects of the cooperative,
+regenerative city (housing co-ops, community land trusts, commons, squatting, repair, mutual aid, energy and
+food co-ops, participatory budgeting, car-free streets…). Each is scored on how much more its Wikipedia
+article is read this week than in the month before, and on how often the channel's own sites named it in
+the last two months (**Commons Network**, based in Amsterdam; **Shareable**; **Repair Café**, born in Amsterdam;
+**Resilience**), a title counting double and older posts less. The best six become the channel's topics; pin,
+add and remove work as on World, and a topic you add joins the pool. The Reading stream reads those four
+sites, which load only on this channel.
+
+[Hipsy](https://hipsy.nl/) (conscious gatherings in the Netherlands) has no public feed a browser can read:
+its [API](https://docs.hipsy.nl/api-reference/list-events) lists one organisation's events, with that
+organiser's key. So the channel links to this weekend's gatherings and workshops there instead.
 
 ### GitHub
 
@@ -107,7 +136,7 @@ flowchart LR
     H[Hacker News]
   end
   subgraph Context["Context and streams"]
-    D[ECB · Eurostat · IPMA<br/>Open-Meteo · NOAA · NSIDC]
+    D[ECB · Eurostat · IPMA · DGEG<br/>Open-Meteo · NOAA · NSIDC]
     R[Followed WordPress sites]
     M[Manifold]
     GH[GitHub search + your profile]
@@ -124,18 +153,20 @@ flowchart LR
 
 ### Sources
 
-| Source                                | Gives                                                  | Notes                                                                |
-| ------------------------------------- | ------------------------------------------------------ | -------------------------------------------------------------------- |
-| Wikipedia pageviews                   | daily views of each topic's English article            | Titles resolve automatically, or set one with `Name \| wiki: Title`. |
-| The Guardian                          | articles per day naming the topic                      | Needs your free key. Cached for the day.                             |
-| Hacker News (Algolia)                 | stories per day; stories ranked by engagement per hour | Cached per day.                                                      |
-| Manifold                              | open prediction markets, with probability              | 10+ forecasters; questions naming a person are dropped.              |
-| Wikipedia feed · Wikidata             | World's daily topics: In the news, most read           | Once a day. Wikidata says which articles are about people.           |
-| WordPress sites you follow            | posts matched to the channel's topics                  | Cached for 12 h.                                                     |
-| GitHub search and users API           | new repos per topic, rising repos, your public stats   | ~10 searches a minute unauthenticated; cached for 12 h / 30 min.     |
-| ECB · Eurostat                        | deposit rate, inflation (HICP), unemployment           | PT, NL and the euro area.                                            |
-| IPMA · Open-Meteo                     | fire risk, warnings, soil moisture, weather, air       | Portugal (Mafra, Lisbon, Porto) and Amsterdam.                       |
-| NOAA · NSIDC (via global-warming.org) | CO₂ at Mauna Loa, global sea ice extent                | With history for the small charts.                                   |
+| Source                                | Gives                                                   | Notes                                                                |
+| ------------------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------- |
+| Wikipedia pageviews                   | daily views of each topic's English article             | Titles resolve automatically, or set one with `Name \| wiki: Title`. |
+| The Guardian                          | articles per day naming the topic                       | Needs your free key. Cached for the day.                             |
+| Hacker News (Algolia)                 | stories per day; stories ranked by engagement per hour  | Cached per day.                                                      |
+| Manifold                              | open prediction markets, with probability               | 10+ forecasters; questions naming a person are dropped.              |
+| Wikipedia feed · Wikidata             | World's daily topics: In the news, most read            | Once a day. Wikidata says which articles are about people.           |
+| WordPress sites you follow            | posts matched to the channel's topics                   | Cached for 12 h.                                                     |
+| GitHub search and users API           | new repos per topic, rising repos, your public stats    | ~10 searches a minute unauthenticated; cached for 12 h / 30 min.     |
+| ECB · Eurostat                        | deposit rate, inflation (HICP), unemployment            | PT, NL and the euro area.                                            |
+| DGEG (precoscombustiveis.dgeg.gov.pt) | daily average price of diesel and petrol 95 in Portugal | Across ~1,700 stations; 100 days of history.                         |
+| Wikipedia page summaries              | Today's stories: each topic's description               | Cached for the day; "In the news" from the daily feed.               |
+| IPMA · Open-Meteo                     | fire risk, warnings, soil moisture, weather, air        | Portugal (Mafra, Lisbon, Porto) and Amsterdam.                       |
+| NOAA · NSIDC (via global-warming.org) | CO₂ at Mauna Loa, global sea ice extent                 | With history for the small charts.                                   |
 
 ## Privacy and scope
 

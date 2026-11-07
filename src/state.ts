@@ -5,7 +5,17 @@
 // replaced whole (never edited in place) and marked raw, so hundreds of points don't each become a proxy.
 import { reactive } from 'vue';
 import type { Alert, Entry, Lens, Prefs, SeriesPoint, TopicDef } from '@/types';
-import { LS, MAX_LENSES, MAX_TOPICS, PRESETS, PRESET_VERSION, SLOT_ANGLE, slotColor, store } from '@core/config';
+import {
+  LS,
+  MAX_LENSES,
+  MAX_TOPICS,
+  PICKED_LENSES,
+  PRESETS,
+  PRESET_VERSION,
+  SLOT_ANGLE,
+  slotColor,
+  store,
+} from '@core/config';
 import { looksLikePerson } from '@core/guard';
 import { createUi } from '@core/ui-store';
 import { type Obj, isObj } from '@sources/shape';
@@ -180,7 +190,9 @@ export function createAppStore() {
       lenses = presetLenses() as unknown as Obj[];
     } else if ((store.get(LS.presetVer, 1) || 1) < PRESET_VERSION) {
       const own = lenses.filter(l => !OLD_PRESET_IDS.has(String(l.id)) && !PRESETS.some(p => p.id === l.id));
-      lenses = [...(presetLenses() as unknown as Obj[]), ...own];
+      // Topics picked each day (World, Alt Amsterdam: features/hot-topics.ts) keep today's, not the shipped ones.
+      const kept = (l: Obj) => (PICKED_LENSES.includes(String(l.id)) && lenses.find(x => x.id === l.id)) || l;
+      lenses = [...(presetLenses() as unknown as Obj[]).map(kept), ...own];
       upgraded = true;
     }
     store.set(LS.presetVer, PRESET_VERSION);

@@ -29,6 +29,19 @@ export const BUILT_IN_SITES: ReadingSite[] = [
   { url: 'https://www.themarginalian.org', name: 'The Marginalian', types: [['posts', 'Essay']] },
 ];
 export const isBuiltInSite = (url: string): boolean => BUILT_IN_SITES.some(s => s.url === url);
+/**
+ * Sites a channel reads without you following them (see `sites` in channels.ts): they load only on that
+ * channel, so other channels never pay for them. Alt Amsterdam reads the commons and repair movement.
+ */
+export const CHANNEL_SITES: ReadingSite[] = [
+  { url: 'https://www.commonsnetwork.org', name: 'Commons Network', types: [['posts', 'Post']] },
+  { url: 'https://www.shareable.net', name: 'Shareable', types: [['posts', 'Story']] },
+  { url: 'https://www.repaircafe.org', name: 'Repair Café', types: [['posts', 'News']] },
+  { url: 'https://www.resilience.org', name: 'Resilience', types: [['posts', 'Article']] },
+];
+/** A followed or channel site by its origin. */
+export const siteByUrl = (url: string): ReadingSite | undefined =>
+  [...readingSites(), ...CHANNEL_SITES].find(s => s.url === url);
 const validSite = (s: unknown): s is ReadingSite =>
   isObj(s) && typeof s.url === 'string' && typeof s.name === 'string' && Array.isArray(s.types);
 /** The sites you added yourself. Storage only ever holds these; the built-in ones are added on read. */
@@ -121,11 +134,14 @@ async function loadSite(site: ReadingSite, signal: AbortSignal): Promise<Reading
   return entry.items;
 }
 
-/** Every followed site's recent posts, newest first. One failing site doesn't hide the others. */
-export async function loadReading(signal: AbortSignal): Promise<{ items: ReadingItem[]; errors: string[] }> {
+/** These sites' recent posts (every followed site by default), newest first. One failing site doesn't hide the others. */
+export async function loadReading(
+  signal: AbortSignal,
+  sites: ReadingSite[] = readingSites(),
+): Promise<{ items: ReadingItem[]; errors: string[] }> {
   const errors: string[] = [];
   const lists = await Promise.all(
-    readingSites().map(site =>
+    sites.map(site =>
       loadSite(site, signal).catch((e: unknown) => {
         if (isAbort(e)) throw e;
         errors.push(`${site.name}: ${errorText(e)}`);

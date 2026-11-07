@@ -86,6 +86,18 @@ export async function mockApis(page: Page, { echoes = false } = {}): Promise<voi
         return json(route, echoes ? fixture('echoes', 'hn-front-page') : { hits: [] });
       if (h === 'api.manifold.markets' && url.searchParams.get('sort') === '24-hour-vol')
         return json(route, echoes ? fixture('echoes', 'manifold-trending') : []);
+      if (h.endsWith('wikipedia.org') && p.includes('/api/rest_v1/page/summary/')) {
+        // Any article: the saved summary, retitled, so each topic gets one line about itself.
+        const title = decodeURIComponent(p.split('/').pop() || 'Topic').replace(/_/g, ' ');
+        return json(route, {
+          ...(fixture('wikipedia', 'summary') as object),
+          title,
+          description: `About ${title}`,
+          extract: `${title} is a subject PRECOG tracks. It has a second sentence.`,
+          content_urls: { desktop: { page: `https://en.wikipedia.org/wiki/${encodeURIComponent(title)}` } },
+        });
+      }
+      if (h === 'precoscombustiveis.dgeg.gov.pt') return json(route, fixture('dgeg', 'pmd'));
       if (h.endsWith('wikipedia.org')) {
         const title = url.searchParams.get('titles') || url.searchParams.get('search') || 'Topic';
         return json(

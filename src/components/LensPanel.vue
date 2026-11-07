@@ -29,7 +29,7 @@
           type="button"
           :aria-pressed="!!hotOf(E)?.pinned"
           :aria-label="(hotOf(E)?.pinned ? 'Unpin ' : 'Pin ') + E.name"
-          :title="hotOf(E)?.pinned ? 'Pinned: stays on World. Click to let it go.' : 'Pin: keep it on World'"
+          :title="hotOf(E)?.pinned ? 'Pinned: it stays. Click to let it go.' : 'Pin: keep it here'"
           @click="togglePin(E.key)"
         >
           <svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true">
@@ -75,7 +75,8 @@ import TopicDot from '@components/TopicDot.vue';
 import PanelShell from '@components/PanelShell.vue';
 
 // PRECOG / Trend Radar · Topics of the channel on screen: pick one to chart, add or remove topics.
-// On World the topics are picked each day from what the internet is echoing: pin one to keep it, and the
+// On World and Alt Amsterdam the topics are picked each day (from what the internet is echoing, or what is
+// moving in the scene): pin one to keep it, and the
 // line under the topics says where the selected one is echoing.
 
 export default defineComponent({
@@ -86,24 +87,27 @@ export default defineComponent({
     const { app, actions, hot } = useApp();
     const ui = app.ui;
     const { addTopic, removeLens, removeTopic, select, togglePin } = actions;
-    const hotOf = (E: Entry) => hot.pickOf(E.name);
-    const isNew = (E: Entry) => hot.isNew(hotOf(E), dayOf(ui.now));
+    const hotOf = (E: Entry) => hot.for(E.lensId)?.pickOf(E.name);
+    const isNew = (E: Entry) => !!hot.for(E.lensId)?.isNew(hotOf(E), dayOf(ui.now));
     const SHORT: Record<Echo, string> = {
       news: 'In the news',
       read: 'Most read',
       hn: 'Hacker News',
       manifold: 'Manifold',
       guardian: 'Guardian',
+      views: 'Rising on Wikipedia',
+      sites: 'In the channel’s sites',
     };
     const newTopic = ref(''),
       addInput = ref<HTMLInputElement | null>(null);
     const view = computed(() => {
       const lens = app.activeLens(),
         list = app.entriesOf(lens);
-      const isHot = !!lens && hot.owns(lens.id);
+      const picker = hot.for(lens?.id);
+      const isHot = !!picker;
       const sel = app.selectedEntry();
       const p = sel && isHot ? hotOf(sel) : undefined;
-      const hs = hot.state;
+      const hs = picker?.state;
       return {
         hot: isHot,
         echo: p && {
@@ -121,13 +125,13 @@ export default defineComponent({
         sel: app.selectedEntry(),
         full: list.length >= MAX_TOPICS,
         own: !!lens && !isBuiltInLens(lens.id),
-        meta: isHot
+        meta: hs
           ? hs.loading
             ? 'Picking today’s topics…'
             : hs.error
               ? `Couldn’t pick today’s topics (${hs.error}); showing the last ones`
               : hs.day
-                ? 'Picked today from what the internet is echoing · pin one to keep it'
+                ? `Picked today from ${picker!.from} · pin one to keep it`
                 : `${list.length} of ${MAX_TOPICS} · click one to chart it`
           : `${list.length} of ${MAX_TOPICS} · click one to chart it`,
       };

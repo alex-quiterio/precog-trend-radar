@@ -48,8 +48,8 @@ describe('the streams panel', () => {
     const w = mountPanel(StoriesPanel);
     expect(w.findAll('.seg button').map(b => b.text())).toEqual([
       'Forecasts',
-      'Reading',
       'Hacker News',
+      'Reading',
       'This topic',
       'Whole channel',
     ]);
