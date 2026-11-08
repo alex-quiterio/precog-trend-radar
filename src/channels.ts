@@ -102,7 +102,10 @@ export const CHANNELS: Channel[] = [
     label: 'Energy & power',
     kicker: 'What powers the grid, what it costs at home, and today’s sun and wind.',
     lensId: 'energy',
+    // When power is cheap first: the one thing here you can act on today.
     datapoints: [
+      'power-pt',
+      'power-nl',
       'renew-pt',
       'energyinfl-pt',
       'diesel-pt',

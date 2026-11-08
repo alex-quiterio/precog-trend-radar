@@ -22,3 +22,4 @@ import '@sources/open-meteo/cards';
 import '@sources/global-warming/cards';
 import '@sources/dgeg/cards';
 import '@sources/aloft/cards';
+import '@sources/powerprices/cards';
