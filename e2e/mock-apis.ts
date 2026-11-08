@@ -166,6 +166,7 @@ export async function mockApis(page: Page, { echoes = false, guardian = false } 
             'utf8',
           ),
         });
+      if (h === 'api.worldbank.org') return json(route, fixture('worldbank', 'gdp'));
       if (h === 'api.inaturalist.org') return json(route, fixture('inaturalist', 'species-counts'));
       if (h === 'api.github.com') {
         if (p.startsWith('/search/repositories')) return json(route, fixture('github', 'repo-search'));

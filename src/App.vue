@@ -26,7 +26,10 @@
             <span>{{ view.n('prices') }}</span>
             Prices
           </h3>
-          <markets-panel :index="0"></markets-panel>
+          <div class="stack">
+            <markets-panel :index="0"></markets-panel>
+            <gdp-panel :index="1"></gdp-panel>
+          </div>
         </section>
         <section v-if="view.channel.migration" class="block" aria-labelledby="b-flyway">
           <h3 id="b-flyway" class="block-head">
@@ -98,7 +101,7 @@
 
     <footer class="foot">
       PRECOG tracks topics, never people · Wikipedia · The Guardian · Hacker News · Manifold · GitHub · ECB · Eurostat ·
-      IPMA · Open-Meteo · NOAA · NSIDC · DGEG · CoinGecko · EIA · alternative.me · Aloft · iNaturalist
+      IPMA · Open-Meteo · NOAA · NSIDC · DGEG · CoinGecko · EIA · alternative.me · World Bank · Aloft · iNaturalist
     </footer>
   </div>
 </template>
@@ -111,6 +114,7 @@ import AppHeader from '@components/AppHeader.vue';
 import MorningBrief from '@components/MorningBrief.vue';
 import DigestPanel from '@components/DigestPanel.vue';
 import MarketsPanel from '@components/MarketsPanel.vue';
+import GdpPanel from '@components/GdpPanel.vue';
 import MigrationPanel from '@components/MigrationPanel.vue';
 import DatapointsPanel from '@components/DatapointsPanel.vue';
 import LensPanel from '@components/LensPanel.vue';
@@ -129,6 +133,7 @@ export default defineComponent({
     MorningBrief,
     DigestPanel,
     MarketsPanel,
+    GdpPanel,
     MigrationPanel,
     DatapointsPanel,
     LensPanel,
