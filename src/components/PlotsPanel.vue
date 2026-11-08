@@ -10,7 +10,28 @@
         <thead>
           <tr>
             <th v-for="p in st.plots" :key="p.id" scope="col">
-              <span class="pl-name">{{ p.name }}</span>
+              <input
+                v-if="editing === p.id"
+                :ref="setEditEl"
+                v-model="draft"
+                class="pl-in pl-rename"
+                type="text"
+                maxlength="24"
+                :aria-label="`New name for ${p.name}`"
+                @keydown.enter.prevent="saveName"
+                @keydown.escape.prevent="editing = ''"
+                @blur="saveName"
+              />
+              <button
+                v-else
+                type="button"
+                class="pl-name"
+                :aria-label="`Rename plot ${p.name}`"
+                title="Rename"
+                @click="startRename(p)"
+              >
+                {{ p.name }}
+              </button>
               <button
                 type="button"
                 class="pl-x"
@@ -70,13 +91,14 @@
     <p class="pl-foot">
       From Open-Meteo’s reanalysis (ERA5, a 10–25 km grid): it tells regions apart, not a valley from the ridge above
       it. Dry months are those under half their normal rain, among months that usually get 15 mm or more. Fire risk is
-      IPMA’s for the nearest municipality, in Portugal only. Plots stay in this browser.
+      IPMA’s for the nearest municipality, in Portugal only; its “today” is computed the day before, so after rain look
+      at tomorrow’s. Plots stay in this browser.
     </p>
   </panel-shell>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from 'vue';
+import { computed, defineComponent, nextTick, onMounted, ref } from 'vue';
 import { ago, nf0, nf2 } from '@core/format';
 import { useApp } from '@/context';
 import { FIRE_WORDS, MAX_PLOTS, type Plot, createPlots, dryMonths } from '@features/plots';
@@ -164,10 +186,20 @@ export default defineComponent({
               ? { v: '–' }
               : wait,
           fire:
-            r && 'fire' in r
+            r && ('fire' in r || 'fireTomorrow' in r)
               ? r.fire != null
-                ? { v: FIRE_WORDS[r.fire], sub: `level ${r.fire} of 5`, cls: r.fire >= 4 ? 'pl-low' : '' }
-                : { v: '–', sub: 'outside Portugal' }
+                ? {
+                    v: FIRE_WORDS[r.fire],
+                    sub:
+                      r.fireTomorrow != null && r.fireTomorrow !== r.fire
+                        ? `level ${r.fire} of 5 · tomorrow ${FIRE_WORDS[r.fireTomorrow]}`
+                        : `level ${r.fire} of 5`,
+                    cls: r.fire >= 4 ? 'pl-low' : '',
+                  }
+                : {
+                    v: '–',
+                    sub: r.fireTomorrow == null ? 'outside Portugal' : `tomorrow ${FIRE_WORDS[r.fireTomorrow]}`,
+                  }
               : r
                 ? { v: '–' }
                 : wait,
@@ -177,6 +209,21 @@ export default defineComponent({
       return out;
     });
     const cell = (id: string, key: string): Cell => cells.value[id]?.[key] ?? { v: '…' };
+    // Renaming in place: the name turns into a field; Enter or leaving it saves, Escape keeps the old name.
+    const editing = ref(''),
+      draft = ref('');
+    let editEl: HTMLInputElement | null = null;
+    const setEditEl = (el: unknown) => void (editEl = el instanceof HTMLInputElement ? el : null);
+    function startRename(p: Plot) {
+      editing.value = p.id;
+      draft.value = p.name;
+      void nextTick(() => editEl?.select());
+    }
+    function saveName() {
+      if (!editing.value) return;
+      plots.rename(editing.value, draft.value);
+      editing.value = '';
+    }
     const mapUrl = (p: Plot) => `https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lon}`;
     const meta = computed(() =>
       st.at && st.plots.length ? `checked ${ago(st.at, app.ui.now)}` : st.loading ? 'reading…' : '',
@@ -196,6 +243,11 @@ export default defineComponent({
       addTyped,
       addHere,
       max: MAX_PLOTS,
+      editing,
+      draft,
+      startRename,
+      saveName,
+      setEditEl,
     };
   },
 });
@@ -237,9 +289,28 @@ export default defineComponent({
 }
 .pl-name {
   display: block;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px dashed transparent;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: text;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.pl-name:hover,
+.pl-name:focus-visible {
+  border-bottom-color: var(--accent);
+}
+.pl-rename {
+  width: 100%;
+  padding: 2px 6px;
+  font-size: 13.5px;
+  font-weight: 600;
 }
 .pl-coords {
   display: block;

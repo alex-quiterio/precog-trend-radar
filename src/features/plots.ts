@@ -133,6 +133,8 @@ export interface PlotRead {
   elevation?: number;
   soil?: { now: number; change: number };
   fire?: number | null;
+  /** Tomorrow's level: IPMA's "today" is computed the day before, so a storm shows up here first. */
+  fireTomorrow?: number | null;
   error?: string;
 }
 const coords = (p: Plot) => `${p.lat.toFixed(2)},${p.lon.toFixed(2)}`;
@@ -205,12 +207,15 @@ export function createPlots() {
   }
   const state = reactive({ plots: saved, reads: {} as Record<string, PlotRead>, loading: false, at: 0 });
   const save = () => store.set(KEY, state.plots);
-  let fire: Promise<unknown> | null = null;
+  // Today's and tomorrow's fire risk files, shared by every plot.
+  let fire: Promise<[unknown, unknown]> | null = null;
   let fireAt = 0;
+  const rcm = (d: 0 | 1) =>
+    getJSON(`https://api.ipma.pt/open-data/forecast/meteorology/rcm/rcm-d${d}.json`).catch(() => null);
   const fireReply = () => {
     if (!fire || Date.now() - fireAt > 3 * HOUR) {
       fireAt = Date.now();
-      fire = getJSON('https://api.ipma.pt/open-data/forecast/meteorology/rcm/rcm-d0.json').catch(() => null);
+      fire = Promise.all([rcm(0), rcm(1)]);
     }
     return fire;
   };
@@ -225,7 +230,11 @@ export function createPlots() {
     }
     if (y.status === 'fulfilled' && y.value) r.year = y.value;
     if (s.status === 'fulfilled' && s.value) r.soil = s.value;
-    if (f.status === 'fulfilled' && f.value) r.fire = nearestFireRisk(f.value, p);
+    if (f.status === 'fulfilled') {
+      const [today, tomorrow] = f.value;
+      if (today) r.fire = nearestFireRisk(today, p);
+      if (tomorrow) r.fireTomorrow = nearestFireRisk(tomorrow, p);
+    }
     const failed = [n, y, s].find((x): x is PromiseRejectedResult => x.status === 'rejected');
     if (failed && !r.year) r.error = errorText(failed.reason);
     state.reads[p.id] = r;
@@ -260,5 +269,13 @@ export function createPlots() {
     delete state.reads[id];
     save();
   }
-  return { state, load, add, remove };
+  /** Renames a plot. An empty name keeps the old one. */
+  function rename(id: string, name: string): void {
+    const p = state.plots.find(x => x.id === id),
+      n = name.trim().slice(0, 24);
+    if (!p || !n || n === p.name) return;
+    p.name = n;
+    save();
+  }
+  return { state, load, add, remove, rename };
 }

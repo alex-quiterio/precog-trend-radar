@@ -8,17 +8,23 @@ registerCards({
   async load() {
     const rows: DatapointRow[] = [],
       facts: DatapointFacts = {};
-    const j = await getJSON('https://api.ipma.pt/open-data/forecast/meteorology/rcm/rcm-d0.json');
+    // IPMA computes "today" the day before, so after rain tomorrow's file tells the truer story: show both.
+    const [j, j1] = await Promise.all([
+      getJSON('https://api.ipma.pt/open-data/forecast/meteorology/rcm/rcm-d0.json'),
+      getJSON('https://api.ipma.pt/open-data/forecast/meteorology/rcm/rcm-d1.json').catch(() => null),
+    ]);
     const { levels: lv, day } = parseFireRisk(j);
     const hi = lv.filter(x => x >= 4).length,
       max = lv.filter(x => x === 5).length;
-    facts.fire = { hi, max, n: lv.length };
+    const next = j1 ? parseFireRisk(j1).levels : [];
+    const tomorrow = next.length ? next.filter(x => x >= 4).length : undefined;
+    facts.fire = { hi, max, n: lv.length, tomorrow };
     rows.push({
       group: 'pt',
       id: 'fire',
       k: 'Fire risk today',
       v: `${hi} of ${lv.length}`,
-      sub: 'municipalities very high or maximum',
+      sub: `municipalities very high or maximum${tomorrow != null ? ` · tomorrow ${tomorrow}` : ''}`,
       src: `IPMA RCM · ${max} at maximum (5) · ${day}`,
       href: 'https://www.ipma.pt/pt/riscoincendio/rcm.pt/',
       o: 3,

@@ -26,7 +26,8 @@ export interface DatapointRow {
 }
 /** Numbers the gist reads as well as the cards (fire risk and weather warnings in Portugal). */
 export interface DatapointFacts {
-  fire?: { hi: number; max: number; n: number };
+  /** Today's municipalities at very high or maximum risk (of n), and tomorrow's, when IPMA has published it. */
+  fire?: { hi: number; max: number; n: number; tomorrow?: number };
   warnings?: { red: number; orange: number; yellow: number; types: string };
 }
 /** One request's worth of cards. A provider registers one loader per request, so they fail independently. */

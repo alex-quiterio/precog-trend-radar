@@ -97,7 +97,9 @@ export function buildBrief(app: AppStore, facts: DatapointFacts = {}) {
   const f = lens?.id === 'portugal' ? facts : {};
   if (f.fire && f.fire.hi)
     out.lines.push(
-      ln`Portugal fire risk today: ${f.fire.hi} of ${f.fire.n} municipalities at very high or maximum risk (IPMA).`,
+      ln`Portugal fire risk today: ${f.fire.hi} of ${f.fire.n} municipalities at very high or maximum risk (IPMA)${
+        f.fire.tomorrow == null ? '' : f.fire.tomorrow === 0 ? '; none tomorrow' : `; ${f.fire.tomorrow} tomorrow`
+      }.`,
     );
   if (f.warnings && (f.warnings.red || f.warnings.orange))
     out.lines.push(

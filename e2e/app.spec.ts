@@ -237,8 +237,16 @@ test('Portugal & the land compares plots of land side by side, and remembers the
   await plots.getByLabel(/Plot location/).fill('not a place');
   await plots.getByRole('button', { name: 'Add plot' }).click();
   await expect(plots.locator('.pl-msg')).toContainText('Paste coordinates');
+  await plots.getByRole('button', { name: 'Rename plot Águeda' }).click();
+  await plots.getByLabel('New name for Águeda').fill('Casa do rio');
+  await plots.getByLabel('New name for Águeda').press('Enter');
+  await expect(plots.locator('thead')).toContainText('Casa do rio');
   await page.reload();
-  await expect(page.locator('#p-plots thead')).toContainText('Águeda');
-  await page.getByRole('button', { name: 'Remove plot Águeda' }).click();
+  await expect(page.locator('#p-plots thead')).toContainText('Casa do rio');
+  await page.getByRole('button', { name: 'Rename plot Casa do rio' }).click();
+  await page.getByLabel('New name for Casa do rio').fill('Ignored');
+  await page.getByLabel('New name for Casa do rio').press('Escape');
+  await expect(page.locator('#p-plots thead')).toContainText('Casa do rio');
+  await page.getByRole('button', { name: 'Remove plot Casa do rio' }).click();
   await expect(page.locator('#p-plots thead')).toHaveCount(0);
 });
