@@ -193,3 +193,25 @@ test('Markets shows real prices and plain takeaways, not attention charts', asyn
   await expect(page.locator('#p-radar')).toHaveCount(0);
   await expect(page.locator('#p-data')).toContainText('10-year bond yield');
 });
+
+test('Bird migration shows the flyway from the North Sea to the Algarve, and the birds seen near each city', async ({
+  page,
+}) => {
+  await open(page);
+  await page.locator('.channels').getByRole('button', { name: 'Bird migration' }).click();
+  await expect(heroTitle(page)).toHaveText('Bird migration');
+  const flyway = page.locator('#p-flyway');
+  await expect(flyway.locator('.fw-stop')).toHaveCount(6);
+  await expect(flyway.locator('.fw-stop').first()).toContainText('Borkum');
+  await expect(flyway.locator('.fw-city')).toHaveCount(2); // the radars near Amsterdam and Lisbon
+  await expect(flyway.locator('.fw-notes')).toContainText('Towards the Netherlands');
+  await expect(flyway.locator('.fw-notes')).toContainText('Towards Portugal');
+  await stories(page).getByRole('button', { name: 'Seen near Amsterdam' }).click();
+  await expect(stories(page)).toContainText('Eurasian Blackcap');
+  await expect(flyway.locator('.fw-gap')).toContainText('France and Spain');
+  await expect(page.locator('#p-data')).toContainText('Birds crossing near Amsterdam');
+  await expect(page.locator('#p-data')).toContainText('Birds crossing near Lisbon');
+  // Birds only: no followed sites, and the gist never reports another channel.
+  await expect(stories(page).getByRole('button', { name: 'Reading' })).toHaveCount(0);
+  await expect(page.locator('#p-brief')).not.toContainText('Elsewhere');
+});

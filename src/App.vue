@@ -28,6 +28,13 @@
           </h3>
           <markets-panel :index="0"></markets-panel>
         </section>
+        <section v-if="view.channel.migration" class="block" aria-labelledby="b-flyway">
+          <h3 id="b-flyway" class="block-head">
+            <span>{{ view.n('flyway') }}</span>
+            Flyway
+          </h3>
+          <migration-panel :index="0"></migration-panel>
+        </section>
         <section v-if="view.channel.digest" class="block" aria-labelledby="b-today">
           <h3 id="b-today" class="block-head">
             <span>{{ view.n('today') }}</span>
@@ -91,7 +98,7 @@
 
     <footer class="foot">
       PRECOG tracks topics, never people · Wikipedia · The Guardian · Hacker News · Manifold · GitHub · ECB · Eurostat ·
-      IPMA · Open-Meteo · NOAA · NSIDC · DGEG · CoinGecko · EIA · alternative.me
+      IPMA · Open-Meteo · NOAA · NSIDC · DGEG · CoinGecko · EIA · alternative.me · Aloft · iNaturalist
     </footer>
   </div>
 </template>
@@ -104,6 +111,7 @@ import AppHeader from '@components/AppHeader.vue';
 import MorningBrief from '@components/MorningBrief.vue';
 import DigestPanel from '@components/DigestPanel.vue';
 import MarketsPanel from '@components/MarketsPanel.vue';
+import MigrationPanel from '@components/MigrationPanel.vue';
 import DatapointsPanel from '@components/DatapointsPanel.vue';
 import LensPanel from '@components/LensPanel.vue';
 import SignalPanel from '@components/SignalPanel.vue';
@@ -121,6 +129,7 @@ export default defineComponent({
     MorningBrief,
     DigestPanel,
     MarketsPanel,
+    MigrationPanel,
     DatapointsPanel,
     LensPanel,
     SignalPanel,
@@ -138,6 +147,7 @@ export default defineComponent({
       // The main column's sections, numbered in the order they show.
       const blocks = [
         channel.prices && 'prices',
+        channel.migration && 'flyway',
         channel.digest && 'today',
         !channel.prices && 'gist',
         'trends',

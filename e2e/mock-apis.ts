@@ -156,6 +156,17 @@ export async function mockApis(page: Page, { echoes = false, guardian = false } 
         return json(route, h.startsWith('air-quality') ? {} : fixture('open-meteo', 'forecast-two-places'));
       if (h === 'global-warming.org')
         return json(route, fixture('global-warming', p.includes('co2') ? 'co2' : 'sea-ice'));
+      // Every radar answers with the saved Lisbon day; iNaturalist with its saved species counts.
+      if (h === 'aloftdata.s3-eu-west-1.amazonaws.com')
+        return route.fulfill({
+          status: 200,
+          contentType: 'text/csv',
+          body: readFileSync(
+            fileURLToPath(new URL('../src/sources/aloft/fixtures/ptlis-vpts.csv', import.meta.url)),
+            'utf8',
+          ),
+        });
+      if (h === 'api.inaturalist.org') return json(route, fixture('inaturalist', 'species-counts'));
       if (h === 'api.github.com') {
         if (p.startsWith('/search/repositories')) return json(route, fixture('github', 'repo-search'));
         if (p.endsWith('/repos')) return json(route, fixture('github', 'user-repos'));

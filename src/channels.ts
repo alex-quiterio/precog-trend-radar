@@ -35,6 +35,8 @@ export interface Channel {
    * Guardian. Set, only these sites tell them, so a channel's stories stay in its own place or voice.
    */
   stories?: StorySources;
+  /** Opens with the flyway: bird migration on the weather radars from Denmark to Lisbon (MigrationPanel.vue). */
+  migration?: boolean;
   /** Opens with real prices (components/MarketsPanel.vue) and charts no attention: no Signal, gist or radar. */
   prices?: boolean;
   /** Links out shown under the channel's name (places with no API the page could read). */
@@ -43,6 +45,8 @@ export interface Channel {
   github?: boolean;
   /** A channel you made yourself (from the "+" in the channel bar): only these can be deleted. */
   own?: boolean;
+  /** Keeps to its own topics: the gist never mentions what is hot in other channels. */
+  focused?: boolean;
   /** A country channel. It never shows another country's data or topics, not even in "Elsewhere". */
   country?: 'pt' | 'nl';
 }
@@ -210,6 +214,27 @@ export const CHANNELS: Channel[] = [
     streams: ['news', 'forecasts', 'hn'],
     prices: true,
     digest: true,
+  },
+  {
+    id: 'birds',
+    icon: 'bird',
+    label: 'Bird migration',
+    kicker:
+      'The flyway from the North Sea to the Algarve on the weather radars, and the birds just seen near Amsterdam and Lisbon.',
+    lensId: 'birds',
+    migration: true,
+    // Birds crossing near each city, and its weather: wind and rain decide a migration night.
+    datapoints: ['birds-amsterdam', 'wx-amsterdam', 'birds-lisbon', 'wx-lisbon'],
+    // Birds only: no followed sites (they write about other things), and the gist never looks elsewhere.
+    streams: ['seen-amsterdam', 'seen-lisbon', 'news'],
+    focused: true,
+    digest: true,
+    links: [
+      { label: 'Trektellen: live counts at watch sites', href: 'https://www.trektellen.org/' },
+      { label: 'eBird: North Holland', href: 'https://ebird.org/region/NL-NH' },
+      { label: 'eBird: Lisbon', href: 'https://ebird.org/region/PT-11' },
+      { label: 'Migration atlas', href: 'https://migrationatlas.org/' },
+    ],
   },
   {
     id: 'github',

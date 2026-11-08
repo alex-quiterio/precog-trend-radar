@@ -74,10 +74,11 @@ export function buildBrief(app: AppStore, facts: DatapointFacts = {}) {
       ln`Steadiest climb: ${climbers[0]}, ${fmtPct(climbers[0].stats.momentum)} per step over the last ${FIT_N} steps. Not a spike yet, but a trend.`,
     );
   // Don't let the focus hide a fire elsewhere: name what's hot in the other lenses.
-  // A country channel never mentions another country's channel.
+  // A country channel never mentions another country's channel, and a focused one (Bird migration) no other channel.
   const here = lens && channelOfLens(app, lens.id)?.country;
+  const focused = !!(lens && channelOfLens(app, lens.id)?.focused);
   const elsewhere = state.lenses
-    .filter(l => l !== lens)
+    .filter(l => l !== lens && !focused)
     .filter(l => {
       const there = channelOfLens(app, l.id)?.country;
       return !here || !there || there === here;

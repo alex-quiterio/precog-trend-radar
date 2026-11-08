@@ -34,6 +34,7 @@ describe('lenses', () => {
       'amsterdam',
       'markets',
       'marginalian',
+      'birds',
       'github',
     ]);
     expect(app.state.lenses.every(l => l.lang === 'en')).toBe(true);
@@ -61,6 +62,7 @@ describe('lenses', () => {
       'amsterdam',
       'markets',
       'marginalian',
+      'birds',
       'github',
       'mine',
     ]);
@@ -100,6 +102,7 @@ describe('lenses', () => {
       'amsterdam',
       'markets',
       'marginalian',
+      'birds',
       'github',
     ]);
     loadLenses(); // and it sticks on the next load

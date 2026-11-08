@@ -154,6 +154,22 @@ export const PRESETS = [
     ],
   },
   {
+    id: 'birds',
+    name: 'Bird migration',
+    desc: 'The birds that travel the flyway between the Netherlands and Portugal, and when they pass.',
+    topics: [
+      ['White stork', { q: 'white stork', also: ['cegonha-branca', 'cegonhas', 'ooievaar', 'ooievaars'] }],
+      ['Black-tailed godwit', { q: 'godwit', also: ['milherango', 'grutto', 'grutto’s'] }],
+      ['Eurasian spoonbill', { q: 'spoonbill', also: ['colhereiro', 'lepelaar', 'lepelaars'] }],
+      ['Common crane', { q: 'common crane', also: ['grou', 'grous', 'kraanvogel', 'kraanvogels'] }],
+      [
+        'Starling',
+        { wiki: 'Common starling', q: 'starlings', also: ['estorninho', 'estorninhos', 'spreeuw', 'spreeuwen'] },
+      ],
+      ['Barn swallow', { q: 'swallows', also: ['andorinha', 'andorinhas', 'boerenzwaluw', 'zwaluwen'] }],
+    ],
+  },
+  {
     id: 'github',
     name: 'GitHub',
     desc: 'The stack and ideas worth watching early, and your own work.',
@@ -182,7 +198,8 @@ export function otherNames(lensId: string, name: string): string[] {
 // v10 tunes Portugal & the land (water, agroforestry, ecovillages), Alt Amsterdam (mutual aid) and The Marginalian
 // (Taoism, Jungian psychology, mysticism).
 // v11 adds Markets.
-export const PRESET_VERSION = 11;
+// v12 adds Bird migration.
+export const PRESET_VERSION = 12;
 /** Lenses whose topics are picked each day rather than shipped (see features/hot-topics.ts). */
 export const PICKED_LENSES = ['world', 'amsterdam'];
 export const LS = {
