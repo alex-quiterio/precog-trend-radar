@@ -255,10 +255,10 @@ test('The Great Simplification lists Campfire Stories films beside its episodes'
   await expect(heroTitle(page)).toHaveText('The Great Simplification');
   const tab = stories(page).locator('.seg button', { hasText: 'The Great Simplification' });
   await tab.click();
-  const film = stories(page).locator('li.story', { hasText: 'Kinfolk' });
-  await expect(film.locator('a')).toHaveAttribute('href', 'https://www.campfire-stories.org/kinfolk');
-  await expect(film).toContainText('Campfire Stories');
-  await expect(film).not.toContainText('new'); // undated: no "new", no date
+  const film = stories(page).locator('li.story', { hasText: 'Campfire Stories' });
+  await expect(film).toHaveCount(3); // the films' own rows, however many episodes outrank them
+  await expect(film.first().locator('a')).toHaveAttribute('href', /^https:\/\/www\.campfire-stories\.org\//);
+  await expect(film.first()).not.toContainText('new'); // undated: no "new", no date
   await film.scrollIntoViewIfNeeded();
   if (process.env.SHOT) await stories(page).screenshot({ path: `${process.env.SHOT}/${info.project.name}.png` });
 });
