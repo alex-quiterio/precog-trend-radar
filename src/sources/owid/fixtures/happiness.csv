@@ -1,0 +1,24 @@
+entity,code,year,cantril_ladder_score
+Afghanistan,AFG,2023,1.721
+Afghanistan,AFG,2024,1.364
+Afghanistan,AFG,2025,1.446
+China,CHN,2023,5.973
+China,CHN,2024,5.921
+China,CHN,2025,6.074
+Finland,FIN,2023,7.741
+Finland,FIN,2024,7.736
+Finland,FIN,2025,7.764
+Germany,DEU,2023,6.719
+Germany,DEU,2024,6.753
+Germany,DEU,2025,6.882
+Netherlands,NLD,2023,7.319
+Netherlands,NLD,2024,7.306
+Netherlands,NLD,2025,7.223
+Portugal,PRT,2023,6.03
+Portugal,PRT,2024,6.013
+Portugal,PRT,2025,6.029
+United States,USA,2023,6.725
+United States,USA,2024,6.724
+United States,USA,2025,6.816
+World,OWID_WRL,2024,5.344821
+World,OWID_WRL,2025,5.436698

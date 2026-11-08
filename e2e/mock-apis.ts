@@ -186,6 +186,15 @@ export async function mockApis(page: Page, { echoes = false, guardian = false } 
         });
       if (h === 'api.energyzero.nl') return json(route, fixture('powerprices', 'energyzero'));
       if (h === 'apidatos.ree.es') return json(route, fixture('powerprices', 'ree-spot'));
+      if (h === 'ourworldindata.org')
+        return route.fulfill({
+          status: 200,
+          contentType: 'text/csv',
+          body: readFileSync(
+            fileURLToPath(new URL('../src/sources/owid/fixtures/happiness.csv', import.meta.url)),
+            'utf8',
+          ),
+        });
       if (h === 'api.worldbank.org') return json(route, fixture('worldbank', 'gdp'));
       if (h === 'api.inaturalist.org') return json(route, fixture('inaturalist', 'species-counts'));
       if (h === 'api.github.com') {

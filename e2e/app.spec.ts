@@ -184,11 +184,18 @@ test('Markets shows real prices and plain takeaways, not attention charts', asyn
   await expect(page.locator('#p-radar')).toHaveCount(0);
   await expect(page.locator('#p-data')).toContainText('10-year bond yield');
   const gdp = page.locator('#p-gdp');
-  await expect(gdp.locator('.gdp-list').first().locator('.gdp-row')).toHaveCount(3); // the fixture has three
-  await expect(gdp.locator('.gdp-home')).toContainText('Netherlands');
-  await expect(gdp.locator('.gdp-home')).toContainText('Portugal');
+  await expect(gdp.locator('.gdp-sec.top .gdp-row')).toHaveCount(3); // the fixture has three
+  await expect(gdp.locator('.gdp-sec.home')).toContainText('Netherlands');
+  await expect(gdp.locator('.gdp-sec.home')).toContainText('Portugal');
   await expect(gdp.locator('.gdp-row').first()).toContainText('United States');
   await expect(gdp.locator('.gdp-row').first()).toContainText('$30.8T');
+  await expect(gdp.locator('.gdp-row').first()).toContainText('6.82'); // happiness, beside GDP
+  await expect(gdp.locator('.gdp-row').first()).toContainText('#4');
+  await expect(gdp.locator('.gdp-sec.home .gdp-row').first()).toContainText('7.22'); // the Netherlands
+  // The happiest three, happiest first; a country the World Bank answer lacks shows without GDP.
+  await expect(gdp.locator('.gdp-sec.happy .gdp-row')).toHaveCount(3);
+  await expect(gdp.locator('.gdp-sec.happy .gdp-row').first()).toContainText('Finland');
+  await expect(gdp.locator('.gdp-sec.happy .gdp-row').first()).toContainText('7.76');
 });
 
 test('Bird migration shows the flyway from the North Sea to the Algarve, and the birds seen near each city', async ({
