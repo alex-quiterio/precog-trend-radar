@@ -259,6 +259,6 @@ test('The Great Simplification lists Campfire Stories films beside its episodes'
   await expect(film).toHaveCount(3); // the films' own rows, however many episodes outrank them
   await expect(film.first().locator('a')).toHaveAttribute('href', /^https:\/\/www\.campfire-stories\.org\//);
   await expect(film.first()).not.toContainText('new'); // undated: no "new", no date
-  await film.scrollIntoViewIfNeeded();
+  await film.first().scrollIntoViewIfNeeded();
   if (process.env.SHOT) await stories(page).screenshot({ path: `${process.env.SHOT}/${info.project.name}.png` });
 });
