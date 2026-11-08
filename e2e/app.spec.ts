@@ -221,3 +221,24 @@ test('Bird migration shows the flyway from the North Sea to the Algarve, and the
   await expect(stories(page).getByRole('button', { name: 'Reading' })).toHaveCount(0);
   await expect(page.locator('#p-brief')).not.toContainText('Elsewhere');
 });
+
+test('Portugal & the land compares plots of land side by side, and remembers them', async ({ page }) => {
+  await open(page);
+  await page.locator('body').press('5');
+  await expect(heroTitle(page)).toHaveText('Portugal & the land');
+  const plots = page.locator('#p-plots');
+  await plots.getByLabel('Plot name').fill('Águeda');
+  await plots.getByLabel(/Plot location/).fill('https://www.google.com/maps/@40.58,-8.44,14z');
+  await plots.getByRole('button', { name: 'Add plot' }).click();
+  await expect(plots.locator('thead')).toContainText('Águeda');
+  await expect(plots).toContainText('100% of normal'); // the mock's rain every day, against the same normal
+  await expect(plots).toContainText('1,000 m');
+  await expect(plots.locator('tbody').filter({ hasText: 'Fire risk' })).toContainText('high');
+  await plots.getByLabel(/Plot location/).fill('not a place');
+  await plots.getByRole('button', { name: 'Add plot' }).click();
+  await expect(plots.locator('.pl-msg')).toContainText('Paste coordinates');
+  await page.reload();
+  await expect(page.locator('#p-plots thead')).toContainText('Águeda');
+  await page.getByRole('button', { name: 'Remove plot Águeda' }).click();
+  await expect(page.locator('#p-plots thead')).toHaveCount(0);
+});

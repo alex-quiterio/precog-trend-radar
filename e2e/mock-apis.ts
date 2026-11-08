@@ -90,6 +90,23 @@ function guardianSearch(url: URL) {
   return { response: { status: 'ok', total: results.length, pages: 1, currentPage: 1, results } };
 }
 
+/** Open-Meteo's archive: a day of 2 mm rain, 20 °C and 8 °C for every day asked for, from 1,000 m up. */
+function archiveDays(url: URL) {
+  const from = Date.parse(url.searchParams.get('start_date') || ''),
+    to = Date.parse(url.searchParams.get('end_date') || '');
+  const time: string[] = [];
+  for (let t = from; t <= to; t += 864e5) time.push(new Date(t).toISOString().slice(0, 10));
+  return {
+    elevation: 1000,
+    daily: {
+      time,
+      precipitation_sum: time.map(() => 2),
+      temperature_2m_max: time.map(() => 20),
+      temperature_2m_min: time.map(() => 8),
+    },
+  };
+}
+
 /**
  * Answers every outside request. With `echoes`, World's daily pick gets the saved replies of 6 Nov 2026
  * (Wikipedia's feed, Wikidata, Hacker News's front page, Manifold's busiest markets); without, Wikipedia's
@@ -152,6 +169,7 @@ export async function mockApis(page: Page, { echoes = false, guardian = false } 
       if (h === 'ec.europa.eu')
         return json(route, fixture('eurostat', p.includes('prc_hpi_q') ? 'house-prices' : 'unemployment'));
       if (h === 'api.ipma.pt') return json(route, fixture('ipma', p.includes('warnings') ? 'warnings' : 'fire-risk'));
+      if (h === 'archive-api.open-meteo.com') return json(route, archiveDays(url));
       if (h.endsWith('open-meteo.com'))
         return json(route, h.startsWith('air-quality') ? {} : fixture('open-meteo', 'forecast-two-places'));
       if (h === 'global-warming.org')

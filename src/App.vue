@@ -45,6 +45,13 @@
           </h3>
           <digest-panel :index="0"></digest-panel>
         </section>
+        <section v-if="view.channel.plots" class="block" aria-labelledby="b-plots">
+          <h3 id="b-plots" class="block-head">
+            <span>{{ view.n('plots') }}</span>
+            Plots
+          </h3>
+          <plots-panel :index="0"></plots-panel>
+        </section>
         <section v-if="!view.channel.prices" class="block" aria-labelledby="b-gist">
           <h3 id="b-gist" class="block-head">
             <span>{{ view.n('gist') }}</span>
@@ -115,6 +122,7 @@ import MorningBrief from '@components/MorningBrief.vue';
 import DigestPanel from '@components/DigestPanel.vue';
 import MarketsPanel from '@components/MarketsPanel.vue';
 import GdpPanel from '@components/GdpPanel.vue';
+import PlotsPanel from '@components/PlotsPanel.vue';
 import MigrationPanel from '@components/MigrationPanel.vue';
 import DatapointsPanel from '@components/DatapointsPanel.vue';
 import LensPanel from '@components/LensPanel.vue';
@@ -134,6 +142,7 @@ export default defineComponent({
     DigestPanel,
     MarketsPanel,
     GdpPanel,
+    PlotsPanel,
     MigrationPanel,
     DatapointsPanel,
     LensPanel,
@@ -154,6 +163,7 @@ export default defineComponent({
         channel.prices && 'prices',
         channel.migration && 'flyway',
         channel.digest && 'today',
+        channel.plots && 'plots',
         !channel.prices && 'gist',
         'trends',
         channel.github && 'build',

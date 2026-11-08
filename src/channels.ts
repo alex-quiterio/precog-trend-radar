@@ -35,6 +35,8 @@ export interface Channel {
    * Guardian. Set, only these sites tell them, so a channel's stories stay in its own place or voice.
    */
   stories?: StorySources;
+  /** Shows Plots: land you're watching, compared side by side (PlotsPanel.vue). */
+  plots?: boolean;
   /** Opens with the flyway: bird migration on the weather radars from Denmark to Lisbon (MigrationPanel.vue). */
   migration?: boolean;
   /** Opens with real prices (components/MarketsPanel.vue) and charts no attention: no Signal, gist or radar. */
@@ -140,6 +142,7 @@ export const CHANNELS: Channel[] = [
     streams: ['news', 'reading', 'forecasts'],
     sites: PORTUGAL_SITES.map(s => s.url),
     digest: true,
+    plots: true,
     // Portuguese sources only, matched in Portuguese.
     stories: {
       sites: PORTUGAL_SITES.map(s => s.url),
