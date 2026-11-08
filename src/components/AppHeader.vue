@@ -78,30 +78,6 @@
           </svg>
         </button>
       </template>
-      <form v-if="view.canAdd && adding" class="ch-new" autocomplete="off" @submit.prevent="create">
-        <label class="sr-only" for="ch-name">New channel name</label>
-        <input
-          id="ch-name"
-          ref="nameInput"
-          v-model="name"
-          maxlength="30"
-          placeholder="Channel name…"
-          @keydown.esc="cancel"
-          @blur="!name.trim() && cancel()"
-        />
-      </form>
-      <button
-        v-else-if="view.canAdd"
-        type="button"
-        class="ch-add"
-        title="New channel"
-        aria-label="New channel"
-        @click="open"
-      >
-        <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
-          <path d="M6 1.5v9M1.5 6h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-        </svg>
-      </button>
     </nav>
   </header>
 </template>
@@ -110,7 +86,6 @@
 import { useApp } from '@/context';
 import { computed, defineComponent, nextTick, ref } from 'vue';
 import { activeChannel, channels } from '@/channels';
-import { MAX_LENSES } from '@core/config';
 
 import BrandMark from '@components/BrandMark.vue';
 import ChannelIcon from '@components/ChannelIcon.vue';
@@ -127,38 +102,20 @@ export default defineComponent({
     const gh = github.state;
     const me = myGithub.state;
     const stories = loader.status;
-    const { addLens, lensHeat, removeLens, selectLens } = actions;
-    const { state } = app;
+    const { lensHeat, removeLens, selectLens } = actions;
     const view = computed(() => {
       return {
         active: activeChannel(app)?.id,
         list: channels(app).map((c, i) => ({ ...c, n: i + 1, heat: lensHeat(app.lensById(c.lensId)) })),
-        canAdd: state.lenses.length < MAX_LENSES,
         // Anything still fetching lights the beacon: trends, streams, GitHub.
         busy: ui.loading || Object.values(stories.loading).some(Boolean) || gh.loading || me.loading,
       };
     });
-    // New channel: a small "+" that opens an inline name field (Enter creates, Esc cancels).
-    const adding = ref(false),
-      name = ref(''),
-      nameInput = ref<HTMLInputElement | null>(null);
-    function open() {
-      adding.value = true;
-      nextTick(() => nameInput.value?.focus());
-    }
-    function cancel() {
-      adding.value = false;
-      name.value = '';
-    }
     // Settings bar (theme, Guardian key): the header's sliders button opens it; ×, Esc or the button closes it.
     const settingsOpen = ref(false);
     function closeSettings() {
       settingsOpen.value = false;
       nextTick(() => document.querySelector<HTMLElement>('.set-toggle')?.focus());
-    }
-    function create() {
-      if (name.value.trim()) addLens(name.value.trim());
-      cancel();
     }
     return {
       ui,
@@ -168,12 +125,6 @@ export default defineComponent({
       removeLens: (id: string) => void removeLens(id),
       settingsOpen,
       closeSettings,
-      adding,
-      name,
-      nameInput,
-      open,
-      cancel,
-      create,
     };
   },
 });
@@ -309,46 +260,6 @@ export default defineComponent({
 .ch-del:focus-visible {
   color: var(--alert);
   background: var(--accent-soft);
-}
-.ch-add {
-  align-self: center;
-  margin: 0 8px 0 auto;
-  width: 26px;
-  height: 26px;
-  padding: 0;
-  border-radius: 50%;
-  border: 1px solid var(--hair);
-  background: var(--card);
-  color: var(--muted);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition:
-    color 0.15s,
-    border-color 0.15s,
-    background 0.15s;
-}
-.ch-add svg {
-  display: block;
-}
-.ch-add:hover {
-  color: var(--accent);
-  border-color: var(--accent);
-  background: var(--accent-soft);
-}
-.ch-new {
-  align-self: center;
-  margin: 0 8px 0 auto;
-}
-.ch-new input {
-  width: 160px;
-  height: 26px;
-  padding: 0 10px;
-  border-radius: 999px;
-  border: 1px solid var(--accent);
-  background: var(--card);
-  font-size: 12px;
-  outline: none;
 }
 .channel .heat {
   font: 600 10px/1 var(--mono);

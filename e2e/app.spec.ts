@@ -98,19 +98,10 @@ test('adds a topic, and refuses a person', async ({ page }) => {
   await expect(page.locator('#p-signal')).toContainText('Heat pumps'); // charted straight away
 });
 
-test('creates a channel and deletes it from the channel bar; built-in channels have no delete', async ({ page }) => {
+test('the channel bar has no way to add a channel, and built-in channels have no delete', async ({ page }) => {
   await open(page);
+  await expect(page.getByRole('button', { name: 'New channel' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: /^Delete channel/ })).toHaveCount(0);
-  await page.getByRole('button', { name: 'New channel' }).click();
-  await page.getByLabel('New channel name').fill('Bikes');
-  await page.getByLabel('New channel name').press('Enter');
-  await expect(heroTitle(page)).toHaveText('Bikes');
-  page.once('dialog', d => void d.accept());
-  await page.locator('.channels').getByRole('button', { name: 'Delete channel Bikes' }).click();
-  await expect(page.locator('.channels').getByRole('button', { name: 'Bikes' })).toHaveCount(0);
-  await expect(heroTitle(page)).not.toHaveText('Bikes');
-  await page.reload();
-  await expect(page.locator('.channels').getByRole('button', { name: 'Bikes' })).toHaveCount(0);
 });
 
 test('World picks its topics from what the internet is echoing, and a pin keeps one', async ({ page }) => {

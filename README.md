@@ -50,7 +50,7 @@ Every channel has the same four parts, and most open with a fifth, [**Today's st
 - **Radar:** a rotating sweep over the channel's topics. Distance shows momentum (centre = rising fastest), size shows volume; click a blip to chart it.
 - **Streams:** **The Guardian** (the newest articles naming the channel's topics, once you add a key), **Reading** (posts from sites you follow, matched to the channel's topics), **Forecasts** (open [Manifold](https://manifold.markets/) markets with the crowd's probability) and **Hacker News** (stories ranked by engagement per hour).
 
-Make your own channel with **+ channel**: give it a name and up to six topics. Delete it with the **×** next to its tab.
+Channels are the ones PRECOG ships with. A channel you made in an earlier version still shows, and the **×** next to its tab deletes it.
 
 ### Today's stories
 
