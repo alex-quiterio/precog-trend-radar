@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import energyzero from './fixtures/energyzero.json';
 import ree from './fixtures/ree-spot.json';
-import { cheapCard } from './cards';
 import { cheapestBlock, parseEnergyZero, parseReeSpot } from './parse';
 
 const at = (h: number) => Date.UTC(2026, 10, 8, h);
@@ -34,18 +33,5 @@ describe('day-ahead power prices', () => {
       { t: at(7), eurKwh: 0.5 },
     ];
     expect(cheapestBlock(prices, 3)?.start).toBe(at(5));
-  });
-  it('names the hours in local time, today or tomorrow, against the average ahead', () => {
-    const prices = [3, 3, 1, 1, 1, 3].map((c, i) => ({ t: at(21 + i), eurKwh: c / 10 }));
-    const card = cheapCard(
-      { id: 'power-nl', group: 'nl', tz: 'Europe/Amsterdam', src: 'EnergyZero', href: '' },
-      prices,
-      at(21) + 10 * 60e3,
-    )!;
-    expect(card.v).toBe('tomorrow 00:00–03:00'); // 23:00 UTC is midnight in Amsterdam
-    expect(card.sub).toMatch(/^10 c\/kWh, against 20 c\/kWh on average/);
-    expect(card.spark).toHaveLength(6);
-    // Nothing left ahead: no card, rather than a stale one.
-    expect(cheapCard({ id: 'x', group: 'nl', tz: 'UTC', src: '', href: '' }, prices, at(31))).toBeNull();
   });
 });

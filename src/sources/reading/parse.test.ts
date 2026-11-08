@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import posts from './fixtures/wp-posts.json';
+import { topicRegex } from '@sources/registry';
 import { libraryItems, parseWpPosts, readingScore, type ReadingSite } from './parse';
 
 const site: ReadingSite = {
@@ -63,5 +64,17 @@ describe('kept libraries', () => {
   });
   it('is empty for a site without one', () => {
     expect(libraryItems(site)).toEqual([]);
+  });
+});
+
+describe('readingScore', () => {
+  const post = {
+    title: 'The Hormuz Oil Crisis',
+    text: 'rory explains why diesel is tight and what peak oil means.',
+  };
+  it('weights title hits over text hits', () => {
+    expect(readingScore(post, [topicRegex('Hormuz')])).toBe(3);
+    expect(readingScore(post, [topicRegex('peak oil')])).toBe(1);
+    expect(readingScore(post, [topicRegex('permaculture')])).toBe(0);
   });
 });

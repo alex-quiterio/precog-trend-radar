@@ -290,8 +290,7 @@ src/
 ├── features/               gist, streams, datapoints, GitHub momentum, your GitHub, World's daily topic pick
 ├── components/             one Vue component per panel, each with its own styles, plus PanelShell, Sparkline, tags
 └── styles/                 tokens (dark default + light), shared base styles, print and reduced motion
-tests/                      Vitest: core logic, the data loop, stream loader, storage, shortcuts, panel rendering
-                            (parser tests sit next to each source)
+                            Vitest specs sit next to what they test: foo.ts → foo.test.ts, Foo.vue → Foo.test.ts
 ```
 
 Imports use path aliases: `@core/…`, `@features/…`, `@sources/…`, `@components/…`, and `@/…` for the top-level

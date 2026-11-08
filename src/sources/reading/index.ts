@@ -4,7 +4,7 @@
 import { shallowRef } from 'vue';
 import { HOUR, store } from '@core/config';
 import { errorText, isAbort } from '@core/errors';
-import { withTimeout } from '@sources/registry';
+import { HttpError, withTimeout } from '@sources/registry';
 import { at, isObj, list, str } from '@sources/shape';
 import { CAMPFIRE_FILMS } from './campfire';
 import { libraryItems, parseWpPosts, plain, squash } from './parse';
@@ -113,7 +113,7 @@ async function fetchType(site: ReadingSite, type: string, label: string, signal:
       `${api(site)}${type}?per_page=100&page=${page}&orderby=date&order=desc&_fields=id,date_gmt,link,title,content`,
       { signal: withTimeout(signal, 30000) },
     );
-    if (!r.ok) throw new Error(`${site.name}: HTTP ${r.status}`);
+    if (!r.ok) throw new HttpError(r.status); // loadReading names the site
     pages = Number(r.headers.get('X-WP-TotalPages')) || 1;
     items.push(...parseWpPosts(await r.json(), site, type, label));
   }

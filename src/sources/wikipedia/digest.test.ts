@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+// Wikipedia stories and the digest: what each topic's story says, where it comes from, and how it loads.
+import { beforeEach, describe, expect, it } from 'vitest';
 import feed from './fixtures/featured-news.json';
 import summary from './fixtures/summary.json';
 import { lead, parseNewsStories, parseSummary, plainText } from './parse';
@@ -6,7 +7,18 @@ import { memoryBackend, useBackend } from '@core/storage';
 import { utcDay } from '@sources/registry';
 import type { Entry } from '@/types';
 import type { ReadingItem } from '@sources/reading';
-import { type DigestData, digestItems, guardianLatest, latestPosts, postFor, storyFor, weekChange } from './digest';
+import { fakeFetch } from '@sources/fake-fetch';
+import { createAppStore } from '@/state';
+import {
+  type DigestData,
+  digestItems,
+  guardianLatest,
+  latestPosts,
+  loadDigest,
+  postFor,
+  storyFor,
+  weekChange,
+} from './digest';
 
 const DAY = 86400e3;
 
@@ -225,5 +237,81 @@ describe('Wikipedia stories', () => {
     useBackend(memoryBackend({}));
     expect(digestItems(entries, data, now)[0]).toMatchObject({ kind: 'news', source: 'In the news · Nov 3' });
     expect(guardianLatest(entries, new Set(), now)).toEqual([]);
+  });
+});
+
+describe('loadDigest', () => {
+  const article = (title: string) => ({
+    type: 'standard',
+    title,
+    description: `About ${title}`,
+    extract: `${title} is a subject. It has a second sentence.`,
+  });
+  const net = fakeFetch(url => {
+    if (url.pathname.includes('/feed/featured/'))
+      return { news: [{ story: '<!--Nov 8-->Leaders meet at the <a href="./NATO" title="NATO">NATO</a> summit.' }] };
+    if (url.searchParams.get('action') === 'query') {
+      const t = url.searchParams.get('titles')!;
+      return t === 'Gaza war'
+        ? { query: { pages: { '-1': { missing: '' } } } }
+        : { query: { pages: { 1: { title: t } } } };
+    }
+    if (url.searchParams.get('action') === 'opensearch') return ['', [], [], []];
+    if (url.pathname.includes('/page/summary/'))
+      return article(decodeURIComponent(url.pathname.split('/').pop()!).replace(/_/g, ' '));
+    throw new Error('unexpected ' + url);
+  });
+  const signal = new AbortController().signal;
+  let world: Entry[] = [];
+  beforeEach(() => {
+    const app = createAppStore();
+    app.loadLenses();
+    world = app.entriesOf(app.lensById('world'));
+  });
+  const byName = (name: string) => world.find(E => E.name === name)!;
+
+  it('gives each topic its article and, in English, the story in the news about it', async () => {
+    const shown: number[] = [];
+    const d = await loadDigest([byName('NATO'), byName('Inflation')], signal, m => shown.push(m.size));
+    expect(d.get(byName('NATO').key)).toMatchObject({ summary: { title: 'NATO' }, news: { day: 'Nov 8' }, post: null });
+    expect(d.get(byName('Inflation').key)?.news).toBeNull();
+    expect(shown).toEqual([1, 2]); // shown as topics arrive
+  });
+  it('reads the feed and each summary once a day', async () => {
+    await loadDigest([byName('NATO')], signal);
+    const asked = net.urls.length;
+    await loadDigest([byName('NATO')], signal);
+    expect(net.urls).toHaveLength(asked); // title, feed and summary all kept
+  });
+  it('uses the article the trend already found', async () => {
+    const E = byName('NATO');
+    E.meta.wikiTitle = 'North Atlantic Treaty Organization';
+    const d = await loadDigest([E], signal);
+    expect(d.get(E.key)?.summary.title).toBe('North Atlantic Treaty Organization');
+    expect(net.urls.some(u => u.includes('action=query'))).toBe(false);
+  });
+  it('leaves out a topic without an article, and fails only when every topic does', async () => {
+    const gaza = byName('Gaza war');
+    const d = await loadDigest([gaza, byName('NATO')], signal);
+    expect([...d.keys()]).toEqual([byName('NATO').key]);
+    await expect(loadDigest([gaza], signal)).rejects.toThrow('no Wikipedia article for Gaza war');
+  });
+  it('on a scoped channel, reads its sites’ posts instead of the news', async () => {
+    const site = { url: 'https://site.example', name: 'Site', types: [['posts', 'Post']] as [string, string][] };
+    net.custom = url =>
+      url.hostname === 'site.example'
+        ? [
+            {
+              id: 1,
+              date_gmt: new Date(Date.now() - 3600e3).toISOString().slice(0, 19),
+              link: 'https://site.example/nato',
+              title: { rendered: 'NATO summit opens' },
+              content: { rendered: '' },
+            },
+          ]
+        : undefined;
+    const d = await loadDigest([byName('NATO')], signal, () => {}, { sites: [site], days: 2 });
+    expect(d.get(byName('NATO').key)).toMatchObject({ news: null, post: { title: 'NATO summit opens', site: 'Site' } });
+    expect(net.urls.some(u => u.includes('/feed/featured/'))).toBe(false);
   });
 });

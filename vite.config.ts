@@ -21,6 +21,6 @@ export default defineConfig({
     },
   },
   build: { target: 'es2022', outDir: 'dist', emptyOutDir: true },
-  // Unit tests live in tests/; each source's parser tests sit next to it, with saved replies in fixtures/.
-  test: { environment: 'node', include: ['tests/**/*.test.ts', 'src/**/*.test.ts'] },
+  // Each spec sits next to the file it tests (foo.ts → foo.test.ts); saved replies live in each source's fixtures/.
+  test: { environment: 'node', include: ['src/**/*.test.ts'] },
 });
