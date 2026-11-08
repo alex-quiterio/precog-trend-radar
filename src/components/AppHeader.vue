@@ -466,6 +466,13 @@ h1 .sub {
     min-height: 32px;
     padding: 0;
   }
+  /* Refresh and settings: bare icons on a phone, no ring. Settings keeps its highlight while open. */
+  .controls .btn.icon {
+    border-color: transparent;
+  }
+  .controls .btn.icon:not([aria-expanded='true']):not(:hover) {
+    background: transparent;
+  }
   .pulse {
     display: none;
   }
