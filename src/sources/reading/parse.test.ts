@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import posts from './fixtures/wp-posts.json';
-import { parseWpPosts, type ReadingSite } from './parse';
+import { libraryItems, parseWpPosts, readingScore, type ReadingSite } from './parse';
 
 const site: ReadingSite = {
   url: 'https://www.themarginalian.org',
@@ -42,5 +42,26 @@ describe('WordPress replies', () => {
   it('skips posts without a date or link, and refuses a reply that is not a list', () => {
     expect(parseWpPosts([{ id: 1, title: { rendered: 'x' } }], site, 'posts', 'Essay')).toEqual([]);
     expect(() => parseWpPosts({ code: 'rest_no_route' }, site, 'posts', 'Essay')).toThrow(/unexpected format/);
+  });
+});
+
+describe('kept libraries', () => {
+  it('lists Campfire Stories’ films undated, linked to their pages, matched on their blurbs', async () => {
+    const { CAMPFIRE } = await import('./index');
+    const films = libraryItems(CAMPFIRE);
+    expect(films.length).toBeGreaterThan(20);
+    expect(films[0]).toMatchObject({
+      site: 'Campfire Stories',
+      kind: 'Film',
+      title: 'Kinfolk',
+      url: 'https://www.campfire-stories.org/kinfolk',
+      t: 0,
+    });
+    expect(new Set(films.map(f => f.id)).size).toBe(films.length);
+    const forest = films.find(f => f.title === 'Once Upon a Forest')!;
+    expect(readingScore(forest, [/climate/i])).toBe(1);
+  });
+  it('is empty for a site without one', () => {
+    expect(libraryItems(site)).toEqual([]);
   });
 });

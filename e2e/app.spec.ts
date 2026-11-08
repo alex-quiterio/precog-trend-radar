@@ -248,3 +248,17 @@ test('Portugal & the land compares plots of land side by side, and remembers the
   await page.getByRole('button', { name: 'Remove plot Casa do rio' }).click();
   await expect(page.locator('#p-plots thead')).toHaveCount(0);
 });
+
+test('The Great Simplification lists Campfire Stories films beside its episodes', async ({ page }, info) => {
+  await open(page);
+  await page.locator('.channels .channel').nth(1).click();
+  await expect(heroTitle(page)).toHaveText('The Great Simplification');
+  const tab = stories(page).locator('.seg button', { hasText: 'The Great Simplification' });
+  await tab.click();
+  const film = stories(page).locator('li.story', { hasText: 'Kinfolk' });
+  await expect(film.locator('a')).toHaveAttribute('href', 'https://www.campfire-stories.org/kinfolk');
+  await expect(film).toContainText('Campfire Stories');
+  await expect(film).not.toContainText('new'); // undated: no "new", no date
+  await film.scrollIntoViewIfNeeded();
+  if (process.env.SHOT) await stories(page).screenshot({ path: `${process.env.SHOT}/${info.project.name}.png` });
+});

@@ -2,7 +2,7 @@
 // A channel names its lens (the topics whose attention it charts), the datapoints worth knowing in
 // that context, the streams it shows, and any special views (GitHub). Switching channel switches all of it.
 import type { AppStore } from '@/state';
-import { AMSTERDAM_SITES, NEWS_SITES, PORTUGAL_SITES } from '@sources/reading';
+import { AMSTERDAM_SITES, CAMPFIRE as CAMPFIRE_SITE, NEWS_SITES, PORTUGAL_SITES } from '@sources/reading';
 
 export interface StorySources {
   /** Sites (origins) whose posts can be a topic's story when they name it in the title. */
@@ -58,6 +58,7 @@ export const channelDatapoints = (c: Channel): string[] => c.datapoints;
 
 const TGS = 'https://www.thegreatsimplification.com';
 const MARGINALIAN = 'https://www.themarginalian.org';
+const CAMPFIRE = CAMPFIRE_SITE.url;
 const DUTCHNEWS = NEWS_SITES[0].url;
 const site = (sites: { url: string; name: string }[], name: string) => sites.find(s => s.name === name)!.url;
 
@@ -80,7 +81,8 @@ export const CHANNELS: Channel[] = [
     lensId: 'tgs',
     datapoints: ['co2', 'seaice'],
     streams: ['reading', 'news', 'forecasts'],
-    sites: [TGS],
+    // Its episodes and Frankly, and Campfire Stories' films beside them.
+    sites: [TGS, CAMPFIRE],
     digest: true,
     // Its own episodes and Frankly only. It publishes weekly, so a story stays fresh for a month.
     stories: { sites: [TGS], days: 30, latest: { title: 'New from The Great Simplification', sites: [TGS] } },

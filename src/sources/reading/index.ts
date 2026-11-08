@@ -6,7 +6,8 @@ import { HOUR, store } from '@core/config';
 import { errorText, isAbort } from '@core/errors';
 import { withTimeout } from '@sources/registry';
 import { at, isObj, list, str } from '@sources/shape';
-import { parseWpPosts, plain, squash } from './parse';
+import { CAMPFIRE_FILMS } from './campfire';
+import { libraryItems, parseWpPosts, plain, squash } from './parse';
 import type { ReadingSite, ReadingItem } from './parse';
 export * from './parse';
 
@@ -46,12 +47,22 @@ export const PORTUGAL_SITES: ReadingSite[] = [
   { url: 'https://greensavers.sapo.pt', name: 'Green Savers', types: [['posts', 'Article']] },
   { url: 'https://www.agroportal.pt', name: 'Agroportal', types: [['posts', 'News']] },
 ];
+/**
+ * The Great Simplification also lists Campfire Stories' films (Stephen Jenkinson, Charles Eisenstein, forests,
+ * gift economy, biodynamic farming). The site can't be read from the browser, so its film library is kept here.
+ */
+export const CAMPFIRE: ReadingSite = {
+  url: 'https://www.campfire-stories.org',
+  name: 'Campfire Stories',
+  types: [],
+  library: { kind: 'Film', entries: CAMPFIRE_FILMS },
+};
 /** News sites that tell a channel's Today's stories (see `stories` in channels.ts); they aren't Reading stream sites. */
 export const NEWS_SITES: ReadingSite[] = [
   // English-language news about the Netherlands, a dozen posts a day: the newest 100, read every two hours.
   { url: 'https://www.dutchnews.nl', name: 'DutchNews.nl', types: [['posts', 'News']], ttlHours: 2, depth: 1 },
 ];
-export const CHANNEL_SITES: ReadingSite[] = [...AMSTERDAM_SITES, ...PORTUGAL_SITES, ...NEWS_SITES];
+export const CHANNEL_SITES: ReadingSite[] = [...AMSTERDAM_SITES, ...PORTUGAL_SITES, ...NEWS_SITES, CAMPFIRE];
 /** A followed or channel site by its origin. */
 export const siteByUrl = (url: string): ReadingSite | undefined =>
   [...readingSites(), ...CHANNEL_SITES].find(s => s.url === url);
@@ -129,6 +140,7 @@ async function fetchPages(site: ReadingSite, signal: AbortSignal): Promise<Readi
 
 const memory = new Map<string, { at: number; items: ReadingItem[] }>();
 async function loadSite(site: ReadingSite, signal: AbortSignal): Promise<ReadingItem[]> {
+  if (site.library) return libraryItems(site);
   const key = CACHE_KEY + site.url;
   const ttl = site.ttlHours ? site.ttlHours * HOUR : TTL;
   const m = memory.get(key);

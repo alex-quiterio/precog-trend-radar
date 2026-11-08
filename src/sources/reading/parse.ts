@@ -15,6 +15,17 @@ export interface ReadingSite {
   ttlHours?: number;
   /** Pages of 100 posts to read per type (2 by default; a busy news site needs only the newest 100). */
   depth?: number;
+  /**
+   * A site the browser can't read, kept here instead: its undated entries are listed as they are and never
+   * fetched (`types` is then empty). Campfire Stories' films, for one.
+   */
+  library?: { kind: string; entries: LibraryEntry[] };
+}
+/** One entry of a kept library: a title, its page on the site, and the blurb it's matched on. */
+export interface LibraryEntry {
+  title: string;
+  path: string;
+  text: string;
 }
 export interface ReadingItem {
   id: string;
@@ -25,6 +36,7 @@ export interface ReadingItem {
   num: number | null;
   title: string;
   url: string;
+  /** Published (ms), or 0 for an undated library entry. */
   t: number;
   /** Lower-cased description, used only for matching. */
   text: string;
@@ -54,6 +66,23 @@ export function parseWpPosts(reply: unknown, site: ReadingSite, type: string, la
       },
     ];
   });
+}
+
+/** A kept library's entries as reading items, undated (t = 0). */
+export function libraryItems(site: ReadingSite): ReadingItem[] {
+  if (!site.library) return [];
+  const { kind, entries } = site.library;
+  return entries.map(e => ({
+    id: `rd:${site.url}:library:${e.path}`,
+    origin: site.url,
+    site: site.name,
+    kind,
+    num: null,
+    title: e.title,
+    url: site.url + e.path,
+    t: 0,
+    text: squash(e.text).slice(0, TEXT_MAX).toLowerCase(),
+  }));
 }
 
 /** How strongly an item matches a topic: 3 for a title hit, 1 for a description hit, 0 for none. */

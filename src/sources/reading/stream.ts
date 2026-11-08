@@ -18,14 +18,19 @@ interface Data {
   failed: string | null;
 }
 const DAY = 86400e3;
-// Recent first: a match counts half as much for every six months of age.
-const fade = (t: number, now: number) => 0.5 ** ((now - t) / (182 * DAY));
+// Recent first: a match counts half as much for every six months of age. An undated library entry (a film)
+// counts as six months old: always there, but under what's new.
+const fade = (t: number, now: number) => (t ? 0.5 ** ((now - t) / (182 * DAY)) : 0.5);
 
 registerStream<Data>({
   id: 'reading',
   label: 'Reading',
-  // A channel that reads one site names the tab after it ("The Great Simplification").
-  tabLabel: ctx => (ctx.sites?.length === 1 && siteByUrl(ctx.sites[0])?.name) || 'Reading',
+  // A channel that reads one site names the tab after it ("The Great Simplification"); a kept library beside it
+  // (Campfire Stories' films) doesn't count.
+  tabLabel: ctx => {
+    const own = (ctx.sites ?? []).map(siteByUrl).filter(s => s && !s.library);
+    return (own.length === 1 && own[0]?.name) || 'Reading';
+  },
   async load(ctx, signal) {
     // A channel with its own sites reads only those (followed or not); any other reads every followed site.
     const sites = ctx.sites?.length
@@ -62,14 +67,18 @@ registerStream<Data>({
           title: r.title,
           url: r.url,
           topics: r.topics,
-          meta: [{ text: r.site, cls: 'site' }, `${r.kind}${r.num ? ' #' + r.num : ''}`, when(r.t, ctx.now)],
+          meta: [
+            { text: r.site, cls: 'site' },
+            `${r.kind}${r.num ? ' #' + r.num : ''}`,
+            ...(r.t ? [when(r.t, ctx.now)] : []),
+          ],
           side: n
             ? {
                 big: String(n),
                 unit: n === 1 ? 'topic' : 'topics',
                 note: r.score >= 3 ? 'in the title' : 'in the text',
               }
-            : { note: 'new' },
+            : { note: r.t ? 'new' : '' }, // a film from a kept library isn't new
           bar: (rank(r) / top) * 100,
         };
       }),
