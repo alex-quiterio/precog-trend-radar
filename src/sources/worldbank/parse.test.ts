@@ -6,7 +6,7 @@ import { parseIndicator } from './parse';
 describe('World Bank indicator replies', () => {
   it('reads yearly values per country, oldest first', () => {
     const data = parseIndicator(gdp);
-    expect(Object.keys(data).sort()).toEqual(['CHN', 'DEU', 'USA']);
+    expect(Object.keys(data).sort()).toEqual(['CHN', 'DEU', 'NLD', 'PRT', 'USA']);
     expect(data.CHN[0].year).toBe(2019);
     expect(data.CHN.at(-1)).toEqual({ year: 2025, value: 19498039388042.6 });
   });

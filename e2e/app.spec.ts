@@ -193,7 +193,9 @@ test('Markets shows real prices and plain takeaways, not attention charts', asyn
   await expect(page.locator('#p-radar')).toHaveCount(0);
   await expect(page.locator('#p-data')).toContainText('10-year bond yield');
   const gdp = page.locator('#p-gdp');
-  await expect(gdp.locator('.gdp-row')).toHaveCount(3); // the fixture has three economies
+  await expect(gdp.locator('.gdp-list').first().locator('.gdp-row')).toHaveCount(3); // the fixture has three
+  await expect(gdp.locator('.gdp-home')).toContainText('Netherlands');
+  await expect(gdp.locator('.gdp-home')).toContainText('Portugal');
   await expect(gdp.locator('.gdp-row').first()).toContainText('United States');
   await expect(gdp.locator('.gdp-row').first()).toContainText('$30.8T');
 });

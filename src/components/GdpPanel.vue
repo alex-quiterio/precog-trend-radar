@@ -8,10 +8,26 @@
         <span class="gdp-ch">{{ e.change }}</span>
       </li>
     </ol>
-    <ul v-else-if="st.loading" class="gdp-wait" aria-label="Loading GDP">
+    <section v-if="rows.length && home.length" class="gdp-home" aria-labelledby="gdp-home-h">
+      <h4 id="gdp-home-h" class="gdp-head">
+        Closer to home
+        <span>same scale as above</span>
+      </h4>
+      <ol class="gdp-list">
+        <li v-for="e in home" :key="e.iso" class="gdp-row" :title="e.tip">
+          <span class="gdp-name">{{ e.name }}</span>
+          <span class="gdp-val">{{ e.text }}</span>
+          <span class="gdp-bar" aria-hidden="true"><i :style="{ width: e.bar + '%' }"></i></span>
+          <span class="gdp-ch">{{ e.change }}</span>
+        </li>
+      </ol>
+    </section>
+    <ul v-else-if="!rows.length && st.loading" class="gdp-wait" aria-label="Loading GDP">
       <li v-for="n in 7" :key="n"></li>
     </ul>
-    <p v-else class="gdp-foot">{{ st.error ? `Not loaded: ${st.error}` : 'No GDP figures could be read just now.' }}</p>
+    <p v-else-if="!rows.length" class="gdp-foot">
+      {{ st.error ? `Not loaded: ${st.error}` : 'No GDP figures could be read just now.' }}
+    </p>
     <p v-if="rows.length" class="gdp-foot">
       GDP in {{ year }}, current US dollars (World Bank). Nominal: it moves with exchange rates as well as output. The
       change is against five years before, in dollars.
@@ -21,10 +37,11 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted } from 'vue';
-import { createGdp, topEconomies, usd } from '@features/gdp';
+import { type Economy, createGdp, homeEconomies, topEconomies, usd } from '@features/gdp';
 import PanelShell from '@components/PanelShell.vue';
 
-// PRECOG / Trend Radar · Markets' largest economies: the top seven by GDP as bars, with their five-year change.
+// PRECOG / Trend Radar · Markets' largest economies: the top seven by GDP as bars, with their five-year change,
+// then the Netherlands and Portugal on the same scale.
 
 export default defineComponent({
   name: 'GdpPanel',
@@ -36,22 +53,23 @@ export default defineComponent({
     onMounted(() => void gdp.load());
     const top = computed(() => (st.data ? topEconomies(st.data) : []));
     const year = computed(() => top.value[0]?.year ?? '');
-    const rows = computed(() => {
+    // Every bar is measured against the largest economy, so the two lists share one scale.
+    const row = (e: Economy) => {
       const max = top.value[0]?.value || 1;
-      return top.value.map(e => {
-        const change =
-          e.change5 == null ? '' : `${e.change5 >= 0 ? '+' : '−'}${Math.abs(Math.round(e.change5))}% in 5 yrs`;
-        return {
-          ...e,
-          text: usd(e.value),
-          bar: (e.value / max) * 100,
-          change,
-          tip: `${e.name}: ${usd(e.value)} in ${e.year}${change ? ` (${change.replace('yrs', 'years')})` : ''}`,
-        };
-      });
-    });
+      const change =
+        e.change5 == null ? '' : `${e.change5 >= 0 ? '+' : '−'}${Math.abs(Math.round(e.change5))}% in 5 yrs`;
+      return {
+        ...e,
+        text: usd(e.value),
+        bar: (e.value / max) * 100,
+        change,
+        tip: `${e.name}: ${usd(e.value)} in ${e.year}${change ? ` (${change.replace('yrs', 'years')})` : ''}`,
+      };
+    };
+    const rows = computed(() => top.value.map(row));
+    const home = computed(() => (st.data ? homeEconomies(st.data).map(row) : []));
     const meta = computed(() => (year.value ? `World Bank · ${year.value}` : ''));
-    return { st, rows, year, meta };
+    return { st, rows, home, year, meta };
   },
 });
 </script>
@@ -100,6 +118,27 @@ export default defineComponent({
 }
 .gdp-row:hover .gdp-bar i {
   filter: brightness(1.15);
+}
+.gdp-home {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--glass-border);
+}
+.gdp-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0 0 8px;
+  color: var(--accent);
+  font: 600 10.5px var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.gdp-head span {
+  color: var(--muted);
+  font: 400 11px var(--sans);
+  letter-spacing: 0;
+  text-transform: none;
 }
 .gdp-wait {
   display: grid;

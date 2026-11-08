@@ -3,7 +3,7 @@
     "page": 1,
     "pages": 1,
     "per_page": 100,
-    "total": 21,
+    "total": 35,
     "sourceid": "2",
     "lastupdated": "2026-10-08"
   },
@@ -189,6 +189,188 @@
       "countryiso3code": "DEU",
       "date": "2019",
       "value": 3959894794039.21
+    },
+    {
+      "indicator": {
+        "id": "NY.GDP.MKTP.CD",
+        "value": "GDP (current US$)"
+      },
+      "country": {
+        "id": "NL",
+        "value": "Netherlands"
+      },
+      "countryiso3code": "NLD",
+      "date": "2025",
+      "value": 1332767651100.39
+    },
+    {
+      "indicator": {
+        "id": "NY.GDP.MKTP.CD",
+        "value": "GDP (current US$)"
+      },
+      "country": {
+        "id": "NL",
+        "value": "Netherlands"
+      },
+      "countryiso3code": "NLD",
+      "date": "2024",
+      "value": 1213936238063.28
+    },
+    {
+      "indicator": {
+        "id": "NY.GDP.MKTP.CD",
+        "value": "GDP (current US$)"
+      },
+      "country": {
+        "id": "NL",
+        "value": "Netherlands"
+      },
+      "countryiso3code": "NLD",
+      "date": "2023",
+      "value": 1135475867551
+    },
+    {
+      "indicator": {
+        "id": "NY.GDP.MKTP.CD",
+        "value": "GDP (current US$)"
+      },
+      "country": {
+        "id": "NL",
+        "value": "Netherlands"
+      },
+      "countryiso3code": "NLD",
+      "date": "2022",
+      "value": 1046540797548.64
+    },
+    {
+      "indicator": {
+        "id": "NY.GDP.MKTP.CD",
+        "value": "GDP (current US$)"
+      },
+      "country": {
+        "id": "NL",
+        "value": "Netherlands"
+      },
+      "countryiso3code": "NLD",
+      "date": "2021",
+      "value": 1054472123449.6
+    },
+    {
+      "indicator": {
+        "id": "NY.GDP.MKTP.CD",
+        "value": "GDP (current US$)"
+      },
+      "country": {
+        "id": "NL",
+        "value": "Netherlands"
+      },
+      "countryiso3code": "NLD",
+      "date": "2020",
+      "value": 932560861701.17
+    },
+    {
+      "indicator": {
+        "id": "NY.GDP.MKTP.CD",
+        "value": "GDP (current US$)"
+      },
+      "country": {
+        "id": "NL",
+        "value": "Netherlands"
+      },
+      "countryiso3code": "NLD",
+      "date": "2019",
+      "value": 928903005576.469
+    },
+    {
+      "indicator": {
+        "id": "NY.GDP.MKTP.CD",
+        "value": "GDP (current US$)"
+      },
+      "country": {
+        "id": "PT",
+        "value": "Portugal"
+      },
+      "countryiso3code": "PRT",
+      "date": "2025",
+      "value": 346639825141.821
+    },
+    {
+      "indicator": {
+        "id": "NY.GDP.MKTP.CD",
+        "value": "GDP (current US$)"
+      },
+      "country": {
+        "id": "PT",
+        "value": "Portugal"
+      },
+      "countryiso3code": "PRT",
+      "date": "2024",
+      "value": 313656884870.859
+    },
+    {
+      "indicator": {
+        "id": "NY.GDP.MKTP.CD",
+        "value": "GDP (current US$)"
+      },
+      "country": {
+        "id": "PT",
+        "value": "Portugal"
+      },
+      "countryiso3code": "PRT",
+      "date": "2023",
+      "value": 292323800948.839
+    },
+    {
+      "indicator": {
+        "id": "NY.GDP.MKTP.CD",
+        "value": "GDP (current US$)"
+      },
+      "country": {
+        "id": "PT",
+        "value": "Portugal"
+      },
+      "countryiso3code": "PRT",
+      "date": "2022",
+      "value": 256898677175.024
+    },
+    {
+      "indicator": {
+        "id": "NY.GDP.MKTP.CD",
+        "value": "GDP (current US$)"
+      },
+      "country": {
+        "id": "PT",
+        "value": "Portugal"
+      },
+      "countryiso3code": "PRT",
+      "date": "2021",
+      "value": 256055879091.139
+    },
+    {
+      "indicator": {
+        "id": "NY.GDP.MKTP.CD",
+        "value": "GDP (current US$)"
+      },
+      "country": {
+        "id": "PT",
+        "value": "Portugal"
+      },
+      "countryiso3code": "PRT",
+      "date": "2020",
+      "value": 229618773422.577
+    },
+    {
+      "indicator": {
+        "id": "NY.GDP.MKTP.CD",
+        "value": "GDP (current US$)"
+      },
+      "country": {
+        "id": "PT",
+        "value": "Portugal"
+      },
+      "countryiso3code": "PRT",
+      "date": "2019",
+      "value": 240115970063.019
     },
     {
       "indicator": {

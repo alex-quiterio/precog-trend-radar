@@ -1,6 +1,6 @@
 // PRECOG / Trend Radar · The world's largest economies, for the Markets channel: GDP in current US dollars from
 // the World Bank (keyless, browser-readable), the top seven by the latest year, each with its change over five
-// years. Annual data, so one call a day at most.
+// years, and the Netherlands and Portugal on the same scale. Annual data, so one call a day at most.
 import { reactive } from 'vue';
 import { HOUR } from '@core/config';
 import { errorText } from '@core/errors';
@@ -28,6 +28,9 @@ export const CANDIDATES: Record<string, string> = {
   IDN: 'Indonesia',
 };
 
+/** Home: shown under the top seven, on the same scale, whatever their rank. */
+export const HOME: Record<string, string> = { NLD: 'Netherlands', PRT: 'Portugal' };
+
 export interface Economy {
   iso: string;
   name: string;
@@ -38,30 +41,37 @@ export interface Economy {
   change5: number | null;
 }
 
+/** One country's latest year and its change over five years. */
+function economy(iso: string, name: string, s: { year: number; value: number }[]): Economy {
+  const last = s[s.length - 1],
+    then = s.find(p => p.year === last.year - 5);
+  return {
+    iso,
+    name,
+    year: last.year,
+    value: last.value,
+    change5: then ? (last.value / then.value - 1) * 100 : null,
+  };
+}
+
 /** The top `n` by each country's latest year, biggest first. */
 export function topEconomies(data: YearlyByCountry, n = 7): Economy[] {
   return Object.entries(data)
     .filter(([iso, s]) => CANDIDATES[iso] && s.length)
-    .map(([iso, s]) => {
-      const last = s[s.length - 1],
-        then = s.find(p => p.year === last.year - 5);
-      return {
-        iso,
-        name: CANDIDATES[iso],
-        year: last.year,
-        value: last.value,
-        change5: then ? (last.value / then.value - 1) * 100 : null,
-      };
-    })
+    .map(([iso, s]) => economy(iso, CANDIDATES[iso], s))
     .sort((a, b) => b.value - a.value)
     .slice(0, n);
 }
+
+/** The Netherlands and Portugal, in that order (those with data). */
+export const homeEconomies = (data: YearlyByCountry): Economy[] =>
+  Object.entries(HOME).flatMap(([iso, name]) => (data[iso]?.length ? [economy(iso, name, data[iso])] : []));
 
 /** "$30.8T", "$950B". */
 export const usd = (v: number): string =>
   v >= 1e12 ? `$${(v / 1e12).toFixed(v >= 1e13 ? 1 : 2)}T` : `$${Math.round(v / 1e9)}B`;
 
-const KEY = 'precog.gdp.v1';
+const KEY = 'precog.gdp.v2'; // v2 adds the Netherlands and Portugal
 export function createGdp() {
   const state = reactive({ data: null as YearlyByCountry | null, error: '', loading: false, at: 0 });
   async function load(): Promise<void> {
@@ -74,7 +84,7 @@ export function createGdp() {
     try {
       const year = new Date().getUTCFullYear();
       const reply = await getJSON(
-        `https://api.worldbank.org/v2/country/${Object.keys(CANDIDATES).join(';')}/indicator/NY.GDP.MKTP.CD` +
+        `https://api.worldbank.org/v2/country/${[...Object.keys(CANDIDATES), ...Object.keys(HOME)].join(';')}/indicator/NY.GDP.MKTP.CD` +
           `?format=json&date=${year - 11}:${year}&per_page=500`,
       );
       const data = parseIndicator(reply);
