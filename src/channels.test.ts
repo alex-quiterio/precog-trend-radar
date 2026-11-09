@@ -31,9 +31,13 @@ describe('the shipped channels', () => {
       ),
     );
   });
-  it('The Great Simplification reads its own posts and Campfire Stories’ films, and tells stories from its own only', () => {
+  it('The Great Simplification reads its own posts, Local Futures and Campfire Stories’ films, and tells stories from its own only', () => {
     const tgs = CHANNELS.find(c => c.id === 'tgs')!;
-    expect(tgs.sites?.map(u => siteByUrl(u)?.name)).toEqual(['The Great Simplification', 'Campfire Stories']);
+    expect(tgs.sites?.map(u => siteByUrl(u)?.name)).toEqual([
+      'The Great Simplification',
+      'Local Futures',
+      'Campfire Stories',
+    ]);
     expect(tgs.stories?.sites.map(u => siteByUrl(u)?.name)).toEqual(['The Great Simplification']);
   });
 });

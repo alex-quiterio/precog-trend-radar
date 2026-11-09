@@ -57,12 +57,24 @@ export const CAMPFIRE: ReadingSite = {
   types: [],
   library: { kind: 'Film', entries: CAMPFIRE_FILMS },
 };
+/** The Great Simplification also reads Local Futures: localization and the economics of happiness. */
+export const LOCAL_FUTURES: ReadingSite = {
+  url: 'https://www.localfutures.org',
+  name: 'Local Futures',
+  types: [['posts', 'Article']],
+};
 /** News sites that tell a channel's Today's stories (see `stories` in channels.ts); they aren't Reading stream sites. */
 export const NEWS_SITES: ReadingSite[] = [
   // English-language news about the Netherlands, a dozen posts a day: the newest 100, read every two hours.
   { url: 'https://www.dutchnews.nl', name: 'DutchNews.nl', types: [['posts', 'News']], ttlHours: 2, depth: 1 },
 ];
-export const CHANNEL_SITES: ReadingSite[] = [...AMSTERDAM_SITES, ...PORTUGAL_SITES, ...NEWS_SITES, CAMPFIRE];
+export const CHANNEL_SITES: ReadingSite[] = [
+  ...AMSTERDAM_SITES,
+  ...PORTUGAL_SITES,
+  ...NEWS_SITES,
+  CAMPFIRE,
+  LOCAL_FUTURES,
+];
 /** A followed or channel site by its origin. */
 export const siteByUrl = (url: string): ReadingSite | undefined =>
   [...readingSites(), ...CHANNEL_SITES].find(s => s.url === url);
