@@ -2,13 +2,7 @@
 // A channel names its lens (the topics whose attention it charts), the datapoints worth knowing in
 // that context, the streams it shows, and any special views (GitHub). Switching channel switches all of it.
 import type { AppStore } from '@/state';
-import {
-  AMSTERDAM_SITES,
-  CAMPFIRE as CAMPFIRE_SITE,
-  LOCAL_FUTURES as LOCAL_FUTURES_SITE,
-  NEWS_SITES,
-  PORTUGAL_SITES,
-} from '@sources/reading';
+import { AMSTERDAM_SITES, NEWS_SITES, PORTUGAL_SITES, TURNING_SITES } from '@sources/reading';
 
 export interface StorySources {
   /** Sites (origins) whose posts can be a topic's story when they name it in the title. */
@@ -62,12 +56,13 @@ export interface Channel {
 /** A channel's open-data cards. Country channels only ever show their own country's data. */
 export const channelDatapoints = (c: Channel): string[] => c.datapoints;
 
-const TGS = 'https://www.thegreatsimplification.com';
 const MARGINALIAN = 'https://www.themarginalian.org';
-const CAMPFIRE = CAMPFIRE_SITE.url;
-const LOCAL_FUTURES = LOCAL_FUTURES_SITE.url;
 const DUTCHNEWS = NEWS_SITES[0].url;
 const site = (sites: { url: string; name: string }[], name: string) => sites.find(s => s.name === name)!.url;
+const TGS = site(TURNING_SITES, 'The Great Simplification');
+const TURNING = TURNING_SITES.map(s => s.url);
+// A kept library is undated, so it can't tell a day's story: only the dated sites do.
+const TURNING_DATED = TURNING_SITES.filter(s => !s.library).map(s => s.url);
 
 export const CHANNELS: Channel[] = [
   {
@@ -83,16 +78,17 @@ export const CHANNELS: Channel[] = [
   {
     id: 'tgs',
     icon: 'leaf',
-    label: 'Great Simplification',
-    kicker: 'Energy, ecology and the economy as one system, with the planet’s slow numbers.',
+    label: 'Great Turning',
+    kicker:
+      'The shift to a life-sustaining world: the energy and ecology underneath, the local economies being built, and the stories that carry us.',
+    // Its id stays 'tgs' (it began as The Great Simplification), so saved topics and choices carry over.
     lensId: 'tgs',
     datapoints: ['co2', 'seaice'],
     streams: ['reading', 'news', 'forecasts'],
-    // Its episodes and Frankly, Local Futures' articles, and Campfire Stories' films beside them.
-    sites: [TGS, LOCAL_FUTURES, CAMPFIRE],
+    sites: TURNING,
     digest: true,
-    // Its own episodes and Frankly only. It publishes weekly, so a story stays fresh for a month.
-    stories: { sites: [TGS], days: 30, latest: { title: 'New from The Great Simplification', sites: [TGS] } },
+    // Its own voices only. They publish weekly or less, so a story stays fresh for a month.
+    stories: { sites: TURNING_DATED, days: 30, latest: { title: 'New in The Great Turning', sites: TURNING_DATED } },
   },
   {
     id: 'marginalian',

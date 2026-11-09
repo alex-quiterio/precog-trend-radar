@@ -44,8 +44,8 @@ export const PRESETS = [
   },
   {
     id: 'tgs',
-    name: 'The Great Simplification',
-    desc: 'Energy, ecology and the economy as one system, after Nate Hagens.',
+    name: 'The Great Turning',
+    desc: 'The shift to a life-sustaining world, after Joanna Macy: what is ending, and what is being built.',
     topics: [
       ['Climate change'],
       ['Peak oil'],

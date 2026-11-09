@@ -2,7 +2,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { PRESETS } from '@core/config';
 import { memoryBackend, useBackend } from '@core/storage';
-import { siteByUrl } from '@sources/reading';
+import { CAMPFIRE, TURNING_SITES, siteByUrl } from '@sources/reading';
 import { streamById } from '@sources/streams';
 import '@sources/index';
 import { createAppStore, type AppStore } from '@/state';
@@ -31,14 +31,11 @@ describe('the shipped channels', () => {
       ),
     );
   });
-  it('The Great Simplification reads its own posts, Local Futures and Campfire Stories’ films, and tells stories from its own only', () => {
-    const tgs = CHANNELS.find(c => c.id === 'tgs')!;
-    expect(tgs.sites?.map(u => siteByUrl(u)?.name)).toEqual([
-      'The Great Simplification',
-      'Local Futures',
-      'Campfire Stories',
-    ]);
-    expect(tgs.stories?.sites.map(u => siteByUrl(u)?.name)).toEqual(['The Great Simplification']);
+  it('The Great Turning reads all its voices, and tells stories from the dated ones only', () => {
+    const turning = CHANNELS.find(c => c.id === 'tgs')!;
+    expect(turning.sites?.map(u => siteByUrl(u)?.name)).toEqual(TURNING_SITES.map(s => s.name));
+    expect(turning.sites).toContain(CAMPFIRE.url);
+    expect(turning.stories?.sites.map(u => siteByUrl(u)?.name)).toEqual(['The Great Simplification', 'Local Futures']);
   });
 });
 

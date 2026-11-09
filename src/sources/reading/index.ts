@@ -17,16 +17,17 @@ const TTL = 12 * HOUR;
 const PAGES_PER_TYPE = 2; // newest 200 per type: enough to match against, light on the site
 
 /** Always followed: they can't be removed, and come back for anyone who removed them in an older version. */
+const TGS: ReadingSite = {
+  url: 'https://www.thegreatsimplification.com',
+  name: 'The Great Simplification',
+  types: [
+    ['episode', 'Episode'],
+    ['frankly-original', 'Frankly'],
+  ],
+  pages: ['resources'],
+};
 export const BUILT_IN_SITES: ReadingSite[] = [
-  {
-    url: 'https://www.thegreatsimplification.com',
-    name: 'The Great Simplification',
-    types: [
-      ['episode', 'Episode'],
-      ['frankly-original', 'Frankly'],
-    ],
-    pages: ['resources'],
-  },
+  TGS,
   { url: 'https://www.themarginalian.org', name: 'The Marginalian', types: [['posts', 'Essay']] },
 ];
 export const isBuiltInSite = (url: string): boolean => BUILT_IN_SITES.some(s => s.url === url);
@@ -48,8 +49,8 @@ export const PORTUGAL_SITES: ReadingSite[] = [
   { url: 'https://www.agroportal.pt', name: 'Agroportal', types: [['posts', 'News']] },
 ];
 /**
- * The Great Simplification also lists Campfire Stories' films (Stephen Jenkinson, Charles Eisenstein, forests,
- * gift economy, biodynamic farming). The site can't be read from the browser, so its film library is kept here.
+ * Campfire Stories' films (Stephen Jenkinson, Charles Eisenstein, forests, gift economy, biodynamic farming).
+ * The site can't be read from the browser, so its film library is kept here.
  */
 export const CAMPFIRE: ReadingSite = {
   url: 'https://www.campfire-stories.org',
@@ -57,24 +58,22 @@ export const CAMPFIRE: ReadingSite = {
   types: [],
   library: { kind: 'Film', entries: CAMPFIRE_FILMS },
 };
-/** The Great Simplification also reads Local Futures: localization and the economics of happiness. */
-export const LOCAL_FUTURES: ReadingSite = {
-  url: 'https://www.localfutures.org',
-  name: 'Local Futures',
-  types: [['posts', 'Article']],
-};
+/**
+ * The Great Turning reads the shift to a life-sustaining world as one: The Great Simplification on what is
+ * ending, Local Futures on the local economies being built, and Campfire Stories' films on the stories that
+ * carry us. Adding a voice to the channel is a line here.
+ */
+export const TURNING_SITES: ReadingSite[] = [
+  TGS,
+  { url: 'https://www.localfutures.org', name: 'Local Futures', types: [['posts', 'Article']] },
+  CAMPFIRE,
+];
 /** News sites that tell a channel's Today's stories (see `stories` in channels.ts); they aren't Reading stream sites. */
 export const NEWS_SITES: ReadingSite[] = [
   // English-language news about the Netherlands, a dozen posts a day: the newest 100, read every two hours.
   { url: 'https://www.dutchnews.nl', name: 'DutchNews.nl', types: [['posts', 'News']], ttlHours: 2, depth: 1 },
 ];
-export const CHANNEL_SITES: ReadingSite[] = [
-  ...AMSTERDAM_SITES,
-  ...PORTUGAL_SITES,
-  ...NEWS_SITES,
-  CAMPFIRE,
-  LOCAL_FUTURES,
-];
+export const CHANNEL_SITES: ReadingSite[] = [...AMSTERDAM_SITES, ...PORTUGAL_SITES, ...NEWS_SITES, ...TURNING_SITES];
 /** A followed or channel site by its origin. */
 export const siteByUrl = (url: string): ReadingSite | undefined =>
   [...readingSites(), ...CHANNEL_SITES].find(s => s.url === url);

@@ -40,7 +40,7 @@ test('never scrolls sideways', async ({ page }) => {
 test('switches channel from the channel bar and with number keys, and remembers it', async ({ page }) => {
   await open(page);
   await page.locator('.channels .channel').nth(1).click();
-  await expect(heroTitle(page)).toHaveText('The Great Simplification');
+  await expect(heroTitle(page)).toHaveText('The Great Turning');
   await page.locator('body').press('3');
   await expect(heroTitle(page)).toHaveText('The Marginalian');
   await page.reload();
@@ -249,11 +249,11 @@ test('Portugal & the land compares plots of land side by side, and remembers the
   await expect(page.locator('#p-plots thead')).toHaveCount(0);
 });
 
-test('The Great Simplification lists Campfire Stories films beside its episodes', async ({ page }, info) => {
+test('The Great Turning lists Campfire Stories films beside its episodes and articles', async ({ page }, info) => {
   await open(page);
   await page.locator('.channels .channel').nth(1).click();
-  await expect(heroTitle(page)).toHaveText('The Great Simplification');
-  const tab = stories(page).locator('.seg button', { hasText: 'The Great Simplification' });
+  await expect(heroTitle(page)).toHaveText('The Great Turning');
+  const tab = stories(page).locator('.seg button', { hasText: 'Reading' });
   await tab.click();
   const film = stories(page).locator('li.story', { hasText: 'Campfire Stories' });
   await expect(film).toHaveCount(3); // the films' own rows, however many episodes outrank them
