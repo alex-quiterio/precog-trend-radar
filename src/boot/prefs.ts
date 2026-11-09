@@ -9,6 +9,9 @@ import type { Prefs } from '@/types';
 
 /** Caches written by earlier versions (GDELT, old Reading and Guardian formats), no longer read. */
 export const OLD_CACHES = /^precog\.(gdelt|reading\.v[12]\.|guardian\.v1\.|tgs\.|rss\.)/;
+/** Channels an earlier version shipped under another id, so the last visit's channel and topic follow them. */
+export const RENAMED_LENSES: Record<string, string> = { tgs: 'turning' };
+const renamed = (id: string) => RENAMED_LENSES[id] ?? id;
 
 /** Restores the lenses and the last view from storage; anything unusable falls back to a default. */
 export function restore({ app, actions }: AppContext): void {
@@ -19,8 +22,12 @@ export function restore({ app, actions }: AppContext): void {
   app.loadLenses();
   ui.guardian = !!guardianKey();
   ui.ghToken = !!githubToken();
-  state.activeLens = (app.lensById(prefs.activeLens) && prefs.activeLens) || state.lenses[0]?.id || null;
-  state.selectedByLens = prefs.selectedByLens && typeof prefs.selectedByLens === 'object' ? prefs.selectedByLens : {};
+  const active = typeof prefs.activeLens === 'string' ? renamed(prefs.activeLens) : null;
+  state.activeLens = (app.lensById(active) && active) || state.lenses[0]?.id || null;
+  state.selectedByLens =
+    prefs.selectedByLens && typeof prefs.selectedByLens === 'object'
+      ? Object.fromEntries(Object.entries(prefs.selectedByLens).map(([id, key]) => [renamed(id), key]))
+      : {};
   // A stream id; loading the streams switches to the channel's first one if this one isn't shown.
   state.storySrc = typeof prefs.storySrc === 'string' ? prefs.storySrc : 'reading';
   state.storyScope = prefs.storyScope === 'topic' ? 'topic' : 'lens';

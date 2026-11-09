@@ -34,7 +34,7 @@ const spin = (id: string, day: number) => {
 registerStream<Data>({
   id: 'reading',
   label: 'Reading',
-  // A channel that reads one site names the tab after it ("The Great Simplification"); a kept library beside it
+  // A channel that reads one site names the tab after it ("The Marginalian"); a kept library beside it
   // (Campfire Stories' films) doesn't count.
   tabLabel: ctx => {
     const own = (ctx.sites ?? []).map(siteByUrl).filter(s => s && !s.library);

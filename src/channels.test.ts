@@ -32,7 +32,7 @@ describe('the shipped channels', () => {
     );
   });
   it('The Great Turning reads all its voices, and tells stories from the dated ones only', () => {
-    const turning = CHANNELS.find(c => c.id === 'tgs')!;
+    const turning = CHANNELS.find(c => c.id === 'turning')!;
     expect(turning.sites?.map(u => siteByUrl(u)?.name)).toEqual(TURNING_SITES.map(s => s.name));
     expect(turning.sites).toContain(CAMPFIRE.url);
     expect(turning.stories?.sites.map(u => siteByUrl(u)?.name)).toEqual(['The Great Simplification', 'Local Futures']);
@@ -53,15 +53,15 @@ describe('channels for an app', () => {
       streams: ['reading', 'forecasts', 'hn'],
     });
     expect(isBuiltInLens('mine')).toBe(false);
-    expect(isBuiltInLens('tgs')).toBe(true);
+    expect(isBuiltInLens('turning')).toBe(true);
   });
   it('leaves out a shipped channel whose lens is gone', () => {
     app.state.lenses = app.state.lenses.filter(l => l.id !== 'markets');
     expect(channels(app).some(c => c.id === 'markets')).toBe(false);
   });
   it('shows the active lens’s channel, or the first when none is active', () => {
-    app.state.activeLens = 'tgs';
-    expect(activeChannel(app).id).toBe('tgs');
+    app.state.activeLens = 'turning';
+    expect(activeChannel(app).id).toBe('turning');
     app.state.activeLens = 'gone';
     expect(activeChannel(app).id).toBe(CHANNELS[0].id);
   });

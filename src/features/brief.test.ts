@@ -76,15 +76,15 @@ describe('buildBrief', () => {
     expect(lines().find(l => l.startsWith('Steadiest climb'))).toMatch(new RegExp(`^Steadiest climb: ${a.name},`));
   });
   it('names what is hot on other channels, with the channel', () => {
-    const tgs = lens('tgs')[0];
-    tgs.stats = stats({ z: 3 });
-    expect(lines()).toContain(`Elsewhere: ${tgs.name} (3.0σ, The Great Turning).`);
+    const turning = lens('turning')[0];
+    turning.stats = stats({ z: 3 });
+    expect(lines()).toContain(`Elsewhere: ${turning.name} (3.0σ, The Great Turning).`);
   });
   it('keeps a country channel to its own country, and a focused one to itself', () => {
     lens('amsterdam')[0].stats = stats({ z: 3 });
     app.state.activeLens = 'portugal';
     expect(lines().some(l => l.startsWith('Elsewhere'))).toBe(false);
-    lens('tgs')[0].stats = stats({ z: 3 });
+    lens('turning')[0].stats = stats({ z: 3 });
     app.state.activeLens = 'birds';
     expect(lines().some(l => l.startsWith('Elsewhere'))).toBe(false);
   });

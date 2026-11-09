@@ -43,7 +43,7 @@ export const PRESETS = [
     ],
   },
   {
-    id: 'tgs',
+    id: 'turning',
     name: 'The Great Turning',
     desc: 'The shift to a life-sustaining world, after Joanna Macy: what is ending, and what is being built.',
     topics: [
@@ -199,7 +199,8 @@ export function otherNames(lensId: string, name: string): string[] {
 // (Taoism, Jungian psychology, mysticism).
 // v11 adds Markets.
 // v12 adds Bird migration.
-export const PRESET_VERSION = 12;
+// v13 turns The Great Simplification ('tgs') into The Great Turning ('turning').
+export const PRESET_VERSION = 13;
 /** Lenses whose topics are picked each day rather than shipped (see features/hot-topics.ts). */
 export const PICKED_LENSES = ['world', 'amsterdam'];
 export const LS = {

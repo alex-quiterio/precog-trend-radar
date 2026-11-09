@@ -19,8 +19,8 @@ describe('createContext', () => {
     const a = createContext(),
       b = createContext();
     a.app.loadLenses();
-    a.app.state.activeLens = 'tgs';
-    expect(b.app.state.activeLens).not.toBe('tgs');
+    a.app.state.activeLens = 'turning';
+    expect(b.app.state.activeLens).not.toBe('turning');
   });
 });
 

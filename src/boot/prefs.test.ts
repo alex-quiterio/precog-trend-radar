@@ -22,8 +22,8 @@ describe('restore', () => {
   it('brings back the last theme, channel, topic, stream and scope', () => {
     store.set(LS.prefs, {
       theme: 'light',
-      activeLens: 'tgs',
-      selectedByLens: { tgs: 'k1' },
+      activeLens: 'turning',
+      selectedByLens: { turning: 'k1' },
       storySrc: 'forecasts',
       storyScope: 'topic',
     });
@@ -31,10 +31,19 @@ describe('restore', () => {
     restore(ctx);
     expect(ctx.app.ui.theme).toBe('light');
     expect(ctx.app.state).toMatchObject({
-      activeLens: 'tgs',
-      selectedByLens: { tgs: 'k1' },
+      activeLens: 'turning',
+      selectedByLens: { turning: 'k1' },
       storySrc: 'forecasts',
       storyScope: 'topic',
+    });
+  });
+  it('follows a channel that was renamed: The Great Simplification is now The Great Turning', () => {
+    store.set(LS.prefs, { activeLens: 'tgs', selectedByLens: { tgs: 'Peak oil', world: 'NATO' } });
+    const ctx = createContext();
+    restore(ctx);
+    expect(ctx.app.state).toMatchObject({
+      activeLens: 'turning',
+      selectedByLens: { turning: 'Peak oil', world: 'NATO' },
     });
   });
   it('falls back to defaults for anything unusable', () => {

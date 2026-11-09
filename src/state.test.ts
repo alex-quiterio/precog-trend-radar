@@ -26,7 +26,7 @@ describe('lenses', () => {
     loadLenses();
     expect(app.state.lenses.map(l => l.id)).toEqual([
       'world',
-      'tgs',
+      'turning',
       'energy',
       'portugal',
       'housing',
@@ -54,7 +54,7 @@ describe('lenses', () => {
     loadLenses();
     expect(app.state.lenses.map(l => l.id)).toEqual([
       'world',
-      'tgs',
+      'turning',
       'energy',
       'portugal',
       'housing',
@@ -94,7 +94,7 @@ describe('lenses', () => {
     loadLenses();
     expect(app.state.lenses.map(l => l.id)).toEqual([
       'world',
-      'tgs',
+      'turning',
       'energy',
       'portugal',
       'housing',

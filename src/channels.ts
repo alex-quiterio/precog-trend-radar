@@ -76,13 +76,12 @@ export const CHANNELS: Channel[] = [
     digest: true,
   },
   {
-    id: 'tgs',
+    id: 'turning',
     icon: 'leaf',
     label: 'Great Turning',
     kicker:
       'The shift to a life-sustaining world: the energy and ecology underneath, the local economies being built, and the stories that carry us.',
-    // Its id stays 'tgs' (it began as The Great Simplification), so saved topics and choices carry over.
-    lensId: 'tgs',
+    lensId: 'turning',
     datapoints: ['co2', 'seaice'],
     streams: ['reading', 'news', 'forecasts'],
     sites: TURNING,
