@@ -185,6 +185,7 @@ export function createLiveLoop(deps: LoopDeps) {
   function stop(): void {
     abort?.abort();
     abort = null;
+    ui.loading = false; // the cancelled load returns without clearing it
     clearInterval(timer);
     timer = undefined;
   }

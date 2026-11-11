@@ -21,8 +21,29 @@ export function registerAdapter(a: Adapter): void {
 }
 export const utcDay = (d = Date.now()) => Math.floor(+d / DAY) * DAY;
 export const iso = (t: number): string => new Date(t).toISOString();
-export const withTimeout = (signal?: AbortSignal, ms = 25000): AbortSignal | undefined =>
-  AbortSignal.any ? AbortSignal.any([signal, AbortSignal.timeout(ms)].filter((s): s is AbortSignal => !!s)) : signal;
+/**
+ * A signal that aborts when `signal` does, or after `ms`: no request may wait forever, or the load it belongs
+ * to never ends. Browsers without AbortSignal.any (Safari before 17.4) get the same from a timer.
+ */
+export function withTimeout(signal?: AbortSignal, ms = 25000): AbortSignal {
+  if (typeof AbortSignal.any === 'function' && typeof AbortSignal.timeout === 'function')
+    return AbortSignal.any([signal, AbortSignal.timeout(ms)].filter((s): s is AbortSignal => !!s));
+  const ctl = new AbortController();
+  if (signal?.aborted) {
+    ctl.abort(signal.reason);
+    return ctl.signal;
+  }
+  const timer = setTimeout(() => ctl.abort(new DOMException('The request timed out', 'TimeoutError')), ms);
+  signal?.addEventListener(
+    'abort',
+    () => {
+      clearTimeout(timer);
+      ctl.abort(signal.reason);
+    },
+    { once: true },
+  );
+  return ctl.signal;
+}
 /** An HTTP error that keeps the status, so callers can react to 403/404/429. */
 export class HttpError extends Error {
   constructor(public status: number) {

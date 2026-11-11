@@ -65,6 +65,46 @@ describe('the stream loader', () => {
     expect(loader.status.errors.b).toBeNull();
     expect(loader.status.loading.b).toBe(false);
   });
+  it('stops showing a cancelled stream as loading when you come back to it before it has let go', async () => {
+    // Stream b notices the cancellation late (it is waiting its turn in a rate-limit queue).
+    let release = () => {};
+    const slow = stream(
+      'b',
+      (_ctx, signal) =>
+        new Promise<void>((resolve, reject) => {
+          release = () => (signal.aborted ? reject(new DOMException('aborted', 'AbortError')) : resolve());
+        }),
+    );
+    const { loader, now } = setup([slow, stream('a', async () => {})]);
+    const first = loader.load();
+    expect(loader.status.loading.b).toBe(true);
+    now.current = 'a'; // to another tab: its load cancels b's…
+    await loader.load();
+    now.current = 'b'; // …and straight back, which loads nothing
+    release();
+    await first;
+    expect(loader.status.loading.b).toBe(false);
+  });
+  it('leaves the flag to the newer load when the same stream is loaded again', async () => {
+    const releases: (() => void)[] = [];
+    const { loader } = setup([
+      stream(
+        'b',
+        (_ctx, signal) =>
+          new Promise<void>((resolve, reject) => {
+            releases.push(() => (signal.aborted ? reject(new DOMException('aborted', 'AbortError')) : resolve()));
+          }),
+      ),
+    ]);
+    const first = loader.load(),
+      second = loader.load();
+    releases[0]();
+    await first;
+    expect(loader.status.loading.b).toBe(true); // the second load is still running
+    releases[1]();
+    await second;
+    expect(loader.status.loading.b).toBe(false);
+  });
   it('keeps each stream’s data per loader, showing partial results while loading', async () => {
     const seen: unknown[] = [];
     const s = stream('b', async (_ctx, _signal, show) => {

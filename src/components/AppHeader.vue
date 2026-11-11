@@ -104,11 +104,16 @@ export default defineComponent({
     const stories = loader.status;
     const { lensHeat, removeLens, selectLens } = actions;
     const view = computed(() => {
+      const channel = activeChannel(app);
       return {
-        active: activeChannel(app)?.id,
+        active: channel?.id,
         list: channels(app).map((c, i) => ({ ...c, n: i + 1, heat: lensHeat(app.lensById(c.lensId)) })),
-        // Anything still fetching lights the beacon: trends, streams, GitHub.
-        busy: ui.loading || Object.values(stories.loading).some(Boolean) || gh.loading || me.loading,
+        // Anything still fetching for this channel lights the beacon: trends, streams, and GitHub on its own
+        // channel only (its searches wait seconds apart, so they run on for a minute after you leave).
+        busy:
+          ui.loading ||
+          Object.values(stories.loading).some(Boolean) ||
+          (!!channel?.github && (gh.loading || me.loading)),
       };
     });
     // Settings bar (theme, Guardian key): the header's sliders button opens it; ×, Esc or the button closes it.

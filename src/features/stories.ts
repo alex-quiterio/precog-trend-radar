@@ -51,16 +51,20 @@ export function createStoryLoader(deps: StoryDeps) {
     at: {} as Record<string, number>,
   });
   let abort: AbortController | null = null,
+    /** The newest load, and the stream it is for (it may have finished). */
+    latest: { src: string } | null = null,
     timer: ReturnType<typeof setInterval> | undefined;
   async function load(): Promise<void> {
     abort?.abort();
     abort = new AbortController();
+    latest = null;
     const shown = deps.shown();
     if (!shown.some(s => s.id === deps.current())) deps.select(shown[0]?.id || 'reading');
     const stream = shown.find(s => s.id === deps.current());
     if (!stream) return;
     const { signal } = abort,
       src = stream.id;
+    const mine = (latest = { src });
     status.loading[src] = true;
     try {
       const data = await stream.load(deps.context(), signal, partial => {
@@ -73,8 +77,9 @@ export function createStoryLoader(deps: StoryDeps) {
     } catch (e) {
       if (!isAbort(e) && !signal.aborted) status.errors[src] = errorText(e);
     } finally {
-      // A cancelled load leaves the flag to the load that replaced it, unless that one is another stream's.
-      if (!signal.aborted || deps.current() !== src) status.loading[src] = false;
+      // A cancelled load leaves the flag to the load that replaced it, when that one is for the same stream.
+      // Otherwise nothing else would clear it: coming back to this tab loads nothing if it has loaded before.
+      if (latest === mine || latest?.src !== src) status.loading[src] = false;
     }
   }
   /** Reloads every `every` ms while the page is visible. */

@@ -153,6 +153,26 @@ describe('the data loop', () => {
     expect(loop.updated()).toBeGreaterThan(0);
   });
 
+  it('stop ends a load in flight, so the page stops showing it as loading and refresh works again', async () => {
+    let release = () => {};
+    const fetch = vi.fn(
+      (topic: string) =>
+        new Promise<{ topic: string; points: ReturnType<typeof days> }>(
+          r => (release = () => r({ topic, points: days(5) })),
+        ),
+    );
+    const { loop, ui } = setup([adapter('a', fetch)], ['Rust']);
+    const running = loop.load();
+    expect(ui.loading).toBe(true);
+    loop.stop();
+    expect(ui.loading).toBe(false);
+    release();
+    await running;
+    expect(loop.updated()).toBe(0); // the cancelled load never landed
+    loop.refresh();
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
   it('start clears what was there and stop cancels the timer', async () => {
     vi.useFakeTimers();
     try {
