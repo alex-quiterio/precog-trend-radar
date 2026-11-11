@@ -1,6 +1,8 @@
-// PRECOG / Trend Radar · Eurostat cards: unemployment, inflation, house prices, rents, energy prices, renewables.
+// PRECOG / Trend Radar · Eurostat cards: unemployment, inflation, house prices, rents, energy prices, renewables,
+// and the yearly environment numbers (greenhouse gases, nitrate in groundwater, municipal waste, circular use).
+import type { SeriesPoint } from '@/types';
 import { type DatapointGroup, type DatapointRow, registerCards } from '@sources/cards';
-import { nf0, nf1 } from '@core/format';
+import { fmtPct, nf0, nf1 } from '@core/format';
 import { month, quarter } from '@core/dates';
 import { getJSON } from '@sources/registry';
 import { parseEurostat } from './parse';
@@ -197,3 +199,84 @@ registerCards({
     return rows;
   },
 });
+
+/** The countries with yearly environment cards: Eurostat code, group and id suffix, name. */
+const COUNTRIES: [string, DatapointGroup, string][] = [
+  ['PT', 'pt', 'Portugal'],
+  ['NL', 'nl', 'Netherlands'],
+];
+const year = (t: number): number => new Date(t).getUTCFullYear();
+/** "−12.5% since 2013": the last year against the first one in the series. */
+const pctSince = (s: SeriesPoint[]): string =>
+  s.length > 1 && s[0].value
+    ? `${fmtPct(((s[s.length - 1].value - s[0].value) / s[0].value) * 100)} since ${year(s[0].t)}`
+    : '';
+/** "+0.4 pts since 2013", for numbers that are already a percentage. */
+const ptsSince = (s: SeriesPoint[]): string => {
+  if (s.length < 2) return '';
+  const d = s[s.length - 1].value - s[0].value;
+  return `${d >= 0 ? '+' : '−'}${nf1.format(Math.abs(d))} pts since ${year(s[0].t)}`;
+};
+const both = (...parts: string[]): string => parts.filter(Boolean).join(' · ');
+
+/**
+ * A yearly dataset with one series per country: a loader making one card each for Portugal and the Netherlands.
+ * `card` gets the country's series (oldest first, never empty) and returns what is particular to the card.
+ */
+function yearlyCards(
+  code: string,
+  query: string,
+  idPrefix: string,
+  o: number,
+  card: (series: SeriesPoint[], name: string) => Pick<DatapointRow, 'k' | 'v' | 'sub'> & { by?: string },
+): void {
+  registerCards({
+    id: `eurostat-${code}`,
+    async load() {
+      const j = await getJSON(
+        `https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/${code}?geo=PT&geo=NL${query}&lastTimePeriod=12`,
+      );
+      return COUNTRIES.flatMap(([geo, group, name]) => {
+        const series = parseEurostat(j, { geo });
+        const last = series[series.length - 1];
+        if (!last) return [];
+        const { by, ...text } = card(series, name);
+        return [
+          {
+            group,
+            id: `${idPrefix}-${group}`,
+            ...text,
+            src: `Eurostat ${code}${by ? ` (${by})` : ''} · ${year(last.t)}`,
+            href: `https://ec.europa.eu/eurostat/databrowser/view/${code}/default/table`,
+            o,
+            spark: series,
+          },
+        ];
+      });
+    },
+  });
+}
+
+// Net emissions: what the country emits, less what its forests and land take up.
+yearlyCards('sdg_13_10', '&unit=T_HAB&src_crf=TOTXMEMO', 'ghg', 27, (s, name) => ({
+  k: `Greenhouse gases · ${name}`,
+  v: `${nf1.format(s[s.length - 1].value)} t`,
+  sub: both('CO₂e per person a year, net of land and forests', pctSince(s)),
+  by: 'EEA',
+}));
+yearlyCards('sdg_06_40', '', 'nitrate', 26, (s, name) => ({
+  k: `Nitrate in groundwater · ${name}`,
+  v: `${nf1.format(s[s.length - 1].value)} mg/L`,
+  sub: both('the drinking-water limit is 50 mg/L', pctSince(s)),
+  by: 'EEA',
+}));
+yearlyCards('env_wasmun', '&wst_oper=GEN&unit=KG_HAB', 'waste', 28, (s, name) => ({
+  k: `Municipal waste · ${name}`,
+  v: `${nf0.format(s[s.length - 1].value)} kg`,
+  sub: both('per person a year', pctSince(s)),
+}));
+yearlyCards('sdg_12_41', '', 'circular', 29, (s, name) => ({
+  k: `Circular material use · ${name}`,
+  v: `${nf1.format(s[s.length - 1].value)}%`,
+  sub: both('of the materials used were recycled ones', ptsSince(s)),
+}));

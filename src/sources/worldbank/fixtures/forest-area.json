@@ -1,0 +1,364 @@
+[
+  {
+    "page": 1,
+    "pages": 1,
+    "per_page": 100,
+    "total": 22,
+    "sourceid": "2",
+    "lastupdated": "2026-11-11"
+  },
+  [
+    {
+      "indicator": {
+        "id": "AG.LND.FRST.ZS",
+        "value": "Forest area (% of land area)"
+      },
+      "country": {
+        "id": "NL",
+        "value": "Netherlands"
+      },
+      "countryiso3code": "NLD",
+      "date": "2025",
+      "value": null,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "AG.LND.FRST.ZS",
+        "value": "Forest area (% of land area)"
+      },
+      "country": {
+        "id": "NL",
+        "value": "Netherlands"
+      },
+      "countryiso3code": "NLD",
+      "date": "2024",
+      "value": 10.955746955747,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "AG.LND.FRST.ZS",
+        "value": "Forest area (% of land area)"
+      },
+      "country": {
+        "id": "NL",
+        "value": "Netherlands"
+      },
+      "countryiso3code": "NLD",
+      "date": "2023",
+      "value": 10.9423819423819,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "AG.LND.FRST.ZS",
+        "value": "Forest area (% of land area)"
+      },
+      "country": {
+        "id": "NL",
+        "value": "Netherlands"
+      },
+      "countryiso3code": "NLD",
+      "date": "2022",
+      "value": 10.9290169290169,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "AG.LND.FRST.ZS",
+        "value": "Forest area (% of land area)"
+      },
+      "country": {
+        "id": "NL",
+        "value": "Netherlands"
+      },
+      "countryiso3code": "NLD",
+      "date": "2021",
+      "value": 10.9156519156519,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "AG.LND.FRST.ZS",
+        "value": "Forest area (% of land area)"
+      },
+      "country": {
+        "id": "NL",
+        "value": "Netherlands"
+      },
+      "countryiso3code": "NLD",
+      "date": "2020",
+      "value": 10.9022869022869,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "AG.LND.FRST.ZS",
+        "value": "Forest area (% of land area)"
+      },
+      "country": {
+        "id": "NL",
+        "value": "Netherlands"
+      },
+      "countryiso3code": "NLD",
+      "date": "2019",
+      "value": 10.8889218889219,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "AG.LND.FRST.ZS",
+        "value": "Forest area (% of land area)"
+      },
+      "country": {
+        "id": "NL",
+        "value": "Netherlands"
+      },
+      "countryiso3code": "NLD",
+      "date": "2018",
+      "value": 10.8755568755569,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "AG.LND.FRST.ZS",
+        "value": "Forest area (% of land area)"
+      },
+      "country": {
+        "id": "NL",
+        "value": "Netherlands"
+      },
+      "countryiso3code": "NLD",
+      "date": "2017",
+      "value": 10.8621918621919,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "AG.LND.FRST.ZS",
+        "value": "Forest area (% of land area)"
+      },
+      "country": {
+        "id": "NL",
+        "value": "Netherlands"
+      },
+      "countryiso3code": "NLD",
+      "date": "2016",
+      "value": 10.8488268488268,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "AG.LND.FRST.ZS",
+        "value": "Forest area (% of land area)"
+      },
+      "country": {
+        "id": "NL",
+        "value": "Netherlands"
+      },
+      "countryiso3code": "NLD",
+      "date": "2015",
+      "value": 10.8354618354618,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "AG.LND.FRST.ZS",
+        "value": "Forest area (% of land area)"
+      },
+      "country": {
+        "id": "PT",
+        "value": "Portugal"
+      },
+      "countryiso3code": "PRT",
+      "date": "2025",
+      "value": null,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "AG.LND.FRST.ZS",
+        "value": "Forest area (% of land area)"
+      },
+      "country": {
+        "id": "PT",
+        "value": "Portugal"
+      },
+      "countryiso3code": "PRT",
+      "date": "2024",
+      "value": 36.6460129075078,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "AG.LND.FRST.ZS",
+        "value": "Forest area (% of land area)"
+      },
+      "country": {
+        "id": "PT",
+        "value": "Portugal"
+      },
+      "countryiso3code": "PRT",
+      "date": "2023",
+      "value": 36.5843354554743,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "AG.LND.FRST.ZS",
+        "value": "Forest area (% of land area)"
+      },
+      "country": {
+        "id": "PT",
+        "value": "Portugal"
+      },
+      "countryiso3code": "PRT",
+      "date": "2022",
+      "value": 36.5227671670728,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "AG.LND.FRST.ZS",
+        "value": "Forest area (% of land area)"
+      },
+      "country": {
+        "id": "PT",
+        "value": "Portugal"
+      },
+      "countryiso3code": "PRT",
+      "date": "2021",
+      "value": 36.4610897150393,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "AG.LND.FRST.ZS",
+        "value": "Forest area (% of land area)"
+      },
+      "country": {
+        "id": "PT",
+        "value": "Portugal"
+      },
+      "countryiso3code": "PRT",
+      "date": "2020",
+      "value": 36.3994122630058,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "AG.LND.FRST.ZS",
+        "value": "Forest area (% of land area)"
+      },
+      "country": {
+        "id": "PT",
+        "value": "Portugal"
+      },
+      "countryiso3code": "PRT",
+      "date": "2019",
+      "value": 36.3501794650109,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "AG.LND.FRST.ZS",
+        "value": "Forest area (% of land area)"
+      },
+      "country": {
+        "id": "PT",
+        "value": "Portugal"
+      },
+      "countryiso3code": "PRT",
+      "date": "2018",
+      "value": 36.300946667016,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "AG.LND.FRST.ZS",
+        "value": "Forest area (% of land area)"
+      },
+      "country": {
+        "id": "PT",
+        "value": "Portugal"
+      },
+      "countryiso3code": "PRT",
+      "date": "2017",
+      "value": 36.2516047053892,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "AG.LND.FRST.ZS",
+        "value": "Forest area (% of land area)"
+      },
+      "country": {
+        "id": "PT",
+        "value": "Portugal"
+      },
+      "countryiso3code": "PRT",
+      "date": "2016",
+      "value": 36.2023719073943,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "AG.LND.FRST.ZS",
+        "value": "Forest area (% of land area)"
+      },
+      "country": {
+        "id": "PT",
+        "value": "Portugal"
+      },
+      "countryiso3code": "PRT",
+      "date": "2015",
+      "value": 36.1531391093994,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    }
+  ]
+]

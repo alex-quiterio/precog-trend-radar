@@ -56,6 +56,12 @@ export async function getJSON(url: string, signal?: AbortSignal, headers?: Heade
   if (!r.ok) throw new HttpError(r.status);
   return r.json();
 }
+/** Fetches text (a CSV file). Read it in parse.ts, like any reply. */
+export async function getText(url: string, signal?: AbortSignal): Promise<string> {
+  const r = await fetch(url, { signal: withTimeout(signal) });
+  if (!r.ok) throw new HttpError(r.status);
+  return r.text();
+}
 export async function pool<T>(items: T[], n: number, fn: (item: T, i: number) => Promise<void>): Promise<void> {
   let i = 0;
   await Promise.all(

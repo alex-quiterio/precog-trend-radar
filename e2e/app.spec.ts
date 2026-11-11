@@ -158,6 +158,45 @@ test('Portugal opens with today’s stories and shows what a litre of fuel costs
   await expect(page.locator('#p-data')).toContainText('2,205 €/L');
 });
 
+const sideways = (page: Page) =>
+  page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+
+test('Portugal shows the air, the trees lost and the groundwater, without scrolling sideways', async ({ page }) => {
+  await open(page);
+  await page.locator('body').press('5');
+  const data = page.locator('#p-data');
+  for (const label of [
+    'Air · Lisbon now',
+    'Air · Porto now',
+    'Tree cover lost · Portugal',
+    'in 2024, to fire and felling',
+    'Forest · Portugal',
+    'Nitrate in groundwater · Portugal',
+  ])
+    await expect(data).toContainText(label);
+  await expect(data).not.toContainText('Netherlands'); // a country channel shows its own country only
+  expect(await sideways(page)).toBeLessThanOrEqual(0);
+});
+
+test('Alt Amsterdam shows the air modelled and measured, emissions and waste, without scrolling sideways', async ({
+  page,
+}) => {
+  await open(page);
+  await page.locator('body').press('8');
+  const data = page.locator('#p-data');
+  for (const label of [
+    'Air · Amsterdam now',
+    'NO₂ · Amsterdam, Van Diemenstraat',
+    'measured by the road',
+    'Greenhouse gases · Netherlands',
+    'Municipal waste · Netherlands',
+    '473 kg',
+    'Circular material use · Netherlands',
+  ])
+    await expect(data).toContainText(label);
+  expect(await sideways(page)).toBeLessThanOrEqual(0);
+});
+
 test('Alt Amsterdam picks its topics from its scene, reads its own sites, and links to Hipsy', async ({ page }) => {
   await open(page);
   await page.locator('body').press('8');

@@ -23,3 +23,6 @@ import '@sources/global-warming/cards';
 import '@sources/dgeg/cards';
 import '@sources/aloft/cards';
 import '@sources/powerprices/cards';
+import '@sources/luchtmeetnet/cards';
+import '@sources/owid/cards';
+import '@sources/worldbank/cards';

@@ -1,6 +1,6 @@
 // Matching topics in text: phrases and whole words.
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { phrase, topicRegex, withTimeout } from '@sources/registry';
+import { getText, HttpError, phrase, topicRegex, withTimeout } from '@sources/registry';
 
 describe('withTimeout', () => {
   const any = AbortSignal.any;
@@ -34,6 +34,16 @@ describe('withTimeout', () => {
     vi.advanceTimersByTime(1);
     expect(timed.aborted).toBe(true);
     expect(timed.reason.name).toBe('TimeoutError');
+  });
+});
+
+describe('getText', () => {
+  afterEach(() => vi.unstubAllGlobals());
+  it('answers the body as text, and throws the status of a failed reply', async () => {
+    vi.stubGlobal('fetch', async () => ({ ok: true, status: 200, text: async () => 'a,b\n1,2\n' }));
+    expect(await getText('https://example.org/file.csv')).toBe('a,b\n1,2\n');
+    vi.stubGlobal('fetch', async () => ({ ok: false, status: 404, text: async () => '' }));
+    await expect(getText('https://example.org/file.csv')).rejects.toBeInstanceOf(HttpError);
   });
 });
 

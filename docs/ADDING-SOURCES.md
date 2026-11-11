@@ -20,11 +20,11 @@ Shared pieces sit next to the folders:
 
 | File                      | What it gives you                                                                                    |
 | ------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `src/sources/registry.ts` | `registerAdapter`, `getJSON` (returns `unknown`), `HttpError`, `pool`, `phrase`, `utcDay`, `SKIP`    |
+| `src/sources/registry.ts` | `registerAdapter`, `getJSON` (returns `unknown`), `getText`, `HttpError`, `pool`, `phrase`, `SKIP`   |
 | `src/sources/shape.ts`    | `at`, `obj`, `list`, `num`, `str`, `objOr`, `listOr`, `ShapeError`: read a reply without trusting it |
 | `src/sources/blend.ts`    | the attention index that combines trend sources                                                      |
 | `src/sources/streams.ts`  | `registerStream`, `StreamRow`, and `when`, `checked`, `inScope` for building rows                    |
-| `src/sources/cards.ts`    | `registerCards`, `DatapointRow`, `DatapointFacts`                                                    |
+| `src/sources/cards.ts`    | `registerCards`, `DatapointRow`, `DatapointFacts`, `keptForADay` (for numbers that change yearly)    |
 
 Import with the path aliases: `@sources/…`, `@core/…`, `@features/…`, `@components/…`, and `@/…` for the
 top-level modules (`@/types`, `@/state`). Only a file's sibling stays relative (`./parse`).

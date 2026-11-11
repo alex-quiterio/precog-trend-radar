@@ -1,6 +1,7 @@
 // PRECOG / Trend Radar · Open-data cards: the shapes, and the registry each provider adds its loaders to
 // (see src/sources/<provider>/cards.ts). The Open data panel shows whichever cards a channel picks by id.
 import type { SeriesPoint } from '@/types';
+import { HOUR, store } from '@core/config';
 import { errorText } from '@core/errors';
 
 /** Which heading a card sits under in the panel. No card mixes two countries. */
@@ -68,4 +69,21 @@ export async function loadCards(loaders: CardLoader[] = CARD_LOADERS): Promise<{
     }),
   );
   return { rows: rows.sort((a, b) => a.o - b.o), facts, failed };
+}
+
+/**
+ * For numbers that change once a year: fetches at most once a day and keeps the result in storage under `key`.
+ * When the fetch fails, yesterday's copy is better than no card.
+ */
+export async function keptForADay<T>(key: string, fetchIt: () => Promise<T>): Promise<T> {
+  const hit = store.get<{ at: number; data: T } | null>(key, null);
+  if (hit && Date.now() - hit.at < 24 * HOUR) return hit.data;
+  try {
+    const data = await fetchIt();
+    store.set(key, { at: Date.now(), data });
+    return data;
+  } catch (e) {
+    if (hit) return hit.data;
+    throw e;
+  }
 }

@@ -1,8 +1,9 @@
-// PRECOG / Trend Radar · Open-Meteo cards: today's weather and air, sun and wind, and soil moisture.
+// PRECOG / Trend Radar · Open-Meteo cards: today's weather and air, air pollution now, sun and wind, and soil
+// moisture.
 import { type DatapointGroup, type DatapointRow, registerCards } from '@sources/cards';
 import { nf0, nf1, nf2 } from '@core/format';
 import { getJSON } from '@sources/registry';
-import { at, num } from '@sources/shape';
+import { at, num, str } from '@sources/shape';
 import { meteoColumn, meteoPlaces, meteoTimes } from './parse';
 
 export const PLACES: [string, number, number, DatapointGroup][] = [
@@ -60,6 +61,57 @@ registerCards({
         src: `Open-Meteo · rain ${nf1.format(rain ?? 0)} mm${aqi != null ? ` · air ${aqi} (${aqiWord(aqi)})` : ''}`,
         href: 'https://open-meteo.com/',
         o: 5 + i,
+      });
+    });
+    return rows;
+  },
+});
+
+/** The WHO's guideline for fine particles (PM2.5): a 24-hour average of 15 µg/m³. */
+export const WHO_PM25_DAY = 15;
+
+// What is in the air right now, from the Copernicus (CAMS) model: one card per place, fine particles first.
+registerCards({
+  id: 'open-meteo-air',
+  async load() {
+    const rows: DatapointRow[] = [];
+    const j = await getJSON(
+      `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${PLACES.map(p => p[1]).join(',')}&longitude=${PLACES.map(p => p[2]).join(',')}&current=pm2_5,pm10,nitrogen_dioxide,ozone&hourly=pm2_5&past_days=6&forecast_days=1&timezone=UTC`,
+    );
+    const places = meteoPlaces(j);
+    PLACES.forEach(([name, , , group], i) => {
+      const now = (field: string) => num(at(places[i], 'current', field));
+      const pm25 = now('pm2_5');
+      if (pm25 == null) return;
+      // The hourly column runs to the end of today: keep the hours up to now.
+      const until = Date.parse(`${str(at(places[i], 'current', 'time'))}Z`);
+      const hourly = meteoColumn(places[i], 'hourly', 'pm2_5');
+      const spark = meteoTimes(places[i], 'hourly').flatMap((t, k) => {
+        const v = hourly[k],
+          ms = Date.parse(`${t}Z`);
+        return v == null || !(ms <= until) ? [] : [{ t: ms, value: v }];
+      });
+      const day = spark.slice(-24);
+      const mean = day.length ? day.reduce((a, p) => a + p.value, 0) / day.length : pm25;
+      const others = [
+        ['NO₂', now('nitrogen_dioxide')],
+        ['PM10', now('pm10')],
+        ['ozone', now('ozone')],
+      ].flatMap(([label, v]) => (v == null ? [] : [`${label} ${nf0.format(v as number)}`]));
+      rows.push({
+        group,
+        id: `air-${String(name).toLowerCase()}`,
+        k: `Air · ${name} now`,
+        v: `${nf1.format(pm25)} µg/m³`,
+        sub:
+          `fine particles (PM2.5) · 24 h average ${nf1.format(mean)}, ` +
+          (mean <= WHO_PM25_DAY
+            ? `within the WHO guideline of ${WHO_PM25_DAY}`
+            : `${nf1.format(mean / WHO_PM25_DAY)}× the WHO guideline of ${WHO_PM25_DAY}`),
+        src: `Open-Meteo (CAMS model)${others.length ? ` · ${others.join(' · ')} µg/m³` : ''}`,
+        href: 'https://open-meteo.com/en/docs/air-quality-api',
+        o: 8 + i / 10,
+        spark,
       });
     });
     return rows;

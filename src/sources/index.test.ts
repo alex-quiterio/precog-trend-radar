@@ -18,7 +18,19 @@ describe('the source list', () => {
   it('registers a card loader for every open-data provider', () => {
     const providers = new Set(CARD_LOADERS.map(l => l.id.split('-')[0]));
     expect([...providers].sort()).toEqual(
-      ['aloft', 'dgeg', 'ecb', 'eurostat', 'global', 'ipma', 'open', 'power'].sort(),
+      [
+        'aloft',
+        'dgeg',
+        'ecb',
+        'eurostat',
+        'global',
+        'ipma',
+        'luchtmeetnet',
+        'open',
+        'owid',
+        'power',
+        'worldbank',
+      ].sort(),
     );
   });
 });

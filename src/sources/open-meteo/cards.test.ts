@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { nf0, nf1, nf2 } from '@core/format';
 import { expectWellFormedCards, fakeFetch, fixture, runCards } from '@sources/fake-fetch';
 import { aqiWord } from './cards';
+import air from './fixtures/air-quality.json';
 
 const DAY = 86400e3;
 const net = fakeFetch(url =>
@@ -35,6 +36,45 @@ describe('Open-Meteo', () => {
       'extremely poor',
       '',
     ]);
+  });
+  it('shows the fine particles in the air now, with the day’s average against the WHO guideline', async () => {
+    net.custom = url => (url.searchParams.get('hourly') === 'pm2_5' ? air : undefined);
+    const { cards } = await runCards('open-meteo-air');
+    expect(Object.keys(cards).sort()).toEqual(['air-amsterdam', 'air-lisbon', 'air-porto']);
+    const mean = (place: number) => air[place].hourly.pm2_5.slice(-24).reduce((a, b) => a + b, 0) / 24;
+    expect(mean(0)).toBeLessThanOrEqual(15);
+    expect(cards['air-lisbon']).toMatchObject({
+      group: 'pt',
+      k: 'Air · Lisbon now',
+      v: `${nf1.format(5.2)} µg/m³`,
+      sub: `fine particles (PM2.5) · 24 h average ${nf1.format(mean(0))}, within the WHO guideline of 15`,
+      src: `Open-Meteo (CAMS model) · NO₂ ${nf0.format(8)} · PM10 ${nf0.format(12)} · ozone ${nf0.format(65)} µg/m³`,
+    });
+    expect(mean(2)).toBeGreaterThan(15);
+    expect(cards['air-amsterdam']).toMatchObject({ group: 'nl', v: `${nf1.format(26.6)} µg/m³` });
+    expect(cards['air-amsterdam'].sub).toBe(
+      `fine particles (PM2.5) · 24 h average ${nf1.format(mean(2))}, ${nf1.format(mean(2) / 15)}× the WHO guideline of 15`,
+    );
+    expect(cards['air-lisbon'].spark).toHaveLength(30);
+  });
+  it('charts the air up to now, leaving out the hours still forecast', async () => {
+    net.custom = url =>
+      url.searchParams.get('hourly') === 'pm2_5'
+        ? [
+            {
+              current: { time: '2026-11-11T10:00', pm2_5: 9 },
+              hourly: { time: ['2026-11-11T09:00', '2026-11-11T10:00', '2026-11-11T11:00'], pm2_5: [7, 9, 30] },
+            },
+          ]
+        : undefined;
+    const { cards } = await runCards('open-meteo-air');
+    expect(Object.keys(cards)).toEqual(['air-lisbon']); // one place answered
+    expect(cards['air-lisbon'].spark?.map(p => p.value)).toEqual([7, 9]);
+    expect(cards['air-lisbon'].sub).toContain(`24 h average ${nf1.format(8)},`);
+    expect(cards['air-lisbon'].src).toBe('Open-Meteo (CAMS model)'); // no other pollutants in the reply
+  });
+  it('shows no air card for a place without a reading', async () => {
+    expect((await runCards('open-meteo-air')).cards).toEqual({});
   });
   it('shows today’s solar energy in kWh/m² and the strongest wind', async () => {
     const place = (sun: number[]) => ({

@@ -10,6 +10,14 @@ const fixture = (source: string, name: string): unknown =>
   JSON.parse(
     readFileSync(fileURLToPath(new URL(`../src/sources/${source}/fixtures/${name}.json`, import.meta.url)), 'utf8'),
   );
+/** Eurostat datasets with a saved reply of their own; the monthly ones share the unemployment reply's shape. */
+const EUROSTAT: Record<string, string> = {
+  prc_hpi_q: 'house-prices',
+  sdg_13_10: 'greenhouse-gases',
+  sdg_06_40: 'nitrate',
+  env_wasmun: 'municipal-waste',
+  sdg_12_41: 'circular-use',
+};
 const json = (route: Route, body: unknown) =>
   route.fulfill({
     status: 200,
@@ -107,6 +115,15 @@ function archiveDays(url: URL) {
   };
 }
 
+/** Luchtmeetnet: the saved hours of NO₂, moved to end at the last full hour (a silent station shows no card). */
+function no2Hours(): unknown {
+  const saved = fixture('luchtmeetnet', 'no2') as { data: { value: number }[] };
+  const last = Math.floor(Date.now() / 3600e3) * 3600e3;
+  return {
+    data: saved.data.map((m, i) => ({ ...m, timestamp_measured: new Date(last - i * 3600e3).toISOString() })),
+  };
+}
+
 /**
  * Answers every outside request. With `echoes`, World's daily pick gets the saved replies of 6 Nov 2026
  * (Wikipedia's feed, Wikidata, Hacker News's front page, Manifold's busiest markets); without, Wikipedia's
@@ -167,11 +184,13 @@ export async function mockApis(page: Page, { echoes = false, guardian = false } 
       if (h === 'data-api.ecb.europa.eu')
         return json(route, fixture('ecb', p.includes('/MIR/') ? 'mortgage-rates' : 'deposit-rate'));
       if (h === 'ec.europa.eu')
-        return json(route, fixture('eurostat', p.includes('prc_hpi_q') ? 'house-prices' : 'unemployment'));
+        return json(route, fixture('eurostat', EUROSTAT[p.split('/').pop() ?? ''] ?? 'unemployment'));
       if (h === 'api.ipma.pt') return json(route, fixture('ipma', p.includes('warnings') ? 'warnings' : 'fire-risk'));
       if (h === 'archive-api.open-meteo.com') return json(route, archiveDays(url));
-      if (h.endsWith('open-meteo.com'))
-        return json(route, h.startsWith('air-quality') ? {} : fixture('open-meteo', 'forecast-two-places'));
+      if (h === 'air-quality-api.open-meteo.com')
+        return json(route, url.searchParams.get('hourly') === 'pm2_5' ? fixture('open-meteo', 'air-quality') : {});
+      if (h.endsWith('open-meteo.com')) return json(route, fixture('open-meteo', 'forecast-two-places'));
+      if (h === 'api.luchtmeetnet.nl') return json(route, no2Hours());
       if (h === 'global-warming.org')
         return json(route, fixture('global-warming', p.includes('co2') ? 'co2' : 'sea-ice'));
       // Every radar answers with the saved Lisbon day; iNaturalist with its saved species counts.
@@ -191,11 +210,17 @@ export async function mockApis(page: Page, { echoes = false, guardian = false } 
           status: 200,
           contentType: 'text/csv',
           body: readFileSync(
-            fileURLToPath(new URL('../src/sources/owid/fixtures/happiness.csv', import.meta.url)),
+            fileURLToPath(
+              new URL(
+                `../src/sources/owid/fixtures/${p.includes('tree-cover-loss') ? 'tree-cover-loss' : 'happiness'}.csv`,
+                import.meta.url,
+              ),
+            ),
             'utf8',
           ),
         });
-      if (h === 'api.worldbank.org') return json(route, fixture('worldbank', 'gdp'));
+      if (h === 'api.worldbank.org')
+        return json(route, fixture('worldbank', p.includes('AG.LND.FRST.ZS') ? 'forest-area' : 'gdp'));
       if (h === 'api.inaturalist.org') return json(route, fixture('inaturalist', 'species-counts'));
       if (h === 'api.github.com') {
         if (p.startsWith('/search/repositories')) return json(route, fixture('github', 'repo-search'));
