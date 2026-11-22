@@ -91,6 +91,8 @@ function initialState() {
     source: 'blend',
     lenses: [] as Lens[],
     activeLens: null as string | null,
+    /** The lens of your home channel: PRECOG always opens on it. Null: it reopens the last one viewed. */
+    homeLens: null as string | null,
     selectedByLens: {} as Record<string, string>,
     rt: new Map<string, Entry>(),
     alerts: [] as Alert[],
@@ -176,6 +178,7 @@ export function createAppStore() {
   function savePrefs(): void {
     store.set(LS.prefs, {
       activeLens: state.activeLens,
+      homeLens: state.homeLens,
       selectedByLens: state.selectedByLens,
       theme: ui.theme,
       storySrc: state.storySrc,

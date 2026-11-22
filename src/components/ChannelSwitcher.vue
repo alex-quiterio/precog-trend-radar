@@ -34,7 +34,10 @@
           <span class="sw-no" aria-hidden="true">{{ c.n <= 9 ? c.n : '' }}</span>
           <channel-icon :name="c.icon"></channel-icon>
           <span class="sw-text">
-            <span class="sw-name">{{ c.label }}</span>
+            <span class="sw-name">
+              {{ c.label }}
+              <span v-if="c.lensId === home" class="sw-home">home</span>
+            </span>
             <span class="sw-kicker">{{ c.kicker }}</span>
           </span>
           <span v-if="c.heat" :class="['sw-heat', c.heat.level]">{{ heatText(c.heat) }}</span>
@@ -107,6 +110,7 @@ export default defineComponent({
       cur,
       shown,
       active: computed(() => activeChannel(app).id),
+      home: computed(() => app.state.homeLens),
       open,
       close,
       move,
@@ -203,6 +207,15 @@ export default defineComponent({
   font: 500 12px/1.3 var(--mono);
   letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+.sw-home {
+  margin-left: 6px;
+  padding: 1px 5px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  color: var(--accent);
+  font-size: 9.5px;
+  vertical-align: 1px;
 }
 .sw-kicker {
   color: var(--muted);

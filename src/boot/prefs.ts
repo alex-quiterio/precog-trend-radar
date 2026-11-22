@@ -1,4 +1,4 @@
-// PRECOG / Trend Radar · Start-up: what the last visit left behind (theme, channel, topic, stream), checked
+// PRECOG / Trend Radar · Start-up: what the last visit left behind (theme, home or last channel, topic, stream), checked
 // before use, and the caches older versions wrote, dropped to free storage.
 import { LS, store } from '@core/config';
 import { dropKeys } from '@core/storage';
@@ -22,8 +22,11 @@ export function restore({ app, actions }: AppContext): void {
   app.loadLenses();
   ui.guardian = !!guardianKey();
   ui.ghToken = !!githubToken();
+  // Your home channel if you pinned one (and it still exists); otherwise the channel you last looked at.
+  const home = typeof prefs.homeLens === 'string' ? renamed(prefs.homeLens) : null;
+  state.homeLens = app.lensById(home) ? home : null;
   const active = typeof prefs.activeLens === 'string' ? renamed(prefs.activeLens) : null;
-  state.activeLens = (app.lensById(active) && active) || state.lenses[0]?.id || null;
+  state.activeLens = state.homeLens || (app.lensById(active) && active) || state.lenses[0]?.id || null;
   state.selectedByLens =
     prefs.selectedByLens && typeof prefs.selectedByLens === 'object'
       ? Object.fromEntries(Object.entries(prefs.selectedByLens).map(([id, key]) => [renamed(id), key]))

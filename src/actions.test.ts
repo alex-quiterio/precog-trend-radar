@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { createActions, parseTopicInput } from '@/actions';
 import { createContext } from '@/context';
 import { memoryBackend, useBackend } from '@core/storage';
+import { LS, store } from '@core/config';
 import { createAppStore, type AppStore } from '@/state';
 
 let app: AppStore;
@@ -104,6 +105,20 @@ describe('contexts', () => {
   });
 });
 
+describe('home channel', () => {
+  it('pins a channel as home and saves it; pinning it again unpins', () => {
+    actions.toggleHome('portugal');
+    expect(app.state.homeLens).toBe('portugal');
+    expect(store.get<{ homeLens?: string }>(LS.prefs, {}).homeLens).toBe('portugal');
+    actions.toggleHome('energy'); // another channel becomes home instead
+    expect(app.state.homeLens).toBe('energy');
+    actions.toggleHome('energy');
+    expect(app.state.homeLens).toBeNull();
+    actions.toggleHome('no-such-channel');
+    expect(app.state.homeLens).toBeNull();
+  });
+});
+
 describe('deleting channels', () => {
   it('deletes a channel you made, after asking, and shows the one before it', () => {
     actions.addLens('Bikes');
@@ -116,6 +131,14 @@ describe('deleting channels', () => {
     expect(app.lensById(id)).toBeUndefined();
     expect(app.state.activeLens).toBe('github'); // the last built-in channel, just before it in the bar
     expect(stories.load).toHaveBeenCalled();
+  });
+  it('leaves no home when you delete the home channel', () => {
+    actions.addLens('Bikes');
+    const id = app.state.activeLens as string;
+    actions.toggleHome(id);
+    expect(app.state.homeLens).toBe(id);
+    actions.removeLens(id, () => true);
+    expect(app.state.homeLens).toBeNull();
   });
   it('never deletes a built-in channel', () => {
     const ask = vi.fn(() => true);

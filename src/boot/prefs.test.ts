@@ -37,6 +37,18 @@ describe('restore', () => {
       storyScope: 'topic',
     });
   });
+  it('opens on your home channel, whichever channel you looked at last', () => {
+    store.set(LS.prefs, { activeLens: 'markets', homeLens: 'portugal' });
+    const ctx = createContext();
+    restore(ctx);
+    expect(ctx.app.state).toMatchObject({ activeLens: 'portugal', homeLens: 'portugal' });
+  });
+  it('reopens the last channel when the home channel no longer exists', () => {
+    store.set(LS.prefs, { activeLens: 'markets', homeLens: 'gone-for-good' });
+    const ctx = createContext();
+    restore(ctx);
+    expect(ctx.app.state).toMatchObject({ activeLens: 'markets', homeLens: null });
+  });
   it('follows a channel that was renamed: The Great Simplification is now The Great Turning', () => {
     store.set(LS.prefs, { activeLens: 'tgs', selectedByLens: { tgs: 'Peak oil', world: 'NATO' } });
     const ctx = createContext();

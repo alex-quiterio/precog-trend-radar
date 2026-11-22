@@ -392,3 +392,24 @@ test('a channel’s badge says what it counts', async ({ page }) => {
     .first();
   await expect(hot).toHaveAttribute('title', /\d topics? on (alert|watch)/);
 });
+
+test('pins a channel as home: PRECOG opens on it, wherever you were last', async ({ page }) => {
+  await open(page);
+  await page
+    .locator('.channels')
+    .getByRole('button', { name: /^Society/ })
+    .click();
+  await expect(heroTitle(page)).toHaveText('Society');
+  const pin = page.locator('.ch-home');
+  await pin.click();
+  await expect(pin).toHaveAttribute('aria-pressed', 'true');
+  await expect(pin).toHaveText('Home');
+  await page.locator('body').press('1'); // look at World last
+  await expect(heroTitle(page)).toHaveText('World');
+  await page.reload();
+  await expect(heroTitle(page)).toHaveText('Society');
+  await page.locator('.ch-home').click(); // unpin: back to reopening the last channel
+  await page.locator('body').press('1');
+  await page.reload();
+  await expect(heroTitle(page)).toHaveText('World');
+});

@@ -121,4 +121,6 @@ export interface Prefs {
   /** The stream on screen (a registered stream id: 'news', 'reading', 'forecasts', 'hn'…). */
   storySrc: string;
   storyScope: 'topic' | 'lens';
+  /** The channel's lens PRECOG always opens on, or null to reopen the last one viewed. */
+  homeLens?: string | null;
 }

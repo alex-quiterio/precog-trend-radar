@@ -131,6 +131,12 @@ export function createActions(app: AppStore, { live, stories, github, myGithub, 
    * Deletes a channel you made, with its topics, after asking. Built-in channels can't be deleted. If it was on
    * screen, the channel before it in the bar takes its place.
    */
+  /** Pins a channel as home, so PRECOG always opens on it; pinning the home channel again unpins it. */
+  function toggleHome(lensId: string): void {
+    if (!app.lensById(lensId)) return;
+    state.homeLens = state.homeLens === lensId ? null : lensId;
+    app.savePrefs();
+  }
   function removeLens(id: string, ask: (q: string) => boolean = q => window.confirm(q)): boolean {
     const lens = app.lensById(id);
     if (!lens || isBuiltInLens(id) || state.lenses.length < 2) return false;
@@ -139,6 +145,7 @@ export function createActions(app: AppStore, { live, stories, github, myGithub, 
     const list = channels(app);
     const before = list[Math.max(0, list.findIndex(c => c.lensId === id) - 1)];
     state.lenses = state.lenses.filter(l => l !== lens);
+    if (state.homeLens === id) state.homeLens = null; // no home rather than a missing one
     app.syncEntries();
     if (state.activeLens === id) {
       state.activeLens = app.lensById(before.lensId) ? before.lensId : state.lenses[0].id;
@@ -307,6 +314,7 @@ export function createActions(app: AppStore, { live, stories, github, myGithub, 
     togglePin,
     addLens,
     removeLens,
+    toggleHome,
     selectLens,
     select,
     shiftTopic,

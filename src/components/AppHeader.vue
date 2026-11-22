@@ -93,7 +93,11 @@
           :aria-current="c.id === view.active ? 'page' : undefined"
           :aria-label="c.label + (c.heat ? `, ${heatText(c.heat)}` : '')"
           :aria-keyshortcuts="c.n <= 9 ? String(c.n) : undefined"
-          :title="[c.label, heatText(c.heat), c.n <= 9 ? `press ${c.n}` : ''].filter(Boolean).join(' · ')"
+          :title="
+            [c.label, c.home ? 'home' : '', heatText(c.heat), c.n <= 9 ? `press ${c.n}` : '']
+              .filter(Boolean)
+              .join(' · ')
+          "
           @click="selectLens(c.lensId)"
         >
           <channel-icon :name="c.icon"></channel-icon>
@@ -145,7 +149,12 @@ export default defineComponent({
       const channel = activeChannel(app);
       return {
         active: channel?.id,
-        list: channels(app).map((c, i) => ({ ...c, n: i + 1, heat: lensHeat(app.lensById(c.lensId)) })),
+        list: channels(app).map((c, i) => ({
+          ...c,
+          n: i + 1,
+          heat: lensHeat(app.lensById(c.lensId)),
+          home: app.state.homeLens === c.lensId,
+        })),
         // Anything still fetching for this channel lights the beacon: trends, streams, and GitHub on its own
         // channel only (its searches wait seconds apart, so they run on for a minute after you leave).
         busy:

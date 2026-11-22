@@ -8,7 +8,28 @@
           <span class="ch-no">CH {{ view.no }}</span>
           {{ view.updated }}
         </p>
-        <h2 id="ch-title">{{ view.title }}</h2>
+        <div class="ch-title-row">
+          <h2 id="ch-title">{{ view.title }}</h2>
+          <button
+            class="btn small ch-home no-print"
+            type="button"
+            :aria-pressed="view.home"
+            :title="view.home ? 'PRECOG opens on this channel. Tap to unpin.' : 'Always open PRECOG on this channel'"
+            @click="toggleHome(view.channel.lensId)"
+          >
+            <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+              <path
+                d="M6 1.5h4l-.7 4.2 2.7 2.3H4l2.7-2.3zM8 8v6.5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linejoin="round"
+                stroke-linecap="round"
+              />
+            </svg>
+            {{ view.home ? 'Home' : 'Make home' }}
+          </button>
+        </div>
         <p class="ch-desc">{{ view.channel.kicker }}</p>
         <p v-if="view.channel.links?.length" class="ch-links">
           <a v-for="l in view.channel.links" :key="l.href" :href="l.href" target="_blank" rel="noopener noreferrer">
@@ -157,7 +178,7 @@ export default defineComponent({
     RadarPanel,
   },
   setup() {
-    const { app } = useApp();
+    const { app, actions } = useApp();
     const ui = app.ui;
     const view = computed(() => {
       const channel = activeChannel(app);
@@ -178,11 +199,12 @@ export default defineComponent({
         channel,
         no: String(i + 1).padStart(2, '0'),
         title: app.activeLens()?.name || channel.label,
+        home: app.state.homeLens === channel.lensId,
         side: channelDatapoints(channel).length > 0,
         updated: new Date(ui.now).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' }),
       };
     });
-    return { ui, view };
+    return { ui, view, toggleHome: actions.toggleHome };
   },
 });
 </script>
@@ -197,6 +219,24 @@ export default defineComponent({
 }
 
 /* channel hero */
+.ch-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+}
+.ch-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font: 500 11px/1 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.ch-home[aria-pressed='true'] {
+  color: var(--accent);
+}
 .ch-links {
   display: flex;
   flex-wrap: wrap;
