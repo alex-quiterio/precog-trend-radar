@@ -67,7 +67,9 @@ const PERSON_DESC =
   /\((born|died|c\.|\d{3,4}\s*[–-])|\bborn \d{4}\b|\b(politician|actor|actress|singer|songwriter|rapper|footballer|cricketer|athlete|player|journalist|businessman|businesswoman|entrepreneur|writer|poet|novelist|musician|comedian|presenter|influencer|youtuber|streamer|activist|lawyer|jurist|prosecutor|economist|physician|epidemiologist|photographer|murderer|criminal|governor-elect|mayor of|governor of)\b/i;
 /** Sport, films, shows, music and games: popular, but not the news this channel is for. */
 const SHOWBIZ_DESC =
-  /\b(film|movie|television|tv series|web series|sitcom|miniseries|soap opera|reality show|episode|album|song|single by|band|video game|anime|manga|novel by|soundtrack|concert tour|award ceremony|beauty pageant|football|soccer|basketball|baseball|american football|ice hockey|cricket|tennis|golf|rugby|formula one|grand prix|wrestling|boxing|mixed martial arts|championship series|super bowl|world series|olympic|sports league|sports team|franchise)\b/i;
+  /\b(film|movie|television|tv series|web series|sitcom|miniseries|soap opera|reality show|episode|album|song|single by|band|video game|anime|manga|novel by|soundtrack|concert tour|award ceremony|beauty pageant|football|soccer|basketball|baseball|american football|ice hockey|cricket|tennis|golf|rugby|formula one|grand prix|wrestling|boxing|mixed martial arts|championship series|super bowl|world series|olympic|sports league|sports team|franchise|professional wrestling|premium live event|pay-per-view|WWE|AEW|UFC|e-?sports?|music festival|song contest|music awards?|(\d+(st|nd|rd|th)|annual) (edition|ceremony) of)\b/i;
+/** Award shows by their title: "MAMA Awards", "Grammy Awards 2026". (A Nobel Prize is news, and stays in.) */
+const AWARDS_TITLE = /\bAwards( \d{4})?$/;
 /** Pages that aren't topics, and events named after one person. */
 const NOT_A_TOPIC =
   /^(main page|special:|wikipedia:|portal:|file:|list of|lists of|deaths in|\d{4} in (film|television|music|sports)\b)|^(murder|killing|death|disappearance|assassination|shooting|trial|arrest|kidnapping) of /i;
@@ -81,7 +83,7 @@ export const leftOut = (a: Pick<FeedArticle, 'title' | 'description'>, nameCheck
     ? 'not a topic'
     : (nameCheck && looksLikePerson(a.title)) || PERSON_DESC.test(a.description)
       ? 'a person'
-      : SHOWBIZ_DESC.test(a.description) || SHOWBIZ_DESC.test(a.title)
+      : SHOWBIZ_DESC.test(a.description) || SHOWBIZ_DESC.test(a.title) || AWARDS_TITLE.test(a.title)
         ? 'sport or entertainment'
         : null;
 

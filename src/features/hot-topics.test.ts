@@ -61,6 +61,23 @@ describe('what is left out', () => {
       'sport or entertainment',
     );
     expect(leftOut({ title: 'Deaths in 2026', description: '' })).toBe('not a topic');
+    // Seen in World's pick on 2026-11-22: an award show and a wrestling card.
+    expect(leftOut({ title: 'MAMA Awards', description: '28th edition of the MAMA Awards held in 2026' })).toBe(
+      'sport or entertainment',
+    );
+    expect(leftOut({ title: 'Survivor Series: WarGames (2026)', description: 'WWE premium live event' })).toBe(
+      'sport or entertainment',
+    );
+    expect(leftOut({ title: 'UFC 322', description: 'Mixed martial arts event' })).toBe('sport or entertainment');
+    expect(leftOut({ title: 'Grammy Awards 2026', description: 'Music awards ceremony' })).toBe(
+      'sport or entertainment',
+    );
+    // News stays in: a prize, a summit, a theorem.
+    expect(leftOut({ title: 'Nobel Peace Prize', description: 'One of the five Nobel Prizes' })).toBeNull();
+    expect(leftOut({ title: 'COP31', description: '2026 United Nations climate change conference' })).toBeNull();
+    expect(
+      leftOut({ title: 'Riemann hypothesis', description: 'Statement about zeros of the zeta function' }),
+    ).toBeNull();
     expect(leftOut({ title: '2026 Binance hack', description: 'Cryptocurrency theft' })).toBeNull();
     expect(leftOut({ title: 'Large language model', description: 'Type of machine learning model' })).toBeNull();
   });
