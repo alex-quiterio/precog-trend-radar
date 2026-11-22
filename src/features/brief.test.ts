@@ -69,6 +69,17 @@ describe('buildBrief', () => {
     expect(lines()).toContain(`Biggest move up: ${a.name}, ${fmtPct(40)} vs yesterday.`);
     expect(lines()).toContain(`Biggest drop: ${b.name}, ${fmtPct(-25)} vs yesterday.`);
   });
+  it('makes no claim about a topic whose Wikipedia numbers didn’t arrive, and shows it as unknown', () => {
+    const [a, b] = lens('world');
+    a.stats = stats({ latest: 0, change: -100, z: -3 });
+    a.partErr = { wikipedia: 'HTTP 429' }; // refused: what's left is Hacker News alone
+    b.stats = stats({ change: -25 });
+    expect(lines()).toContain(`Biggest drop: ${b.name}, ${fmtPct(-25)} vs yesterday.`);
+    expect(lines().join(' ')).not.toContain(a.name);
+    expect(briefMarkdown(app, { rows: [], facts: {} })).toContain(
+      `| ${a.name} | — | — | — | Wikipedia didn't answer |`,
+    );
+  });
   it('names the steadiest climber that is not a spike yet', () => {
     const [a, b] = lens('world');
     a.stats = stats({ momentum: 0.5 });

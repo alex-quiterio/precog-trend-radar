@@ -15,11 +15,12 @@
 // Each also says how far the topic's attention moved in a week, like a digest's trending terms, and links
 // to a week of coverage. Calls: the day's feed (one, cached for the day) and one summary per topic (cached).
 import { DAY, LS, store } from '@core/config';
-import { getJSON, pool, queryOf, topicRegex, topicTerms } from '@sources/registry';
+import { pool, queryOf, topicRegex, topicTerms } from '@sources/registry';
 import { guardianArticles } from '@sources/guardian';
 import { loadReading, type ReadingItem, type ReadingSite } from '@sources/reading';
 import type { Entry } from '@/types';
-import { resolveWikiTitle } from './index';
+import { partial } from '@sources/blend';
+import { getWikiJSON, resolveWikiTitle, wikiFailure } from './index';
 import { type NewsStory, type WikiSummary, lead, parseNewsStories, parseSummary } from './parse';
 
 /** What a topic's row is made of. */
@@ -41,7 +42,7 @@ async function newsStories(signal: AbortSignal, now = Date.now()): Promise<NewsS
   const cached = store.get<{ day: string; stories: NewsStory[] } | null>(LS.wikiNews, null);
   if (cached?.day === day && Array.isArray(cached.stories)) return cached.stories;
   const stories = parseNewsStories(
-    await getJSON(`https://en.wikipedia.org/api/rest_v1/feed/featured/${day.replace(/-/g, '/')}`, signal),
+    await getWikiJSON(`https://en.wikipedia.org/api/rest_v1/feed/featured/${day.replace(/-/g, '/')}`, signal),
   );
   store.set(LS.wikiNews, { day, stories });
   return stories;
@@ -53,7 +54,7 @@ async function summaryOf(title: string, lang: string, signal: AbortSignal, now =
   const cache = store.get<Record<string, { day: string; s: WikiSummary }>>(LS.wikiSummaries, {});
   if (cache[ck]?.day === day) return cache[ck].s;
   const s = parseSummary(
-    await getJSON(
+    await getWikiJSON(
       `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title.replace(/ /g, '_'))}`,
       signal,
     ),
@@ -181,8 +182,9 @@ export function digestItems(
       const base = {
         key: E.key,
         wiki: s.summary.url,
-        now: E.liveSeries[E.liveSeries.length - 1]?.value ?? null,
-        week: weekChange(E.liveSeries),
+        now: partial(E) ? null : (E.liveSeries[E.liveSeries.length - 1]?.value ?? null),
+        // A topic whose main source failed shows no move, rather than a fall to zero that didn't happen.
+        week: partial(E) ? null : weekChange(E.liveSeries),
         coverage: coverageUrl(queryOf(E).q),
       };
       const news = s.news
@@ -233,7 +235,8 @@ export async function loadDigest(
     scope ? ([] as NewsStory[]) : newsStories(signal).catch(() => [] as NewsStory[]),
     scope ? sitePosts(scope.sites, signal) : ([] as ReadingItem[]),
   ]);
-  const failed: string[] = [];
+  const failed: string[] = [],
+    errors: unknown[] = [];
   await pool(entries, 4, async E => {
     try {
       const lang = E.lang || 'en';
@@ -247,8 +250,9 @@ export async function loadDigest(
     } catch (e) {
       if (signal.aborted) throw e;
       failed.push(E.name);
+      errors.push(e);
     }
   });
-  if (!map.size && failed.length) throw new Error(`no Wikipedia article for ${failed.join(', ')}`);
+  if (!map.size && failed.length) throw new Error(wikiFailure(failed, errors));
   return map;
 }

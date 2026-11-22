@@ -1,8 +1,8 @@
 // The Wikipedia trend: a topic's article, found once and kept, and 60 days of its pageviews in the lens language.
 import { describe, expect, it } from 'vitest';
 import { fakeFetch, fixture } from '@sources/fake-fetch';
-import { ADAPTERS } from '@sources/registry';
-import { resolveWikiTitle } from './index';
+import { ADAPTERS, HttpError } from '@sources/registry';
+import { resolveWikiTitle, wiki, wikiFailure } from './index';
 
 const signal = new AbortController().signal;
 const net = fakeFetch(url => {
@@ -55,5 +55,33 @@ describe('Wikipedia pageviews', () => {
     ).toBe(59);
     expect(r.meta).toEqual({ wikiTitle: savedTitle, wikiLang: 'nl' });
     expect(r.points.length).toBeGreaterThan(0);
+  });
+});
+
+describe('when Wikipedia is busy', () => {
+  it('tries a refused request (429) once more after a pause, and gets through', async () => {
+    wiki.retryMs = 0;
+    let refused = 0;
+    net.custom = url => {
+      if (url.searchParams.get('action') === 'query' && refused++ === 0) throw new HttpError(429);
+      return undefined;
+    };
+    expect(await resolveWikiTitle('degrowth', signal)).toBe(savedTitle);
+    expect(net.urls).toHaveLength(2);
+  });
+  it('gives up after one retry, and says Wikipedia is busy rather than that the article is missing', async () => {
+    wiki.retryMs = 0;
+    net.custom = () => {
+      throw new HttpError(429);
+    };
+    const e = await resolveWikiTitle('degrowth', signal).catch(x => x);
+    expect(net.urls).toHaveLength(2);
+    expect(wikiFailure(['Degrowth', 'Peak oil'], [e])).toBe(
+      'Wikipedia is busy (too many requests) for Degrowth, Peak oil; it will try again on the next refresh',
+    );
+  });
+  it('says an article is missing only when it is, and names any other failure', () => {
+    expect(wikiFailure(['Qwzx'], [new Error('no matching Wikipedia article')])).toBe('no Wikipedia article for Qwzx');
+    expect(wikiFailure(['Degrowth'], [new HttpError(503)])).toBe("Wikipedia didn't answer for Degrowth (HTTP 503)");
   });
 });

@@ -2,6 +2,7 @@
 import { FIT_N, LS, Z_WATCH, store } from '@core/config';
 import { ago, changeLabel, fmtPct, fmtTime, fmtVal, nf0 } from '@core/format';
 import { levelOf } from '@core/stats';
+import { partial } from '@sources/blend';
 import type { DatapointFacts, DatapointRow } from '@features/datapoints';
 import { hnStories } from '@sources/hackernews/stream';
 import { channelOfLens } from '@/channels';
@@ -34,6 +35,8 @@ export type Scored = Entry & { stats: Stats };
 export const hasStats = (E: Entry): E is Scored => !!E.stats;
 /** z for sorting: topics without one go last. */
 const zOf = (E: Scored): number => E.stats.z ?? -Infinity;
+/** Numbers solid enough to make a claim about: not from thin sources only, and Wikipedia answered. */
+const solid = (E: Scored): boolean => !E.sparse && !partial(E);
 const sigma = (E: Scored): string => (E.stats.z ?? 0).toFixed(1);
 const chg = (E: Scored): number => E.stats.change ?? 0;
 
@@ -50,7 +53,7 @@ export function buildBrief(app: AppStore, facts: DatapointFacts = {}) {
   const out = { lines: [] as BriefLine[], movers: [] as Scored[], items, lens };
   if (!items.length) return out;
   if (!state.liveLoaded) out.lines.push(ln`Still loading: numbers will settle once every source has answered.`);
-  const hot = items.filter(E => levelOf(E.stats.z)).sort((a, b) => zOf(b) - zOf(a));
+  const hot = items.filter(E => levelOf(E.stats.z) && !partial(E)).sort((a, b) => zOf(b) - zOf(a));
   out.lines.push(
     hot.length
       ? ln`${hot.length} topic${hot.length > 1 ? 's are' : ' is'} running hot: ${join(
@@ -58,7 +61,7 @@ export function buildBrief(app: AppStore, facts: DatapointFacts = {}) {
         )}${hot.length > 3 ? ` and ${hot.length - 3} more` : ''}.`
       : ln`Nothing unusual: every topic is within ${Z_WATCH}σ of its 30-step baseline.`,
   );
-  const withChg = items.filter(E => E.stats.change != null && !E.sparse);
+  const withChg = items.filter(E => E.stats.change != null && solid(E));
   if (withChg.length) {
     const up = withChg.reduce((a, b) => (chg(b) > chg(a) ? b : a));
     const dn = withChg.reduce((a, b) => (chg(b) < chg(a) ? b : a));
@@ -67,7 +70,7 @@ export function buildBrief(app: AppStore, facts: DatapointFacts = {}) {
       out.lines.push(ln`Biggest drop: ${dn}, ${fmtPct(dn.stats.change)} ${changeLabel(dn.stats)}.`);
   }
   const climbers = items
-    .filter(E => !levelOf(E.stats.z) && E.stats.momentum > 0.3 && !E.sparse)
+    .filter(E => !levelOf(E.stats.z) && E.stats.momentum > 0.3 && solid(E))
     .sort((a, b) => b.stats.momentum - a.stats.momentum);
   if (climbers.length)
     out.lines.push(
@@ -85,7 +88,7 @@ export function buildBrief(app: AppStore, facts: DatapointFacts = {}) {
     })
     .flatMap(app.entriesOf)
     .filter(hasStats)
-    .filter(E => levelOf(E.stats.z) && !E.sparse)
+    .filter(E => levelOf(E.stats.z) && solid(E))
     .sort((a, b) => zOf(b) - zOf(a));
   if (elsewhere.length)
     out.lines.push(
@@ -136,9 +139,10 @@ export function briefMarkdown(
   const b = buildBrief(app, cards.facts),
     d = new Date().toISOString().slice(0, 10);
   const rows = b.movers
-    .map(
-      E =>
-        `| ${E.name} | ${fmtVal(E.stats.latest)} | ${fmtPct(E.stats.change)} | ${E.stats.z == null ? '—' : E.stats.z.toFixed(1)} | ${levelOf(E.stats.z) || 'normal'} |`,
+    .map(E =>
+      partial(E)
+        ? `| ${E.name} | — | — | — | Wikipedia didn't answer |`
+        : `| ${E.name} | ${fmtVal(E.stats.latest)} | ${fmtPct(E.stats.change)} | ${E.stats.z == null ? '—' : E.stats.z.toFixed(1)} | ${levelOf(E.stats.z) || 'normal'} |`,
     )
     .join('\n');
   const recent = app.state.alerts

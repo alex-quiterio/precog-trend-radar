@@ -32,19 +32,26 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="E in b.movers" :key="E.key">
+          <tr
+            v-for="E in b.movers"
+            :key="E.key"
+            :class="{ partial: partial(E) }"
+            :title="
+              partial(E) ? 'A source didn’t answer (often Wikipedia, when busy): no numbers until it does' : undefined
+            "
+          >
             <td>
               <button class="topic" type="button" :title="'Chart ' + E.name" @click="focusTopic(E.key)">
                 <topic-dot :color="E.color"></topic-dot>
                 {{ E.name }}
               </button>
             </td>
-            <td>{{ fmtVal(E.stats.latest) }}</td>
+            <td>{{ partial(E) ? '—' : fmtVal(E.stats.latest) }}</td>
             <td>
-              <span class="mbar" aria-hidden="true"><i :style="bar(E)"></i></span>
-              {{ fmtPct(E.stats.change) }}
+              <span class="mbar" aria-hidden="true"><i v-if="!partial(E)" :style="bar(E)"></i></span>
+              {{ partial(E) ? '—' : fmtPct(E.stats.change) }}
             </td>
-            <td class="col-z">{{ E.stats.z == null ? '—' : E.stats.z.toFixed(1) }}</td>
+            <td class="col-z">{{ partial(E) || E.stats.z == null ? '—' : E.stats.z.toFixed(1) }}</td>
             <td><state-tag :st="E.stats"></state-tag></td>
           </tr>
         </tbody>
@@ -63,6 +70,7 @@ import { useApp } from '@/context';
 import { ref, computed, defineComponent } from 'vue';
 import { DAY } from '@core/config';
 import { fmtPct, fmtTime, fmtVal } from '@core/format';
+import { partial } from '@sources/blend';
 import { briefMarkdown, buildBrief, copyText, type Scored } from '@features/brief';
 import StateTag from '@components/StateTag.vue';
 import TopicDot from '@components/TopicDot.vue';
@@ -105,7 +113,7 @@ export default defineComponent({
       markRead();
       note.value = 'Marked as read.';
     }
-    return { ui, state, b, head, bar, note, copy, read, focusTopic, fmtVal, fmtPct };
+    return { ui, state, b, head, bar, note, copy, read, focusTopic, fmtVal, fmtPct, partial };
   },
 });
 </script>

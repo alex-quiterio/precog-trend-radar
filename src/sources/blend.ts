@@ -62,3 +62,10 @@ export function blendParts(
     .map(([t, o]) => ({ t, value: o.s / o.w, comp: o.comp }))
     .slice(-HISTORY);
 }
+
+/**
+ * True when Wikipedia, the backbone of every line, failed for this topic (refused as too many requests, or no
+ * answer). What's left is a thinner source on its own, often Hacker News, where a day with no stories reads as a
+ * fall to zero; so the topic's latest value and change are shown as unknown until Wikipedia answers.
+ */
+export const partial = (E: Pick<Entry, 'partErr'>): boolean => !!E.partErr?.wikipedia;
