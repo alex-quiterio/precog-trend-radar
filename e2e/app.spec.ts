@@ -341,6 +341,9 @@ test('Portugal shows the air, the trees lost and the groundwater, without scroll
     'Forests & land · Portugal',
     'Forest · Portugal',
     'Nitrate in groundwater · Portugal',
+    'Greenhouse gases · Portugal',
+    'Emissions · Portugal',
+    'Largest emitter · Portugal',
   ]) {
     await expect(data).toContainText(label);
   }
@@ -773,4 +776,25 @@ test('pins a channel as home: PRECOG opens on it, wherever you were last', async
   await page.locator('body').press('1');
   await page.reload();
   await expect(heroTitle(page)).toHaveText('World');
+});
+
+test('Circular economy shows each country’s waste, what comes back as material, and what handling it emits', async ({
+  page,
+}) => {
+  await open(page);
+  await page
+    .locator('.channels')
+    .getByRole('button', { name: /^Circular economy/ })
+    .click();
+  const data = page.locator('#p-data');
+  for (const label of [
+    'Municipal waste · Portugal',
+    'Circular material use · Portugal',
+    'Waste emissions · Portugal',
+    'Municipal waste · Netherlands',
+    'Circular material use · Netherlands',
+    'Waste emissions · Netherlands',
+  ]) {
+    await expect(data).toContainText(label);
+  }
 });

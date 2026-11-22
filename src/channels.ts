@@ -185,6 +185,9 @@ export const CHANNELS: Channel[] = [
       'treeloss-pt',
       'ctland-pt',
       'forest-pt',
+      'ghg-pt',
+      'ctrace-pt',
+      'cttop-pt',
       'nitrate-pt',
       'diesel-pt',
       'petrol-pt',
@@ -258,8 +261,13 @@ export const CHANNELS: Channel[] = [
     kicker:
       'The rules and markets that shape recycling and waste services.',
     lensId: 'circular',
+    // How much waste each country makes, how much comes back as material, and what handling it emits.
     datapoints: [
+      'waste-pt',
+      'circular-pt',
       'ctwaste-pt',
+      'waste-nl',
+      'circular-nl',
       'ctwaste-nl',
       'inflation-ea',
       'ecb',
