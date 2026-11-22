@@ -1,21 +1,57 @@
 <template>
-  <section id="settings" class="settings no-print" aria-label="Settings" @keydown.esc="$emit('close')">
+  <section
+    id="settings"
+    class="settings no-print"
+    aria-label="Settings"
+    @keydown.esc="$emit('close')">
     <div class="set-item">
       <span class="set-label" id="set-theme">Theme</span>
-      <span class="seg" role="group" aria-labelledby="set-theme">
-        <button v-for="t in themes" :key="t.id" type="button" :aria-pressed="ui.theme === t.id" @click="setTheme(t.id)">
+      <span
+        class="seg"
+        role="group"
+        aria-labelledby="set-theme">
+        <button
+          v-for="t in themes"
+          :key="t.id"
+          type="button"
+          :aria-pressed="ui.theme === t.id"
+          @click="setTheme(t.id)">
           {{ t.label }}
         </button>
       </span>
     </div>
     <div class="set-item">
       <span class="set-label">Guardian key</span>
-      <span class="set-state" :class="guardian.cls">{{ guardian.text }}</span>
-      <button class="btn small" type="button" @click="editGuardianKey">
+      <span class="set-state" :class="guardian.cls">
+        {{ guardian.text }}
+      </span>
+      <button
+        class="btn small"
+        type="button"
+        @click="editGuardianKey">
         {{ ui.guardian ? 'Change or remove' : '+ Add key' }}
       </button>
     </div>
-    <button class="set-close" type="button" aria-label="Close settings" @click="$emit('close')">×</button>
+    <div class="set-item">
+      <span class="set-label">Notifications</span>
+      <span class="set-state" :class="notify.cls">
+        {{ notify.text }}
+      </span>
+      <button
+        v-if="notify.action"
+        class="btn small"
+        type="button"
+        @click="toggleNotify">
+        {{ notify.action }}
+      </button>
+    </div>
+    <button
+      class="set-close"
+      type="button"
+      aria-label="Close settings"
+      @click="$emit('close')">
+      ×
+    </button>
   </section>
 </template>
 
@@ -23,27 +59,75 @@
 import { useApp } from '@/context';
 import { computed, defineComponent } from 'vue';
 
-// PRECOG / Trend Radar · Settings bar, opened from the header: theme and the Guardian API key.
+// PRECOG / Trend Radar · Settings bar, opened from the header: theme, the Guardian API key and notifications.
 
 export default defineComponent({
   name: 'SettingsBar',
   emits: ['close'],
   setup() {
-    const { app, actions } = useApp();
+    const { app, actions, notifier } = useApp();
     const ui = app.ui;
     const guardian = computed(() => {
-      if (!ui.guardian)
+      if (!ui.guardian) {
         return {
           cls: '',
           text: 'Not set. A free key adds news coverage to each topic, and the Guardian’s front to World’s daily pick.',
         };
-      if (ui.guardianState === 'checking') return { cls: 'checking', text: 'Checking…' };
-      if (ui.guardianState === 'error') return { cls: 'error', text: '⚠ ' + ui.guardianNote };
-      return { cls: 'ok', text: '✓ ' + (ui.guardianNote || 'Key saved.') };
+      }
+      if (ui.guardianState === 'checking') {
+        return { cls: 'checking', text: 'Checking…' };
+      }
+      if (ui.guardianState === 'error') {
+        return {
+          cls: 'error',
+          text: '⚠ ' + ui.guardianNote,
+        };
+      }
+      return {
+        cls: 'ok',
+        text: '✓ ' + (ui.guardianNote || 'Key saved.'),
+      };
     });
+    // Notifications: what's possible here, and the one thing to do about it.
+    const notify = computed(() => {
+      void (notifier.state.on, notifier.state.permission); // re-read when either changes
+      const ios = /iPhone|iPad/.test(navigator.userAgent);
+      switch (notifier.status()) {
+        case 'unsupported':
+          return {
+            cls: '',
+            text: ios
+              ? 'On an iPhone or iPad, add PRECOG to your Home Screen first.'
+              : 'Not available in this browser.',
+          };
+        case 'denied':
+          return {
+            cls: 'error',
+            text: 'Blocked for this site: allow notifications in your browser’s site settings.',
+          };
+        case 'on':
+          return {
+            cls: 'ok',
+            text: '✓ On: new alerts and new posts, while PRECOG is open or installed in the background.',
+            action: 'Turn off',
+          };
+        default:
+          return {
+            cls: '',
+            text: 'Tell me when a topic goes on alert or a site I read posts something new.',
+            action: 'Turn on',
+          };
+      }
+    });
+    const toggleNotify = () =>
+      notifier.state.on
+        ? notifier.disable()
+        : void notifier.enable();
     return {
       ui,
       guardian,
+      notify,
+      toggleNotify,
       themes: [
         { id: 'dark', label: 'Dark' },
         { id: 'light', label: 'Light' },

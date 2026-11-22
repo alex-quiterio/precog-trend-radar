@@ -9,17 +9,65 @@ import { createAppStore, type AppStore } from '@/state';
 import { createDatapoints } from '@features/datapoints';
 import { createGitHub } from '@features/github';
 import { createMyGitHub } from '@features/github-me';
-import { createHotTopics, createPickers } from '@features/hot-topics';
-import { SCENE_KEY, SCENE_LENS, TURNING_KEY, TURNING_LENS, sceneSource, turningSource } from '@features/scene-topics';
-import { channelStreams, createStoryLoader, streamContext } from '@features/stories';
+import {
+  createHotTopics,
+  createPickers,
+} from '@features/hot-topics';
+import {
+  SCENE_KEY,
+  SCENE_LENS,
+  TURNING_KEY,
+  TURNING_LENS,
+  sceneSource,
+  turningSource,
+} from '@features/scene-topics';
+import {
+  channelStreams,
+  createStoryLoader,
+  streamContext,
+} from '@features/stories';
+import { createNotifier } from '@features/notify';
 import { ADAPTERS, SOURCES } from '@sources/registry';
+import { streamById } from '@sources/streams';
 
-export function createContext(app: AppStore = createAppStore()) {
+export function createContext(
+  app: AppStore = createAppStore(),
+) {
+  // Notifications when something new is pulled (features/notify.ts); a click opens what it's about.
+  const notifier = createNotifier({
+    win: typeof window !== 'undefined' ? window : undefined,
+    onOpen: ({ lensId, key }) => {
+      if (key && app.state.rt.has(key)) {
+        actions.select(key);
+      } else if (lensId) {
+        actions.selectLens(lensId);
+      }
+    },
+  });
   const stories = createStoryLoader({
     shown: () => channelStreams(app),
     current: () => app.state.storySrc,
     select: id => void (app.state.storySrc = id),
     context: () => streamContext(app),
+    // New posts from the sites you read: the Reading stream's rows, as its tab would show them.
+    onLoaded: (src, data, at) => {
+      if (src !== 'reading') {
+        return;
+      }
+      const rows =
+        streamById(src)?.view(streamContext(app), data, at)
+          .rows ?? [];
+      notifier.posts(
+        rows.map(r => ({
+          id: r.id,
+          title: r.title,
+          site: r.meta.map(p =>
+            typeof p === 'string' ? p : p.text,
+          )[0],
+        })),
+        app.state.activeLens ?? undefined,
+      );
+    },
   });
   const live = createLiveLoop({
     adapters: ADAPTERS,
@@ -30,7 +78,10 @@ export function createContext(app: AppStore = createAppStore()) {
     onScreen: E => E.lensId === app.state.activeLens,
     onLoadStart: () => void stories.load(),
     onScreenReady: () => rescanAll(app), // its alerts straight away; the rest rescan when all are in
-    onLoaded: () => rescanAll(app),
+    onLoaded: () => {
+      rescanAll(app);
+      notifier.alerts(app.state.alerts); // topics newly on alert, in any channel
+    },
   });
   const datapoints = createDatapoints();
   const github = createGitHub(app);
@@ -44,27 +95,53 @@ export function createContext(app: AppStore = createAppStore()) {
       lensId: SCENE_LENS,
       storageKey: SCENE_KEY,
       from: 'what is moving in the scene',
-      candidates: sceneSource(() => app.lensById(SCENE_LENS)?.topics ?? []),
+      candidates: sceneSource(
+        () => app.lensById(SCENE_LENS)?.topics ?? [],
+      ),
     }),
     createHotTopics({
       app,
       lensId: TURNING_LENS,
       storageKey: TURNING_KEY,
       from: 'what is moving among its voices',
-      candidates: turningSource(() => app.lensById(TURNING_LENS)?.topics ?? []),
+      candidates: turningSource(
+        () => app.lensById(TURNING_LENS)?.topics ?? [],
+      ),
     }),
   ]);
-  const actions = createActions(app, { live, stories, github, myGithub, hot });
-  return { app, live, stories, actions, datapoints, github, myGithub, hot };
+  const actions = createActions(app, {
+    live,
+    stories,
+    github,
+    myGithub,
+    hot,
+  });
+  return {
+    app,
+    live,
+    stories,
+    actions,
+    datapoints,
+    github,
+    myGithub,
+    hot,
+    notifier,
+  };
 }
 export type AppContext = ReturnType<typeof createContext>;
 
 const KEY: InjectionKey<AppContext> = Symbol('precog');
 /** A Vue plugin that provides the context to every component (`app.use(contextPlugin(ctx))`). */
-export const contextPlugin = (ctx: AppContext) => ({ install: (vue: App) => void vue.provide(KEY, ctx) });
+export const contextPlugin = (ctx: AppContext) => ({
+  install: (vue: App) => void vue.provide(KEY, ctx),
+});
 /** The context, inside a component's setup. */
 export function useApp(): AppContext {
   const ctx = inject(KEY);
-  if (!ctx) throw new Error('useApp() needs the context: install contextPlugin(createContext()) on the app');
+  if (!ctx) {
+    throw new Error(
+      'useApp() needs the context: install contextPlugin(createContext()) on the app',
+    );
+  }
   return ctx;
 }

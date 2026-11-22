@@ -7,19 +7,56 @@ self.addEventListener('activate', event => {
   event.waitUntil(
     caches
       .keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(keys =>
+        Promise.all(
+          keys
+            .filter(k => k !== CACHE)
+            .map(k => caches.delete(k)),
+        ),
+      )
       .then(() => self.clients.claim()),
   );
 });
 self.addEventListener('fetch', event => {
-  if (event.request.mode !== 'navigate') return; // everything but the page goes straight to the network
+  if (event.request.mode !== 'navigate') {
+    return;
+  } // everything but the page goes straight to the network
   event.respondWith(
     fetch(event.request)
       .then(res => {
         const copy = res.clone();
-        if (res.ok) void caches.open(CACHE).then(c => c.put('./', copy));
+        if (res.ok) {
+          void caches
+            .open(CACHE)
+            .then(c => c.put('./', copy));
+        }
         return res;
       })
-      .catch(() => caches.match('./').then(hit => hit || Response.error())),
+      .catch(() =>
+        caches
+          .match('./')
+          .then(hit => hit || Response.error()),
+      ),
+  );
+});
+
+// A click on a notification (see src/features/notify.ts): bring PRECOG forward and open what it was about.
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const target = event.notification.data || {};
+  event.waitUntil(
+    self.clients
+      .matchAll({
+        type: 'window',
+        includeUncontrolled: true,
+      })
+      .then(list => {
+        const open = list[0];
+        if (open) {
+          open.postMessage({ type: 'precog:open', target });
+          return open.focus();
+        }
+        return self.clients.openWindow('./');
+      }),
   );
 });

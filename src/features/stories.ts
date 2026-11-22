@@ -4,18 +4,29 @@
 import { markRaw, reactive } from 'vue';
 import { STORY_REFRESH_MS } from '@core/config';
 import { errorText, isAbort } from '@core/errors';
-import { streamsFor, type Stream, type StreamContext } from '@sources/streams';
+import {
+  streamsFor,
+  type Stream,
+  type StreamContext,
+} from '@sources/streams';
 import { activeChannel } from '@/channels';
 import type { AppStore } from '@/state';
 import type { Entry } from '@/types';
 
 /** Streams look at the selected topic, or at every topic of the channel on screen. */
 export function storyScopeEntries(app: AppStore): Entry[] {
-  if (app.state.storyScope === 'topic') return [app.selectedEntry()].filter((E): E is Entry => !!E);
+  if (app.state.storyScope === 'topic') {
+    return [app.selectedEntry()].filter(
+      (E): E is Entry => !!E,
+    );
+  }
   return app.entriesOf(app.activeLens());
 }
 /** What the streams are looking at now. */
-export function streamContext(app: AppStore, entries = storyScopeEntries(app)): StreamContext {
+export function streamContext(
+  app: AppStore,
+  entries = storyScopeEntries(app),
+): StreamContext {
   return {
     entries,
     scopeKeys: new Set(entries.map(E => E.key)),
@@ -26,7 +37,11 @@ export function streamContext(app: AppStore, entries = storyScopeEntries(app)): 
   };
 }
 /** The streams the channel on screen shows. */
-export const channelStreams = (app: AppStore) => streamsFor(activeChannel(app).streams, streamContext(app));
+export const channelStreams = (app: AppStore) =>
+  streamsFor(
+    activeChannel(app).streams,
+    streamContext(app),
+  );
 
 export interface StoryDeps {
   /** The streams the channel on screen shows, in tab order. */
@@ -37,6 +52,8 @@ export interface StoryDeps {
   select(id: string): void;
   /** What the streams look at now. */
   context(): StreamContext;
+  /** Called after a stream loaded, with its result (the app tells new Reading posts). */
+  onLoaded?(src: string, data: unknown, at: number): void;
 }
 /**
  * Loads the stream on screen and keeps, per stream, whether it is loading, what failed and when it last
@@ -59,34 +76,56 @@ export function createStoryLoader(deps: StoryDeps) {
     abort = new AbortController();
     latest = null;
     const shown = deps.shown();
-    if (!shown.some(s => s.id === deps.current())) deps.select(shown[0]?.id || 'reading');
+    if (!shown.some(s => s.id === deps.current())) {
+      deps.select(shown[0]?.id || 'reading');
+    }
     const stream = shown.find(s => s.id === deps.current());
-    if (!stream) return;
+    if (!stream) {
+      return;
+    }
     const { signal } = abort,
       src = stream.id;
     const mine = (latest = { src });
     status.loading[src] = true;
     try {
-      const data = await stream.load(deps.context(), signal, partial => {
-        if (!signal.aborted) status.data[src] = markRaw(Object(partial));
-      });
-      if (signal.aborted) return;
+      const data = await stream.load(
+        deps.context(),
+        signal,
+        partial => {
+          if (!signal.aborted) {
+            status.data[src] = markRaw(Object(partial));
+          }
+        },
+      );
+      if (signal.aborted) {
+        return;
+      }
       status.data[src] = markRaw(Object(data));
       status.errors[src] = null;
       status.at[src] = Date.now();
+      deps.onLoaded?.(src, data, status.at[src]);
     } catch (e) {
-      if (!isAbort(e) && !signal.aborted) status.errors[src] = errorText(e);
+      if (!isAbort(e) && !signal.aborted) {
+        status.errors[src] = errorText(e);
+      }
     } finally {
       // A cancelled load leaves the flag to the load that replaced it, when that one is for the same stream.
       // Otherwise nothing else would clear it: coming back to this tab loads nothing if it has loaded before.
-      if (latest === mine || latest?.src !== src) status.loading[src] = false;
+      if (latest === mine || latest?.src !== src) {
+        status.loading[src] = false;
+      }
     }
   }
   /** Reloads every `every` ms while the page is visible. */
   function startTimer(every = STORY_REFRESH_MS): void {
     clearInterval(timer);
     timer = setInterval(() => {
-      if (typeof document === 'undefined' || document.visibilityState === 'visible') void load();
+      if (
+        typeof document === 'undefined' ||
+        document.visibilityState === 'visible'
+      ) {
+        void load();
+      }
     }, every);
   }
   return { status, load, startTimer };

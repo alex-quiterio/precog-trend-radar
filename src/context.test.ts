@@ -2,7 +2,11 @@
 import { createApp } from 'vue';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { memoryBackend, useBackend } from '@core/storage';
-import { contextPlugin, createContext, useApp } from './context';
+import {
+  contextPlugin,
+  createContext,
+  useApp,
+} from './context';
 
 beforeEach(() => {
   useBackend(memoryBackend());
@@ -12,7 +16,17 @@ describe('createContext', () => {
   it('builds the app store with every service working on it', () => {
     const ctx = createContext();
     expect(Object.keys(ctx).sort()).toEqual(
-      ['actions', 'app', 'datapoints', 'github', 'hot', 'live', 'myGithub', 'stories'].sort(),
+      [
+        'actions',
+        'app',
+        'datapoints',
+        'github',
+        'hot',
+        'live',
+        'myGithub',
+        'notifier',
+        'stories',
+      ].sort(),
     );
   });
   it('gives each context its own state', () => {
@@ -31,6 +45,8 @@ describe('useApp', () => {
     expect(vue.runWithContext(() => useApp())).toBe(ctx);
   });
   it('says what is missing when no context was provided', () => {
-    expect(() => createApp({}).runWithContext(() => useApp())).toThrow(/needs the context/);
+    expect(() =>
+      createApp({}).runWithContext(() => useApp()),
+    ).toThrow(/needs the context/);
   });
 });
