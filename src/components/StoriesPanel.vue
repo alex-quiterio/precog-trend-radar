@@ -194,7 +194,7 @@ export default defineComponent({
   border-bottom: 0;
 }
 .story .rank {
-  font: 500 18px/1.1 var(--sans);
+  font: 500 15px/1.3 var(--mono);
   color: var(--muted);
   text-align: right;
 }
@@ -227,7 +227,7 @@ export default defineComponent({
   white-space: nowrap;
 }
 .story .vel b {
-  font: 500 18px/1 var(--sans);
+  font: 500 16px/1 var(--mono);
 }
 .story .vel small {
   display: block;
@@ -237,7 +237,7 @@ export default defineComponent({
 }
 .vbar {
   height: 4px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   background: var(--track);
   margin-top: 5px;
   overflow: hidden;
@@ -247,7 +247,7 @@ export default defineComponent({
 .vbar i {
   display: block;
   height: 100%;
-  border-radius: 4px;
+  border-radius: var(--radius);
   background: var(--ink-2);
 }
 /* Phones: the figure moves under the title as one line, so titles get the full width. */
@@ -282,7 +282,7 @@ export default defineComponent({
   font-weight: 700;
   letter-spacing: 0.08em;
   padding: 1px 6px;
-  border-radius: 5px;
+  border-radius: var(--radius);
   border: 1.5px solid var(--ink);
   color: var(--ink);
 }
@@ -301,7 +301,7 @@ export default defineComponent({
   gap: 2px;
   border: 1px solid var(--hair);
   background: var(--card);
-  border-radius: 999px;
+  border-radius: var(--radius);
   padding: 2px 4px 2px 10px;
 }
 .site-chip a {
@@ -322,7 +322,7 @@ export default defineComponent({
 .site-add input {
   border: 1px dashed var(--axis);
   background: transparent;
-  border-radius: 999px;
+  border-radius: var(--radius);
   padding: 3px 12px;
   width: 230px;
   max-width: 100%;

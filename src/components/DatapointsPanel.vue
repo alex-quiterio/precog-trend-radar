@@ -94,7 +94,7 @@ export default defineComponent({
 .dp dd {
   margin: 0;
   text-align: right;
-  font: 500 18px/1.1 var(--sans);
+  font: 500 17px/1.1 var(--mono);
   white-space: nowrap;
 }
 .dp .dp-spark {
@@ -131,7 +131,9 @@ export default defineComponent({
 }
 .dp-group h4 {
   margin: 0;
-  font: 600 15px/1.2 var(--sans);
+  font: 600 11.5px/1.2 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   color: var(--ink);
 }
 .dp-group header .muted {

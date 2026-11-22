@@ -380,7 +380,7 @@ export default defineComponent({
   min-width: 0;
   padding: 8px 10px;
   border: 1px solid var(--glass-border);
-  border-radius: 10px;
+  border-radius: var(--radius);
   background: var(--card);
   color: var(--ink);
   font: inherit;
@@ -395,7 +395,7 @@ export default defineComponent({
 .pl-btn {
   padding: 8px 14px;
   border: 1px solid var(--accent);
-  border-radius: 99px;
+  border-radius: var(--radius);
   background: var(--accent);
   color: var(--on-ink);
   font: 600 12.5px var(--sans);

@@ -140,14 +140,16 @@ export default defineComponent({
 /* header: sticky, with section links */
 .topbar {
   position: sticky;
-  top: 10px;
+  top: 0;
   z-index: 10;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px 22px;
   padding: 12px 18px 0;
-  margin: 10px 0 0;
+  margin: 0;
+  border-top: 0;
+  border-radius: 0 0 var(--radius) var(--radius);
   background: var(--glass-strong);
 }
 .brand {
@@ -184,9 +186,8 @@ export default defineComponent({
   background: transparent;
   color: var(--muted);
   padding: 10px 10px 11px;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
+  font: 500 11.5px/1 var(--mono);
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
   transition: color 0.15s;
@@ -223,7 +224,6 @@ export default defineComponent({
   height: 2px;
   border-radius: 2px;
   background: var(--accent);
-  box-shadow: 0 0 12px var(--accent);
   transform: scaleX(0);
   transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
@@ -269,7 +269,7 @@ export default defineComponent({
 .channel .heat {
   font: 600 10px/1 var(--mono);
   padding: 2px 5px;
-  border-radius: 999px;
+  border-radius: var(--radius);
   letter-spacing: 0;
 }
 .channel .heat.alert {
@@ -292,8 +292,9 @@ export default defineComponent({
 }
 h1 {
   margin: 0;
-  font: 600 24px/1.1 var(--sans);
-  letter-spacing: 0.02em;
+  font: 600 20px/1.1 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 h1 .mark {
   width: 1.45em;
@@ -319,7 +320,8 @@ h1 .sub {
   align-items: center;
   gap: 8px;
   color: var(--muted);
-  font-size: 11.5px;
+  font: 11px var(--mono);
+  letter-spacing: 0.04em;
 }
 .pulse i {
   position: relative;
@@ -411,10 +413,7 @@ h1 .sub {
   bottom: 0;
   width: 26%;
   left: -26%;
-  background: linear-gradient(90deg, transparent, var(--accent) 35%, #fff 50%, var(--accent) 65%, transparent);
-  box-shadow:
-    0 0 10px 1px var(--accent),
-    0 0 28px 6px var(--accent-soft);
+  background: linear-gradient(90deg, transparent, var(--accent) 30%, var(--accent) 70%, transparent);
 }
 .topbar.busy .beacon {
   opacity: 1;
@@ -431,9 +430,7 @@ h1 .sub {
   }
 }
 .topbar.busy .pulse i {
-  box-shadow:
-    0 0 0 3px var(--accent-soft),
-    0 0 12px var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
   animation: glow 1.2s ease-in-out infinite alternate;
 }
 @keyframes glow {
@@ -457,7 +454,7 @@ h1 .sub {
     font-size: 19px;
   }
   .topbar {
-    top: 4px;
+    top: 0;
     padding: 10px 12px 0;
     gap: 8px 12px;
     grid-template-columns: minmax(0, 1fr) auto; /* the two round buttons sit beside the name */

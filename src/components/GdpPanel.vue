@@ -158,7 +158,7 @@ export default defineComponent({
   flex: none;
   width: 28px;
   height: 4px;
-  border-radius: 99px;
+  border-radius: var(--radius);
   background: var(--track);
   overflow: hidden;
 }
@@ -231,7 +231,7 @@ export default defineComponent({
 }
 .gdp-wait li {
   height: 30px;
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: var(--track);
   animation: dg-pulse 1.6s ease-in-out infinite;
 }

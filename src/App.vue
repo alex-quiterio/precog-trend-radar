@@ -202,7 +202,7 @@ export default defineComponent({
 .ch-links a {
   padding: 4px 10px;
   border: 1px solid var(--glass-border);
-  border-radius: 99px;
+  border-radius: var(--radius);
   background: var(--card);
   color: var(--ink-2);
   font-size: 12px;
@@ -233,14 +233,9 @@ export default defineComponent({
 }
 .channel-hero h2 {
   margin: 0;
-  font: 300 42px/1.05 var(--sans);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  background: var(--title);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 0 18px var(--accent-soft));
+  font: 600 30px/1.1 var(--sans);
+  letter-spacing: -0.01em;
+  color: var(--ink);
 }
 .ch-desc {
   margin: 8px 0 0;
@@ -296,13 +291,12 @@ export default defineComponent({
 .block-head span {
   color: var(--accent);
   font-weight: 500;
-  text-shadow: 0 0 12px var(--accent-soft);
 }
 .block-head::after {
   content: '';
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, var(--accent-soft), var(--hair) 30%, transparent);
+  background: var(--glass-border);
 }
 .stack {
   display: flex;

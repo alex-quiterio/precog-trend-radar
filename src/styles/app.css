@@ -15,12 +15,8 @@ body {
   margin: 0;
   background-color: var(--bg);
   color: var(--ink);
-  background-image: var(--bg-glow);
-  background-attachment: fixed;
   font: 13.5px/1.5 var(--sans);
-  font-feature-settings:
-    'tnum' 1,
-    'cv11' 1;
+  font-feature-settings: 'tnum' 1;
   -webkit-font-smoothing: antialiased;
 }
 button,
@@ -44,7 +40,7 @@ a:hover {
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: 6px;
+  border-radius: var(--radius);
 }
 .page {
   max-width: 1480px;
@@ -70,56 +66,18 @@ a:hover {
   color: var(--alert);
 }
 
-/* The grid behind everything, fading out down the page. */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(var(--bg-grid) 1px, transparent 1px), linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
-  background-size: 44px 44px;
-  -webkit-mask-image: linear-gradient(180deg, #000, transparent 70%);
-  mask-image: linear-gradient(180deg, #000, transparent 70%);
-}
-
-/* Scanlines over the page, and a slow band of light sweeping down it (off with reduced motion). */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  pointer-events: none;
-  background:
-    linear-gradient(180deg, transparent 0, var(--accent-soft) 50%, transparent 100%) 0 -30vh / 100% 30vh no-repeat,
-    repeating-linear-gradient(180deg, var(--scan) 0 1px, transparent 1px 3px);
-  opacity: 0.55;
-  animation: hud-sweep 9s linear infinite;
-}
-@keyframes hud-sweep {
-  to {
-    background-position:
-      0 130vh,
-      0 0;
-  }
-}
-
-/* glass */
+/* flat panels: solid fill, one hairline, square corners */
 .panel,
 .topbar {
   background: var(--glass);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
-  backdrop-filter: blur(18px) saturate(140%);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
 }
 .btn,
 select {
   border: 1px solid var(--hair);
   background: var(--card);
-  border-radius: 999px;
+  border-radius: var(--radius);
   padding: 5px 13px;
   min-height: 32px;
   transition:
@@ -149,7 +107,7 @@ select:hover {
 .seg {
   display: inline-flex;
   border: 1px solid var(--hair);
-  border-radius: 999px;
+  border-radius: var(--radius);
   overflow: hidden;
   background: var(--card);
   padding: 2px;
@@ -160,7 +118,7 @@ select:hover {
   background: transparent;
   padding: 3px 11px;
   font-size: 11.5px;
-  border-radius: 999px;
+  border-radius: var(--radius);
   color: var(--ink-2);
 }
 .seg button:hover {
@@ -184,11 +142,10 @@ select:hover {
   z-index: 4;
   min-width: 120px;
   padding: 7px 10px;
-  border-radius: 9px;
+  border-radius: var(--radius);
   background: var(--tip-bg);
-  border: 1px solid var(--hair);
-  box-shadow: 0 8px 22px -8px rgba(0, 0, 0, 0.45);
-  font-size: 12px;
+  border: 1px solid var(--glass-border);
+  font: 11.5px var(--mono);
   color: var(--ink);
   white-space: nowrap;
 }

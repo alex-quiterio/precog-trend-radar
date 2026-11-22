@@ -1,91 +1,85 @@
-/* Design tokens. Dark is the default; [data-theme="light"] overrides. Alert red/amber are reserved for alerts. */
+/* Design tokens: situation room. Flat panels, hairlines, one amber accent, no glow. Dark is the default;
+   [data-theme="light"] is the daylight console. Alert red and watch yellow are reserved for alerts. */
 :root {
-  /* Precog HUD: holographic ice-blue light on near-black glass. */
-  --bg: #02060c;
-  --bg-glow:
-    radial-gradient(1000px 560px at 50% -14%, rgba(90, 190, 255, 0.16), transparent 64%),
-    radial-gradient(800px 600px at 0% 10%, rgba(40, 120, 255, 0.09), transparent 60%),
-    radial-gradient(800px 600px at 100% 30%, rgba(60, 220, 255, 0.07), transparent 60%);
-  /* The faint grid of a situation room, fading out towards the bottom, and its scanlines. */
-  --bg-grid: rgba(120, 200, 255, 0.055);
-  --scan: rgba(140, 210, 255, 0.025);
-  --accent: #7fd6ff;
-  --accent-2: #3b9dff;
-  --accent-soft: rgba(127, 214, 255, 0.13);
-  --glow: 0 0 14px rgba(127, 214, 255, 0.45);
-  --edge: linear-gradient(90deg, transparent, rgba(127, 214, 255, 0.7), rgba(59, 157, 255, 0.4), transparent);
-  --bracket: rgba(127, 214, 255, 0.55);
-  --title: linear-gradient(180deg, #ffffff 20%, #a9e4ff 75%, #5fb8ff);
-  --surface-gap: #08121f;
-  --glass: rgba(8, 20, 36, 0.5);
-  --glass-strong: rgba(10, 24, 42, 0.94);
-  --glass-border: rgba(120, 200, 255, 0.18);
-  --hair: rgba(140, 200, 255, 0.12);
-  --ink: #e6f3ff;
-  --ink-2: #a3bdd6;
-  --muted: #8792a4;
-  --grid: #212b39;
-  --axis: #3b4759;
-  --ring: #141b26;
-  --halo: rgba(11, 16, 23, 0.85);
-  --card: rgba(255, 255, 255, 0.035);
-  --card-hover: rgba(255, 255, 255, 0.075);
-  --hover: rgba(255, 255, 255, 0.08);
-  --tip-bg: rgba(16, 23, 34, 0.96);
-  --on-ink: #0b1017;
-  --track: rgba(255, 255, 255, 0.08);
-  --ring-line: rgba(200, 220, 255, 0.12);
-  --ring-flat: rgba(200, 220, 255, 0.3);
-  --spoke: rgba(200, 220, 255, 0.06);
-  --sweep-line: rgba(160, 220, 255, 0.65);
-  --sweep-fill: #8fc4ff;
-  --shadow:
-    0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 18px 40px -14px rgba(0, 0, 0, 0.65), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --bg: #0b0b0a;
+  --bg-glow: none;
+  --bg-grid: transparent;
+  --scan: transparent;
+  --accent: #e39b2d;
+  --accent-2: #c9b48a;
+  --accent-soft: rgba(227, 155, 45, 0.13);
+  --glow: none;
+  --edge: transparent;
+  --bracket: transparent;
+  --title: none;
+  --surface-gap: #121211;
+  --glass: #121211;
+  --glass-strong: #181816;
+  --glass-border: #2a2924;
+  --hair: #22211d;
+  --ink: #e8e4d8;
+  --ink-2: #b4ae9f;
+  --muted: #8a8577;
+  --grid: #1f1e1a;
+  --axis: #3a3832;
+  --ring: #121211;
+  --halo: rgba(11, 11, 10, 0.9);
+  --card: #151513;
+  --card-hover: #1c1c19;
+  --hover: #1f1e1b;
+  --tip-bg: #181816;
+  --on-ink: #0b0b0a;
+  --track: rgba(232, 228, 216, 0.07);
+  --ring-line: rgba(227, 155, 45, 0.16);
+  --ring-flat: rgba(227, 155, 45, 0.38);
+  --spoke: rgba(232, 228, 216, 0.05);
+  --sweep-line: rgba(227, 155, 45, 0.75);
+  --sweep-fill: #e39b2d;
+  --shadow: none;
   color-scheme: dark;
-  --alert: #d03b3b; /* alerts only */
-  --watch: #fab219; /* alerts only */
-  --sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
-  --radius: 16px;
+  --alert: #d63c3c; /* alerts only */
+  --watch: #f0d43a; /* alerts only */
+  --sans:
+    'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+  --radius: 2px;
 }
 :root[data-theme='light'] {
-  --bg: #eef3f8;
-  --bg-glow:
-    radial-gradient(1100px 620px at 8% -12%, rgba(40, 170, 220, 0.14), transparent 62%),
-    radial-gradient(900px 640px at 96% -6%, rgba(110, 90, 240, 0.1), transparent 60%);
-  --bg-grid: rgba(30, 80, 140, 0.05);
+  --bg: #efede6;
+  --bg-glow: none;
+  --bg-grid: transparent;
   --scan: transparent;
-  --accent: #0a6fa8;
-  --accent-2: #1f58d6;
-  --accent-soft: rgba(10, 111, 168, 0.1);
+  --accent: #9a5800;
+  --accent-2: #6b5a3a;
+  --accent-soft: rgba(154, 88, 0, 0.1);
   --glow: none;
-  --edge: linear-gradient(90deg, transparent, rgba(10, 111, 168, 0.4), rgba(31, 88, 214, 0.25), transparent);
-  --bracket: rgba(10, 111, 168, 0.45);
-  --title: linear-gradient(180deg, #0b1626 40%, #0a5f92);
-  --surface-gap: #ffffff;
-  --glass: rgba(255, 255, 255, 0.62);
-  --glass-strong: rgba(255, 255, 255, 0.86);
-  --glass-border: rgba(255, 255, 255, 0.92);
-  --hair: rgba(17, 23, 34, 0.1);
-  --ink: #111722;
-  --ink-2: #4a5263;
-  --muted: #6a7282;
-  --grid: #dde3ea;
-  --axis: #b9c1cc;
-  --ring: #ffffff;
-  --halo: rgba(255, 255, 255, 0.85);
-  --card: rgba(255, 255, 255, 0.55);
-  --card-hover: rgba(255, 255, 255, 0.9);
+  --edge: transparent;
+  --bracket: transparent;
+  --title: none;
+  --surface-gap: #f7f6f1;
+  --glass: #f7f6f1;
+  --glass-strong: #ffffff;
+  --glass-border: #cfcabd;
+  --hair: #dedad0;
+  --ink: #161512;
+  --ink-2: #4a473f;
+  --muted: #6b675d;
+  --grid: #e4e0d6;
+  --axis: #b9b4a7;
+  --ring: #f7f6f1;
+  --halo: rgba(247, 246, 241, 0.9);
+  --card: #f2f0ea;
+  --card-hover: #ffffff;
   --hover: #ffffff;
-  --tip-bg: rgba(255, 255, 255, 0.95);
-  --on-ink: #ffffff;
-  --track: rgba(17, 23, 34, 0.07);
-  --ring-line: rgba(17, 23, 34, 0.13);
-  --ring-flat: rgba(17, 23, 34, 0.28);
-  --spoke: rgba(17, 23, 34, 0.07);
-  --sweep-line: rgba(17, 23, 34, 0.55);
-  --sweep-fill: #111722;
-  --shadow:
-    0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 14px 34px -10px rgba(30, 50, 80, 0.2), 0 2px 6px rgba(30, 50, 80, 0.06);
+  --tip-bg: #ffffff;
+  --on-ink: #f7f6f1;
+  --track: rgba(22, 21, 18, 0.07);
+  --ring-line: rgba(22, 21, 18, 0.14);
+  --ring-flat: rgba(154, 88, 0, 0.45);
+  --spoke: rgba(22, 21, 18, 0.06);
+  --sweep-line: rgba(154, 88, 0, 0.7);
+  --sweep-fill: #9a5800;
+  --shadow: none;
+  --watch: #b38f00; /* alerts only */
   color-scheme: light;
 }

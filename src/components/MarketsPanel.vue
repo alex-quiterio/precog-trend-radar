@@ -158,7 +158,7 @@ export default defineComponent({
   margin: 0 0 16px;
   padding: 12px 14px 12px 30px;
   border: 1px solid var(--glass-border);
-  border-radius: 12px;
+  border-radius: var(--radius);
   background: var(--accent-soft);
   font-size: 13.5px;
   line-height: 1.5;
@@ -197,7 +197,7 @@ export default defineComponent({
   min-width: 0;
   padding: 10px 12px;
   border: 1px solid var(--hair);
-  border-radius: 12px;
+  border-radius: var(--radius);
   background: var(--card);
 }
 .mk-tile header {
@@ -274,7 +274,7 @@ export default defineComponent({
   display: block;
   height: 6px;
   margin-bottom: 6px;
-  border-radius: 3px;
+  border-radius: var(--radius);
   background: var(--track);
   overflow: hidden;
 }
@@ -293,7 +293,7 @@ export default defineComponent({
 }
 .mk-wait li {
   height: 130px;
-  border-radius: 12px;
+  border-radius: var(--radius);
   background: var(--track);
   animation: dg-pulse 1.6s ease-in-out infinite;
 }

@@ -258,7 +258,7 @@ export default defineComponent({
 }
 .dg-flag {
   padding: 1px 8px;
-  border-radius: 99px;
+  border-radius: var(--radius);
   background: var(--accent-soft);
   color: var(--accent);
   font-weight: 600;
@@ -356,7 +356,7 @@ export default defineComponent({
   display: block;
   height: 12px;
   margin: 6px 0;
-  border-radius: 6px;
+  border-radius: var(--radius);
   background: var(--track);
   animation: dg-pulse 1.6s ease-in-out infinite;
 }

@@ -182,7 +182,7 @@ export default defineComponent({
   gap: 2px;
   border: 1px solid var(--hair);
   background: var(--glass-strong);
-  border-radius: 999px;
+  border-radius: var(--radius);
   padding: 2px 2px 2px 10px;
 }
 .chip.sel {
@@ -197,7 +197,7 @@ export default defineComponent({
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  border-radius: 999px;
+  border-radius: var(--radius);
 }
 .chip .x {
   border: 0;
@@ -234,7 +234,7 @@ export default defineComponent({
   text-transform: uppercase;
   color: var(--accent);
   border: 1px solid var(--accent);
-  border-radius: 999px;
+  border-radius: var(--radius);
   padding: 2px 5px;
 }
 /* Where the selected World topic is echoing today */
@@ -252,7 +252,7 @@ export default defineComponent({
   font-weight: 500;
   letter-spacing: 0.03em;
   padding: 2px 8px;
-  border-radius: 999px;
+  border-radius: var(--radius);
   background: var(--accent-soft);
   color: var(--ink);
   white-space: nowrap;
@@ -273,7 +273,7 @@ export default defineComponent({
 .add-form input {
   border: 1px dashed var(--axis);
   background: var(--card);
-  border-radius: 999px;
+  border-radius: var(--radius);
   padding: 6px 12px;
   width: 220px;
   min-height: 32px;

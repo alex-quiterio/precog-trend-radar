@@ -30,39 +30,10 @@ export default defineComponent({
   animation: enter 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   animation-delay: calc(var(--i, 0) * 70ms);
 }
-/* Brackets at the four corners, like a reticle. */
-.panel::after {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: var(--radius);
-  pointer-events: none;
-  --b: var(--bracket);
-  background:
-    linear-gradient(var(--b), var(--b)) top left / 14px 1px no-repeat,
-    linear-gradient(var(--b), var(--b)) top left / 1px 14px no-repeat,
-    linear-gradient(var(--b), var(--b)) top right / 14px 1px no-repeat,
-    linear-gradient(var(--b), var(--b)) top right / 1px 14px no-repeat,
-    linear-gradient(var(--b), var(--b)) bottom left / 14px 1px no-repeat,
-    linear-gradient(var(--b), var(--b)) bottom left / 1px 14px no-repeat,
-    linear-gradient(var(--b), var(--b)) bottom right / 14px 1px no-repeat,
-    linear-gradient(var(--b), var(--b)) bottom right / 1px 14px no-repeat;
-}
-/* A thin line of light along the top edge. */
-.panel::before {
-  content: '';
-  position: absolute;
-  top: -1px;
-  left: 18px;
-  right: 18px;
-  height: 1px;
-  background: var(--edge);
-  pointer-events: none;
-}
 @keyframes enter {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(4px);
   }
   to {
     opacity: 1;
@@ -73,28 +44,32 @@ export default defineComponent({
   display: flex;
   align-items: center;
   gap: 8px 10px;
-  margin-bottom: 12px;
+  margin: -16px -18px 12px;
+  padding: 9px 18px;
+  border-bottom: 1px solid var(--glass-border);
   flex-wrap: wrap;
 }
 .panel-head h3 {
   margin: 0;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
+  font: 600 11px/1.2 var(--mono);
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--accent);
-  text-shadow: var(--glow);
 }
 .panel-head .meta {
   margin-left: auto;
   color: var(--muted);
-  font-size: 11px;
+  font: 10.5px var(--mono);
   text-align: right;
 }
 /* Phones */
 @media (max-width: 600px) {
   .panel {
     padding: 14px 14px 16px;
+  }
+  .panel-head {
+    margin: -14px -14px 12px;
+    padding: 9px 14px;
   }
 }
 </style>

@@ -371,8 +371,8 @@ export default defineComponent({
   margin-top: 2px;
 }
 .big .num {
-  font: 500 52px/1 var(--sans);
-  letter-spacing: -0.01em;
+  font: 500 48px/1 var(--mono);
+  letter-spacing: -0.03em;
   font-variant-numeric: lining-nums;
 }
 .big .arrow {
@@ -404,7 +404,7 @@ export default defineComponent({
   touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
-  border-radius: 10px;
+  border-radius: var(--radius);
   outline-offset: 4px;
   cursor: crosshair;
 }
@@ -497,7 +497,7 @@ export default defineComponent({
   align-items: center;
   gap: 5px;
   padding: 2px 9px 2px 7px;
-  border-radius: 999px;
+  border-radius: var(--radius);
   border: 1px solid var(--hair);
   color: var(--muted);
 }

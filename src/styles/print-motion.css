@@ -16,33 +16,34 @@
   }
   :root,
   :root[data-theme] {
-    --bg: #eef2f6;
-    --glass: rgba(255, 255, 255, 0.62);
-    --glass-strong: rgba(255, 255, 255, 0.86);
-    --glass-border: rgba(255, 255, 255, 0.92);
-    --hair: rgba(17, 23, 34, 0.1);
-    --ink: #111722;
-    --ink-2: #4a5263;
-    --muted: #6a7282;
-    --grid: #dde3ea;
-    --axis: #b9c1cc;
+    --bg: #ffffff;
+    --glass: #ffffff;
+    --glass-strong: #ffffff;
+    --glass-border: #cfcabd;
+    --hair: #dedad0;
+    --ink: #161512;
+    --ink-2: #4a473f;
+    --muted: #6b675d;
+    --grid: #e4e0d6;
+    --axis: #b9b4a7;
     --ring: #ffffff;
-    --halo: rgba(255, 255, 255, 0.85);
-    --card: rgba(255, 255, 255, 0.55);
-    --card-hover: rgba(255, 255, 255, 0.9);
+    --halo: rgba(255, 255, 255, 0.9);
+    --card: #ffffff;
+    --card-hover: #ffffff;
     --hover: #ffffff;
-    --tip-bg: rgba(255, 255, 255, 0.95);
+    --tip-bg: #ffffff;
     --on-ink: #ffffff;
-    --track: rgba(17, 23, 34, 0.07);
-    --ring-line: rgba(17, 23, 34, 0.13);
-    --ring-flat: rgba(17, 23, 34, 0.28);
-    --spoke: rgba(17, 23, 34, 0.07);
-    --sweep-line: rgba(17, 23, 34, 0.55);
-    --sweep-fill: #111722;
+    --track: rgba(22, 21, 18, 0.07);
+    --ring-line: rgba(22, 21, 18, 0.14);
+    --ring-flat: rgba(154, 88, 0, 0.45);
+    --spoke: rgba(22, 21, 18, 0.06);
+    --sweep-line: rgba(154, 88, 0, 0.7);
+    --sweep-fill: #9a5800;
     --shadow: none;
     --bg-glow: none;
-    --accent: #0d7f72;
-    --accent-soft: rgba(13, 127, 114, 0.1);
+    --accent: #9a5800;
+    --accent-soft: rgba(154, 88, 0, 0.1);
+    --watch: #b38f00;
     --surface-gap: #ffffff;
     color-scheme: light;
   }

@@ -109,7 +109,7 @@ export default defineComponent({
   margin: 0 0 14px;
   padding: 12px 14px 12px 30px;
   border: 1px solid var(--glass-border);
-  border-radius: 12px;
+  border-radius: var(--radius);
   background: var(--card);
   color: var(--ink-2);
   font-size: 13px;
@@ -189,7 +189,7 @@ export default defineComponent({
 .fw-bar {
   height: 4px;
   margin: 6px 0 0 30px;
-  border-radius: 99px;
+  border-radius: var(--radius);
   background: var(--track);
   overflow: hidden;
 }

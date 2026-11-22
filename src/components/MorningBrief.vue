@@ -191,7 +191,7 @@ export default defineComponent({
   position: absolute;
   top: 0;
   height: 8px;
-  border-radius: 4px;
+  border-radius: var(--radius);
 }
 /* Phones: drop the bar and z (State says the same thing), let long names wrap, so nothing scrolls sideways. */
 @media (max-width: 600px) {
@@ -226,7 +226,7 @@ export default defineComponent({
   background: transparent;
   padding: 0 2px;
   margin: 0 -2px;
-  border-radius: 5px;
+  border-radius: var(--radius);
   color: var(--ink);
   font-weight: 500;
   text-decoration: underline;
