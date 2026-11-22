@@ -43,6 +43,16 @@ describe('keyboard shortcuts', () => {
     expect(app.selectedEntry()?.name).not.toBe(before);
     expect(app.selectedEntry()?.lensId).toBe(app.activeLens()?.id);
   });
+  it('opens the list of every channel with /', () => {
+    const btn = document.createElement('button');
+    btn.className = 'sw-toggle';
+    const clicked = vi.fn();
+    btn.addEventListener('click', clicked);
+    document.body.append(btn);
+    shortcut(ctx, key('/'), document.body)?.();
+    expect(clicked).toHaveBeenCalledOnce();
+    btn.remove();
+  });
   it('leaves keys alone while typing, with a modifier held, and for other keys', () => {
     const input = document.createElement('input');
     document.body.append(input);

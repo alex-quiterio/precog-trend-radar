@@ -1,7 +1,7 @@
 // View helpers: axis ticks, alert tags, source breakdowns and SVG paths.
 import { describe, expect, it } from 'vitest';
 import { nf0 } from '@core/format';
-import { compText, niceStep, niceTicks, pathOf, tagOf } from './helpers';
+import { compText, heatText, niceStep, niceTicks, pathOf, tagOf } from './helpers';
 
 describe('axis ticks', () => {
   it('round a step up to 1, 2, 2.5 or 5 times a power of ten', () => {
@@ -46,5 +46,13 @@ describe('pathOf', () => {
       ]),
     ).toBe('M0.0,10.0L5.3,2.0L10.0,0.0');
     expect(pathOf([])).toBe('');
+  });
+});
+
+describe('heatText', () => {
+  it('says what a channel’s badge counts', () => {
+    expect(heatText({ level: 'alert', n: 2 })).toBe('2 topics on alert');
+    expect(heatText({ level: 'watch', n: 1 })).toBe('1 topic on watch');
+    expect(heatText(null)).toBe('');
   });
 });

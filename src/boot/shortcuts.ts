@@ -1,5 +1,5 @@
-// PRECOG / Trend Radar · Keyboard: 1–9 jump to a channel, [ and ] step through channels, ← and → through
-// the channel's topics. Ignored while typing, and with a modifier key held.
+// PRECOG / Trend Radar · Keyboard: 1–9 jump to a channel, / opens the list of every channel, [ and ] step
+// through channels, ← and → through the channel's topics. Ignored while typing, and with a modifier key held.
 import { channels } from '@/channels';
 import type { AppContext } from '@/context';
 
@@ -20,6 +20,7 @@ export function shortcut(
         }
       : null;
   }
+  if (e.key === '/') return () => document.querySelector<HTMLElement>('.sw-toggle')?.click();
   if (e.key === '[' || e.key === ']') return () => actions.shiftLens(e.key === ']' ? 1 : -1);
   if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !e.shiftKey && !target?.closest('.table-scroll'))
     return () => actions.shiftTopic(e.key === 'ArrowRight' ? 1 : -1);

@@ -15,6 +15,24 @@
     </div>
     <div class="controls no-print">
       <button
+        class="btn icon sw-toggle"
+        type="button"
+        aria-label="All channels"
+        title="All channels (press /)"
+        aria-keyshortcuts="/"
+        aria-haspopup="dialog"
+        @click="switcher?.open()"
+      >
+        <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
+          <g fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="2" y="2" width="4.5" height="4.5" rx="0.5" />
+            <rect x="9.5" y="2" width="4.5" height="4.5" rx="0.5" />
+            <rect x="2" y="9.5" width="4.5" height="4.5" rx="0.5" />
+            <rect x="9.5" y="9.5" width="4.5" height="4.5" rx="0.5" />
+          </g>
+        </svg>
+      </button>
+      <button
         class="btn icon refresh"
         type="button"
         :disabled="ui.loading"
@@ -73,9 +91,9 @@
           class="channel"
           :class="{ on: c.id === view.active }"
           :aria-current="c.id === view.active ? 'page' : undefined"
-          :aria-label="c.label + (c.heat ? `, ${c.heat.n} ${c.heat.level}` : '')"
+          :aria-label="c.label + (c.heat ? `, ${heatText(c.heat)}` : '')"
           :aria-keyshortcuts="c.n <= 9 ? String(c.n) : undefined"
-          :title="c.n <= 9 ? `${c.label} (press ${c.n})` : c.label"
+          :title="[c.label, heatText(c.heat), c.n <= 9 ? `press ${c.n}` : ''].filter(Boolean).join(' · ')"
           @click="selectLens(c.lensId)"
         >
           <channel-icon :name="c.icon"></channel-icon>
@@ -96,6 +114,7 @@
         </button>
       </template>
     </nav>
+    <channel-switcher ref="switcher"></channel-switcher>
   </header>
 </template>
 
@@ -105,6 +124,8 @@ import { computed, defineComponent, nextTick, ref } from 'vue';
 import { activeChannel, channels } from '@/channels';
 
 import BrandMark from '@components/BrandMark.vue';
+import ChannelSwitcher from '@components/ChannelSwitcher.vue';
+import { heatText } from '@components/helpers';
 import ChannelIcon from '@components/ChannelIcon.vue';
 import SettingsBar from '@components/SettingsBar.vue';
 
@@ -112,7 +133,7 @@ import SettingsBar from '@components/SettingsBar.vue';
 
 export default defineComponent({
   name: 'AppHeader',
-  components: { BrandMark, ChannelIcon, SettingsBar },
+  components: { BrandMark, ChannelIcon, ChannelSwitcher, SettingsBar },
   setup() {
     const { app, live, stories: loader, actions, github, myGithub } = useApp();
     const ui = app.ui;
@@ -139,9 +160,12 @@ export default defineComponent({
       settingsOpen.value = false;
       nextTick(() => document.querySelector<HTMLElement>('.set-toggle')?.focus());
     }
+    const switcher = ref<{ open: () => void } | null>(null);
     return {
       ui,
       view,
+      switcher,
+      heatText,
       refresh: live.refresh,
       selectLens,
       removeLens: (id: string) => void removeLens(id),

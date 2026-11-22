@@ -353,3 +353,38 @@ test('offers to install PRECOG as an app, and a "Not now" waits π days', async 
   await page.waitForTimeout(7000);
   await expect(notice).toHaveCount(0); // snoozed
 });
+
+test('finds any channel by name: / and a few letters on a keyboard, the grid button and a tap on a phone', async ({
+  page,
+}, info) => {
+  await open(page);
+  const list = page.locator('.switcher-dlg');
+  if (info.project.name === 'desktop') {
+    await page.locator('body').press('/');
+    await expect(list).toBeVisible();
+    await expect(list.locator('.sw-list li')).toHaveCount(12); // every channel, not only 1–9
+    await list.getByRole('combobox').fill('soc');
+    await expect(list.locator('.sw-list li')).toHaveCount(1);
+    await list.getByRole('combobox').press('Enter');
+    await expect(heroTitle(page)).toHaveText('Society');
+  } else {
+    await page.getByRole('button', { name: 'All channels' }).click();
+    await expect(list).toBeVisible();
+    const row = list.getByRole('option', { name: /GitHub/ }); // channel 12: past the number keys
+    const box = await row.boundingBox();
+    expect(box!.height).toBeGreaterThanOrEqual(44); // big enough to tap
+    await row.click();
+    await expect(heroTitle(page)).toHaveText('GitHub');
+  }
+  await expect(list).not.toBeVisible();
+  expect(await sideways(page)).toBeLessThanOrEqual(0);
+});
+
+test('a channel’s badge says what it counts', async ({ page }) => {
+  await open(page);
+  const hot = page
+    .locator('.channels .channel')
+    .filter({ has: page.locator('.heat') })
+    .first();
+  await expect(hot).toHaveAttribute('title', /\d topics? on (alert|watch)/);
+});

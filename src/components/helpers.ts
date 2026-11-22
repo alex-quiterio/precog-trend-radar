@@ -47,3 +47,7 @@ export function useWidth(elRef: Ref<HTMLElement | null>, fallback = 600): Ref<nu
   onBeforeUnmount(() => ro?.disconnect());
   return width;
 }
+
+/** What a channel's badge counts, in words: "2 topics on alert" (far from their usual) or "1 topic on watch". */
+export const heatText = (heat: { level: 'alert' | 'watch'; n: number } | null | undefined): string =>
+  heat ? `${heat.n} topic${heat.n > 1 ? 's' : ''} on ${heat.level}` : '';
