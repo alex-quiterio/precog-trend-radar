@@ -17,6 +17,14 @@ const EUROSTAT: Record<string, string> = {
   sdg_06_40: 'nitrate',
   env_wasmun: 'municipal-waste',
   sdg_12_41: 'circular-use',
+  edat_lfse_14: 'early-leavers',
+  edat_lfse_03: 'degree',
+};
+/** crim_off_cat answers per crime category. */
+const CRIME: Record<string, string> = {
+  ICCS0101: 'crime-homicide',
+  ICCS05012: 'crime-burglary',
+  ICCS0701: 'crime-fraud',
 };
 const json = (route: Route, body: unknown) =>
   route.fulfill({
@@ -184,7 +192,15 @@ export async function mockApis(page: Page, { echoes = false, guardian = false } 
       if (h === 'data-api.ecb.europa.eu')
         return json(route, fixture('ecb', p.includes('/MIR/') ? 'mortgage-rates' : 'deposit-rate'));
       if (h === 'ec.europa.eu')
-        return json(route, fixture('eurostat', EUROSTAT[p.split('/').pop() ?? ''] ?? 'unemployment'));
+        return json(
+          route,
+          fixture(
+            'eurostat',
+            p.endsWith('/crim_off_cat')
+              ? (CRIME[url.searchParams.get('iccs') ?? ''] ?? 'crime-homicide')
+              : (EUROSTAT[p.split('/').pop() ?? ''] ?? 'unemployment'),
+          ),
+        );
       if (h === 'api.ipma.pt') return json(route, fixture('ipma', p.includes('warnings') ? 'warnings' : 'fire-risk'));
       if (h === 'archive-api.open-meteo.com') return json(route, archiveDays(url));
       if (h === 'air-quality-api.open-meteo.com')
@@ -221,6 +237,14 @@ export async function mockApis(page: Page, { echoes = false, guardian = false } 
         });
       if (h === 'api.worldbank.org')
         return json(route, fixture('worldbank', p.includes('AG.LND.FRST.ZS') ? 'forest-area' : 'gdp'));
+      // Climate TRACE: the saved year for every year asked (all sectors, or forests and land), and Schiphol.
+      if (h === 'api.climatetrace.org')
+        return json(
+          route,
+          p.endsWith('/assets')
+            ? fixture('climatetrace', 'assets-nld')
+            : fixture('climatetrace', url.searchParams.get('sectors') ? 'land-2017' : 'country-emissions'),
+        );
       if (h === 'api.inaturalist.org') return json(route, fixture('inaturalist', 'species-counts'));
       if (h === 'api.github.com') {
         if (p.startsWith('/search/repositories')) return json(route, fixture('github', 'repo-search'));

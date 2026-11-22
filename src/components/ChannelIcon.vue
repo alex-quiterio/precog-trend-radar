@@ -50,6 +50,11 @@
       <path d="M2 9c3-1 6 0 8 3 2-3 5-4 8-3l4-1-3 3c0 4-4 7-9 7-3 0-6-2-8-5" />
       <path d="M10 12 7 6M14 11l3-5" />
     </template>
+    <template v-else-if="name === 'people'">
+      <circle cx="9" cy="8" r="3" />
+      <path d="M3 19c0-3.3 2.7-6 6-6s6 2.7 6 6" />
+      <path d="M16 5.2a3 3 0 0 1 0 5.6M18 13.4c1.8.9 3 2.9 3 5.6" />
+    </template>
     <path v-else-if="name === 'code'" d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 4l-3 16" />
     <path v-else d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6l-5.4 2.9 1.2-6-4.5-4.2 6.1-.7z" />
   </svg>

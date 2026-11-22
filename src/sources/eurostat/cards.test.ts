@@ -13,8 +13,20 @@ const SAVED: Record<string, string> = {
   sdg_06_40: 'nitrate.json',
   env_wasmun: 'municipal-waste.json',
   sdg_12_41: 'circular-use.json',
+  edat_lfse_14: 'early-leavers.json',
+  edat_lfse_03: 'degree.json',
 };
-const net = fakeFetch(url => fixture('eurostat', SAVED[url.pathname.split('/').pop() ?? ''] ?? 'unemployment.json'));
+/** crim_off_cat answers per crime category. */
+const CRIME: Record<string, string> = {
+  ICCS0101: 'crime-homicide.json',
+  ICCS05012: 'crime-burglary.json',
+  ICCS0701: 'crime-fraud.json',
+};
+const saved = (url: URL): string =>
+  url.pathname.endsWith('/crim_off_cat')
+    ? CRIME[url.searchParams.get('iccs') ?? '']
+    : (SAVED[url.pathname.split('/').pop() ?? ''] ?? 'unemployment.json');
+const net = fakeFetch(url => fixture('eurostat', saved(url)));
 
 describe('Eurostat', () => {
   it('builds well-formed cards from the saved replies', async () => {
@@ -114,12 +126,40 @@ describe('Eurostat', () => {
     expect(Object.keys(cards)).toEqual(['waste-pt']); // nothing for the Netherlands: no card
     expect(cards['waste-pt'].sub).toBe('per person a year');
   });
+  it('shows police-recorded crime per 100,000 people, with its change over the years', async () => {
+    const { cards } = await runCards('eurostat-crime-burglary');
+    expect(cards['burglary-pt']).toMatchObject({
+      group: 'pt',
+      k: 'Home burglaries · Portugal',
+      v: nf1.format(74.07),
+      sub: `police-recorded, per 100,000 people · ${fmtPct(((74.07 - 211.74) / 211.74) * 100)} since 2013`,
+      src: 'Eurostat crim_off_cat · 2024',
+    });
+    expect(cards['burglary-nl'].v).toBe(nf1.format(117.01));
+  });
+  it('leaves out a country whose newest year is too old to show as today’s', async () => {
+    // The Netherlands reported fraud for 2016 only.
+    const { cards } = await runCards('eurostat-crime-fraud');
+    expect(Object.keys(cards)).toEqual(['fraud-pt']);
+  });
+  it('shows early school leavers and degree holders as shares, with their change in points', async () => {
+    const leavers = (await runCards('eurostat-edat_lfse_14')).cards;
+    expect(leavers['leavers-pt']).toMatchObject({ k: 'Early school leavers · Portugal', v: `${nf1.format(6.1)}%` });
+    expect(leavers['leavers-pt'].sub?.endsWith(`−${nf1.format(11.2)} pts since 2014`)).toBe(true);
+    const degree = (await runCards('eurostat-edat_lfse_03')).cards;
+    expect(degree['degree-nl']).toMatchObject({ k: 'Degree holders · Netherlands', v: `${nf1.format(56.1)}%` });
+  });
   it('reports each loader that fails by its id', async () => {
     net.custom = url => {
       if (url.hostname === 'ec.europa.eu') throw new Error('down');
     };
     const { rows, failed } = await loadCards(CARD_LOADERS.filter(l => l.id.startsWith('eurostat-')));
     expect(failed.map(f => f.id).sort()).toEqual([
+      'eurostat-crime-burglary',
+      'eurostat-crime-fraud',
+      'eurostat-crime-homicide',
+      'eurostat-edat_lfse_03',
+      'eurostat-edat_lfse_14',
       'eurostat-energy-prices',
       'eurostat-env_wasmun',
       'eurostat-house-prices',

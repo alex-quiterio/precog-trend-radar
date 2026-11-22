@@ -170,6 +170,7 @@ test('Portugal shows the air, the trees lost and the groundwater, without scroll
     'Air · Porto now',
     'Tree cover lost · Portugal',
     'in 2024, to fire and felling',
+    'Forests & land · Portugal',
     'Forest · Portugal',
     'Nitrate in groundwater · Portugal',
   ])
@@ -182,7 +183,7 @@ test('Alt Amsterdam shows the air modelled and measured, emissions and waste, wi
   page,
 }) => {
   await open(page);
-  await page.locator('body').press('8');
+  await page.locator('body').press('9'); // Alt Amsterdam
   const data = page.locator('#p-data');
   for (const label of [
     'Air · Amsterdam now',
@@ -197,9 +198,30 @@ test('Alt Amsterdam shows the air modelled and measured, emissions and waste, wi
   expect(await sideways(page)).toBeLessThanOrEqual(0);
 });
 
+test('Society sets Portugal and the Netherlands side by side: crime, schooling and emissions', async ({ page }) => {
+  await open(page);
+  await page.locator('body').press('7');
+  await expect(heroTitle(page)).toHaveText('Society');
+  const data = page.locator('#p-data');
+  for (const label of [
+    'Homicides · Portugal',
+    'Home burglaries · Netherlands',
+    'police-recorded, per 100,000 people',
+    'Early school leavers · Portugal',
+    'Degree holders · Netherlands',
+    'Emissions · Portugal',
+    'world #72',
+  ])
+    await expect(data).toContainText(label);
+  await expect(data).toContainText('Fraud · Portugal');
+  await expect(data).not.toContainText('Fraud · Netherlands'); // its newest year is 2016: too old to show
+  await expect(page.locator('#p-radar .blip')).toHaveCount(6);
+  expect(await sideways(page)).toBeLessThanOrEqual(0);
+});
+
 test('Alt Amsterdam picks its topics from its scene, reads its own sites, and links to Hipsy', async ({ page }) => {
   await open(page);
-  await page.locator('body').press('8');
+  await page.locator('body').press('9'); // Alt Amsterdam
   await expect(heroTitle(page)).toHaveText('Alternative Amsterdam');
   await expect(page.locator('#p-watch')).toContainText('Picked today from what is moving in the scene');
   await expect(page.locator('#p-watch .chip .name')).toHaveCount(6);
@@ -209,7 +231,7 @@ test('Alt Amsterdam picks its topics from its scene, reads its own sites, and li
 
 test('Markets shows real prices and plain takeaways, not attention charts', async ({ page }) => {
   await open(page);
-  await page.locator('.channels .channel').nth(8).click();
+  await page.locator('.channels').getByRole('button', { name: 'Markets' }).click();
   await expect(heroTitle(page)).toHaveText('Markets');
   const prices = page.locator('#p-markets');
   await expect(prices.locator('.mk-notes')).toContainText('Brent is $107.03 a barrel');

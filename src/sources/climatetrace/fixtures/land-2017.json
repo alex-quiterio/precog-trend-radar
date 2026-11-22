@@ -1,0 +1,58 @@
+[
+  {
+    "country": "NLD",
+    "continent": "null",
+    "rank": 447,
+    "previousRank": 447,
+    "assetCount": null,
+    "emissions": {
+      "co2": 6243006.2306691,
+      "ch4": 18.508350783,
+      "n2o": 0,
+      "co2e_100yr": 6243505.956140241,
+      "co2e_20yr": 6244481.346226505
+    },
+    "worldEmissions": {
+      "co2": -8623905467.672567,
+      "ch4": 3260904.3493055156,
+      "n2o": 0,
+      "co2e_100yr": -8535861050.241318,
+      "co2e_20yr": -8364011391.032917
+    },
+    "emissionsChange": {
+      "co2": 0,
+      "ch4": 0,
+      "n2o": 0,
+      "co2e_100yr": 0,
+      "co2e_20yr": 0
+    }
+  },
+  {
+    "country": "PRT",
+    "continent": "null",
+    "rank": 129,
+    "previousRank": 129,
+    "assetCount": null,
+    "emissions": {
+      "co2": 80427507.63892628,
+      "ch4": 9297.200603016401,
+      "n2o": 0,
+      "co2e_100yr": 80678532.05520773,
+      "co2e_20yr": 81168494.52698669
+    },
+    "worldEmissions": {
+      "co2": -8623905467.672567,
+      "ch4": 3260904.3493055156,
+      "n2o": 0,
+      "co2e_100yr": -8535861050.241318,
+      "co2e_20yr": -8364011391.032917
+    },
+    "emissionsChange": {
+      "co2": 0,
+      "ch4": 0,
+      "n2o": 0,
+      "co2e_100yr": 0,
+      "co2e_20yr": 0
+    }
+  }
+]

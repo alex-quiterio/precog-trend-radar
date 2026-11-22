@@ -4,7 +4,7 @@ export const MIN = 60e3,
   HOUR = 3600e3,
   DAY = 86400e3;
 export const MAX_TOPICS = 6,
-  MAX_LENSES = 14,
+  MAX_LENSES = 15, // 12 shipped lenses, and 3 of your own
   HISTORY = 90,
   FC_STEPS = 12,
   FIT_N = 20,
@@ -99,6 +99,19 @@ export const PRESETS = [
       ['Mortgage loan', { q: 'mortgage rates' }],
       ['Gentrification'],
       ['Short-term rental', { q: 'short-term rental' }],
+    ],
+  },
+  {
+    id: 'society',
+    name: 'Society',
+    desc: 'Inequality, poverty, crime, schooling and migration in Portugal and the Netherlands, side by side.',
+    topics: [
+      ['Inequality', { wiki: 'Economic inequality', q: 'inequality' }],
+      ['Poverty'],
+      ['Crime', { q: 'crime rate' }],
+      ['Education', { q: 'schools' }],
+      ['Immigration'],
+      ['Populism'],
     ],
   },
   {
@@ -200,9 +213,10 @@ export function otherNames(lensId: string, name: string): string[] {
 // v11 adds Markets.
 // v12 adds Bird migration.
 // v13 turns The Great Simplification ('tgs') into The Great Turning ('turning').
-export const PRESET_VERSION = 13;
+// v14 adds Society.
+export const PRESET_VERSION = 14;
 /** Lenses whose topics are picked each day rather than shipped (see features/hot-topics.ts). */
-export const PICKED_LENSES = ['world', 'amsterdam'];
+export const PICKED_LENSES = ['world', 'amsterdam', 'turning'];
 export const LS = {
   presetVer: 'precog.presetver',
   lenses: 'precog.lenses.v1',

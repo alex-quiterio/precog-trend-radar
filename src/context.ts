@@ -10,7 +10,7 @@ import { createDatapoints } from '@features/datapoints';
 import { createGitHub } from '@features/github';
 import { createMyGitHub } from '@features/github-me';
 import { createHotTopics, createPickers } from '@features/hot-topics';
-import { SCENE_KEY, SCENE_LENS, sceneSource } from '@features/scene-topics';
+import { SCENE_KEY, SCENE_LENS, TURNING_KEY, TURNING_LENS, sceneSource, turningSource } from '@features/scene-topics';
 import { channelStreams, createStoryLoader, streamContext } from '@features/stories';
 import { ADAPTERS, SOURCES } from '@sources/registry';
 
@@ -43,6 +43,13 @@ export function createContext(app: AppStore = createAppStore()) {
       storageKey: SCENE_KEY,
       from: 'what is moving in the scene',
       candidates: sceneSource(() => app.lensById(SCENE_LENS)?.topics ?? []),
+    }),
+    createHotTopics({
+      app,
+      lensId: TURNING_LENS,
+      storageKey: TURNING_KEY,
+      from: 'what is moving among its voices',
+      candidates: turningSource(() => app.lensById(TURNING_LENS)?.topics ?? []),
     }),
   ]);
   const actions = createActions(app, { live, stories, github, myGithub, hot });

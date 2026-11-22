@@ -1,14 +1,14 @@
-// PRECOG / Trend Radar · Alt Amsterdam's topics, picked each day from what is moving in its scene. A pool of the
-// cooperative, regenerative city's subjects is scored on two signals: how much more its Wikipedia article is
-// read this week than in the month before, and how often the channel's own sites (Commons Network, Shareable,
-// Repair Café, Resilience) named it in recent posts. The best six become the channel's topics, through the
-// same store as World's (features/hot-topics.ts), so pins, your own topics and removals work the same way.
-// The pool is curated, so no pick is ever a person; your own additions join the pool.
+// PRECOG / Trend Radar · Topics picked each day from a curated pool: Alt Amsterdam's (what is moving in its scene)
+// and The Great Turning's (what is moving among its voices). Each pool is scored on two signals: how much more a
+// subject's Wikipedia article is read this week than in the month before, and how often the channel's own sites
+// named it in recent posts. The best six become the channel's topics, through the same store as World's
+// (features/hot-topics.ts), so pins, your own topics and removals work the same way, and a pick stays a few days
+// unless something else rises. The pools are curated, so no pick is ever a person; your own additions join them.
 import { DAY, store } from '@core/config';
 import { getJSON, pool as inPool, topicRegex } from '@sources/registry';
 import { parsePageviews } from '@sources/wikipedia/parse';
-import { AMSTERDAM_SITES, loadReading } from '@sources/reading';
-import type { ReadingItem } from '@sources/reading/parse';
+import { AMSTERDAM_SITES, TURNING_SITES, loadReading } from '@sources/reading';
+import type { ReadingItem, ReadingSite } from '@sources/reading/parse';
 import type { Candidate, Echo } from './hot-topics';
 
 export const SCENE_LENS = 'amsterdam';
@@ -41,6 +41,51 @@ export const SCENE_POOL: [string, string, string][] = [
   ['Universal basic income', 'Universal basic income', 'basic income'],
   ['Degrowth', 'Degrowth', 'degrowth'],
   ['Food sovereignty', 'Food sovereignty', 'food sovereignty'],
+];
+
+export const TURNING_LENS = 'turning';
+export const TURNING_KEY = 'precog.turning.v1';
+/**
+ * The Great Turning's subjects, after Joanna Macy's three strands: what is ending (holding actions), the
+ * structures being built in its place, and the shift in how we see ourselves in the living world. Weighted
+ * toward the land, energy descent and a local, closed-loop life. [name, Wikipedia title, search phrase].
+ */
+export const TURNING_POOL: [string, string, string][] = [
+  // What is ending
+  ['Climate change', 'Climate change', 'climate change'],
+  ['Biodiversity loss', 'Biodiversity loss', 'biodiversity'],
+  ['Overshoot', 'Overshoot (population)', 'overshoot'],
+  ['Planetary boundaries', 'Planetary boundaries', 'planetary boundaries'],
+  ['Peak oil', 'Peak oil', 'peak oil'],
+  ['Energy descent', 'Energy descent', 'energy descent'],
+  ['Strait of Hormuz', 'Strait of Hormuz', 'Hormuz'],
+  ['Societal collapse', 'Societal collapse', 'societal collapse'],
+  // What is being built
+  ['Degrowth', 'Degrowth', 'degrowth'],
+  ['Localism', 'Localism (politics)', 'localization'],
+  ['Doughnut economics', 'Doughnut (economic model)', 'doughnut economics'],
+  ['Commons', 'Commons', 'commons'],
+  ['Gift economy', 'Gift economy', 'gift economy'],
+  ['Mutual aid', 'Mutual aid', 'mutual aid'],
+  ['Food sovereignty', 'Food sovereignty', 'food sovereignty'],
+  ['Permaculture', 'Permaculture', 'permaculture'],
+  ['Regenerative agriculture', 'Regenerative agriculture', 'regenerative agriculture'],
+  ['Agroforestry', 'Agroforestry', 'agroforestry'],
+  ['Rewilding', 'Rewilding', 'rewilding'],
+  ['Seed saving', 'Seed saving', 'seed saving'],
+  ['Ecovillage', 'Ecovillage', 'ecovillage'],
+  ['Transition towns', 'Transition town', 'transition town'],
+  ['Appropriate technology', 'Appropriate technology', 'appropriate technology'],
+  ['Bioregionalism', 'Bioregionalism', 'bioregional'],
+  ['Rights of nature', 'Rights of nature', 'rights of nature'],
+  // The shift in consciousness
+  ['Deep ecology', 'Deep ecology', 'deep ecology'],
+  ['Systems thinking', 'Systems thinking', 'systems thinking'],
+  ['Gaia hypothesis', 'Gaia hypothesis', 'Gaia'],
+  ['Traditional knowledge', 'Traditional ecological knowledge', 'indigenous knowledge'],
+  ['Simple living', 'Simple living', 'simple living'],
+  ['Eco-anxiety', 'Eco-anxiety', 'eco-anxiety'],
+  ['Solarpunk', 'Solarpunk', 'solarpunk'],
 ];
 
 const median = (xs: number[]) => {
@@ -139,13 +184,18 @@ async function surges(titles: string[], signal: AbortSignal, now: number): Promi
 }
 
 /**
- * Today's candidates for Alt Amsterdam: the pool plus the topics you added to the channel yourself. `lensTopics`
- * gives the channel's topics now, so one you added stays in the running.
+ * Today's candidates from a pool: the pool plus the topics you added to the channel yourself, scored against the
+ * channel's own sites. `lensTopics` gives the channel's topics now, so one you added stays in the running.
  */
-export function sceneSource(lensTopics: () => { name: string; wiki?: string; q?: string }[], now = Date.now) {
+export function poolSource(
+  base: [string, string, string][],
+  sites: ReadingSite[],
+  lensTopics: () => { name: string; wiki?: string; q?: string }[],
+  now = Date.now,
+) {
   return async (signal: AbortSignal, skip: Set<string>): Promise<Candidate[]> => {
     const t = now();
-    const pool = [...SCENE_POOL];
+    const pool = [...base];
     lensTopics().forEach(d => {
       if (!pool.some(([n]) => n.toLowerCase() === d.name.toLowerCase()))
         pool.push([d.name, d.wiki || d.name, (d.q || d.name).replace(/"/g, '')]);
@@ -156,9 +206,15 @@ export function sceneSource(lensTopics: () => { name: string; wiki?: string; q?:
         signal,
         t,
       ),
-      loadReading(signal, AMSTERDAM_SITES).catch(() => ({ items: [] as ReadingItem[], errors: [] })),
+      loadReading(signal, sites).catch(() => ({ items: [] as ReadingItem[], errors: [] })),
     ]);
     const recent = reading.items.filter(it => t - it.t < 60 * DAY);
     return sceneCandidates(pool, surge, recent, t, skip);
   };
 }
+/** Alt Amsterdam's candidates: its scene's pool, read against its own sites. */
+export const sceneSource = (lensTopics: () => { name: string; wiki?: string; q?: string }[], now = Date.now) =>
+  poolSource(SCENE_POOL, AMSTERDAM_SITES, lensTopics, now);
+/** The Great Turning's candidates: its pool, read against its own voices (The Great Simplification, Local Futures). */
+export const turningSource = (lensTopics: () => { name: string; wiki?: string; q?: string }[], now = Date.now) =>
+  poolSource(TURNING_POOL, TURNING_SITES, lensTopics, now);

@@ -1,0 +1,122 @@
+{
+  "version": "2.0",
+  "class": "dataset",
+  "label": "Population in private households by educational attainment level",
+  "source": "ESTAT",
+  "updated": "2026-10-30T23:00:00+0100",
+  "value": {
+    "0": 44.3,
+    "1": 45.1,
+    "2": 45.2,
+    "3": 46.6,
+    "4": 47.6,
+    "5": 49.1,
+    "6": 52.3,
+    "7": 55.6,
+    "8": 56.4,
+    "9": 54.5,
+    "10": 55.1,
+    "11": 56.1,
+    "12": 31.6,
+    "13": 33.2,
+    "14": 34.9,
+    "15": 34.2,
+    "16": 35.2,
+    "17": 38.0,
+    "18": 41.7,
+    "19": 45.9,
+    "20": 42.9,
+    "21": 41.5,
+    "22": 43.2,
+    "23": 42.5
+  },
+  "status": { "0": "b", "5": "b", "7": "b", "12": "b", "19": "b" },
+  "id": ["freq", "sex", "age", "unit", "isced11", "geo", "time"],
+  "size": [1, 1, 1, 1, 1, 2, 12],
+  "dimension": {
+    "freq": { "label": "Time frequency", "category": { "index": { "A": 0 }, "label": { "A": "Annual" } } },
+    "sex": { "label": "Sex", "category": { "index": { "T": 0 }, "label": { "T": "Total" } } },
+    "age": {
+      "label": "Age class",
+      "category": { "index": { "Y25-34": 0 }, "label": { "Y25-34": "From 25 to 34 years" } }
+    },
+    "unit": { "label": "Unit of measure", "category": { "index": { "PC": 0 }, "label": { "PC": "Percentage" } } },
+    "isced11": {
+      "label": "International Standard Classification of Education (ISCED 2011)",
+      "category": { "index": { "ED5-8": 0 }, "label": { "ED5-8": "Tertiary education (levels 5-8)" } }
+    },
+    "geo": {
+      "label": "Geopolitical entity (reporting)",
+      "category": { "index": { "NL": 0, "PT": 1 }, "label": { "NL": "Netherlands", "PT": "Portugal" } }
+    },
+    "time": {
+      "label": "Time",
+      "category": {
+        "index": {
+          "2014": 0,
+          "2015": 1,
+          "2016": 2,
+          "2017": 3,
+          "2018": 4,
+          "2019": 5,
+          "2020": 6,
+          "2021": 7,
+          "2022": 8,
+          "2023": 9,
+          "2024": 10,
+          "2025": 11
+        },
+        "label": {
+          "2014": "2014",
+          "2015": "2015",
+          "2016": "2016",
+          "2017": "2017",
+          "2018": "2018",
+          "2019": "2019",
+          "2020": "2020",
+          "2021": "2021",
+          "2022": "2022",
+          "2023": "2023",
+          "2024": "2024",
+          "2025": "2025"
+        }
+      }
+    }
+  },
+  "extension": {
+    "lang": "EN",
+    "id": "EDAT_LFSE_03",
+    "agencyId": "ESTAT",
+    "version": "1.0",
+    "datastructure": { "id": "EDAT_LFSE_03", "agencyId": "ESTAT", "version": "44.0" },
+    "annotation": [
+      { "type": "CREATED", "date": "2015-11-16T16:17:02+0100" },
+      {
+        "type": "DISSEMINATION_DOI_XML",
+        "title": "<adms:identifier xmlns:adms=\"http://www.w3.org/ns/adms#\" xmlns:skos=\"http://www.w3.org/2004/02/skos/core.html\" xmlns:dct=\"http://purl.org/dc/terms/\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"><adms:Identifier rdf:about=\"https://doi.org/10.2908/EDAT_LFSE_03\"><skos:notation rdf:datatype=\"http://purl.org/spar/datacite/doi\">10.2908/EDAT_LFSE_03</skos:notation><dct:creator rdf:resource=\"http://publications.europa.eu/resource/authority/corporate-body/ESTAT\"/><dct:issued rdf:datatype=\"http://www.w3.org/2001/XMLSchema#date\">2023-01-19</dct:issued></adms:Identifier></adms:identifier>"
+      },
+      { "type": "DISSEMINATION_OBJECT_TYPE", "title": "DATASET" },
+      { "type": "DISSEMINATION_TIMESTAMP_DATA", "date": "2026-10-30T23:00:00+0100" },
+      { "type": "DISSEMINATION_TIMESTAMP_GLOBAL", "date": "2026-10-30T23:00:00+0100" },
+      { "type": "DISSEMINATION_TIMESTAMP_PLANNED", "date": "2026-10-30T23:00:00+0100" },
+      {
+        "type": "ESMS_HTML",
+        "title": "Explanatory texts (metadata)",
+        "href": "https://ec.europa.eu/eurostat/cache/metadata/en/edat1_esms.htm"
+      },
+      {
+        "type": "ESMS_SDMX",
+        "title": "Explanatory texts (metadata)",
+        "href": "https://ec.europa.eu/eurostat/api/dissemination/files?file=metadata/edat1_esms.sdmx.zip"
+      },
+      { "type": "OBS_COUNT", "title": "378147" },
+      { "type": "OBS_PERIOD_OVERALL_LATEST", "title": "2025" },
+      { "type": "OBS_PERIOD_OVERALL_OLDEST", "title": "1992" },
+      { "type": "SOURCE_INSTITUTIONS", "text": "Eurostat" },
+      { "type": "UPDATE_DATA", "date": "2026-10-30T23:00:00+0100" },
+      { "type": "UPDATE_STRUCTURE", "date": "2026-05-08T23:00:00+0200" }
+    ],
+    "status": { "label": { "b": "break in time series" } },
+    "positions-with-no-data": { "freq": [], "sex": [], "age": [], "unit": [], "isced11": [], "geo": [], "time": [] }
+  }
+}

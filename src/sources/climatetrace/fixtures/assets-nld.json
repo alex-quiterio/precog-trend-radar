@@ -1,0 +1,27 @@
+{
+  "bbox": [4.76389, 52.308601, 4.76389, 52.308601],
+  "assets": [
+    {
+      "Id": 3165570,
+      "Name": "Amsterdam Airport Schiphol",
+      "NativeId": "iata_AMS",
+      "Country": "NLD",
+      "Sector": "international-aviation",
+      "AssetType": "international",
+      "ReportingEntity": "climate-trace",
+      "EmissionsSummary": [
+        {
+          "Gas": "co2e_100yr",
+          "ActivityUnits": "t of fuel",
+          "Activity": 3113929.38006216,
+          "EmissionsFactorUnits": "t of CO2e_100yr per t of fuel",
+          "CapacityUnits": "flights",
+          "Capacity": 478057,
+          "CapacityFactor": 6.513719870354707,
+          "EmissionsFactor": 3.1848478700000005,
+          "EmissionsQuantity": 9917391.353421392
+        }
+      ]
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 // PRECOG / Trend Radar · Eurostat cards: unemployment, inflation, house prices, rents, energy prices, renewables,
-// and the yearly environment numbers (greenhouse gases, nitrate in groundwater, municipal waste, circular use).
+// the yearly environment numbers (greenhouse gases, nitrate in groundwater, municipal waste, circular use), and
+// society's (police-recorded crime, early school leavers, young adults with a degree).
 import type { SeriesPoint } from '@/types';
 import { type DatapointGroup, type DatapointRow, registerCards } from '@sources/cards';
 import { fmtPct, nf0, nf1 } from '@core/format';
@@ -222,6 +223,8 @@ const both = (...parts: string[]): string => parts.filter(Boolean).join(' · ');
 /**
  * A yearly dataset with one series per country: a loader making one card each for Portugal and the Netherlands.
  * `card` gets the country's series (oldest first, never empty) and returns what is particular to the card.
+ * `opts.loader` names the loader when several cards read one dataset (crime categories); `opts.freshYears`
+ * leaves a country out when its newest year is older than that, rather than show a stale number as today's.
  */
 function yearlyCards(
   code: string,
@@ -229,9 +232,10 @@ function yearlyCards(
   idPrefix: string,
   o: number,
   card: (series: SeriesPoint[], name: string) => Pick<DatapointRow, 'k' | 'v' | 'sub'> & { by?: string },
+  opts: { loader?: string; freshYears?: number } = {},
 ): void {
   registerCards({
-    id: `eurostat-${code}`,
+    id: opts.loader ?? `eurostat-${code}`,
     async load() {
       const j = await getJSON(
         `https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/${code}?geo=PT&geo=NL${query}&lastTimePeriod=12`,
@@ -240,6 +244,7 @@ function yearlyCards(
         const series = parseEurostat(j, { geo });
         const last = series[series.length - 1];
         if (!last) return [];
+        if (opts.freshYears && new Date().getUTCFullYear() - year(last.t) > opts.freshYears) return [];
         const { by, ...text } = card(series, name);
         return [
           {
@@ -279,4 +284,33 @@ yearlyCards('sdg_12_41', '', 'circular', 29, (s, name) => ({
   k: `Circular material use · ${name}`,
   v: `${nf1.format(s[s.length - 1].value)}%`,
   sub: both('of the materials used were recycled ones', ptsSince(s)),
+}));
+
+// Crime as the police recorded it, per 100,000 people. Recording and reporting differ between countries, so a
+// country's own trend says more than the two side by side.
+const crime = (iccs: string, idPrefix: string, label: string, o: number): void =>
+  yearlyCards(
+    'crim_off_cat',
+    `&iccs=${iccs}&unit=P_HTHAB`,
+    idPrefix,
+    o,
+    (s, name) => ({
+      k: `${label} · ${name}`,
+      v: nf1.format(s[s.length - 1].value),
+      sub: both('police-recorded, per 100,000 people', pctSince(s)),
+    }),
+    { loader: `eurostat-crime-${idPrefix}`, freshYears: 5 },
+  );
+crime('ICCS0101', 'homicide', 'Homicides', 40);
+crime('ICCS05012', 'burglary', 'Home burglaries', 41);
+crime('ICCS0701', 'fraud', 'Fraud', 42);
+yearlyCards('edat_lfse_14', '&sex=T&wstatus=POP&unit=PC', 'leavers', 43, (s, name) => ({
+  k: `Early school leavers · ${name}`,
+  v: `${nf1.format(s[s.length - 1].value)}%`,
+  sub: both('of 18–24-year-olds, with no upper-secondary school and not in training', ptsSince(s)),
+}));
+yearlyCards('edat_lfse_03', '&sex=T&age=Y25-34&isced11=ED5-8&unit=PC', 'degree', 44, (s, name) => ({
+  k: `Degree holders · ${name}`,
+  v: `${nf1.format(s[s.length - 1].value)}%`,
+  sub: both('of 25–34-year-olds, with a higher-education degree', ptsSince(s)),
 }));

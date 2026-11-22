@@ -26,3 +26,4 @@ import '@sources/powerprices/cards';
 import '@sources/luchtmeetnet/cards';
 import '@sources/owid/cards';
 import '@sources/worldbank/cards';
+import '@sources/climatetrace/cards';

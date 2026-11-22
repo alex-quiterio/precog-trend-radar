@@ -1,7 +1,9 @@
-// Alt Amsterdam's daily pick: Wikipedia momentum and the channel's sites' recent posts, scored over a pool.
+// The daily picks from a pool (Alt Amsterdam, The Great Turning): Wikipedia momentum and the channel's sites'
+// recent posts, scored over a curated pool.
 import { describe, expect, it } from 'vitest';
 import { DAY } from '@core/config';
-import { sceneCandidates, siteMentions, viewsSurge } from '@features/scene-topics';
+import { PICKED_LENSES } from '@core/config';
+import { TURNING_POOL, sceneCandidates, siteMentions, viewsSurge } from '@features/scene-topics';
 import type { ReadingItem } from '@sources/reading/parse';
 
 const now = Date.UTC(2026, 10, 7);
@@ -65,5 +67,22 @@ describe('the scene pick', () => {
     );
     expect(c.map(x => x.name)).not.toContain('Degrowth');
     expect(c.find(x => x.name === 'Squatting')?.echoes).toEqual(['sites']);
+  });
+});
+
+describe('The Great Turning’s pick', () => {
+  it('is picked each day, so its saved topics survive a preset upgrade', () => {
+    expect(PICKED_LENSES).toContain('turning');
+  });
+  it('draws on a pool of more than six subjects, none of them a person, each with its own article', () => {
+    expect(TURNING_POOL.length).toBeGreaterThan(20);
+    expect(new Set(TURNING_POOL.map(([n]) => n.toLowerCase())).size).toBe(TURNING_POOL.length);
+    expect(new Set(TURNING_POOL.map(([, w]) => w)).size).toBe(TURNING_POOL.length);
+    expect(TURNING_POOL.map(([n]) => n)).not.toContain('Joanna Macy');
+  });
+  it('lifts what its voices are writing about this month over a quiet subject', () => {
+    const items = [post('Seed saving as resistance', 'keep the old varieties', 3, 'Local Futures')];
+    const c = sceneCandidates(TURNING_POOL, new Map(), items, now);
+    expect(c[0]).toMatchObject({ name: 'Seed saving', notes: ['1 recent post on Local Futures'] });
   });
 });
