@@ -1,5 +1,5 @@
 // Actions on their own app store, with fake services: no shared state, no network.
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { createActions, parseTopicInput } from '@/actions';
 import { createContext } from '@/context';
 import { memoryBackend, useBackend } from '@core/storage';
@@ -9,11 +9,11 @@ let app: AppStore;
 let live: {
   signal: () => undefined;
   parts: () => string[];
-  fetchPart: ReturnType<typeof vi.fn>;
-  setStatus: ReturnType<typeof vi.fn>;
-  start: ReturnType<typeof vi.fn>;
+  fetchPart: Mock<() => Promise<void>>;
+  setStatus: Mock<(msg: string) => void>;
+  start: Mock<() => void>;
 };
-let stories: { load: ReturnType<typeof vi.fn>; status: { at: Record<string, number> } };
+let stories: { load: Mock<() => Promise<void>>; status: { at: Record<string, number> } };
 let actions: ReturnType<typeof createActions>;
 
 beforeEach(() => {

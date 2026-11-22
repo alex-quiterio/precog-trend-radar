@@ -20,19 +20,19 @@
   },
   "dependencies": {
     "date-fns": "4.4.0",
-    "vue": "3.5.13"
+    "vue": "3.5.46"
   },
   "devDependencies": {
-    "@playwright/test": "1.64.1",
-    "@types/node": "22.15.21",
-    "@vitejs/plugin-vue": "5.2.4",
-    "@vue/test-utils": "2.4.6",
-    "happy-dom": "15.11.7",
-    "prettier": "3.5.3",
-    "typescript": "5.8.3",
-    "vite": "6.3.5",
-    "vite-plugin-singlefile": "2.2.0",
-    "vitest": "3.1.4",
-    "vue-tsc": "2.2.10"
+    "@playwright/test": "1.65.1",
+    "@types/node": "22.20.5",
+    "@vitejs/plugin-vue": "6.0.11",
+    "@vue/test-utils": "2.6.0",
+    "happy-dom": "21.0.4",
+    "prettier": "3.10.1",
+    "typescript": "6.0.3",
+    "vite": "8.3.8",
+    "vite-plugin-singlefile": "2.3.4",
+    "vitest": "5.1.1",
+    "vue-tsc": "3.3.14"
   }
 }

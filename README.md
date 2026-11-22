@@ -14,8 +14,8 @@ What's moving in the topics you care about, the numbers worth knowing, and what'
 
 [![Build and deploy](https://github.com/alex-quiterio/precog-trend-radar/actions/workflows/pages.yml/badge.svg)](https://github.com/alex-quiterio/precog-trend-radar/actions/workflows/pages.yml)
 ![Vue 3](https://img.shields.io/badge/Vue-3.5-42b883?logo=vuedotjs&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178c6?logo=typescript&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-6-646cff?logo=vite&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178c6?logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)
 ![Tracks topics, never people](https://img.shields.io/badge/tracks-topics%2C%20never%20people-d03b3b)
 
 <img src="docs/screenshot-dark.png" alt="PRECOG in dark mode on The Great Turning channel: the gist of what moved, the attention chart, the planet's open data alongside, and episodes matched to the channel's topics" width="100%">
