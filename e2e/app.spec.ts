@@ -320,6 +320,10 @@ test('The Great Turning lists Campfire Stories films beside its episodes and art
   await expect(film).toHaveCount(3); // the films' own rows, however many episodes outrank them
   await expect(film.first().locator('a')).toHaveAttribute('href', /^https:\/\/www\.campfire-stories\.org\//);
   await expect(film.first()).not.toContainText('new'); // undated: no "new", no date
+  // A phone shows the first five items; the films come after "Show all".
+  const more = stories(page).locator('.stories-more');
+  if (await more.isVisible()) await more.click();
+  await expect(film.first()).toBeVisible();
   await film.first().scrollIntoViewIfNeeded();
   if (process.env.SHOT) await stories(page).screenshot({ path: `${process.env.SHOT}/${info.project.name}.png` });
 });
