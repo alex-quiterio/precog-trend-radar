@@ -139,7 +139,10 @@
         </svg>
         ±1σ
       </span>
-      <span class="hint">Swipe, drag or ←/→ to switch topic · 1–9 or [ ] to switch channel</span>
+      <span class="hint">
+        <span class="hint-touch">Swipe or drag to switch topic</span>
+        <span class="hint-keys">Swipe, drag or ←/→ to switch topic · 1–9 or [ ] to switch channel · / for all</span>
+      </span>
     </div>
   </panel-shell>
 </template>
@@ -522,5 +525,16 @@ export default defineComponent({
 }
 .src-chip.error i {
   color: var(--watch);
+}
+.hint-touch {
+  display: none;
+}
+@media (hover: none) and (pointer: coarse) {
+  .hint-touch {
+    display: inline;
+  }
+  .hint-keys {
+    display: none;
+  }
 }
 </style>

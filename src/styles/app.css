@@ -152,3 +152,22 @@ select:hover {
 .tip b {
   font-weight: 700;
 }
+
+/* Touch screens: segmented tabs and small buttons tall enough to tap. */
+@media (pointer: coarse) {
+  .seg button {
+    min-height: 36px;
+    padding: 6px 13px;
+  }
+  .btn.small {
+    min-height: 36px;
+  }
+}
+/* Phones: nothing smaller than 11.5px to read. */
+@media (max-width: 600px) {
+  .panel-head .meta,
+  .dp .src,
+  .dp dt .sub {
+    font-size: 11.5px;
+  }
+}

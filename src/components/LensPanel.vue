@@ -292,4 +292,14 @@ export default defineComponent({
 .watch-msg.err::before {
   content: '⚠ ';
 }
+@media (pointer: coarse) {
+  .chip .x,
+  .chip .pin {
+    width: 36px;
+    height: 36px;
+  }
+  .chip .name {
+    min-height: 36px;
+  }
+}
 </style>

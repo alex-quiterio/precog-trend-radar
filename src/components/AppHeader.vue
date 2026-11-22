@@ -524,4 +524,22 @@ h1 .sub {
     display: none;
   }
 }
+@media (max-width: 600px) {
+  h1 .slash,
+  h1 .sub {
+    display: none;
+  }
+}
+@media (pointer: coarse) {
+  .channel {
+    min-height: 44px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .controls .btn.icon,
+  .controls .btn.refresh {
+    width: 40px;
+    min-height: 40px;
+  }
+}
 </style>

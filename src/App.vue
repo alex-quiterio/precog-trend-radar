@@ -80,7 +80,7 @@
             <git-hub-me-panel :index="4"></git-hub-me-panel>
           </div>
         </section>
-        <section class="block" aria-labelledby="b-streams">
+        <section class="block streams-block" aria-labelledby="b-streams">
           <h3 id="b-streams" class="block-head">
             <span>{{ view.n('streams') }}</span>
             Streams
@@ -329,6 +329,17 @@ export default defineComponent({
   }
   .channel-hero .status {
     text-align: left;
+  }
+}
+/* One column (phones, tablets): the numbers before the reading. The main column's blocks and the side's
+   (Open data, Radar) join one list, and Streams goes last. */
+@media (max-width: 1179px) {
+  .main,
+  .side {
+    display: contents;
+  }
+  .streams-block {
+    order: 1;
   }
 }
 </style>

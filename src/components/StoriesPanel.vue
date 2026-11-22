@@ -45,7 +45,7 @@
       <span v-if="siteMsg" class="muted err">{{ siteMsg }}</span>
     </div>
 
-    <ol class="stories">
+    <ol class="stories" :class="{ all: showAll }">
       <li v-for="(r, i) in view.rows" :key="r.id" class="story">
         <span class="rank">{{ i + 1 }}</span>
         <div>
@@ -78,12 +78,15 @@
       <li v-if="!view.rows.length" class="empty">{{ view.empty }}</li>
       <li v-if="view.warn" class="empty">{{ view.warn }}</li>
     </ol>
+    <button v-if="view.rows.length > 5 && !showAll" class="btn stories-more" type="button" @click="showAll = true">
+      Show all {{ view.rows.length }}
+    </button>
   </panel-shell>
 </template>
 
 <script lang="ts">
 import { useApp } from '@/context';
-import { computed, defineComponent, ref } from 'vue';
+import { computed, defineComponent, ref, watch } from 'vue';
 import type { Entry, Prefs } from '@/types';
 import { channelStreams, streamContext } from '@features/stories';
 import { isBuiltInSite, readingSites } from '@sources/reading';
@@ -152,10 +155,17 @@ export default defineComponent({
       const ctx = streamContext(app);
       return channelStreams(app).map(s => [s.id, s.tabLabel?.(ctx) ?? s.label] as const);
     });
+    // Phones show the first five items, so the page doesn't run on for screens; this shows the rest.
+    const showAll = ref(false);
+    watch(
+      () => [app.state.activeLens, app.state.storySrc],
+      () => (showAll.value = false),
+    );
     return {
       state,
       view,
       sites,
+      showAll,
       isBuiltInSite,
       newSite,
       siteMsg,
@@ -333,5 +343,25 @@ export default defineComponent({
 .smeta .desc {
   color: var(--muted);
   flex-basis: 100%;
+}
+.stories-more {
+  display: none;
+}
+@media (max-width: 600px) {
+  .stories:not(.all) .story:nth-child(n + 6) {
+    display: none;
+  }
+  .stories-more {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    min-height: 44px;
+  }
+}
+@media (pointer: coarse) {
+  .site-chip button {
+    width: 32px;
+    height: 32px;
+  }
 }
 </style>
