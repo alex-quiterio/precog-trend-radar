@@ -108,8 +108,10 @@
 
     <footer class="foot">
       PRECOG tracks topics, never people · Wikipedia · The Guardian · Hacker News · Manifold · GitHub · ECB · Eurostat ·
-      IPMA · Open-Meteo · NOAA · NSIDC · DGEG · CoinGecko · EIA · alternative.me · World Bank · Aloft · iNaturalist
+      IPMA · Open-Meteo · NOAA · NSIDC · DGEG · CoinGecko · EIA · alternative.me · World Bank · Climate TRACE · Aloft ·
+      iNaturalist
     </footer>
+    <install-notice></install-notice>
   </div>
 </template>
 
@@ -118,6 +120,7 @@ import { useApp } from '@/context';
 import { computed, defineComponent } from 'vue';
 import { activeChannel, channelDatapoints, channels } from '@/channels';
 import AppHeader from '@components/AppHeader.vue';
+import InstallNotice from '@components/InstallNotice.vue';
 import MorningBrief from '@components/MorningBrief.vue';
 import DigestPanel from '@components/DigestPanel.vue';
 import MarketsPanel from '@components/MarketsPanel.vue';
@@ -138,6 +141,7 @@ export default defineComponent({
   name: 'App',
   components: {
     AppHeader,
+    InstallNotice,
     MorningBrief,
     DigestPanel,
     MarketsPanel,

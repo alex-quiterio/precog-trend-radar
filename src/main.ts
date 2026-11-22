@@ -13,6 +13,7 @@ import { exposeConsoleHooks } from '@/boot/console';
 import { installLifecycle } from '@/boot/lifecycle';
 import { restore } from '@/boot/prefs';
 import { installShortcuts } from '@/boot/shortcuts';
+import { registerServiceWorker } from '@features/install';
 import { activeChannel } from '@/channels';
 import { contextPlugin, createContext } from '@/context';
 import { HOUR } from '@core/config';
@@ -39,4 +40,5 @@ ctx.stories.startTimer();
 
 installShortcuts(ctx);
 installLifecycle(ctx);
+registerServiceWorker(); // the installed app opens offline too
 exposeConsoleHooks();

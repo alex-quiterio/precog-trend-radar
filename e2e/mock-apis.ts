@@ -137,7 +137,10 @@ function no2Hours(): unknown {
  * (Wikipedia's feed, Wikidata, Hacker News's front page, Manifold's busiest markets); without, Wikipedia's
  * feed is missing, so World keeps its shipped topics and the other tests can rely on them.
  */
-export async function mockApis(page: Page, { echoes = false, guardian = false } = {}): Promise<void> {
+export async function mockApis(page: Page, { echoes = false, guardian = false, install = false } = {}): Promise<void> {
+  // The install notice would sit over the page in every test; only the test about it lets it ask.
+  if (!install)
+    await page.addInitScript(() => localStorage.setItem('precog.install.v1', JSON.stringify({ done: true })));
   // With `guardian`, a key is set before the app starts, so the trend fetch reads the Guardian below.
   if (guardian) await page.addInitScript(() => localStorage.setItem('precog.guardian.key', JSON.stringify('test-key')));
   await page.route(

@@ -175,6 +175,13 @@ Or use the [hosted version](https://alex-quiterio.github.io/precog-trend-radar/)
 
 `npm run build` writes **one self-contained `dist/index.html`** with all JS and CSS inlined. It opens straight from your file system.
 
+### Install it as an app
+
+The hosted version installs as an app, with its own window and icon. In **Chrome or Edge**, PRECOG offers it in a
+small notice (or use the install icon in the address bar). On an **iPhone or iPad**: Share › Add to Home Screen. In
+**Safari on a Mac** (17 or later): File › Add to Dock. "Not now" hides the notice for π days (3.1415). The installed
+app opens offline too, with the last version you saw; the data always loads live.
+
 ## How it works
 
 A channel is four things, set in [`src/channels.ts`](src/channels.ts):

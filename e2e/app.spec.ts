@@ -323,3 +323,33 @@ test('The Great Turning lists Campfire Stories films beside its episodes and art
   await film.first().scrollIntoViewIfNeeded();
   if (process.env.SHOT) await stories(page).screenshot({ path: `${process.env.SHOT}/${info.project.name}.png` });
 });
+
+test('offers to install PRECOG as an app, and a "Not now" waits π days', async ({ page, request }) => {
+  const manifest = await (await request.get('/manifest.webmanifest')).json();
+  expect(manifest).toMatchObject({ short_name: 'PRECOG', display: 'standalone' });
+  expect(manifest.icons.map((i: { sizes: string }) => i.sizes)).toEqual(expect.arrayContaining(['192x192', '512x512']));
+  expect((await request.get('/icon-512.png')).ok()).toBe(true);
+  // Chrome hands the page its install prompt; here a stand-in arrives just after load.
+  await page.addInitScript(() =>
+    window.addEventListener('load', () =>
+      setTimeout(() => {
+        const e = Object.assign(new Event('beforeinstallprompt', { cancelable: true }), {
+          prompt: async () => {},
+          userChoice: Promise.resolve({ outcome: 'dismissed' }),
+        });
+        window.dispatchEvent(e);
+      }, 100),
+    ),
+  );
+  await open(page, { install: true });
+  const notice = page.locator('.install');
+  await expect(notice).toBeVisible({ timeout: 10_000 }); // it waits for the page to settle
+  await expect(notice).toContainText('Install PRECOG');
+  await notice.locator('.install-actions').getByRole('button', { name: 'Not now' }).click();
+  await expect(notice).toHaveCount(0);
+  const until = await page.evaluate(() => JSON.parse(localStorage.getItem('precog.install.v1') || '{}').until);
+  expect((until - Date.now()) / 86400e3).toBeCloseTo(3.1415, 2);
+  await page.reload();
+  await page.waitForTimeout(7000);
+  await expect(notice).toHaveCount(0); // snoozed
+});
