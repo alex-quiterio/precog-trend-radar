@@ -23,7 +23,24 @@
         :title="ui.loading ? 'Loading…' : 'Refresh data now'"
         @click="refresh"
       >
-        <span class="refresh-icon" aria-hidden="true">↻</span>
+        <svg class="refresh-icon" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
+          <!-- an open circle, three quarters round, with the arrowhead at its end -->
+          <path
+            d="M13.5 8a5.5 5.5 0 1 1-1.61-3.89"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            fill="none"
+          />
+          <path
+            d="M12.25 1.75v2.75H9.5"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none"
+          />
+        </svg>
       </button>
       <button
         class="btn icon set-toggle"
@@ -359,16 +376,20 @@ h1 .sub {
   gap: 8px;
 }
 /* Settings button: lit while the bar is open, amber when the Guardian key fails */
-/* Refresh: just the ↻, as round as the settings button; it spins while loading */
+/* Refresh: a line icon drawn like the settings one beside it; it turns while loading */
 .btn.refresh {
   justify-content: center;
 }
 .btn.refresh .refresh-icon {
-  font-size: 15px;
+  display: block;
+  margin: auto;
+}
+.btn.refresh:hover .refresh-icon {
+  color: var(--accent);
 }
 .btn.refresh[aria-busy='true'] .refresh-icon {
-  display: inline-block;
-  animation: spin 1s linear infinite;
+  color: var(--accent);
+  animation: spin 0.9s linear infinite;
 }
 @keyframes spin {
   to {
