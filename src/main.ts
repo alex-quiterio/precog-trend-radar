@@ -36,6 +36,11 @@ function pickHot(): void {
 }
 pickHot();
 setInterval(pickHot, HOUR); // a no-op until the day changes
+// Opening a picked channel before its turn picks its topics now (a no-op once it has picked today).
+watch(
+  () => ctx.app.state.activeLens,
+  lens => void ctx.hot.for(lens)?.refresh().then(reloadIf),
+);
 // GitHub's panels load only on its channel (its API allows 60 calls an hour without a token).
 const loadGitHub = () => {
   if (!activeChannel(ctx.app).github) return;
