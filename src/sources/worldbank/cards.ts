@@ -11,6 +11,7 @@ const COUNTRIES: [string, DatapointGroup, string][] = [
 
 registerCards({
   id: 'worldbank-forest-area',
+  cards: COUNTRIES.map(c => `forest-${c[1]}`),
   async load() {
     const data = await keptForADay('precog.forest.v1', async () =>
       parseIndicator(

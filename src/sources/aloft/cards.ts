@@ -38,6 +38,7 @@ export function crossingCard(c: (typeof CITIES)[number], d: MigrationDay): Datap
 CITIES.forEach(c =>
   registerCards({
     id: `aloft-${c.radar}`,
+    cards: [c.id],
     async load() {
       return [crossingCard(c, (await latestDay(c.radar)).day)];
     },

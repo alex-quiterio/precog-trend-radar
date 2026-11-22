@@ -4,6 +4,7 @@ import { PRESETS } from '@core/config';
 import { memoryBackend, useBackend } from '@core/storage';
 import { CAMPFIRE, TURNING_SITES, siteByUrl } from '@sources/reading';
 import { streamById } from '@sources/streams';
+import { CARD_LOADERS } from '@sources/cards';
 import '@sources/index';
 import { createAppStore, type AppStore } from '@/state';
 import { CHANNELS, activeChannel, channelOfLens, channels, isBuiltInLens } from './channels';
@@ -64,5 +65,12 @@ describe('channels for an app', () => {
     expect(activeChannel(app).id).toBe('turning');
     app.state.activeLens = 'gone';
     expect(activeChannel(app).id).toBe(CHANNELS[0].id);
+  });
+});
+
+describe('channel cards', () => {
+  it('lists only cards some loader makes, so none waits on a loader that never runs', () => {
+    const made = new Set(CARD_LOADERS.flatMap(l => l.cards));
+    for (const c of CHANNELS) for (const id of c.datapoints) expect(made, `${c.label}: ${id}`).toContain(id);
   });
 });

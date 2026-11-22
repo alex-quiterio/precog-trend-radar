@@ -6,6 +6,7 @@ import { parseCo2, parseSeaIce } from './parse';
 
 registerCards({
   id: 'global-warming-co2',
+  cards: ['co2'],
   async load() {
     const rows: DatapointRow[] = [];
     const j = await getJSON('https://global-warming.org/api/co2-api');
@@ -30,6 +31,7 @@ registerCards({
 
 registerCards({
   id: 'global-warming-sea-ice',
+  cards: ['seaice'],
   async load() {
     const rows: DatapointRow[] = [];
     const j = await getJSON('https://global-warming.org/api/arctic-api');

@@ -43,6 +43,7 @@ export function cheapCard(
 
 registerCards({
   id: 'power-nl',
+  cards: ['power-nl'],
   async load() {
     const now = Date.now();
     const reply = await getJSON(
@@ -60,6 +61,7 @@ registerCards({
 
 registerCards({
   id: 'power-pt',
+  cards: ['power-pt'],
   async load() {
     const now = Date.now();
     const url = (end: number) =>

@@ -14,6 +14,7 @@ const URL = 'https://ourworldindata.org/grapher/tree-cover-loss.csv?v=1&csvType=
 
 registerCards({
   id: 'owid-tree-cover-loss',
+  cards: COUNTRIES.map(c => `treeloss-${c[1]}`),
   async load() {
     // The file holds every country (145 KB): keep only the ones shown, for the day.
     const data = await keptForADay('precog.treeloss.v1', async () => {

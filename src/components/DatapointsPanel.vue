@@ -60,7 +60,7 @@ export default defineComponent({
           ...DATAPOINT_GROUPS.find(g => g.id === id),
           rows: rows.filter(r => r.group === id),
         })),
-        loaded: !!dp.at,
+        loaded: !!dp.at && !dp.loading,
         meta: dp.at ? `open data · ${hhmm(dp.at)}` : 'open data',
       };
     });

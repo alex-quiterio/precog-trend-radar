@@ -23,6 +23,7 @@ const HPI_AREAS: [string, DatapointGroup, string, string][] = [
 
 registerCards({
   id: 'eurostat-unemployment',
+  cards: AREAS.map(a => `unemployment-${a[2]}`),
   async load() {
     const rows: DatapointRow[] = [];
     const j = await getJSON(
@@ -55,6 +56,7 @@ registerCards({
 // Eurostat's HICP moved to prc_hicp_minr (ECOICOP 2) in 2026; annual rate of change, 13 months.
 registerCards({
   id: 'eurostat-inflation',
+  cards: AREAS.map(a => `inflation-${a[2]}`),
   async load() {
     const rows: DatapointRow[] = [];
     // Eurostat's HICP moved to prc_hicp_minr (ECOICOP 2) in 2026; annual rate of change, 13 months.
@@ -83,6 +85,7 @@ registerCards({
 
 registerCards({
   id: 'eurostat-house-prices',
+  cards: HPI_AREAS.map(a => `hpi-${a[2]}`),
   async load() {
     const rows: DatapointRow[] = [];
     const j = await getJSON(
@@ -110,6 +113,7 @@ registerCards({
 
 registerCards({
   id: 'eurostat-rents',
+  cards: AREAS.map(a => `rent-${a[2]}`),
   async load() {
     const rows: DatapointRow[] = [];
     const j = await getJSON(
@@ -137,6 +141,7 @@ registerCards({
 
 registerCards({
   id: 'eurostat-energy-prices',
+  cards: AREAS.map(a => `energyinfl-${a[2]}`),
   async load() {
     const rows: DatapointRow[] = [];
     const j = await getJSON(
@@ -164,6 +169,7 @@ registerCards({
 
 registerCards({
   id: 'eurostat-renewables',
+  cards: ['renew-pt', 'renew-nl'],
   async load() {
     const rows: DatapointRow[] = [];
     const j = await getJSON(
@@ -236,6 +242,7 @@ function yearlyCards(
 ): void {
   registerCards({
     id: opts.loader ?? `eurostat-${code}`,
+    cards: COUNTRIES.map(c => `${idPrefix}-${c[1]}`),
     async load() {
       const j = await getJSON(
         `https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/${code}?geo=PT&geo=NL${query}&lastTimePeriod=12`,

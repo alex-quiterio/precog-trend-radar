@@ -15,6 +15,7 @@ const price = (v: number) => `${v.toFixed(3).replace('.', ',')} €`;
 
 registerCards({
   id: 'dgeg-fuel',
+  cards: FUELS.map(f => f.card),
   async load() {
     const now = Date.now();
     const q = new URLSearchParams({

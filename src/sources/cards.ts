@@ -35,6 +35,11 @@ export interface DatapointFacts {
 export interface CardLoader {
   /** Unique, e.g. 'eurostat-unemployment'. */
   id: string;
+  /**
+   * The ids of the cards it can make (see channels.ts). Only the loaders a channel's cards need are run, so a
+   * card it makes but doesn't list here would never show; a test checks every card is listed by its loader.
+   */
+  cards: string[];
   /** Fetch and build the cards: a list of them, or the cards plus facts for the gist. */
   load(): Promise<DatapointRow[] | { rows: DatapointRow[]; facts: DatapointFacts }>;
 }

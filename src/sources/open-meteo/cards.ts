@@ -34,6 +34,7 @@ export const aqiWord = (v: number | null | undefined): string =>
 
 registerCards({
   id: 'open-meteo-weather',
+  cards: PLACES.map(p => `wx-${p[0].toLowerCase()}`),
   async load() {
     const rows: DatapointRow[] = [];
     const lat = PLACES.map(p => p[1]).join(','),
@@ -73,6 +74,7 @@ export const WHO_PM25_DAY = 15;
 // What is in the air right now, from the Copernicus (CAMS) model: one card per place, fine particles first.
 registerCards({
   id: 'open-meteo-air',
+  cards: PLACES.map(p => `air-${p[0].toLowerCase()}`),
   async load() {
     const rows: DatapointRow[] = [];
     const j = await getJSON(
@@ -120,6 +122,7 @@ registerCards({
 
 registerCards({
   id: 'open-meteo-sun-wind',
+  cards: ['sun-lisbon', 'sun-amsterdam'],
   async load() {
     const rows: DatapointRow[] = [];
     const j = await getJSON(
@@ -159,6 +162,7 @@ registerCards({
 SOIL_PLACES.forEach(([id, name, lat, lon, group], i) =>
   registerCards({
     id: `open-meteo-${id}`,
+    cards: [id],
     async load() {
       const rows: DatapointRow[] = [];
       const j = await getJSON(

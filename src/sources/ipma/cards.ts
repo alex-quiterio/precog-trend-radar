@@ -5,6 +5,7 @@ import { parseFireRisk, parseWarnings } from './parse';
 
 registerCards({
   id: 'ipma-fire-risk',
+  cards: ['fire'],
   async load() {
     const rows: DatapointRow[] = [],
       facts: DatapointFacts = {};
@@ -35,6 +36,7 @@ registerCards({
 
 registerCards({
   id: 'ipma-warnings',
+  cards: ['warnings'],
   async load() {
     const rows: DatapointRow[] = [],
       facts: DatapointFacts = {};

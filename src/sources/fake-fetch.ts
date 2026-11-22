@@ -70,6 +70,11 @@ export async function expectWellFormedCards(prefix: string): Promise<DatapointRo
   expect(loaders.length).toBeGreaterThan(0);
   const { rows, failed } = await loadCards(loaders);
   expect(failed).toEqual([]);
+  // A loader only runs for channels showing the cards it lists, so every card it makes must be listed.
+  for (const l of loaders) {
+    const own = await loadCards([l]);
+    own.rows.forEach(r => expect(l.cards, `${l.id} makes ${r.id} but doesn't list it`).toContain(r.id));
+  }
   expect(new Set(rows.map(r => r.id)).size).toBe(rows.length);
   rows.forEach(r => {
     expect(r.k, r.id).toBeTruthy();

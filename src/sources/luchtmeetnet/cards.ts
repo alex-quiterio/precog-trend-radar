@@ -13,6 +13,7 @@ export const WHO_NO2_DAY = 25;
 
 registerCards({
   id: 'luchtmeetnet-no2',
+  cards: ['no2-amsterdam'],
   async load() {
     // Whole hours, so the address (and any cache in front of it) stays the same for the hour.
     const end = Math.ceil(Date.now() / 3600e3) * 3600e3;

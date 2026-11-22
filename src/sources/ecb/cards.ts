@@ -8,6 +8,7 @@ import { monthMove } from '@sources/markets';
 
 registerCards({
   id: 'ecb-deposit-rate',
+  cards: ['ecb'],
   async load() {
     const rows: DatapointRow[] = [];
     const j = await getJSON(
@@ -29,6 +30,7 @@ registerCards({
 
 registerCards({
   id: 'ecb-mortgage-rates',
+  cards: ['mortgage-pt', 'mortgage-nl', 'mortgage-ea'],
   async load() {
     const rows: DatapointRow[] = [];
     const j = await getJSON(
@@ -63,6 +65,7 @@ registerCards({
 /** The euro area's 10-year government bond yield (AAA-rated issuers' curve), daily. */
 registerCards({
   id: 'ecb-bond-yield',
+  cards: ['yield-ea-10y'],
   async load() {
     const j = await getJSON(
       'https://data-api.ecb.europa.eu/service/data/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.SR_10Y?format=jsondata&lastNObservations=90',

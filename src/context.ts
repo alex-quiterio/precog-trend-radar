@@ -27,7 +27,9 @@ export function createContext(app: AppStore = createAppStore()) {
     state: app.state,
     ui: app.ui,
     entries: app.orderedEntries, // the channel on screen first
+    onScreen: E => E.lensId === app.state.activeLens,
     onLoadStart: () => void stories.load(),
+    onScreenReady: () => rescanAll(app), // its alerts straight away; the rest rescan when all are in
     onLoaded: () => rescanAll(app),
   });
   const datapoints = createDatapoints();

@@ -53,6 +53,7 @@ const both = (...parts: string[]): string => parts.filter(Boolean).join(' · ');
 
 registerCards({
   id: 'climatetrace-total',
+  cards: ['ctrace-pt', 'ctrace-nl', 'ctrace-world'],
   async load() {
     const data = await keptForADay('precog.ctrace.total.v1', () => byYear(null));
     const rows: DatapointRow[] = [];
@@ -95,6 +96,7 @@ registerCards({
 
 registerCards({
   id: 'climatetrace-land',
+  cards: COUNTRIES.map(c => `ctland-${c[1]}`),
   async load() {
     const data = await keptForADay('precog.ctrace.land.v1', () => byYear('forestry-and-land-use'));
     return COUNTRIES.flatMap(([iso, group, name]): DatapointRow[] => {
@@ -125,6 +127,7 @@ registerCards({
 
 registerCards({
   id: 'climatetrace-waste',
+  cards: COUNTRIES.map(c => `ctwaste-${c[1]}`),
   async load() {
     const data = await keptForADay('precog.ctrace.waste.v1', () => byYear('waste'));
     return COUNTRIES.flatMap(([iso, group, name]): DatapointRow[] => {
@@ -150,6 +153,7 @@ registerCards({
 
 registerCards({
   id: 'climatetrace-top',
+  cards: COUNTRIES.map(c => `cttop-${c[1]}`),
   async load() {
     // The year is kept with the result, so the card always names the year it was fetched for.
     const { year, tops } = await keptForADay('precog.ctrace.top.v1', async () => {

@@ -192,3 +192,93 @@ describe('the data loop', () => {
     }
   });
 });
+
+describe('the channel on screen first', () => {
+  /** Topics in three channels, and a loop that treats channel `screen.lens` as the one on screen. */
+  function channels(fetch: (topic: string) => Promise<AdapterResult>) {
+    const ui = reactive<LoopUi>({
+      status: '',
+      pulse: '',
+      beat: 0,
+      loading: false,
+      offline: false,
+      guardian: false,
+      guardianState: 'off',
+      guardianNote: '',
+    });
+    const state = reactive({ source: 'blend', liveLoaded: false, alerts: [] as Alert[] });
+    const entries = ['a1', 'a2', 'b1', 'b2', 'c1', 'c2', 'c3'].map(n => {
+      const E = entry(n);
+      E.lensId = n[0];
+      return E;
+    });
+    const screen = { lens: 'a' };
+    const ready = vi.fn(() => ({ liveLoaded: state.liveLoaded, loading: ui.loading, status: ui.status }));
+    const onLoaded = vi.fn();
+    const loop = createLiveLoop({
+      adapters: { a: { ...adapter('a', fetch), concurrency: 4 } },
+      sources: { blend: { label: 'index', parts: ['a'], blend: true } },
+      state,
+      ui,
+      entries: () => entries,
+      onScreen: E => E.lensId === screen.lens,
+      onScreenReady: ready,
+      onLoaded,
+      backgroundGapMs: 1,
+    });
+    return { loop, ui, state, entries, screen, ready, onLoaded };
+  }
+
+  it('loads the channel on screen first, and counts the screen as loaded before the rest are in', async () => {
+    const order: string[] = [];
+    const { loop, ready, onLoaded, ui } = channels(async topic => {
+      order.push(topic);
+      await new Promise(r => setTimeout(r, 2));
+      return { topic, points: days(100) };
+    });
+    await loop.load();
+    expect(order.slice(0, 2).sort()).toEqual(['a1', 'a2']);
+    expect(ready).toHaveBeenCalledOnce();
+    expect(ready.mock.results[0].value).toMatchObject({ liveLoaded: true, loading: false });
+    expect(ready.mock.results[0].value.status).toMatch(/Other channels are catching up\.$/);
+    expect(onLoaded).toHaveBeenCalledOnce(); // once everything is in
+    expect(ui.status).not.toContain('catching up');
+  });
+
+  it('fetches the other channels one at a time per source, so a cold start never floods it', async () => {
+    let background = 0,
+      most = 0;
+    const { loop } = channels(async topic => {
+      const bg = !topic.startsWith('a');
+      if (bg) most = Math.max(most, ++background);
+      await new Promise(r => setTimeout(r, 2));
+      if (bg) background--;
+      return { topic, points: days(100) };
+    });
+    await loop.load();
+    expect(most).toBe(1);
+  });
+
+  it('moves a channel you switch to mid-load to the front, and shows it loading until it is in', async () => {
+    const order: string[] = [];
+    let release: () => void = () => {};
+    const gate = new Promise<void>(r => (release = r));
+    const { loop, ui, state, screen } = channels(async topic => {
+      order.push(topic);
+      if (!topic.startsWith('a')) await gate; // the background waits until we've switched
+      return { topic, points: days(100) };
+    });
+    const running = loop.load();
+    await vi.waitFor(() => expect(state.liveLoaded).toBe(true)); // channel a is in
+    screen.lens = 'c';
+    loop.focus();
+    expect(state.liveLoaded).toBe(false);
+    expect(ui.loading).toBe(true);
+    release();
+    await running;
+    // After the one background request already in flight (b1), channel c comes before the rest of b.
+    expect(order.slice(3, 6).sort()).toEqual(['c1', 'c2', 'c3']);
+    expect(state.liveLoaded).toBe(true);
+    expect(ui.loading).toBe(false);
+  });
+});

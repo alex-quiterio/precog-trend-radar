@@ -29,7 +29,7 @@ export function parseTopicInput(raw: string): TopicDef {
 }
 /** The services actions start: the data loop and the stream loader. */
 export interface ActionDeps {
-  live: Pick<LiveLoop, 'signal' | 'parts' | 'fetchPart' | 'setStatus' | 'start'>;
+  live: Pick<LiveLoop, 'signal' | 'parts' | 'fetchPart' | 'setStatus' | 'start'> & Partial<Pick<LiveLoop, 'focus'>>;
   stories: { load(): Promise<void>; status: { at: Record<string, number> } };
   /** The GitHub panels' loaders (optional: a test may leave them out). */
   github?: Pick<GitHub, 'load'>;
@@ -155,6 +155,7 @@ export function createActions(app: AppStore, { live, stories, github, myGithub, 
     state.activeLens = id;
     app.savePrefs();
     ui.swap++;
+    live.focus?.(); // its topics go first if they're still loading
     void stories.load();
     if (activeChannel(app).github) void github?.load();
   }
@@ -169,6 +170,7 @@ export function createActions(app: AppStore, { live, stories, github, myGithub, 
     ui.swap++;
     if (state.storyScope === 'topic' || changedLens) loadStoriesDebounced();
     if (changedLens && activeChannel(app).github) void github?.load();
+    if (changedLens) live.focus?.();
   }
   function shiftTopic(d: number): void {
     const list = app.entriesOf(app.activeLens());
