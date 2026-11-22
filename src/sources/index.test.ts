@@ -37,6 +37,7 @@ describe('the source list', () => {
     expect([...providers].sort()).toEqual(
       [
         'aloft',
+        'bis',
         'climatetrace',
         'dgeg',
         'ecb',

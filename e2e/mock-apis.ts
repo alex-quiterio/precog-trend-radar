@@ -498,6 +498,9 @@ export async function mockApis(
               ),
         );
       }
+      if (h === 'stats.bis.org') {
+        return json(route, fixture('bis', 'cpi'));
+      }
       if (h === 'api.inaturalist.org') {
         return json(
           route,

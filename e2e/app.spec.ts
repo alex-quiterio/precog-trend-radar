@@ -42,6 +42,20 @@ test('loads every panel with data', async ({ page }) => {
   await expect(page.locator('#p-data')).toContainText(
     'CO₂ in the air',
   );
+  // Inflation in the five largest economies: the euro area's, and the BIS's for the rest.
+  for (const zone of [
+    'United States',
+    'China',
+    'Japan',
+    'India',
+  ]) {
+    await expect(page.locator('#p-data')).toContainText(
+      `Inflation · ${zone}`,
+    );
+  }
+  await expect(page.locator('#p-data')).toContainText(
+    'Largest economies',
+  );
 });
 
 test('flags the topic that spikes, in the gist and the movers table', async ({

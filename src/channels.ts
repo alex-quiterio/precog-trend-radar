@@ -83,8 +83,13 @@ export const CHANNELS: Channel[] = [
     kicker:
       'What the internet is echoing today, what forecasters expect, and the money underneath.',
     lensId: 'world',
+    // Inflation in the five largest economies (the euro area counted as one), then the euro area's rate and jobs.
     datapoints: [
+      'inflation-us',
+      'inflation-cn',
       'inflation-ea',
+      'inflation-jp',
+      'inflation-in',
       'ecb',
       'unemployment-ea',
       'co2',

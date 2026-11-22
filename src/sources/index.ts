@@ -27,3 +27,4 @@ import '@sources/luchtmeetnet/cards';
 import '@sources/owid/cards';
 import '@sources/worldbank/cards';
 import '@sources/climatetrace/cards';
+import '@sources/bis/cards';

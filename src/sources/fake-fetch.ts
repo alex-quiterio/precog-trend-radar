@@ -119,9 +119,14 @@ export async function expectWellFormedCards(
     expect(r.k, r.id).toBeTruthy();
     expect(r.v, r.id).toBeTruthy();
     expect(r.href, r.id).toMatch(/^https:\/\//);
-    expect(['pt', 'nl', 'ea', 'mkt', 'planet']).toContain(
-      r.group,
-    );
+    expect([
+      'pt',
+      'nl',
+      'world',
+      'ea',
+      'mkt',
+      'planet',
+    ]).toContain(r.group);
   });
   return rows;
 }

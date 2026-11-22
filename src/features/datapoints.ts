@@ -32,6 +32,11 @@ export const DATAPOINT_GROUPS: {
     hint: 'Land, air, weather, prices, jobs',
   },
   {
+    id: 'world',
+    label: 'Largest economies',
+    hint: 'Prices vs a year earlier',
+  },
+  {
     id: 'ea',
     label: 'Euro area',
     hint: 'Rates, prices, jobs',
