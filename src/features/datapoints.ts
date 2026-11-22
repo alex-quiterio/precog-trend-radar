@@ -34,7 +34,7 @@ export const DATAPOINT_GROUPS: {
   {
     id: 'world',
     label: 'Largest economies',
-    hint: 'Prices vs a year earlier',
+    hint: 'Prices and policy rates',
   },
   {
     id: 'ea',
@@ -45,6 +45,11 @@ export const DATAPOINT_GROUPS: {
     id: 'mkt',
     label: 'Markets',
     hint: 'The euro, bonds, gold, Bitcoin',
+  },
+  {
+    id: 'money',
+    label: 'Money & credit',
+    hint: 'Liquidity, central banks, currencies, credit',
   },
   {
     id: 'planet',

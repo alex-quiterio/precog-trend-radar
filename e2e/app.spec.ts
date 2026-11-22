@@ -56,6 +56,9 @@ test('loads every panel with data', async ({ page }) => {
   await expect(page.locator('#p-data')).toContainText(
     'Largest economies',
   );
+  await expect(page.locator('#p-data')).toContainText(
+    'Policy rate · Japan',
+  );
 });
 
 test('flags the topic that spikes, in the gist and the movers table', async ({
@@ -504,6 +507,18 @@ test('Markets shows real prices and plain takeaways, not attention charts', asyn
   await expect(
     gdp.locator('.gdp-sec.happy .gdp-row').first(),
   ).toContainText('7.76');
+  // Money & credit, from the BIS.
+  for (const label of [
+    'Money & credit',
+    'Dollar credit outside the US',
+    'Balance sheet · Fed',
+    'Yen, against its trading partners',
+    'Private credit · China',
+  ]) {
+    await expect(page.locator('#p-data')).toContainText(
+      label,
+    );
+  }
 });
 
 test('Bird migration shows the flyway from the North Sea to the Algarve, and the birds seen near each city', async ({

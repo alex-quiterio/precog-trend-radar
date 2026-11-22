@@ -499,7 +499,19 @@ export async function mockApis(
         );
       }
       if (h === 'stats.bis.org') {
-        return json(route, fixture('bis', 'cpi'));
+        const BIS: Record<string, string> = {
+          WS_LONG_CPI: 'cpi',
+          WS_CBPOL: 'policy-rates',
+          WS_GLI: 'liquidity',
+          WS_CBTA: 'cb-assets',
+          WS_EER: 'eer',
+          WS_TC: 'credit',
+          WS_CREDIT_GAP: 'credit-gap',
+        };
+        return json(
+          route,
+          fixture('bis', BIS[p.split('/')[6]] ?? 'cpi'),
+        );
       }
       if (h === 'api.inaturalist.org') {
         return json(

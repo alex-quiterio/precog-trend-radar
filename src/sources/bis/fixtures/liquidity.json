@@ -1,0 +1,400 @@
+{
+  "meta": {
+    "id": "IDREF6e8197ee-7c1e-4018-9ea0-bbe7d47f13ba",
+    "prepared": "2026-11-22T10:04:59",
+    "test": false,
+    "datasetId": "752a6bf3-dfea-45d0-9a6f-a2c8a6312a24",
+    "sender": {
+      "id": "UNKNOWN"
+    },
+    "receiver": {
+      "id": "guest"
+    },
+    "links": [
+      {
+        "rel": "self",
+        "href": "/data/dataflow/BIS/WS_GLI/1.0/Q.USD+EUR.3P.N.A.I.B.USD+771?lastNObservations=5",
+        "uri": "https://raw.githubusercontent.com/sdmx-twg/sdmx-json/develop/structure-message/tools/schemas/1.0/sdmx-json-structure-schema.json"
+      }
+    ]
+  },
+  "data": {
+    "dataSets": [
+      {
+        "links": [
+          {
+            "rel": "dataflow",
+            "urn": "urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=BIS:WS_GLI(1.0)"
+          }
+        ],
+        "reportingBegin": "2025-04-01T00:00:00",
+        "reportingEnd": "2026-04-01T23:59:59",
+        "action": "Information",
+        "series": {
+          "0:0:0:0:0:0:0:0": {
+            "attributes": [0, 0, 0, null, 0],
+            "observations": {
+              "0": ["14002516.068", 0, null, 0],
+              "1": ["14240684.034", 0, null, 0],
+              "2": ["14264166.94", 0, null, 0],
+              "3": ["14770950.729", 0, null, 0],
+              "4": ["15132723.957", 0, null, 0]
+            }
+          },
+          "0:1:0:0:0:0:0:1": {
+            "attributes": [1, 1, 1, null, 0],
+            "observations": {
+              "0": ["12.702", 0, null, 0],
+              "1": ["11.572", 0, null, 0],
+              "2": ["11.122", 0, null, 0],
+              "3": ["12.627", 0, null, 0],
+              "4": ["13.813", 0, null, 0]
+            }
+          },
+          "0:0:0:0:0:0:0:1": {
+            "attributes": [0, 1, 1, null, 0],
+            "observations": {
+              "0": ["6.527", 0, null, 0],
+              "1": ["7.378", 0, null, 0],
+              "2": ["8.671", 0, null, 0],
+              "3": ["7.308", 0, null, 0],
+              "4": ["8.03", 0, null, 0]
+            }
+          }
+        }
+      }
+    ],
+    "structure": {
+      "links": [
+        {
+          "rel": "dataflow",
+          "urn": "urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=BIS:WS_GLI(1.0)"
+        },
+        {
+          "rel": "datastructure",
+          "urn": "urn:sdmx:org.sdmx.infomodel.datastructure.DataStructure=BIS:BIS_GLI(1.0)"
+        }
+      ],
+      "name": "Global liquidity indicators",
+      "names": {
+        "en": "Global liquidity indicators"
+      },
+      "dimensions": {
+        "dataset": [],
+        "series": [
+          {
+            "id": "FREQ",
+            "name": "Frequency",
+            "keyPosition": 0,
+            "role": null,
+            "values": [
+              {
+                "id": "Q",
+                "name": "Quarterly"
+              }
+            ]
+          },
+          {
+            "id": "CURR_DENOM",
+            "name": "Currency of denomination",
+            "keyPosition": 1,
+            "role": null,
+            "values": [
+              {
+                "id": "USD",
+                "name": "US dollar"
+              },
+              {
+                "id": "EUR",
+                "name": "Euro"
+              }
+            ]
+          },
+          {
+            "id": "BORROWERS_CTY",
+            "name": "Borrowers' country",
+            "keyPosition": 2,
+            "role": null,
+            "values": [
+              {
+                "id": "3P",
+                "name": "All countries excluding residents"
+              }
+            ]
+          },
+          {
+            "id": "BORROWERS_SECTOR",
+            "name": "Borrowers' sector",
+            "keyPosition": 3,
+            "role": null,
+            "values": [
+              {
+                "id": "N",
+                "name": "Non-banks, total",
+                "description": "Entity that is not a bank. Sectoral classification that refers collectively to non-bank financial corporations and the non-financial sector."
+              }
+            ]
+          },
+          {
+            "id": "LENDERS_SECTOR",
+            "name": "Lending sector",
+            "keyPosition": 4,
+            "role": null,
+            "values": [
+              {
+                "id": "A",
+                "name": "All sectors"
+              }
+            ]
+          },
+          {
+            "id": "L_POS_TYPE",
+            "name": "Position type",
+            "keyPosition": 5,
+            "role": null,
+            "values": [
+              {
+                "id": "I",
+                "name": "Cross-border & Local in FCY"
+              }
+            ]
+          },
+          {
+            "id": "L_INSTR",
+            "name": "Type of instruments",
+            "keyPosition": 6,
+            "role": null,
+            "values": [
+              {
+                "id": "B",
+                "name": "Credit (loans & debt securities)"
+              }
+            ]
+          },
+          {
+            "id": "UNIT_MEASURE",
+            "name": "Unit of measure",
+            "keyPosition": 7,
+            "role": null,
+            "values": [
+              {
+                "id": "USD",
+                "name": "US dollar"
+              },
+              {
+                "id": "771",
+                "name": "Year-on-year changes, in per cent"
+              }
+            ]
+          }
+        ],
+        "observation": [
+          {
+            "id": "TIME_PERIOD",
+            "name": "Time period or range",
+            "keyPosition": 8,
+            "role": "time",
+            "values": [
+              {
+                "start": "2025-04-01T00:00:00",
+                "end": "2025-06-30T23:59:59",
+                "id": "2025-Q2",
+                "name": "2025-Q2"
+              },
+              {
+                "start": "2025-07-01T00:00:00",
+                "end": "2025-09-30T23:59:59",
+                "id": "2025-Q3",
+                "name": "2025-Q3"
+              },
+              {
+                "start": "2025-10-01T00:00:00",
+                "end": "2025-12-31T23:59:59",
+                "id": "2025-Q4",
+                "name": "2025-Q4"
+              },
+              {
+                "start": "2026-01-01T00:00:00",
+                "end": "2026-03-31T23:59:59",
+                "id": "2026-Q1",
+                "name": "2026-Q1"
+              },
+              {
+                "start": "2026-04-01T00:00:00",
+                "end": "2026-06-30T23:59:59",
+                "id": "2026-Q2",
+                "name": "2026-Q2"
+              }
+            ]
+          }
+        ]
+      },
+      "attributes": {
+        "dataset": [],
+        "series": [
+          {
+            "id": "TITLE",
+            "name": "Title",
+            "relationship": {
+              "dimensions": [
+                "FREQ",
+                "CURR_DENOM",
+                "BORROWERS_CTY",
+                "BORROWERS_SECTOR",
+                "LENDERS_SECTOR",
+                "L_POS_TYPE",
+                "L_INSTR",
+                "UNIT_MEASURE"
+              ]
+            },
+            "role": null,
+            "values": [
+              {
+                "id": "USD denominated credit (bank loans & debt securities) to non-bank borrowers located outside the US",
+                "name": "USD denominated credit (bank loans & debt securities) to non-bank borrowers located outside the US"
+              },
+              {
+                "id": "EUR denominated credit (bank loans & debt securities) to non-bank borrowers located outside the euro area",
+                "name": "EUR denominated credit (bank loans & debt securities) to non-bank borrowers located outside the euro area"
+              }
+            ]
+          },
+          {
+            "id": "UNIT_MULT",
+            "name": "Unit Multiplier",
+            "relationship": {
+              "dimensions": [
+                "FREQ",
+                "CURR_DENOM",
+                "BORROWERS_CTY",
+                "BORROWERS_SECTOR",
+                "LENDERS_SECTOR",
+                "L_POS_TYPE",
+                "L_INSTR",
+                "UNIT_MEASURE"
+              ]
+            },
+            "role": null,
+            "values": [
+              {
+                "id": "6",
+                "name": "Millions"
+              },
+              {
+                "id": "0",
+                "name": "Units"
+              }
+            ]
+          },
+          {
+            "id": "DECIMALS",
+            "name": "Decimals",
+            "relationship": {
+              "dimensions": [
+                "FREQ",
+                "CURR_DENOM",
+                "BORROWERS_CTY",
+                "BORROWERS_SECTOR",
+                "LENDERS_SECTOR",
+                "L_POS_TYPE",
+                "L_INSTR",
+                "UNIT_MEASURE"
+              ]
+            },
+            "role": null,
+            "values": [
+              {
+                "id": "0",
+                "name": "Zero"
+              },
+              {
+                "id": "2",
+                "name": "Two"
+              }
+            ]
+          },
+          {
+            "id": "COLLECTION",
+            "name": "Collection Indicator",
+            "relationship": {
+              "dimensions": [
+                "FREQ",
+                "CURR_DENOM",
+                "BORROWERS_CTY",
+                "BORROWERS_SECTOR",
+                "LENDERS_SECTOR",
+                "L_POS_TYPE",
+                "L_INSTR",
+                "UNIT_MEASURE"
+              ]
+            },
+            "role": null,
+            "values": []
+          },
+          {
+            "id": "AVAILABILITY",
+            "name": "Availability",
+            "relationship": {
+              "dimensions": [
+                "FREQ",
+                "CURR_DENOM",
+                "BORROWERS_CTY",
+                "BORROWERS_SECTOR",
+                "LENDERS_SECTOR",
+                "L_POS_TYPE",
+                "L_INSTR",
+                "UNIT_MEASURE"
+              ]
+            },
+            "role": null,
+            "values": [
+              {
+                "id": "A",
+                "name": "All users"
+              }
+            ]
+          }
+        ],
+        "observation": [
+          {
+            "id": "OBS_STATUS",
+            "name": "Observation Status",
+            "relationship": {
+              "primaryMeasure": "OBS_VALUE"
+            },
+            "role": null,
+            "values": [
+              {
+                "id": "A",
+                "name": "Normal value"
+              }
+            ]
+          },
+          {
+            "id": "OBS_PRE_BREAK",
+            "name": "Pre-Break Observation",
+            "relationship": {
+              "primaryMeasure": "OBS_VALUE"
+            },
+            "role": null,
+            "values": []
+          },
+          {
+            "id": "OBS_CONF",
+            "name": "Observation confidentiality",
+            "relationship": {
+              "primaryMeasure": "OBS_VALUE"
+            },
+            "role": null,
+            "values": [
+              {
+                "id": "F",
+                "name": "Free"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

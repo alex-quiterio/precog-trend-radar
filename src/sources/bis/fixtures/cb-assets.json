@@ -1,0 +1,758 @@
+{
+  "meta": {
+    "id": "IDREFd15163e1-a80e-4d14-8242-b529003bcf82",
+    "prepared": "2026-11-22T10:04:58",
+    "test": false,
+    "datasetId": "024465a5-6a24-45c9-aae2-1b9f32e5b236",
+    "sender": {
+      "id": "UNKNOWN"
+    },
+    "receiver": {
+      "id": "guest"
+    },
+    "links": [
+      {
+        "rel": "self",
+        "href": "/data/dataflow/BIS/WS_CBTA/1.0/M.US+XM+JP+CN.B.USD+XDC.USD+_Z.B?lastNObservations=13",
+        "uri": "https://raw.githubusercontent.com/sdmx-twg/sdmx-json/develop/structure-message/tools/schemas/1.0/sdmx-json-structure-schema.json"
+      }
+    ]
+  },
+  "data": {
+    "dataSets": [
+      {
+        "links": [
+          {
+            "rel": "dataflow",
+            "urn": "urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=BIS:WS_CBTA(1.0)"
+          }
+        ],
+        "reportingBegin": "2025-06-01T00:00:00",
+        "reportingEnd": "2026-07-01T23:59:59",
+        "action": "Information",
+        "series": {
+          "0:0:0:0:0:0": {
+            "attributes": [
+              0,
+              0,
+              0,
+              null,
+              0,
+              0,
+              null,
+              0,
+              0,
+              0,
+              0,
+              null,
+              0
+            ],
+            "observations": {
+              "0": ["6992.2304582519", null, 0, 0, null],
+              "1": ["7099.0148989251", null, 0, 0, null],
+              "2": ["7290.2446355358", null, 0, 0, null],
+              "3": ["7129.9097285849", null, 0, 0, null],
+              "4": ["7105.8242916113", null, 0, 0, null],
+              "5": ["7427.9090644182", null, 0, 0, null],
+              "6": ["7497.0434936001", null, 0, 0, null],
+              "7": ["7350.7146154109", null, 0, 0, null],
+              "8": ["7190.2000193166", null, 0, 0, null],
+              "9": ["7250.5584778042", null, 0, 0, null],
+              "10": ["7175.0559785564", null, 0, 0, null],
+              "11": ["6817.046561576", null, 0, 0, null],
+              "12": ["6823.522655883", null, 0, 0, null]
+            }
+          },
+          "0:1:0:0:0:0": {
+            "attributes": [
+              1,
+              0,
+              0,
+              null,
+              0,
+              0,
+              null,
+              0,
+              1,
+              0,
+              1,
+              null,
+              0
+            ],
+            "observations": {
+              "13": ["6390.0133097435", null, 0, 0, null],
+              "0": ["6386.6021057583", null, 0, 0, null],
+              "1": ["6494.6382031356", null, 0, 0, null],
+              "2": ["6621.0553682864", null, 0, 0, null],
+              "3": ["6613.5058985547", null, 0, 0, null],
+              "4": ["6684.5535749366", null, 0, 0, null],
+              "5": ["6878.8680965248", null, 0, 0, null],
+              "6": ["7096.5189509139", null, 0, 0, null],
+              "7": ["7288.5464340768", null, 0, 0, null],
+              "8": ["7121.2899162471", null, 0, 0, null],
+              "9": ["7121.7677269344", null, 0, 0, null],
+              "10": ["7149.6799167351", null, 0, 0, null],
+              "11": ["7285.1658263701", null, 0, 0, null]
+            }
+          },
+          "0:2:0:0:0:0": {
+            "attributes": [
+              2,
+              0,
+              0,
+              null,
+              1,
+              0,
+              null,
+              0,
+              2,
+              0,
+              2,
+              null,
+              0
+            ],
+            "observations": {
+              "0": ["4814.1654607393", null, 0, 0, null],
+              "1": ["4915.4111692479", null, 0, 0, null],
+              "2": ["4701.4130444889", null, 0, 0, null],
+              "3": ["4516.4549806178", null, 0, 0, null],
+              "4": ["4470.5533303284", null, 0, 0, null],
+              "5": ["4326.0744047099", null, 0, 0, null],
+              "6": ["4433.3044920237", null, 0, 0, null],
+              "7": ["4383.8107667152", null, 0, 0, null],
+              "8": ["4156.9668161915", null, 0, 0, null],
+              "9": ["4236.335408049", null, 0, 0, null],
+              "10": ["4171.3900107414", null, 0, 0, null],
+              "11": ["3937.239548015", null, 0, 0, null],
+              "12": ["4020.9401325324", null, 0, 0, null]
+            }
+          },
+          "0:3:0:1:1:0": {
+            "attributes": [
+              3,
+              0,
+              1,
+              null,
+              0,
+              0,
+              null,
+              0,
+              3,
+              0,
+              3,
+              null,
+              0
+            ],
+            "observations": {
+              "0": ["6642.578", null, 0, 0, null],
+              "1": ["6603.384", null, 0, 0, null],
+              "2": ["6608.395", null, 0, 0, null],
+              "3": ["6587.034", null, 0, 0, null],
+              "4": ["6552.419", null, 0, 0, null],
+              "5": ["6640.618", null, 0, 0, null],
+              "6": ["6587.568", null, 0, 0, null],
+              "7": ["6613.797", null, 0, 0, null],
+              "8": ["6657.161", null, 0, 0, null],
+              "9": ["6699.95", null, 0, 0, null],
+              "10": ["6704.383", null, 0, 0, null],
+              "11": ["6735.645", null, 0, 0, null],
+              "12": ["6738.19", null, 0, 0, null]
+            }
+          }
+        }
+      }
+    ],
+    "structure": {
+      "links": [
+        {
+          "rel": "dataflow",
+          "urn": "urn:sdmx:org.sdmx.infomodel.datastructure.Dataflow=BIS:WS_CBTA(1.0)"
+        },
+        {
+          "rel": "datastructure",
+          "urn": "urn:sdmx:org.sdmx.infomodel.datastructure.DataStructure=BIS:CBTA(1.0)"
+        }
+      ],
+      "name": "Central bank total assets",
+      "names": {
+        "en": "Central bank total assets"
+      },
+      "description": "Tracks the evolution of the size of central bank balance sheets across the world.",
+      "descriptions": {
+        "en": "Tracks the evolution of the size of central bank balance sheets across the world."
+      },
+      "dimensions": {
+        "dataset": [],
+        "series": [
+          {
+            "id": "FREQ",
+            "name": "Frequency",
+            "description": "The time interval at which observations occur over a given time period.",
+            "keyPosition": 0,
+            "role": null,
+            "values": [
+              {
+                "id": "M",
+                "name": "Monthly",
+                "description": "To be used for data collected or disseminated every month."
+              }
+            ]
+          },
+          {
+            "id": "REF_AREA",
+            "name": "Reference area",
+            "description": "The country or geographic area to which the measured statistical phenomenon relates.",
+            "keyPosition": 1,
+            "role": null,
+            "values": [
+              {
+                "id": "XM",
+                "name": "Euro area"
+              },
+              {
+                "id": "CN",
+                "name": "China"
+              },
+              {
+                "id": "JP",
+                "name": "Japan"
+              },
+              {
+                "id": "US",
+                "name": "United States"
+              }
+            ]
+          },
+          {
+            "id": "COMP_METHOD",
+            "name": "Compilation methodology",
+            "keyPosition": 2,
+            "role": null,
+            "values": [
+              {
+                "id": "B",
+                "name": "BIS-spliced",
+                "description": "The spliced series may follow multiple methodologies as a result of the splicing performed by the BIS. The methodologies are detailed in the compilation attribute"
+              }
+            ]
+          },
+          {
+            "id": "UNIT_MEASURE",
+            "name": "Unit of measure",
+            "keyPosition": 3,
+            "role": null,
+            "values": [
+              {
+                "id": "USD",
+                "name": "US dollar"
+              },
+              {
+                "id": "XDC",
+                "name": "Domestic currency (incl. conversion to current currency made using a fixed parity)"
+              }
+            ]
+          },
+          {
+            "id": "CURRENCY",
+            "name": "Currency",
+            "description": "Monetary denomination of the object being measured.",
+            "keyPosition": 4,
+            "role": null,
+            "values": [
+              {
+                "id": "_Z",
+                "name": "Not applicable"
+              },
+              {
+                "id": "USD",
+                "name": "US dollar"
+              }
+            ]
+          },
+          {
+            "id": "TRANSFORMATION",
+            "name": "Transformation",
+            "keyPosition": 5,
+            "role": null,
+            "values": [
+              {
+                "id": "B",
+                "name": "Adjusted for breaks"
+              }
+            ]
+          }
+        ],
+        "observation": [
+          {
+            "id": "TIME_PERIOD",
+            "name": "Time period or range",
+            "keyPosition": 6,
+            "role": "time",
+            "values": [
+              {
+                "start": "2025-07-01T00:00:00",
+                "end": "2025-07-31T23:59:59",
+                "id": "2025-07",
+                "name": "2025-07"
+              },
+              {
+                "start": "2025-08-01T00:00:00",
+                "end": "2025-08-31T23:59:59",
+                "id": "2025-08",
+                "name": "2025-08"
+              },
+              {
+                "start": "2025-09-01T00:00:00",
+                "end": "2025-09-30T23:59:59",
+                "id": "2025-09",
+                "name": "2025-09"
+              },
+              {
+                "start": "2025-10-01T00:00:00",
+                "end": "2025-10-31T23:59:59",
+                "id": "2025-10",
+                "name": "2025-10"
+              },
+              {
+                "start": "2025-11-01T00:00:00",
+                "end": "2025-11-30T23:59:59",
+                "id": "2025-11",
+                "name": "2025-11"
+              },
+              {
+                "start": "2025-12-01T00:00:00",
+                "end": "2025-12-31T23:59:59",
+                "id": "2025-12",
+                "name": "2025-12"
+              },
+              {
+                "start": "2026-01-01T00:00:00",
+                "end": "2026-01-31T23:59:59",
+                "id": "2026-01",
+                "name": "2026-01"
+              },
+              {
+                "start": "2026-02-01T00:00:00",
+                "end": "2026-02-28T23:59:59",
+                "id": "2026-02",
+                "name": "2026-02"
+              },
+              {
+                "start": "2026-03-01T00:00:00",
+                "end": "2026-03-31T23:59:59",
+                "id": "2026-03",
+                "name": "2026-03"
+              },
+              {
+                "start": "2026-04-01T00:00:00",
+                "end": "2026-04-30T23:59:59",
+                "id": "2026-04",
+                "name": "2026-04"
+              },
+              {
+                "start": "2026-05-01T00:00:00",
+                "end": "2026-05-31T23:59:59",
+                "id": "2026-05",
+                "name": "2026-05"
+              },
+              {
+                "start": "2026-06-01T00:00:00",
+                "end": "2026-06-30T23:59:59",
+                "id": "2026-06",
+                "name": "2026-06"
+              },
+              {
+                "start": "2026-07-01T00:00:00",
+                "end": "2026-07-31T23:59:59",
+                "id": "2026-07",
+                "name": "2026-07"
+              },
+              {
+                "start": "2025-06-01T00:00:00",
+                "end": "2025-06-30T23:59:59",
+                "id": "2025-06",
+                "name": "2025-06"
+              }
+            ]
+          }
+        ]
+      },
+      "attributes": {
+        "dataset": [
+          {
+            "id": "COMMENT_DSET",
+            "name": "Dataset comment",
+            "relationship": {
+              "none": {}
+            },
+            "role": null,
+            "values": []
+          }
+        ],
+        "series": [
+          {
+            "id": "DATA_COMP",
+            "name": "Data compilation",
+            "description": "Operations performed on data to derive new information according to a given set of rules.",
+            "relationship": {
+              "dimensions": [
+                "FREQ",
+                "REF_AREA",
+                "COMP_METHOD",
+                "UNIT_MEASURE",
+                "CURRENCY",
+                "TRANSFORMATION"
+              ]
+            },
+            "role": null,
+            "values": [
+              {
+                "id": "From 1998 onwards: consolidated financial statements of the Eurosystem, including the balance sheets of the European Central Bank and Eurosystem central banks, including all national central banks branches, vis-\u00e0-vis third parties.",
+                "name": "From 1998 onwards: consolidated financial statements of the Eurosystem, including the balance sheets of the European Central Bank and Eurosystem central banks, including all national central banks branches, vis-\u00e0-vis third parties."
+              },
+              {
+                "id": "From January 2002 onwards: monthly balance sheet of the People's Bank of China. Between 1993 and 2001: sum of foreign assets (net), claims against the government, bank claims on deposit money, claims against non-monetary financial institutions and claims on the non-financial sector. Before 2000: Almanac of China's finance and banking.",
+                "name": "From January 2002 onwards: monthly balance sheet of the People's Bank of China. Between 1993 and 2001: sum of foreign assets (net), claims against the government, bank claims on deposit money, claims against non-monetary financial institutions and claims on the non-financial sector. Before 2000: Almanac of China's finance and banking."
+              },
+              {
+                "id": "From January 1953 onwards: end-of-month balance for total assets following the methodological specifications of the Bank of Japan Accounts. Before 1953: end-of-year balance for total assets as shown in 'Meiji iko hompo shuyo keizai tokei [Hundred-year statistics of the Japanese economy] (edition 1966)'.",
+                "name": "From January 1953 onwards: end-of-month balance for total assets following the methodological specifications of the Bank of Japan Accounts. Before 1953: end-of-year balance for total assets as shown in 'Meiji iko hompo shuyo keizai tokei [Hundred-year statistics of the Japanese economy] (edition 1966)'."
+              },
+              {
+                "id": "From March 1989 onwards: Factors Affecting Reserve Balances (H.4.1). Between November 1914 and March 1989: Bao et al (2018): 'The Federal Reserve System's weekly balance sheet since 1914'.",
+                "name": "From March 1989 onwards: Factors Affecting Reserve Balances (H.4.1). Between November 1914 and March 1989: Bao et al (2018): 'The Federal Reserve System's weekly balance sheet since 1914'."
+              }
+            ]
+          },
+          {
+            "id": "METHOD_REF",
+            "name": "Methodology reference",
+            "relationship": {
+              "dimensions": [
+                "FREQ",
+                "REF_AREA",
+                "COMP_METHOD",
+                "UNIT_MEASURE",
+                "CURRENCY",
+                "TRANSFORMATION"
+              ]
+            },
+            "role": null,
+            "values": [
+              {
+                "id": "BIS-spliced",
+                "name": "BIS-spliced"
+              }
+            ]
+          },
+          {
+            "id": "COLLECTION_DETAIL",
+            "name": "Collection explanation detail",
+            "relationship": {
+              "dimensions": [
+                "FREQ",
+                "REF_AREA",
+                "COMP_METHOD",
+                "UNIT_MEASURE",
+                "CURRENCY",
+                "TRANSFORMATION"
+              ]
+            },
+            "role": null,
+            "values": [
+              {
+                "id": "The data in billions of US dollars are calculated using market exchange rates.",
+                "name": "The data in billions of US dollars are calculated using market exchange rates."
+              },
+              {
+                "id": "-",
+                "name": "-"
+              }
+            ]
+          },
+          {
+            "id": "COMMENT_TS",
+            "name": "Series comment",
+            "relationship": {
+              "dimensions": [
+                "FREQ",
+                "REF_AREA",
+                "COMP_METHOD",
+                "UNIT_MEASURE",
+                "CURRENCY",
+                "TRANSFORMATION"
+              ]
+            },
+            "role": null,
+            "values": []
+          },
+          {
+            "id": "DECIMALS",
+            "name": "Decimals",
+            "relationship": {
+              "dimensions": [
+                "FREQ",
+                "REF_AREA",
+                "COMP_METHOD",
+                "UNIT_MEASURE",
+                "CURRENCY",
+                "TRANSFORMATION"
+              ]
+            },
+            "role": null,
+            "values": [
+              {
+                "id": "3",
+                "name": "Three"
+              },
+              {
+                "id": "1",
+                "name": "One"
+              }
+            ]
+          },
+          {
+            "id": "UNIT_MULT",
+            "name": "Unit multiplier",
+            "description": "Exponent in base 10 specified so that multiplying the observation numeric values by 10^UNIT_MULT gives a value expressed in the unit of measure.",
+            "relationship": {
+              "dimensions": [
+                "FREQ",
+                "REF_AREA",
+                "COMP_METHOD",
+                "UNIT_MEASURE",
+                "CURRENCY",
+                "TRANSFORMATION"
+              ]
+            },
+            "role": null,
+            "values": [
+              {
+                "id": "9",
+                "name": "Billions",
+                "description": "In scientific notation, expressed as ten raised to the power of nine (10^9)"
+              }
+            ]
+          },
+          {
+            "id": "BREAKS",
+            "name": "Breaks",
+            "relationship": {
+              "dimensions": [
+                "FREQ",
+                "REF_AREA",
+                "COMP_METHOD",
+                "UNIT_MEASURE",
+                "CURRENCY",
+                "TRANSFORMATION"
+              ]
+            },
+            "role": null,
+            "values": []
+          },
+          {
+            "id": "SUPP_INFO_BREAKS",
+            "name": "Supplemental information and breaks",
+            "relationship": {
+              "dimensions": [
+                "FREQ",
+                "REF_AREA",
+                "COMP_METHOD",
+                "UNIT_MEASURE",
+                "CURRENCY",
+                "TRANSFORMATION"
+              ]
+            },
+            "role": null,
+            "values": [
+              {
+                "id": "This series is adjusted for breaks. Break-adjustment calculations follow the methodology outlined in the BIS Quarterly Review (2013). For further detail, see https://www.bis.org/publ/qtrpdf/r_qt1303z.htm",
+                "name": "This series is adjusted for breaks. Break-adjustment calculations follow the methodology outlined in the BIS Quarterly Review (2013). For further detail, see https://www.bis.org/publ/qtrpdf/r_qt1303z.htm"
+              }
+            ]
+          },
+          {
+            "id": "COMPILING_ORG",
+            "name": "Compiling agency",
+            "description": "The organisation compiling the data being reported.",
+            "relationship": {
+              "dimensions": [
+                "FREQ",
+                "REF_AREA",
+                "COMP_METHOD",
+                "UNIT_MEASURE",
+                "CURRENCY",
+                "TRANSFORMATION"
+              ]
+            },
+            "role": null,
+            "values": [
+              {
+                "id": "European Central Bank; Bank for International Settlements.",
+                "name": "European Central Bank; Bank for International Settlements."
+              },
+              {
+                "id": "People's Bank of China; Bank for International Settlements.",
+                "name": "People's Bank of China; Bank for International Settlements."
+              },
+              {
+                "id": "Bank of Japan; Bank for International Settlements.",
+                "name": "Bank of Japan; Bank for International Settlements."
+              },
+              {
+                "id": "Board of Governors of the Federal Reserve System; Bank for International Settlements.",
+                "name": "Board of Governors of the Federal Reserve System; Bank for International Settlements."
+              }
+            ]
+          },
+          {
+            "id": "DISS_ORG",
+            "name": "Data dissemination agency",
+            "description": "The organisation disseminating the data.",
+            "relationship": {
+              "dimensions": [
+                "FREQ",
+                "REF_AREA",
+                "COMP_METHOD",
+                "UNIT_MEASURE",
+                "CURRENCY",
+                "TRANSFORMATION"
+              ]
+            },
+            "role": null,
+            "values": [
+              {
+                "id": "5B0",
+                "name": "BIS (Bank for International Settlements)"
+              }
+            ]
+          },
+          {
+            "id": "TITLE",
+            "name": "Title",
+            "description": "Textual label used as identification of a statistical object.",
+            "relationship": {
+              "dimensions": [
+                "FREQ",
+                "REF_AREA",
+                "COMP_METHOD",
+                "UNIT_MEASURE",
+                "CURRENCY",
+                "TRANSFORMATION"
+              ]
+            },
+            "role": null,
+            "values": [
+              {
+                "id": "Euro area - Central bank, assets, total, BIS-spliced, USD",
+                "name": "Euro area - Central bank, assets, total, BIS-spliced, USD"
+              },
+              {
+                "id": "China - Central bank, assets, total, BIS-spliced, USD",
+                "name": "China - Central bank, assets, total, BIS-spliced, USD"
+              },
+              {
+                "id": "Japan - Central bank, assets, total, BIS-spliced, USD",
+                "name": "Japan - Central bank, assets, total, BIS-spliced, USD"
+              },
+              {
+                "id": "United States - Central bank, assets, total, BIS-spliced, break-adjusted",
+                "name": "United States - Central bank, assets, total, BIS-spliced, break-adjusted"
+              }
+            ]
+          },
+          {
+            "id": "TIME_FORMAT",
+            "name": "Time format",
+            "description": "Technical format in which time is represented for the measured phenomenon.",
+            "relationship": {
+              "dimensions": [
+                "FREQ",
+                "REF_AREA",
+                "COMP_METHOD",
+                "UNIT_MEASURE",
+                "CURRENCY",
+                "TRANSFORMATION"
+              ]
+            },
+            "role": null,
+            "values": []
+          },
+          {
+            "id": "COLLECTION",
+            "name": "Collection Indicator",
+            "relationship": {
+              "dimensions": [
+                "FREQ",
+                "REF_AREA",
+                "COMP_METHOD",
+                "UNIT_MEASURE",
+                "CURRENCY",
+                "TRANSFORMATION"
+              ]
+            },
+            "role": null,
+            "values": [
+              {
+                "id": "E",
+                "name": "End of period"
+              }
+            ]
+          }
+        ],
+        "observation": [
+          {
+            "id": "FISCAL_YEAR",
+            "name": "Fiscal year",
+            "relationship": {
+              "primaryMeasure": "OBS_VALUE"
+            },
+            "role": null,
+            "values": []
+          },
+          {
+            "id": "CONF_STATUS",
+            "name": "Confidentiality - status",
+            "description": "Information about the confidentiality status of the object to which this attribute is attached.",
+            "relationship": {
+              "primaryMeasure": "OBS_VALUE"
+            },
+            "role": null,
+            "values": [
+              {
+                "id": "F",
+                "name": "Free (free for publication)"
+              }
+            ]
+          },
+          {
+            "id": "OBS_STATUS",
+            "name": "Observation status",
+            "description": "Information on the quality of a value or an unusual or missing value.",
+            "relationship": {
+              "primaryMeasure": "OBS_VALUE"
+            },
+            "role": null,
+            "values": [
+              {
+                "id": "A",
+                "name": "Normal value",
+                "description": "To be used as default value if no value is provided or when no special coded qualification is assumed. Usually, it can be assumed that the source agency assigns sufficient confidence to the provided observation and/or the value is not expected to be dramatically revised."
+              }
+            ]
+          },
+          {
+            "id": "OBS_PRE_BREAK",
+            "name": "Observation pre-break value",
+            "description": "The observation, at a time series break period, that was calculated using the old methodology.",
+            "relationship": {
+              "primaryMeasure": "OBS_VALUE"
+            },
+            "role": null,
+            "values": []
+          }
+        ]
+      }
+    }
+  }
+}

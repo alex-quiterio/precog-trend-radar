@@ -125,6 +125,7 @@ export async function expectWellFormedCards(
       'world',
       'ea',
       'mkt',
+      'money',
       'planet',
     ]).toContain(r.group);
   });

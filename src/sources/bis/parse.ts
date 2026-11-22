@@ -13,10 +13,11 @@ import {
 } from '@sources/shape';
 
 /**
- * Each series in the reply, by its REF_AREA code ("US", "JP"), oldest first. Periods without a number are
- * skipped; a reply without series or dimensions throws ShapeError.
+ * Each series in the reply by its full code, the dimension values joined by dots as in the query
+ * ("Q.USD.3P.N.A.I.B.771"), oldest first. Periods without a number are skipped; a reply without series or
+ * dimensions throws ShapeError.
  */
-export function parseBisSeries(
+export function parseBisKeys(
   reply: unknown,
 ): Record<string, SeriesPoint[]> {
   const data = obj(at(reply, 'data'), 'BIS', 'data');
@@ -29,18 +30,11 @@ export function parseBisSeries(
     at(data, 'structure', 'dimensions', 'series'),
     'BIS',
     'series dimensions',
+  ).map(d =>
+    list(at(d, 'values'), 'BIS', 'dimension values').map(
+      v => str(at(v, 'id')),
+    ),
   );
-  const area = dims.findIndex(
-    d => str(at(d, 'id')) === 'REF_AREA',
-  );
-  if (area < 0) {
-    throw new ShapeError('BIS', 'no REF_AREA dimension');
-  }
-  const areas = list(
-    at(dims[area], 'values'),
-    'BIS',
-    'areas',
-  ).map(v => str(at(v, 'id')));
   const times = list(
     at(
       data,
@@ -57,10 +51,10 @@ export function parseBisSeries(
   for (const [key, s] of Object.entries(
     obj(set.series, 'BIS', 'series'),
   )) {
-    const code = areas[Number(key.split(':')[area])];
-    if (!code) {
-      continue;
-    }
+    const code = key
+      .split(':')
+      .map((j, d) => dims[d]?.[Number(j)] ?? '')
+      .join('.');
     out[code] = Object.entries(objOr(at(s, 'observations')))
       .flatMap(([i, o]) => {
         const value = num(at(o, 0)),
@@ -72,4 +66,29 @@ export function parseBisSeries(
       .sort((a, b) => a.t - b.t);
   }
   return out;
+}
+
+/**
+ * Each series in the reply by the value of one dimension (REF_AREA: "US", "JP"), oldest first. Throws
+ * ShapeError when the reply has no such dimension.
+ */
+export function parseBisSeries(
+  reply: unknown,
+  dim = 'REF_AREA',
+): Record<string, SeriesPoint[]> {
+  const ids = list(
+    at(reply, 'data', 'structure', 'dimensions', 'series'),
+    'BIS',
+    'series dimensions',
+  ).map(d => str(at(d, 'id')));
+  const pos = ids.indexOf(dim);
+  if (pos < 0) {
+    throw new ShapeError('BIS', `no ${dim} dimension`);
+  }
+  return Object.fromEntries(
+    Object.entries(parseBisKeys(reply)).map(([code, s]) => [
+      code.split('.')[pos],
+      s,
+    ]),
+  );
 }

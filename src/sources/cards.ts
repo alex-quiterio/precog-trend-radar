@@ -6,7 +6,7 @@ import { errorText } from '@core/errors';
 
 /** Which heading a card sits under in the panel. No card mixes two countries. */
 export type DatapointGroup =
-  'pt' | 'nl' | 'world' | 'ea' | 'mkt' | 'planet';
+  'pt' | 'nl' | 'world' | 'ea' | 'mkt' | 'money' | 'planet';
 export interface DatapointRow {
   /** Stable id a channel picks the card by (see channels.ts). */
   id: string;
