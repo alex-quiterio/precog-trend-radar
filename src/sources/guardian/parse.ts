@@ -15,13 +15,24 @@ export interface GuardianResult extends GuardianArticle {
   type: string;
 }
 /** A Guardian search reply: how many pages it has, and its results (those without a valid date are skipped). */
-export function parseGuardianPage(reply: unknown): { pages: number; results: GuardianResult[] } {
-  const r = obj(obj(reply, 'The Guardian').response, 'The Guardian', 'response');
+export function parseGuardianPage(reply: unknown): {
+  pages: number;
+  results: GuardianResult[];
+} {
+  const r = obj(
+    obj(reply, 'The Guardian').response,
+    'The Guardian',
+    'response',
+  );
   return {
     pages: num(r.pages) || 1,
     results: listOr(r.results).flatMap(a => {
-      const t = Date.parse(str(at(a, 'webPublicationDate')));
-      if (!Number.isFinite(t)) return [];
+      const t = Date.parse(
+        str(at(a, 'webPublicationDate')),
+      );
+      if (!Number.isFinite(t)) {
+        return [];
+      }
       return [
         {
           id: str(at(a, 'id')),

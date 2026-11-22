@@ -6,7 +6,12 @@ describe('iNaturalist species counts', () => {
   it('reads each species with its English name and count', () => {
     const s = parseSpeciesCounts(counts);
     expect(s).toHaveLength(4);
-    expect(s[0]).toEqual({ id: 15282, name: 'Sylvia atricapilla', common: 'Eurasian Blackcap', count: 16 });
+    expect(s[0]).toEqual({
+      id: 15282,
+      name: 'Sylvia atricapilla',
+      common: 'Eurasian Blackcap',
+      count: 16,
+    });
   });
   it('falls back to the scientific name and skips broken records', () => {
     const reply = {
@@ -15,6 +20,13 @@ describe('iNaturalist species counts', () => {
         { count: 3, taxon: {} },
       ],
     };
-    expect(parseSpeciesCounts(reply)).toEqual([{ id: 1, name: 'Aves sp.', common: 'Aves sp.', count: 2 }]);
+    expect(parseSpeciesCounts(reply)).toEqual([
+      {
+        id: 1,
+        name: 'Aves sp.',
+        common: 'Aves sp.',
+        count: 2,
+      },
+    ]);
   });
 });

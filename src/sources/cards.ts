@@ -5,7 +5,8 @@ import { HOUR, store } from '@core/config';
 import { errorText } from '@core/errors';
 
 /** Which heading a card sits under in the panel. No card mixes two countries. */
-export type DatapointGroup = 'pt' | 'nl' | 'ea' | 'mkt' | 'planet';
+export type DatapointGroup =
+  'pt' | 'nl' | 'ea' | 'mkt' | 'planet';
 export interface DatapointRow {
   /** Stable id a channel picks the card by (see channels.ts). */
   id: string;
@@ -28,8 +29,18 @@ export interface DatapointRow {
 /** Numbers the gist reads as well as the cards (fire risk and weather warnings in Portugal). */
 export interface DatapointFacts {
   /** Today's municipalities at very high or maximum risk (of n), and tomorrow's, when IPMA has published it. */
-  fire?: { hi: number; max: number; n: number; tomorrow?: number };
-  warnings?: { red: number; orange: number; yellow: number; types: string };
+  fire?: {
+    hi: number;
+    max: number;
+    n: number;
+    tomorrow?: number;
+  };
+  warnings?: {
+    red: number;
+    orange: number;
+    yellow: number;
+    types: string;
+  };
 }
 /** One request's worth of cards. A provider registers one loader per request, so they fail independently. */
 export interface CardLoader {
@@ -41,17 +52,26 @@ export interface CardLoader {
    */
   cards: string[];
   /** Fetch and build the cards: a list of them, or the cards plus facts for the gist. */
-  load(): Promise<DatapointRow[] | { rows: DatapointRow[]; facts: DatapointFacts }>;
+  load(): Promise<
+    | DatapointRow[]
+    | { rows: DatapointRow[]; facts: DatapointFacts }
+  >;
 }
 
 export const CARD_LOADERS: CardLoader[] = [];
 /** Adds a loader. Its cards appear wherever a channel lists their ids. */
 export function registerCards(loader: CardLoader): void {
-  if (CARD_LOADERS.some(l => l.id === loader.id)) throw new Error(`Card loader “${loader.id}” is registered twice`);
+  if (CARD_LOADERS.some(l => l.id === loader.id)) {
+    throw new Error(
+      `Card loader “${loader.id}” is registered twice`,
+    );
+  }
   CARD_LOADERS.push(loader);
 }
 /** Runs loaders side by side. One failing never blocks the others; its id and error come back in `failed`. */
-export async function loadCards(loaders: CardLoader[] = CARD_LOADERS): Promise<{
+export async function loadCards(
+  loaders: CardLoader[] = CARD_LOADERS,
+): Promise<{
   rows: DatapointRow[];
   facts: DatapointFacts;
   failed: { id: string; error: string }[];
@@ -63,8 +83,9 @@ export async function loadCards(loaders: CardLoader[] = CARD_LOADERS): Promise<{
     loaders.map(async l => {
       try {
         const out = await l.load();
-        if (Array.isArray(out)) rows.push(...out);
-        else {
+        if (Array.isArray(out)) {
+          rows.push(...out);
+        } else {
           rows.push(...out.rows);
           Object.assign(facts, out.facts);
         }
@@ -73,22 +94,36 @@ export async function loadCards(loaders: CardLoader[] = CARD_LOADERS): Promise<{
       }
     }),
   );
-  return { rows: rows.sort((a, b) => a.o - b.o), facts, failed };
+  return {
+    rows: rows.sort((a, b) => a.o - b.o),
+    facts,
+    failed,
+  };
 }
 
 /**
  * For numbers that change once a year: fetches at most once a day and keeps the result in storage under `key`.
  * When the fetch fails, yesterday's copy is better than no card.
  */
-export async function keptForADay<T>(key: string, fetchIt: () => Promise<T>): Promise<T> {
-  const hit = store.get<{ at: number; data: T } | null>(key, null);
-  if (hit && Date.now() - hit.at < 24 * HOUR) return hit.data;
+export async function keptForADay<T>(
+  key: string,
+  fetchIt: () => Promise<T>,
+): Promise<T> {
+  const hit = store.get<{ at: number; data: T } | null>(
+    key,
+    null,
+  );
+  if (hit && Date.now() - hit.at < 24 * HOUR) {
+    return hit.data;
+  }
   try {
     const data = await fetchIt();
     store.set(key, { at: Date.now(), data });
     return data;
   } catch (e) {
-    if (hit) return hit.data;
+    if (hit) {
+      return hit.data;
+    }
     throw e;
   }
 }

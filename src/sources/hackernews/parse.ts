@@ -1,10 +1,19 @@
 // PRECOG / Trend Radar · Hacker News (Algolia): reading search replies.
-import { ShapeError, at, listOr, num, obj, str } from '@sources/shape';
+import {
+  ShapeError,
+  at,
+  listOr,
+  num,
+  obj,
+  str,
+} from '@sources/shape';
 
 /** Algolia's hit count (nbHits) for a search; a reply without one is not an Algolia reply. */
 export function parseHitCount(reply: unknown): number {
   const n = num(obj(reply, 'Hacker News').nbHits);
-  if (n == null) throw new ShapeError('Hacker News', 'no hit count');
+  if (n == null) {
+    throw new ShapeError('Hacker News', 'no hit count');
+  }
   return n;
 }
 /** A story from Algolia's story search. */
@@ -18,12 +27,16 @@ export interface StoryHit {
   comments: number;
 }
 /** The stories of an Algolia search reply. Hits without an id, title or time are skipped. */
-export const parseStoryHits = (reply: unknown): StoryHit[] =>
+export const parseStoryHits = (
+  reply: unknown,
+): StoryHit[] =>
   listOr(at(reply, 'hits')).flatMap(h => {
     const objectID = str(at(h, 'objectID')),
       title = str(at(h, 'title')),
       created = num(at(h, 'created_at_i'));
-    if (!objectID || !title || created == null) return [];
+    if (!objectID || !title || created == null) {
+      return [];
+    }
     return [
       {
         objectID,

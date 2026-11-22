@@ -17,11 +17,28 @@ export const LIVE_REFRESH_MS = 30 * MIN,
   STORY_REFRESH_MS = 10 * MIN;
 // Topic colours in fixed order (validated for colour-blind separation). Red and amber are reserved for alerts.
 export const PALETTES = {
-  dark: ['#3987e5', '#d55181', '#008300', '#9085e9', '#199e70', '#d95926'],
-  light: ['#2a78d6', '#e87ba4', '#008300', '#6250d6', '#1baf7a', '#eb6834'],
+  dark: [
+    '#3987e5',
+    '#d55181',
+    '#008300',
+    '#9085e9',
+    '#199e70',
+    '#d95926',
+  ],
+  light: [
+    '#2a78d6',
+    '#e87ba4',
+    '#008300',
+    '#6250d6',
+    '#1baf7a',
+    '#eb6834',
+  ],
 };
 /** A topic slot's colour in a theme (each theme has its own palette, tuned for contrast). */
-export const slotColor = (slot: number, theme: 'dark' | 'light' = 'dark'): string => PALETTES[theme][slot];
+export const slotColor = (
+  slot: number,
+  theme: 'dark' | 'light' = 'dark',
+): string => PALETTES[theme][slot];
 export const SLOT_ANGLE = [20, 80, 140, 200, 260, 320];
 
 // Each topic: [display name, { wiki: exact article title, q: search phrase for news and stories,
@@ -50,7 +67,13 @@ export const PRESETS = [
       ['Climate change'],
       ['Peak oil'],
       ['Degrowth'],
-      ['Overshoot', { wiki: 'Overshoot (population)', q: 'ecological overshoot' }],
+      [
+        'Overshoot',
+        {
+          wiki: 'Overshoot (population)',
+          q: 'ecological overshoot',
+        },
+      ],
       ['Biodiversity loss'],
       ['Strait of Hormuz', { q: 'Hormuz' }],
     ],
@@ -78,14 +101,39 @@ export const PRESETS = [
         {
           wiki: 'Wildfire',
           q: 'wildfire',
-          also: ['incêndios', 'incêndio rural', 'incêndio florestal', 'fogos florestais', 'fogo florestal'],
+          also: [
+            'incêndios',
+            'incêndio rural',
+            'incêndio florestal',
+            'fogos florestais',
+            'fogo florestal',
+          ],
         },
       ],
       ['Desertification', { also: ['desertificação'] }],
-      ['Rainwater harvesting', { also: ['água da chuva', 'águas pluviais'] }],
-      ['Agroforestry', { also: ['agrofloresta', 'agroflorestal', 'agroflorestais', 'montado'] }],
+      [
+        'Rainwater harvesting',
+        { also: ['água da chuva', 'águas pluviais'] },
+      ],
+      [
+        'Agroforestry',
+        {
+          also: [
+            'agrofloresta',
+            'agroflorestal',
+            'agroflorestais',
+            'montado',
+          ],
+        },
+      ],
       ['Permaculture', { also: ['permacultura'] }],
-      ['Ecovillage', { q: 'ecovillage', also: ['ecoaldeia', 'ecoaldeias', 'eco-aldeia'] }],
+      [
+        'Ecovillage',
+        {
+          q: 'ecovillage',
+          also: ['ecoaldeia', 'ecoaldeias', 'eco-aldeia'],
+        },
+      ],
     ],
   },
   {
@@ -106,7 +154,10 @@ export const PRESETS = [
     name: 'Society',
     desc: 'Inequality, poverty, crime, schooling and migration in Portugal and the Netherlands, side by side.',
     topics: [
-      ['Inequality', { wiki: 'Economic inequality', q: 'inequality' }],
+      [
+        'Inequality',
+        { wiki: 'Economic inequality', q: 'inequality' },
+      ],
       ['Poverty'],
       ['Crime', { q: 'crime rate' }],
       ['Education', { q: 'schools' }],
@@ -121,10 +172,28 @@ export const PRESETS = [
     topics: [
       ['Circular economy'],
       ['Recycling'],
-      ['Packaging rules (PPWR)', { wiki: 'Packaging and packaging waste directive', q: 'packaging waste regulation' }],
-      ['Producer responsibility', { wiki: 'Extended producer responsibility', q: 'extended producer responsibility' }],
-      ['Food waste', { wiki: 'Food loss and waste', q: 'food waste' }],
-      ['CSRD', { wiki: 'Sustainability reporting', q: 'CSRD' }],
+      [
+        'Packaging rules (PPWR)',
+        {
+          wiki: 'Packaging and packaging waste directive',
+          q: 'packaging waste regulation',
+        },
+      ],
+      [
+        'Producer responsibility',
+        {
+          wiki: 'Extended producer responsibility',
+          q: 'extended producer responsibility',
+        },
+      ],
+      [
+        'Food waste',
+        { wiki: 'Food loss and waste', q: 'food waste' },
+      ],
+      [
+        'CSRD',
+        { wiki: 'Sustainability reporting', q: 'CSRD' },
+      ],
     ],
   },
   {
@@ -132,10 +201,22 @@ export const PRESETS = [
     name: 'Alternative Amsterdam',
     desc: 'The cooperative, regenerative city: doughnut economics, housing co-ops, mutual aid and urban farms.',
     topics: [
-      ['Doughnut economics', { wiki: 'Doughnut (economic model)', q: 'doughnut economics' }],
+      [
+        'Doughnut economics',
+        {
+          wiki: 'Doughnut (economic model)',
+          q: 'doughnut economics',
+        },
+      ],
       ['Housing cooperative'],
       ['Community land trust'],
-      ['Mutual aid', { wiki: 'Mutual aid (organization theory)', q: 'mutual aid' }],
+      [
+        'Mutual aid',
+        {
+          wiki: 'Mutual aid (organization theory)',
+          q: 'mutual aid',
+        },
+      ],
       ['Urban agriculture'],
       ['Repair Café', { q: 'repair cafe' }],
     ],
@@ -146,9 +227,21 @@ export const PRESETS = [
     desc: 'International markets: stocks, bonds, currencies, oil, gold and crypto, and the fear of a downturn.',
     topics: [
       ['S&P 500', { q: 'S&P 500' }],
-      ['Treasury yields', { wiki: 'United States Treasury security', q: 'Treasury yields' }],
-      ['Oil prices', { wiki: 'Price of oil', q: 'oil prices' }],
-      ['Gold', { wiki: 'Gold as an investment', q: 'gold price' }],
+      [
+        'Treasury yields',
+        {
+          wiki: 'United States Treasury security',
+          q: 'Treasury yields',
+        },
+      ],
+      [
+        'Oil prices',
+        { wiki: 'Price of oil', q: 'oil prices' },
+      ],
+      [
+        'Gold',
+        { wiki: 'Gold as an investment', q: 'gold price' },
+      ],
       ['Bitcoin'],
       ['Recession'],
     ],
@@ -160,7 +253,10 @@ export const PRESETS = [
     topics: [
       ['Poetry'],
       ['Taoism', { q: 'Tao' }],
-      ['Jungian psychology', { wiki: 'Analytical psychology', q: 'Jungian' }],
+      [
+        'Jungian psychology',
+        { wiki: 'Analytical psychology', q: 'Jungian' },
+      ],
       ['Mysticism'],
       ['Grief'],
       ['Meaning of life'],
@@ -171,15 +267,69 @@ export const PRESETS = [
     name: 'Bird migration',
     desc: 'The birds that travel the flyway between the Netherlands and Portugal, and when they pass.',
     topics: [
-      ['White stork', { q: 'white stork', also: ['cegonha-branca', 'cegonhas', 'ooievaar', 'ooievaars'] }],
-      ['Black-tailed godwit', { q: 'godwit', also: ['milherango', 'grutto', 'grutto’s'] }],
-      ['Eurasian spoonbill', { q: 'spoonbill', also: ['colhereiro', 'lepelaar', 'lepelaars'] }],
-      ['Common crane', { q: 'common crane', also: ['grou', 'grous', 'kraanvogel', 'kraanvogels'] }],
+      [
+        'White stork',
+        {
+          q: 'white stork',
+          also: [
+            'cegonha-branca',
+            'cegonhas',
+            'ooievaar',
+            'ooievaars',
+          ],
+        },
+      ],
+      [
+        'Black-tailed godwit',
+        {
+          q: 'godwit',
+          also: ['milherango', 'grutto', 'grutto’s'],
+        },
+      ],
+      [
+        'Eurasian spoonbill',
+        {
+          q: 'spoonbill',
+          also: ['colhereiro', 'lepelaar', 'lepelaars'],
+        },
+      ],
+      [
+        'Common crane',
+        {
+          q: 'common crane',
+          also: [
+            'grou',
+            'grous',
+            'kraanvogel',
+            'kraanvogels',
+          ],
+        },
+      ],
       [
         'Starling',
-        { wiki: 'Common starling', q: 'starlings', also: ['estorninho', 'estorninhos', 'spreeuw', 'spreeuwen'] },
+        {
+          wiki: 'Common starling',
+          q: 'starlings',
+          also: [
+            'estorninho',
+            'estorninhos',
+            'spreeuw',
+            'spreeuwen',
+          ],
+        },
       ],
-      ['Barn swallow', { q: 'swallows', also: ['andorinha', 'andorinhas', 'boerenzwaluw', 'zwaluwen'] }],
+      [
+        'Barn swallow',
+        {
+          q: 'swallows',
+          also: [
+            'andorinha',
+            'andorinhas',
+            'boerenzwaluw',
+            'zwaluwen',
+          ],
+        },
+      ],
     ],
   },
   {
@@ -188,8 +338,17 @@ export const PRESETS = [
     desc: 'The stack and ideas worth watching early, and your own work.',
     topics: [
       ['AI agents', { wiki: 'AI agent', q: 'AI agents' }],
-      ['MCP', { wiki: 'Model Context Protocol', q: 'Model Context Protocol' }],
-      ['Rust', { wiki: 'Rust (programming language)', q: 'Rust' }],
+      [
+        'MCP',
+        {
+          wiki: 'Model Context Protocol',
+          q: 'Model Context Protocol',
+        },
+      ],
+      [
+        'Rust',
+        { wiki: 'Rust (programming language)', q: 'Rust' },
+      ],
       ['TypeScript'],
       ['Vue.js', { q: 'Vue' }],
       ['Local-first software', { q: 'local-first' }],
@@ -200,11 +359,21 @@ export const PRESETS = [
  * Other names a shipped topic goes by in its lens (`also` above), for matching text written in them. Read from
  * the presets rather than storage, so saved lenses pick them up without an upgrade.
  */
-export function otherNames(lensId: string, name: string): string[] {
+export function otherNames(
+  lensId: string,
+  name: string,
+): string[] {
   const n = name.toLowerCase();
-  const t = PRESETS.find(p => p.id === lensId)?.topics.find(t => String(t[0]).toLowerCase() === n);
+  const t = PRESETS.find(p => p.id === lensId)?.topics.find(
+    t => String(t[0]).toLowerCase() === n,
+  );
   const o = t?.[1];
-  return typeof o === 'object' && o && 'also' in o && Array.isArray(o.also) ? o.also : [];
+  return typeof o === 'object' &&
+    o &&
+    'also' in o &&
+    Array.isArray(o.also)
+    ? o.also
+    : [];
 }
 // v8 re-ran the upgrade for browsers that versions 5-7 marked as upgraded without saving the new lenses.
 // v9 adds Energy & power and Housing.
@@ -216,7 +385,11 @@ export function otherNames(lensId: string, name: string): string[] {
 // v14 adds Society.
 export const PRESET_VERSION = 14;
 /** Lenses whose topics are picked each day rather than shipped (see features/hot-topics.ts). */
-export const PICKED_LENSES = ['world', 'amsterdam', 'turning'];
+export const PICKED_LENSES = [
+  'world',
+  'amsterdam',
+  'turning',
+];
 export const LS = {
   presetVer: 'precog.presetver',
   lenses: 'precog.lenses.v1',
@@ -233,4 +406,5 @@ export const LS = {
 
 // Storage lives in core/storage.ts; re-exported here because most modules import it with the keys above.
 export { store } from '@core/storage';
-export const sleep = (ms: number): Promise<void> => new Promise(r => setTimeout(r, ms));
+export const sleep = (ms: number): Promise<void> =>
+  new Promise(r => setTimeout(r, ms));

@@ -7,13 +7,27 @@ const DAY = 86400e3;
  * How far a series moved in about a month, as a card's sub line: "+1.2% in a month" (pct) or "+0.15 pts in
  * a month" (pts, for rates). '' when the series is shorter than that.
  */
-export function monthMove(series: SeriesPoint[], as: 'pct' | 'pts'): string {
+export function monthMove(
+  series: SeriesPoint[],
+  as: 'pct' | 'pts',
+): string {
   const last = series[series.length - 1];
-  const before = last && [...series].reverse().find(p => p.t <= last.t - 30 * DAY);
-  if (!last || !before || !before.value) return '';
-  const d = as === 'pct' ? ((last.value - before.value) / before.value) * 100 : last.value - before.value;
+  const before =
+    last &&
+    [...series]
+      .reverse()
+      .find(p => p.t <= last.t - 30 * DAY);
+  if (!last || !before || !before.value) {
+    return '';
+  }
+  const d =
+    as === 'pct'
+      ? ((last.value - before.value) / before.value) * 100
+      : last.value - before.value;
   // A move that rounds to nothing is flat, never "−0%".
-  if (Math.abs(d) < (as === 'pct' ? 0.05 : 0.005)) return 'flat over a month';
+  if (Math.abs(d) < (as === 'pct' ? 0.05 : 0.005)) {
+    return 'flat over a month';
+  }
   const sign = d > 0 ? '+' : '−';
   return as === 'pct'
     ? `${sign}${nf1.format(Math.abs(d))}% in a month`

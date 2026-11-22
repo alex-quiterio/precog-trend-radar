@@ -1,15 +1,26 @@
 <template>
-  <panel-shell id="p-plots" title="Plots, side by side" :meta="meta" :index="index">
+  <panel-shell
+    id="p-plots"
+    title="Plots, side by side"
+    :meta="meta"
+    :index="index">
     <p v-if="!st.plots.length" class="pl-intro">
-      Add the land you’re looking at, up to {{ max }} plots, to compare its rain, heat, frost, soil and fire risk.
+      Add the land you’re looking at, up to {{ max }} plots,
+      to compare its rain, heat, frost, soil and fire risk.
     </p>
 
     <div v-if="st.plots.length" class="pl-scroll">
       <table class="pl-table">
-        <caption class="pl-cap">Each plot over the last 12 months, against its 1991–2020 normal</caption>
+        <caption class="pl-cap">
+          Each plot over the last 12 months, against its
+          1991–2020 normal
+        </caption>
         <thead>
           <tr>
-            <th v-for="p in st.plots" :key="p.id" scope="col">
+            <th
+              v-for="p in st.plots"
+              :key="p.id"
+              scope="col">
               <input
                 v-if="editing === p.id"
                 :ref="setEditEl"
@@ -20,16 +31,14 @@
                 :aria-label="`New name for ${p.name}`"
                 @keydown.enter.prevent="saveName"
                 @keydown.escape.prevent="editing = ''"
-                @blur="saveName"
-              />
+                @blur="saveName" />
               <button
                 v-else
                 type="button"
                 class="pl-name"
                 :aria-label="`Rename plot ${p.name}`"
                 title="Rename"
-                @click="startRename(p)"
-              >
+                @click="startRename(p)">
                 {{ p.name }}
               </button>
               <button
@@ -37,12 +46,16 @@
                 class="pl-x"
                 :aria-label="`Remove plot ${p.name}`"
                 :title="`Remove ${p.name}`"
-                @click="plots.remove(p.id)"
-              >
+                @click="plots.remove(p.id)">
                 ×
               </button>
-              <a class="pl-coords" :href="mapUrl(p)" target="_blank" rel="noopener noreferrer">
-                {{ p.lat.toFixed(3) }}, {{ p.lon.toFixed(3) }}
+              <a
+                class="pl-coords"
+                :href="mapUrl(p)"
+                target="_blank"
+                rel="noopener noreferrer">
+                {{ p.lat.toFixed(3) }},
+                {{ p.lon.toFixed(3) }}
               </a>
             </th>
           </tr>
@@ -55,53 +68,80 @@
             </th>
           </tr>
           <tr>
-            <td v-for="p in st.plots" :key="p.id" :class="cell(p.id, m.key).cls">
+            <td
+              v-for="p in st.plots"
+              :key="p.id"
+              :class="cell(p.id, m.key).cls">
               <b>{{ cell(p.id, m.key).v }}</b>
-              <small v-if="cell(p.id, m.key).sub">{{ cell(p.id, m.key).sub }}</small>
+              <small v-if="cell(p.id, m.key).sub">
+                {{ cell(p.id, m.key).sub }}
+              </small>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <form v-if="st.plots.length < max" class="pl-add" @submit.prevent="addTyped">
+    <form
+      v-if="st.plots.length < max"
+      class="pl-add"
+      @submit.prevent="addTyped">
       <input
         v-model="name"
         class="pl-in pl-in-name"
         type="text"
         maxlength="24"
         placeholder="Name"
-        aria-label="Plot name"
-      />
+        aria-label="Plot name" />
       <input
         v-model="where"
         class="pl-in pl-in-where"
         type="text"
         inputmode="text"
         placeholder="39.61, -7.99 or a Google Maps link"
-        aria-label="Plot location: coordinates or a Google Maps link"
-      />
+        aria-label="Plot location: coordinates or a Google Maps link" />
       <button type="submit" class="pl-btn">Add plot</button>
-      <button v-if="canLocate" type="button" class="pl-btn pl-ghost" :disabled="locating" @click="addHere">
+      <button
+        v-if="canLocate"
+        type="button"
+        class="pl-btn pl-ghost"
+        :disabled="locating"
+        @click="addHere">
         {{ locating ? 'Locating…' : 'Use where I am' }}
       </button>
     </form>
     <p v-if="msg" class="pl-msg" role="status">{{ msg }}</p>
 
     <p class="pl-foot">
-      From Open-Meteo’s reanalysis (ERA5, a 10–25 km grid): it tells regions apart, not a valley from the ridge above
-      it. Dry months are those under half their normal rain, among months that usually get 15 mm or more. Fire risk is
-      IPMA’s for the nearest municipality, in Portugal only; its “today” is computed the day before, so after rain look
-      at tomorrow’s. Plots stay in this browser.
+      From Open-Meteo’s reanalysis (ERA5, a 10–25 km grid):
+      it tells regions apart, not a valley from the ridge
+      above it. Dry months are those under half their normal
+      rain, among months that usually get 15 mm or more.
+      Fire risk is IPMA’s for the nearest municipality, in
+      Portugal only; its “today” is computed the day before,
+      so after rain look at tomorrow’s. Plots stay in this
+      browser.
     </p>
   </panel-shell>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, nextTick, onMounted, ref } from 'vue';
+import {
+  computed,
+  defineComponent,
+  nextTick,
+  onMounted,
+  ref,
+} from 'vue';
 import { ago, nf0, nf2 } from '@core/format';
 import { useApp } from '@/context';
-import { FIRE_WORDS, MAX_PLOTS, type Plot, createPlots, dryMonths } from '@features/plots';
+import {
+  FIRE_WORDS,
+  MAX_PLOTS,
+  type Plot,
+  createPlots,
+  dryMonths,
+} from '@features/plots';
 import PanelShell from '@components/PanelShell.vue';
 
 // PRECOG / Trend Radar · Watch a plot: up to four plots of land, compared measure by measure. Each measure is a
@@ -122,10 +162,14 @@ export default defineComponent({
       where = ref(''),
       msg = ref(''),
       locating = ref(false);
-    const canLocate = typeof navigator !== 'undefined' && 'geolocation' in navigator;
+    const canLocate =
+      typeof navigator !== 'undefined' &&
+      'geolocation' in navigator;
     function addTyped() {
       msg.value = plots.add(name.value, where.value);
-      if (!msg.value) name.value = where.value = '';
+      if (!msg.value) {
+        name.value = where.value = '';
+      }
     }
     function addHere() {
       locating.value = true;
@@ -133,50 +177,96 @@ export default defineComponent({
       navigator.geolocation.getCurrentPosition(
         pos => {
           locating.value = false;
-          msg.value = plots.add(name.value || 'Here', { lat: pos.coords.latitude, lon: pos.coords.longitude });
-          if (!msg.value) name.value = '';
+          msg.value = plots.add(name.value || 'Here', {
+            lat: pos.coords.latitude,
+            lon: pos.coords.longitude,
+          });
+          if (!msg.value) {
+            name.value = '';
+          }
         },
         () => {
           locating.value = false;
-          msg.value = 'Your location isn’t available: paste coordinates instead.';
+          msg.value =
+            'Your location isn’t available: paste coordinates instead.';
         },
         { enableHighAccuracy: true, timeout: 15000 },
       );
     }
     const metrics = [
-      { key: 'rain', label: 'Rain, last 12 months', hint: 'and against normal' },
-      { key: 'dry', label: 'Dry months', hint: 'of the last 12' },
-      { key: 'hot', label: 'Days over 35 °C', hint: 'last 12 months' },
-      { key: 'frost', label: 'Frost nights', hint: 'below 0 °C' },
-      { key: 'soil', label: 'Soil moisture now', hint: '3–9 cm down' },
-      { key: 'fire', label: 'Fire risk today', hint: 'IPMA' },
+      {
+        key: 'rain',
+        label: 'Rain, last 12 months',
+        hint: 'and against normal',
+      },
+      {
+        key: 'dry',
+        label: 'Dry months',
+        hint: 'of the last 12',
+      },
+      {
+        key: 'hot',
+        label: 'Days over 35 °C',
+        hint: 'last 12 months',
+      },
+      {
+        key: 'frost',
+        label: 'Frost nights',
+        hint: 'below 0 °C',
+      },
+      {
+        key: 'soil',
+        label: 'Soil moisture now',
+        hint: '3–9 cm down',
+      },
+      {
+        key: 'fire',
+        label: 'Fire risk today',
+        hint: 'IPMA',
+      },
       { key: 'elev', label: 'Elevation', hint: '' },
     ];
     const cells = computed(() => {
       const out: Record<string, Record<string, Cell>> = {};
       st.plots.forEach(p => {
         const r = st.reads[p.id];
-        const wait: Cell = { v: r?.error ? '–' : '…', sub: r?.error ? 'not loaded' : '' };
+        const wait: Cell = {
+          v: r?.error ? '–' : '…',
+          sub: r?.error ? 'not loaded' : '',
+        };
         const y = r?.year,
           n = r?.normals;
         const annual = n ? n.reduce((a, b) => a + b, 0) : 0;
-        const pct = y && annual ? Math.round((y.rainMm / annual) * 100) : null;
+        const pct =
+          y && annual
+            ? Math.round((y.rainMm / annual) * 100)
+            : null;
         out[p.id] = {
           rain: y
             ? {
                 v: `${nf0.format(y.rainMm)} mm`,
-                sub: pct != null ? `${pct}% of normal${pct < 75 ? ', dry' : ''}` : '',
-                cls: pct != null && pct < 75 ? 'pl-low' : '',
+                sub:
+                  pct != null
+                    ? `${pct}% of normal${pct < 75 ? ', dry' : ''}`
+                    : '',
+                cls:
+                  pct != null && pct < 75 ? 'pl-low' : '',
               }
             : wait,
           dry:
             y && n
               ? dryMonths(y, n) >= 3
-                ? { v: nf0.format(dryMonths(y, n)), sub: 'a dry stretch', cls: 'pl-low' }
+                ? {
+                    v: nf0.format(dryMonths(y, n)),
+                    sub: 'a dry stretch',
+                    cls: 'pl-low',
+                  }
                 : { v: nf0.format(dryMonths(y, n)) }
               : wait,
           hot: y ? { v: nf0.format(y.hotDays) } : wait,
-          frost: y ? { v: nf0.format(y.frostNights) } : wait,
+          frost: y
+            ? { v: nf0.format(y.frostNights) }
+            : wait,
           soil: r?.soil
             ? {
                 v: `${nf2.format(r.soil.now)} m³/m³`,
@@ -191,42 +281,61 @@ export default defineComponent({
                 ? {
                     v: FIRE_WORDS[r.fire],
                     sub:
-                      r.fireTomorrow != null && r.fireTomorrow !== r.fire
+                      r.fireTomorrow != null &&
+                      r.fireTomorrow !== r.fire
                         ? `level ${r.fire} of 5 · tomorrow ${FIRE_WORDS[r.fireTomorrow]}`
                         : `level ${r.fire} of 5`,
                     cls: r.fire >= 4 ? 'pl-low' : '',
                   }
                 : {
                     v: '–',
-                    sub: r.fireTomorrow == null ? 'outside Portugal' : `tomorrow ${FIRE_WORDS[r.fireTomorrow]}`,
+                    sub:
+                      r.fireTomorrow == null
+                        ? 'outside Portugal'
+                        : `tomorrow ${FIRE_WORDS[r.fireTomorrow]}`,
                   }
               : r
                 ? { v: '–' }
                 : wait,
-          elev: r?.elevation != null ? { v: `${nf0.format(r.elevation)} m` } : r ? { v: '–' } : wait,
+          elev:
+            r?.elevation != null
+              ? { v: `${nf0.format(r.elevation)} m` }
+              : r
+                ? { v: '–' }
+                : wait,
         };
       });
       return out;
     });
-    const cell = (id: string, key: string): Cell => cells.value[id]?.[key] ?? { v: '…' };
+    const cell = (id: string, key: string): Cell =>
+      cells.value[id]?.[key] ?? { v: '…' };
     // Renaming in place: the name turns into a field; Enter or leaving it saves, Escape keeps the old name.
     const editing = ref(''),
       draft = ref('');
     let editEl: HTMLInputElement | null = null;
-    const setEditEl = (el: unknown) => void (editEl = el instanceof HTMLInputElement ? el : null);
+    const setEditEl = (el: unknown) =>
+      void (editEl =
+        el instanceof HTMLInputElement ? el : null);
     function startRename(p: Plot) {
       editing.value = p.id;
       draft.value = p.name;
       void nextTick(() => editEl?.select());
     }
     function saveName() {
-      if (!editing.value) return;
+      if (!editing.value) {
+        return;
+      }
       plots.rename(editing.value, draft.value);
       editing.value = '';
     }
-    const mapUrl = (p: Plot) => `https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lon}`;
+    const mapUrl = (p: Plot) =>
+      `https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lon}`;
     const meta = computed(() =>
-      st.at && st.plots.length ? `checked ${ago(st.at, app.ui.now)}` : st.loading ? 'reading…' : '',
+      st.at && st.plots.length
+        ? `checked ${ago(st.at, app.ui.now)}`
+        : st.loading
+          ? 'reading…'
+          : '',
     );
     return {
       st,

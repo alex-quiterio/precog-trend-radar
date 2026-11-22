@@ -5,7 +5,28 @@
       "validFrom": "2026-11-07T08:18:48.689+01:00",
       "series": {
         "0:0:0:0:0": {
-          "attributes": [0, null, 0, null, null, null, null, null, null, 0, null, null, 0, null, 0, null, 0, 0, 0, 0],
+          "attributes": [
+            0,
+            null,
+            0,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            0,
+            null,
+            null,
+            0,
+            null,
+            0,
+            null,
+            0,
+            0,
+            0,
+            0
+          ],
           "observations": {
             "0": [0.9188, 0, 0, null, null],
             "1": [0.918, 0, 0, null, null],
@@ -13,7 +34,28 @@
           }
         },
         "0:1:0:0:0": {
-          "attributes": [0, null, 0, null, null, null, null, null, null, 0, null, null, 0, null, 0, null, 1, 1, 1, 0],
+          "attributes": [
+            0,
+            null,
+            0,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            0,
+            null,
+            null,
+            0,
+            null,
+            0,
+            null,
+            1,
+            1,
+            1,
+            0
+          ],
           "observations": {
             "0": [7.5177, 0, 0, null, null],
             "1": [7.4846, 0, 0, null, null],
@@ -21,7 +63,28 @@
           }
         },
         "0:2:0:0:0": {
-          "attributes": [0, null, 0, null, null, null, null, null, null, 0, null, null, 1, null, 0, null, 2, 2, 2, 0],
+          "attributes": [
+            0,
+            null,
+            0,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            0,
+            null,
+            null,
+            1,
+            null,
+            0,
+            null,
+            2,
+            2,
+            2,
+            0
+          ],
           "observations": {
             "0": [0.8346, 0, 0, null, null],
             "1": [0.83393, 0, 0, null, null],
@@ -29,7 +92,28 @@
           }
         },
         "0:3:0:0:0": {
-          "attributes": [0, null, 0, null, null, null, null, null, null, 0, null, null, 2, null, 0, null, 3, 3, 3, 0],
+          "attributes": [
+            0,
+            null,
+            0,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            0,
+            null,
+            null,
+            2,
+            null,
+            0,
+            null,
+            3,
+            3,
+            3,
+            0
+          ],
           "observations": {
             "0": [178.3, 0, 0, null, null],
             "1": [177.85, 0, 0, null, null],
@@ -37,7 +121,28 @@
           }
         },
         "0:4:0:0:0": {
-          "attributes": [0, null, 0, null, null, null, null, null, null, 0, null, null, 0, null, 0, null, 4, 4, 4, 0],
+          "attributes": [
+            0,
+            null,
+            0,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            0,
+            null,
+            null,
+            0,
+            null,
+            0,
+            null,
+            4,
+            4,
+            4,
+            0
+          ],
           "observations": {
             "0": [1.1267, 0, 0, null, null],
             "1": [1.1224, 0, 0, null, null],

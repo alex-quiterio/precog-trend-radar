@@ -3,7 +3,12 @@
 import { describe, expect, it } from 'vitest';
 import { fmtPct, nf0, nf1 } from '@core/format';
 import { CARD_LOADERS, loadCards } from '@sources/cards';
-import { expectWellFormedCards, fakeFetch, fixture, runCards } from '@sources/fake-fetch';
+import {
+  expectWellFormedCards,
+  fakeFetch,
+  fixture,
+  runCards,
+} from '@sources/fake-fetch';
 import './cards';
 
 /** The saved reply for each dataset that has its own; the monthly ones share the unemployment reply's shape. */
@@ -25,32 +30,55 @@ const CRIME: Record<string, string> = {
 const saved = (url: URL): string =>
   url.pathname.endsWith('/crim_off_cat')
     ? CRIME[url.searchParams.get('iccs') ?? '']
-    : (SAVED[url.pathname.split('/').pop() ?? ''] ?? 'unemployment.json');
-const net = fakeFetch(url => fixture('eurostat', saved(url)));
+    : (SAVED[url.pathname.split('/').pop() ?? ''] ??
+      'unemployment.json');
+const net = fakeFetch(url =>
+  fixture('eurostat', saved(url)),
+);
 
 describe('Eurostat', () => {
   it('builds well-formed cards from the saved replies', async () => {
     await expectWellFormedCards('eurostat-');
   });
   it('shows unemployment with its change over the year', async () => {
-    const { cards } = await runCards('eurostat-unemployment');
-    expect(cards['unemployment-pt']).toMatchObject({ group: 'pt', v: `${nf1.format(5.6)}%` });
-    expect(cards['unemployment-pt'].sub).toMatch(/pts in a year$/);
-    expect(cards['unemployment-pt'].src).toBe('Eurostat une_rt_m · 2026-09, seasonally adjusted');
+    const { cards } = await runCards(
+      'eurostat-unemployment',
+    );
+    expect(cards['unemployment-pt']).toMatchObject({
+      group: 'pt',
+      v: `${nf1.format(5.6)}%`,
+    });
+    expect(cards['unemployment-pt'].sub).toMatch(
+      /pts in a year$/,
+    );
+    expect(cards['unemployment-pt'].src).toBe(
+      'Eurostat une_rt_m · 2026-09, seasonally adjusted',
+    );
   });
   it('signs year-on-year changes, with a real minus for a fall', async () => {
-    const { cards } = await runCards('eurostat-house-prices');
-    expect(cards['hpi-pt']).toMatchObject({ v: `+${nf1.format(16.5)}%`, src: 'Eurostat house price index · 2026-Q2' });
+    const { cards } = await runCards(
+      'eurostat-house-prices',
+    );
+    expect(cards['hpi-pt']).toMatchObject({
+      v: `+${nf1.format(16.5)}%`,
+      src: 'Eurostat house price index · 2026-Q2',
+    });
     expect(cards['hpi-nl'].v).toBe(`+${nf1.format(4.3)}%`);
   });
   it.each([
     ['eurostat-inflation', 'inflation-'],
     ['eurostat-rents', 'rent-'],
     ['eurostat-energy-prices', 'energyinfl-'],
-  ])('%s builds one card per country it has data for', async (id, prefix) => {
-    const { cards } = await runCards(id);
-    expect(Object.keys(cards).sort()).toEqual([`${prefix}nl`, `${prefix}pt`]);
-  });
+  ])(
+    '%s builds one card per country it has data for',
+    async (id, prefix) => {
+      const { cards } = await runCards(id);
+      expect(Object.keys(cards).sort()).toEqual([
+        `${prefix}nl`,
+        `${prefix}pt`,
+      ]);
+    },
+  );
   it('works out the renewable share of electricity from total and renewable generation', async () => {
     // geo × siec × time: PT and NL, total and renewable, two months.
     net.custom = url =>
@@ -59,17 +87,39 @@ describe('Eurostat', () => {
             id: ['geo', 'siec', 'time'],
             size: [2, 2, 2],
             dimension: {
-              geo: { category: { index: { PT: 0, NL: 1 } } },
-              siec: { category: { index: { TOTAL: 0, RA000: 1 } } },
-              time: { category: { index: { '2026-08': 0, '2026-09': 1 } } },
+              geo: {
+                category: { index: { PT: 0, NL: 1 } },
+              },
+              siec: {
+                category: { index: { TOTAL: 0, RA000: 1 } },
+              },
+              time: {
+                category: {
+                  index: { '2026-08': 0, '2026-09': 1 },
+                },
+              },
             },
             // PT total 4000, 4000; PT renewable 2600, 3000; NL total 10000, 10000; NL renewable 5000, 4800.
-            value: { 0: 4000, 1: 4000, 2: 2600, 3: 3000, 4: 10000, 5: 10000, 6: 5000, 7: 4800 },
+            value: {
+              0: 4000,
+              1: 4000,
+              2: 2600,
+              3: 3000,
+              4: 10000,
+              5: 10000,
+              6: 5000,
+              7: 4800,
+            },
           }
         : undefined;
     const { cards } = await runCards('eurostat-renewables');
-    expect(cards['renew-pt']).toMatchObject({ v: `${nf0.format(75)}%`, src: 'Eurostat nrg_cb_pem · 2026-09' });
-    expect(cards['renew-pt'].spark?.map(p => p.value)).toEqual([65, 75]);
+    expect(cards['renew-pt']).toMatchObject({
+      v: `${nf0.format(75)}%`,
+      src: 'Eurostat nrg_cb_pem · 2026-09',
+    });
+    expect(
+      cards['renew-pt'].spark?.map(p => p.value),
+    ).toEqual([65, 75]);
     expect(cards['renew-nl'].v).toBe(`${nf0.format(48)}%`);
   });
   it('shows net greenhouse gases per person, with the change over the years in the reply', async () => {
@@ -84,7 +134,9 @@ describe('Eurostat', () => {
     });
     expect(cards['ghg-pt'].v).toBe(`${nf1.format(4.9)} t`);
     expect(cards['ghg-nl'].spark).toHaveLength(12);
-    expect(net.urls[0]).toContain('unit=T_HAB&src_crf=TOTXMEMO');
+    expect(net.urls[0]).toContain(
+      'unit=T_HAB&src_crf=TOTXMEMO',
+    );
   });
   it('shows nitrate in groundwater against the drinking-water limit', async () => {
     const { cards } = await runCards('eurostat-sdg_06_40');
@@ -93,7 +145,9 @@ describe('Eurostat', () => {
       v: `${nf1.format(15.7)} mg/L`,
       src: 'Eurostat sdg_06_40 (EEA) · 2023',
     });
-    expect(cards['nitrate-pt'].sub).toMatch(/^the drinking-water limit is 50 mg\/L · .* since 2012$/);
+    expect(cards['nitrate-pt'].sub).toMatch(
+      /^the drinking-water limit is 50 mg\/L · .* since 2012$/,
+    );
   });
   it('shows municipal waste per person', async () => {
     const { cards } = await runCards('eurostat-env_wasmun');
@@ -102,7 +156,9 @@ describe('Eurostat', () => {
       sub: `per person a year · ${fmtPct(((473 - 526) / 526) * 100)} since 2013`,
       src: 'Eurostat env_wasmun · 2024',
     });
-    expect(cards['waste-pt'].v).toBe(`${nf0.format(492)} kg`);
+    expect(cards['waste-pt'].v).toBe(
+      `${nf0.format(492)} kg`,
+    );
   });
   it('shows circular material use, with its change in points', async () => {
     const { cards } = await runCards('eurostat-sdg_12_41');
@@ -110,7 +166,9 @@ describe('Eurostat', () => {
       v: `${nf1.format(32.7)}%`,
       sub: `of the materials used were recycled ones · +${nf1.format(6.7)} pts since 2013`,
     });
-    expect(cards['circular-pt'].sub).toMatch(/· \+.* pts since 2013$/);
+    expect(cards['circular-pt'].sub).toMatch(
+      /· \+.* pts since 2013$/,
+    );
   });
   it('shows a yearly card without a change when the reply holds one year', async () => {
     net.custom = url =>
@@ -118,7 +176,10 @@ describe('Eurostat', () => {
         ? {
             id: ['geo', 'time'],
             size: [1, 1],
-            dimension: { geo: { category: { index: { PT: 0 } } }, time: { category: { index: { '2024': 0 } } } },
+            dimension: {
+              geo: { category: { index: { PT: 0 } } },
+              time: { category: { index: { '2024': 0 } } },
+            },
             value: { 0: 492 },
           }
         : undefined;
@@ -127,7 +188,9 @@ describe('Eurostat', () => {
     expect(cards['waste-pt'].sub).toBe('per person a year');
   });
   it('shows police-recorded crime per 100,000 people, with its change over the years', async () => {
-    const { cards } = await runCards('eurostat-crime-burglary');
+    const { cards } = await runCards(
+      'eurostat-crime-burglary',
+    );
     expect(cards['burglary-pt']).toMatchObject({
       group: 'pt',
       k: 'Home burglaries · Portugal',
@@ -139,21 +202,42 @@ describe('Eurostat', () => {
   });
   it('leaves out a country whose newest year is too old to show as today’s', async () => {
     // The Netherlands reported fraud for 2016 only.
-    const { cards } = await runCards('eurostat-crime-fraud');
+    const { cards } = await runCards(
+      'eurostat-crime-fraud',
+    );
     expect(Object.keys(cards)).toEqual(['fraud-pt']);
   });
   it('shows early school leavers and degree holders as shares, with their change in points', async () => {
-    const leavers = (await runCards('eurostat-edat_lfse_14')).cards;
-    expect(leavers['leavers-pt']).toMatchObject({ k: 'Early school leavers · Portugal', v: `${nf1.format(6.1)}%` });
-    expect(leavers['leavers-pt'].sub?.endsWith(`−${nf1.format(11.2)} pts since 2014`)).toBe(true);
-    const degree = (await runCards('eurostat-edat_lfse_03')).cards;
-    expect(degree['degree-nl']).toMatchObject({ k: 'Degree holders · Netherlands', v: `${nf1.format(56.1)}%` });
+    const leavers = (
+      await runCards('eurostat-edat_lfse_14')
+    ).cards;
+    expect(leavers['leavers-pt']).toMatchObject({
+      k: 'Early school leavers · Portugal',
+      v: `${nf1.format(6.1)}%`,
+    });
+    expect(
+      leavers['leavers-pt'].sub?.endsWith(
+        `−${nf1.format(11.2)} pts since 2014`,
+      ),
+    ).toBe(true);
+    const degree = (await runCards('eurostat-edat_lfse_03'))
+      .cards;
+    expect(degree['degree-nl']).toMatchObject({
+      k: 'Degree holders · Netherlands',
+      v: `${nf1.format(56.1)}%`,
+    });
   });
   it('reports each loader that fails by its id', async () => {
     net.custom = url => {
-      if (url.hostname === 'ec.europa.eu') throw new Error('down');
+      if (url.hostname === 'ec.europa.eu') {
+        throw new Error('down');
+      }
     };
-    const { rows, failed } = await loadCards(CARD_LOADERS.filter(l => l.id.startsWith('eurostat-')));
+    const { rows, failed } = await loadCards(
+      CARD_LOADERS.filter(l =>
+        l.id.startsWith('eurostat-'),
+      ),
+    );
     expect(failed.map(f => f.id).sort()).toEqual([
       'eurostat-crime-burglary',
       'eurostat-crime-fraud',

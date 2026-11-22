@@ -104,7 +104,10 @@ export interface Adapter {
   weight?: number;
   minMean?: number;
   lagDays?: number;
-  fetch(topic: string, ctx: { signal: AbortSignal; query: Query }): Promise<AdapterResult>;
+  fetch(
+    topic: string,
+    ctx: { signal: AbortSignal; query: Query },
+  ): Promise<AdapterResult>;
 }
 export interface Source {
   label: string;

@@ -1,11 +1,20 @@
 // View helpers: axis ticks, alert tags, source breakdowns and SVG paths.
 import { describe, expect, it } from 'vitest';
 import { nf0 } from '@core/format';
-import { compText, heatText, niceStep, niceTicks, pathOf, tagOf } from './helpers';
+import {
+  compText,
+  heatText,
+  niceStep,
+  niceTicks,
+  pathOf,
+  tagOf,
+} from './helpers';
 
 describe('axis ticks', () => {
   it('round a step up to 1, 2, 2.5 or 5 times a power of ten', () => {
-    expect([0.7, 1.5, 2.2, 3, 7, 23, 4100].map(niceStep)).toEqual([1, 2, 2.5, 5, 10, 25, 5000]);
+    expect(
+      [0.7, 1.5, 2.2, 3, 7, 23, 4100].map(niceStep),
+    ).toEqual([1, 2, 2.5, 5, 10, 25, 5000]);
   });
   it('run from 0 past the maximum, about four steps', () => {
     expect(niceTicks(100)).toEqual([0, 25, 50, 75, 100]);
@@ -20,16 +29,30 @@ describe('axis ticks', () => {
 
 describe('tagOf', () => {
   it('tags an alert, a watch, or normal from the z-score', () => {
-    expect(tagOf({ z: 3 })).toEqual({ cls: 'alert', text: '▲ ALERT' });
-    expect(tagOf({ z: 2 })).toEqual({ cls: 'watch', text: '◆ WATCH' });
-    expect(tagOf({ z: 0.5 })).toEqual({ cls: 'none', text: 'normal' });
-    expect(tagOf(null)).toEqual({ cls: 'none', text: 'normal' });
+    expect(tagOf({ z: 3 })).toEqual({
+      cls: 'alert',
+      text: '▲ ALERT',
+    });
+    expect(tagOf({ z: 2 })).toEqual({
+      cls: 'watch',
+      text: '◆ WATCH',
+    });
+    expect(tagOf({ z: 0.5 })).toEqual({
+      cls: 'none',
+      text: 'normal',
+    });
+    expect(tagOf(null)).toEqual({
+      cls: 'none',
+      text: 'normal',
+    });
   });
 });
 
 describe('compText', () => {
   it('names each source of a blended point with its value', () => {
-    expect(compText({ wikipedia: 120, hn: 80.4, other: 5 })).toBe(
+    expect(
+      compText({ wikipedia: 120, hn: 80.4, other: 5 }),
+    ).toBe(
       `Wikipedia ${nf0.format(120)} · HN ${nf0.format(80)} · other ${nf0.format(5)}`,
     );
     expect(compText(null)).toBe('');
@@ -51,8 +74,12 @@ describe('pathOf', () => {
 
 describe('heatText', () => {
   it('says what a channel’s badge counts', () => {
-    expect(heatText({ level: 'alert', n: 2 })).toBe('2 topics on alert');
-    expect(heatText({ level: 'watch', n: 1 })).toBe('1 topic on watch');
+    expect(heatText({ level: 'alert', n: 2 })).toBe(
+      '2 topics on alert',
+    );
+    expect(heatText({ level: 'watch', n: 1 })).toBe(
+      '1 topic on watch',
+    );
     expect(heatText(null)).toBe('');
   });
 });

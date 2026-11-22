@@ -38,7 +38,9 @@ describe('lenses', () => {
       'birds',
       'github',
     ]);
-    expect(app.state.lenses.every(l => l.lang === 'en')).toBe(true);
+    expect(
+      app.state.lenses.every(l => l.lang === 'en'),
+    ).toBe(true);
   });
 
   it('replaces the old presets on upgrade and keeps lenses the user made', () => {
@@ -68,21 +70,35 @@ describe('lenses', () => {
       'github',
       'mine',
     ]);
-    expect(app.state.lenses.at(-1)?.topics.map(t => t.name)).toEqual(['Zig', 'Solarpunk']);
+    expect(
+      app.state.lenses.at(-1)?.topics.map(t => t.name),
+    ).toEqual(['Zig', 'Solarpunk']);
   });
 
   it('leaves saved lenses alone once they are on the current version', () => {
     loadLenses();
-    mem.set(LS.lenses, JSON.stringify([saved('mine', ['Zig'])]));
+    mem.set(
+      LS.lenses,
+      JSON.stringify([saved('mine', ['Zig'])]),
+    );
     loadLenses();
-    expect(app.state.lenses.map(l => l.id)).toEqual(['mine']);
+    expect(app.state.lenses.map(l => l.id)).toEqual([
+      'mine',
+    ]);
   });
 
   it('saves the upgraded lenses straight away', () => {
     mem.set(LS.presetVer, '4');
-    mem.set(LS.lenses, JSON.stringify([saved('geo', ['NATO'])]));
+    mem.set(
+      LS.lenses,
+      JSON.stringify([saved('geo', ['NATO'])]),
+    );
     loadLenses();
-    expect(JSON.parse(mem.get(LS.lenses) || '[]').map((l: { id: string }) => l.id)).toContain('github');
+    expect(
+      JSON.parse(mem.get(LS.lenses) || '[]').map(
+        (l: { id: string }) => l.id,
+      ),
+    ).toContain('github');
   });
 
   it('repairs a browser marked as upgraded that still holds the old lenses', () => {
@@ -90,7 +106,16 @@ describe('lenses', () => {
     mem.set(
       LS.lenses,
       JSON.stringify(
-        ['world', 'tgs', 'portugal', 'circular', 'geo', 'climate', 'land', 'nl'].map(id => saved(id, ['X'])),
+        [
+          'world',
+          'tgs',
+          'portugal',
+          'circular',
+          'geo',
+          'climate',
+          'land',
+          'nl',
+        ].map(id => saved(id, ['X'])),
       ),
     );
     loadLenses();
@@ -109,6 +134,8 @@ describe('lenses', () => {
       'github',
     ]);
     loadLenses(); // and it sticks on the next load
-    expect(app.state.lenses.map((l: { id: string }) => l.id)).toContain('github');
+    expect(
+      app.state.lenses.map((l: { id: string }) => l.id),
+    ).toContain('github');
   });
 });

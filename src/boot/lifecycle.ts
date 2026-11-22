@@ -5,13 +5,28 @@ import { saveLook } from '@features/brief';
 import type { AppContext } from '@/context';
 
 const LOOKED = 20e3;
-export function installLifecycle({ app, live }: AppContext): void {
+export function installLifecycle({
+  app,
+  live,
+}: AppContext): void {
   const { state } = app;
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && Date.now() - live.updated() > HOUR) void live.load();
-    if (document.visibilityState === 'hidden' && Date.now() - state.viewStart > LOOKED) saveLook(app);
+    if (
+      document.visibilityState === 'visible' &&
+      Date.now() - live.updated() > HOUR
+    ) {
+      void live.load();
+    }
+    if (
+      document.visibilityState === 'hidden' &&
+      Date.now() - state.viewStart > LOOKED
+    ) {
+      saveLook(app);
+    }
   });
   window.addEventListener('pagehide', () => {
-    if (Date.now() - state.viewStart > LOOKED) saveLook(app);
+    if (Date.now() - state.viewStart > LOOKED) {
+      saveLook(app);
+    }
   });
 }

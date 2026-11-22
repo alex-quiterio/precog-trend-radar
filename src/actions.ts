@@ -2,7 +2,13 @@
 // set keys, follow sites. createActions binds them to one app store and the services they start, so a test
 // can give them its own; the app makes one set (context.ts). No DOM, except focusing the chart and prompts.
 import type { Lens, Prefs, TopicDef } from '@/types';
-import { LS, MAX_LENSES, MAX_TOPICS, slotColor, store } from '@core/config';
+import {
+  LS,
+  MAX_LENSES,
+  MAX_TOPICS,
+  slotColor,
+  store,
+} from '@core/config';
 import { errorText } from '@core/errors';
 import { looksLikePerson } from '@core/guard';
 import { levelOf } from '@core/stats';
@@ -10,34 +16,64 @@ import { saveLook } from '@features/brief';
 import type { GitHub } from '@features/github';
 import type { Pickers } from '@features/hot-topics';
 import type { MyGitHub } from '@features/github-me';
-import { githubToken, setGithubToken } from '@sources/github/auth';
-import { activeChannel, channels, isBuiltInLens } from '@/channels';
-import { guardianKey, setGuardianKey } from '@sources/guardian';
-import { probeSite, readingSites, saveReadingSites } from '@sources/reading';
+import {
+  githubToken,
+  setGithubToken,
+} from '@sources/github/auth';
+import {
+  activeChannel,
+  channels,
+  isBuiltInLens,
+} from '@/channels';
+import {
+  guardianKey,
+  setGuardianKey,
+} from '@sources/guardian';
+import {
+  probeSite,
+  readingSites,
+  saveReadingSites,
+} from '@sources/reading';
 import type { LiveLoop } from '@/live';
 import type { AppStore } from '@/state';
 
 /** "Name | wiki: Title | q: query" → a topic definition (its slot is picked when it's added). */
 export function parseTopicInput(raw: string): TopicDef {
   const [name, ...rest] = raw.split('|').map(s => s.trim());
-  const def: TopicDef = { name: name.replace(/\s+/g, ' '), slot: -1 };
+  const def: TopicDef = {
+    name: name.replace(/\s+/g, ' '),
+    slot: -1,
+  };
   rest.forEach(r => {
     const m = r.match(/^(wiki|q|query)\s*:\s*(.+)$/i);
-    if (m) def[m[1].toLowerCase() === 'wiki' ? 'wiki' : 'q'] = m[2].trim();
+    if (m) {
+      def[m[1].toLowerCase() === 'wiki' ? 'wiki' : 'q'] =
+        m[2].trim();
+    }
   });
   return def;
 }
 /** The services actions start: the data loop and the stream loader. */
 export interface ActionDeps {
-  live: Pick<LiveLoop, 'signal' | 'parts' | 'fetchPart' | 'setStatus' | 'start'> & Partial<Pick<LiveLoop, 'focus'>>;
-  stories: { load(): Promise<void>; status: { at: Record<string, number> } };
+  live: Pick<
+    LiveLoop,
+    'signal' | 'parts' | 'fetchPart' | 'setStatus' | 'start'
+  > &
+    Partial<Pick<LiveLoop, 'focus'>>;
+  stories: {
+    load(): Promise<void>;
+    status: { at: Record<string, number> };
+  };
   /** The GitHub panels' loaders (optional: a test may leave them out). */
   github?: Pick<GitHub, 'load'>;
   myGithub?: Pick<MyGitHub, 'load'>;
   /** World's daily topic pick (optional: without it, World's topics are fixed like any channel's). */
   hot?: Pick<Pickers, 'for'>;
 }
-export function createActions(app: AppStore, { live, stories, github, myGithub, hot }: ActionDeps) {
+export function createActions(
+  app: AppStore,
+  { live, stories, github, myGithub, hot }: ActionDeps,
+) {
   const { state, ui } = app;
   function watchMsg(text: string, err = false): void {
     ui.watchMsg = text || '';
@@ -45,31 +81,56 @@ export function createActions(app: AppStore, { live, stories, github, myGithub, 
   }
   function addTopic(raw: string): boolean {
     const lens = app.activeLens();
-    if (!lens) return false;
+    if (!lens) {
+      return false;
+    }
     const def = parseTopicInput(raw);
     const name = def.name;
-    if (!name) return false;
+    if (!name) {
+      return false;
+    }
     if (name.length > 40) {
-      watchMsg('Keep topic names under 40 characters.', true);
+      watchMsg(
+        'Keep topic names under 40 characters.',
+        true,
+      );
       return false;
     }
     if ([def.name, def.wiki, def.q].some(looksLikePerson)) {
-      watchMsg(`“${name}” looks like a person or a handle. PRECOG tracks topics, not people.`, true);
+      watchMsg(
+        `“${name}” looks like a person or a handle. PRECOG tracks topics, not people.`,
+        true,
+      );
       return false;
     }
-    if (lens.topics.some(t => t.name.toLowerCase() === name.toLowerCase())) {
-      watchMsg(`“${name}” is already in ${lens.name}.`, true);
+    if (
+      lens.topics.some(
+        t => t.name.toLowerCase() === name.toLowerCase(),
+      )
+    ) {
+      watchMsg(
+        `“${name}” is already in ${lens.name}.`,
+        true,
+      );
       return false;
     }
     // A channel that picks its own topics: one you add takes the place of the weakest pick that isn't pinned.
     const picker = hot?.for(lens.id);
-    if (lens.topics.length >= MAX_TOPICS && picker) picker.makeRoom();
+    if (lens.topics.length >= MAX_TOPICS && picker) {
+      picker.makeRoom();
+    }
     if (lens.topics.length >= MAX_TOPICS) {
-      watchMsg(`A lens holds ${MAX_TOPICS} topics. Remove one, or start a new lens.`, true);
+      watchMsg(
+        `A lens holds ${MAX_TOPICS} topics. Remove one, or start a new lens.`,
+        true,
+      );
       return false;
     }
     const used = new Set(lens.topics.map(t => t.slot));
-    def.slot = [...Array(MAX_TOPICS).keys()].find(i => !used.has(i)) ?? 0; // a free slot exists: the lens isn't full
+    def.slot =
+      [...Array(MAX_TOPICS).keys()].find(
+        i => !used.has(i),
+      ) ?? 0; // a free slot exists: the lens isn't full
     lens.topics.push(def);
     lens.topics.sort((a, b) => a.slot - b.slot);
     const E = app.ensureEntry(lens, def);
@@ -79,38 +140,62 @@ export function createActions(app: AppStore, { live, stories, github, myGithub, 
     app.savePrefs();
     watchMsg(`Tracking “${name}” in ${lens.name}.`);
     // Fetch the new topic now; a refresh that starts meanwhile cancels it along with everything else.
-    const signal = live.signal() ?? new AbortController().signal;
-    Promise.all(live.parts().map(p => live.fetchPart(E, p, signal))).then(() => {
-      if (E.liveError) live.setStatus(`No data for ${E.name}: ${E.liveError}`);
+    const signal =
+      live.signal() ?? new AbortController().signal;
+    Promise.all(
+      live.parts().map(p => live.fetchPart(E, p, signal)),
+    ).then(() => {
+      if (E.liveError) {
+        live.setStatus(
+          `No data for ${E.name}: ${E.liveError}`,
+        );
+      }
     });
     return true;
   }
   /** Pins a picked World topic so it stays however it scores, or unpins it. */
   function togglePin(key: string): void {
     const E = state.rt.get(key);
-    if (E) hot?.for(E.lensId)?.togglePin(E.name);
+    if (E) {
+      hot?.for(E.lensId)?.togglePin(E.name);
+    }
   }
   function removeTopic(key: string): void {
     const E = state.rt.get(key);
-    if (!E) return;
+    if (!E) {
+      return;
+    }
     const lens = app.lensById(E.lensId);
-    if (!lens) return;
+    if (!lens) {
+      return;
+    }
     const i = lens.topics.findIndex(t => t.name === E.name);
     lens.topics.splice(i, 1);
     state.rt.delete(key);
-    if (state.selectedByLens[lens.id] === E.name)
-      state.selectedByLens[lens.id] = (lens.topics[i] || lens.topics[i - 1])?.name ?? '';
+    if (state.selectedByLens[lens.id] === E.name) {
+      state.selectedByLens[lens.id] =
+        (lens.topics[i] || lens.topics[i - 1])?.name ?? '';
+    }
     app.saveLenses();
     app.savePrefs();
     const picker = hot?.for(lens.id);
     if (picker) {
       picker.dismiss(E.name);
-      watchMsg(`Removed “${E.name}”. It won't be picked again for a week.`);
-    } else watchMsg(`Removed “${E.name}” from ${lens.name}.`);
+      watchMsg(
+        `Removed “${E.name}”. It won't be picked again for a week.`,
+      );
+    } else {
+      watchMsg(`Removed “${E.name}” from ${lens.name}.`);
+    }
   }
   function addLens(raw: string): void {
-    const name = raw.trim().replace(/\s+/g, ' ').slice(0, 30);
-    if (!name) return;
+    const name = raw
+      .trim()
+      .replace(/\s+/g, ' ')
+      .slice(0, 30);
+    if (!name) {
+      return;
+    }
     if (state.lenses.length >= MAX_LENSES) {
       watchMsg(`Up to ${MAX_LENSES} lenses.`, true);
       return;
@@ -124,7 +209,9 @@ export function createActions(app: AppStore, { live, stories, github, myGithub, 
     state.activeLens = id;
     app.saveLenses();
     app.savePrefs();
-    watchMsg(`New lens “${name}”. Add up to ${MAX_TOPICS} topics.`);
+    watchMsg(
+      `New lens “${name}”. Add up to ${MAX_TOPICS} topics.`,
+    );
     ui.focusAdd++;
   }
   /**
@@ -133,22 +220,50 @@ export function createActions(app: AppStore, { live, stories, github, myGithub, 
    */
   /** Pins a channel as home, so PRECOG always opens on it; pinning the home channel again unpins it. */
   function toggleHome(lensId: string): void {
-    if (!app.lensById(lensId)) return;
-    state.homeLens = state.homeLens === lensId ? null : lensId;
+    if (!app.lensById(lensId)) {
+      return;
+    }
+    state.homeLens =
+      state.homeLens === lensId ? null : lensId;
     app.savePrefs();
   }
-  function removeLens(id: string, ask: (q: string) => boolean = q => window.confirm(q)): boolean {
+  function removeLens(
+    id: string,
+    ask: (q: string) => boolean = q => window.confirm(q),
+  ): boolean {
     const lens = app.lensById(id);
-    if (!lens || isBuiltInLens(id) || state.lenses.length < 2) return false;
+    if (
+      !lens ||
+      isBuiltInLens(id) ||
+      state.lenses.length < 2
+    ) {
+      return false;
+    }
     const n = lens.topics.length;
-    if (!ask(`Delete the channel “${lens.name}”${n ? ` and its ${n} topic${n === 1 ? '' : 's'}` : ''}?`)) return false;
+    if (
+      !ask(
+        `Delete the channel “${lens.name}”${n ? ` and its ${n} topic${n === 1 ? '' : 's'}` : ''}?`,
+      )
+    ) {
+      return false;
+    }
     const list = channels(app);
-    const before = list[Math.max(0, list.findIndex(c => c.lensId === id) - 1)];
+    const before =
+      list[
+        Math.max(
+          0,
+          list.findIndex(c => c.lensId === id) - 1,
+        )
+      ];
     state.lenses = state.lenses.filter(l => l !== lens);
-    if (state.homeLens === id) state.homeLens = null; // no home rather than a missing one
+    if (state.homeLens === id) {
+      state.homeLens = null;
+    } // no home rather than a missing one
     app.syncEntries();
     if (state.activeLens === id) {
-      state.activeLens = app.lensById(before.lensId) ? before.lensId : state.lenses[0].id;
+      state.activeLens = app.lensById(before.lensId)
+        ? before.lensId
+        : state.lenses[0].id;
       ui.swap++;
       void stories.load();
     }
@@ -158,30 +273,49 @@ export function createActions(app: AppStore, { live, stories, github, myGithub, 
     return true;
   }
   function selectLens(id: string): void {
-    if (!app.lensById(id) || id === state.activeLens) return;
+    if (!app.lensById(id) || id === state.activeLens) {
+      return;
+    }
     state.activeLens = id;
     app.savePrefs();
     ui.swap++;
     live.focus?.(); // its topics go first if they're still loading
     void stories.load();
-    if (activeChannel(app).github) void github?.load();
+    if (activeChannel(app).github) {
+      void github?.load();
+    }
   }
   function select(key: string): void {
     const E = state.rt.get(key);
-    if (!E) return;
+    if (!E) {
+      return;
+    }
     const changedLens = E.lensId !== state.activeLens;
-    if (!changedLens && state.selectedByLens[E.lensId] === E.name) return;
+    if (
+      !changedLens &&
+      state.selectedByLens[E.lensId] === E.name
+    ) {
+      return;
+    }
     state.activeLens = E.lensId;
     state.selectedByLens[E.lensId] = E.name;
     app.savePrefs();
     ui.swap++;
-    if (state.storyScope === 'topic' || changedLens) loadStoriesDebounced();
-    if (changedLens && activeChannel(app).github) void github?.load();
-    if (changedLens) live.focus?.();
+    if (state.storyScope === 'topic' || changedLens) {
+      loadStoriesDebounced();
+    }
+    if (changedLens && activeChannel(app).github) {
+      void github?.load();
+    }
+    if (changedLens) {
+      live.focus?.();
+    }
   }
   function shiftTopic(d: number): void {
     const list = app.entriesOf(app.activeLens());
-    if (!list.length) return;
+    if (!list.length) {
+      return;
+    }
     const sel = app.selectedEntry();
     const i = sel ? Math.max(0, list.indexOf(sel)) : 0;
     select(list[(i + d + list.length) % list.length].key);
@@ -190,7 +324,9 @@ export function createActions(app: AppStore, { live, stories, github, myGithub, 
     // In the channel bar's order, which isn't the order the lenses are stored in.
     const all = channels(app);
     const i = Math.max(0, all.indexOf(activeChannel(app)));
-    selectLens(all[(i + d + all.length) % all.length].lensId);
+    selectLens(
+      all[(i + d + all.length) % all.length].lensId,
+    );
   }
   let storyDeb: ReturnType<typeof setTimeout> | undefined;
   function loadStoriesDebounced(): void {
@@ -198,18 +334,26 @@ export function createActions(app: AppStore, { live, stories, github, myGithub, 
     storyDeb = setTimeout(stories.load, 500);
   }
 
-  function lensHeat(l: Lens | undefined): { level: 'alert' | 'watch'; n: number } | null {
+  function lensHeat(
+    l: Lens | undefined,
+  ): { level: 'alert' | 'watch'; n: number } | null {
     const ls = app
       .entriesOf(l)
       .map(E => levelOf(E.stats?.z))
       .filter(Boolean);
     const alert = ls.filter(x => x === 'alert').length;
-    return alert ? { level: 'alert', n: alert } : ls.length ? { level: 'watch', n: ls.length } : null;
+    return alert
+      ? { level: 'alert', n: alert }
+      : ls.length
+        ? { level: 'watch', n: ls.length }
+        : null;
   }
   function setStorySource(src: string): void {
     state.storySrc = src;
     app.savePrefs();
-    if (!stories.status.at[src]) void stories.load();
+    if (!stories.status.at[src]) {
+      void stories.load();
+    }
   }
   function setStoryScope(scope: Prefs['storyScope']): void {
     state.storyScope = scope;
@@ -222,13 +366,17 @@ export function createActions(app: AppStore, { live, stories, github, myGithub, 
   }
   function applyTheme(theme: string): void {
     ui.theme = theme === 'light' ? 'light' : 'dark';
-    if (typeof document !== 'undefined') document.documentElement.dataset.theme = ui.theme;
+    if (typeof document !== 'undefined') {
+      document.documentElement.dataset.theme = ui.theme;
+    }
     state.rt.forEach(E => {
       E.color = slotColor(E.slot, ui.theme);
     });
     state.alerts.forEach(a => {
       const E = state.rt.get(a.key);
-      if (E) a.color = E.color;
+      if (E) {
+        a.color = E.color;
+      }
     });
   }
   /** Switches to this theme and remembers it. */
@@ -248,20 +396,32 @@ export function createActions(app: AppStore, { live, stories, github, myGithub, 
         : 'Paste your free Guardian API key (from open-platform.theguardian.com/access). It stays in this browser.',
       now,
     );
-    if (k == null || k.trim() === now) return;
+    if (k == null || k.trim() === now) {
+      return;
+    }
     setGuardianKey(k);
     ui.guardian = !!guardianKey();
     // Show the articles straight away, unless this channel leads with something else (e.g. its podcast).
-    if (ui.guardian && !now && activeChannel(app).streams[0] === 'news') state.storySrc = 'news';
+    if (
+      ui.guardian &&
+      !now &&
+      activeChannel(app).streams[0] === 'news'
+    ) {
+      state.storySrc = 'news';
+    }
     app.savePrefs();
     live.start();
   }
   /** Follows a WordPress site in the Reading tab, after checking the browser may read it. */
-  async function addReadingSite(raw: string): Promise<string | null> {
+  async function addReadingSite(
+    raw: string,
+  ): Promise<string | null> {
     try {
       const site = await probeSite(raw);
       const sites = readingSites();
-      if (sites.some(x => x.url === site.url)) return `Already following ${site.name}.`;
+      if (sites.some(x => x.url === site.url)) {
+        return `Already following ${site.name}.`;
+      }
       saveReadingSites([...sites, site]);
       void stories.load();
       return null;
@@ -270,7 +430,9 @@ export function createActions(app: AppStore, { live, stories, github, myGithub, 
     }
   }
   function removeReadingSite(url: string): void {
-    saveReadingSites(readingSites().filter(x => x.url !== url));
+    saveReadingSites(
+      readingSites().filter(x => x.url !== url),
+    );
     void stories.load();
   }
   /** Asks for an optional GitHub token (kept in this browser only), then reloads the GitHub views faster. */
@@ -283,25 +445,38 @@ export function createActions(app: AppStore, { live, stories, github, myGithub, 
             'github.com/settings/personal-access-tokens/new. It stays in this browser.',
       now,
     );
-    if (t == null || t.trim() === now) return;
+    if (t == null || t.trim() === now) {
+      return;
+    }
     setGithubToken(t);
     ui.ghToken = !!githubToken();
     void myGithub?.load(true);
-    if (activeChannel(app).github) void github?.load(true);
+    if (activeChannel(app).github) {
+      void github?.load(true);
+    }
   }
   /**
    * Charts a topic from anywhere (the gist's sentences, the movers table): selects it, switching to its
    * channel if it lives in another one, then brings the trend chart into view and flashes it.
    */
   function focusTopic(key: string): void {
-    if (!state.rt.get(key)) return;
+    if (!state.rt.get(key)) {
+      return;
+    }
     select(key);
     // Let the channel re-render first; the chart element is recreated when the channel changes.
     setTimeout(() => {
       const el = document.getElementById('p-signal');
-      if (!el) return;
-      const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-      el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+      if (!el) {
+        return;
+      }
+      const reduce = window.matchMedia?.(
+        '(prefers-reduced-motion: reduce)',
+      ).matches;
+      el.scrollIntoView({
+        behavior: reduce ? 'auto' : 'smooth',
+        block: 'start',
+      });
       el.classList.remove('flash');
       void el.offsetWidth; // restart the animation
       el.classList.add('flash');

@@ -1,7 +1,15 @@
 <template>
-  <panel-shell id="p-data" title="Open data" :meta="view.meta" :index="index">
+  <panel-shell
+    id="p-data"
+    title="Open data"
+    :meta="view.meta"
+    :index="index">
     <div v-if="view.groups.length" class="dp-groups">
-      <section v-for="g in view.groups" :key="g.id" class="dp-group" :aria-labelledby="'dp-' + g.id">
+      <section
+        v-for="g in view.groups"
+        :key="g.id"
+        class="dp-group"
+        :aria-labelledby="'dp-' + g.id">
         <header>
           <h4 :id="'dp-' + g.id">{{ g.label }}</h4>
           <span class="muted">{{ g.hint }}</span>
@@ -10,7 +18,9 @@
           <div v-for="r in g.rows" :key="r.k" class="row">
             <dt>
               {{ r.k }}
-              <span v-if="r.sub" class="sub">{{ r.sub }}</span>
+              <span v-if="r.sub" class="sub">
+                {{ r.sub }}
+              </span>
             </dt>
             <dd>{{ r.v }}</dd>
             <sparkline
@@ -18,24 +28,40 @@
               class="dp-spark"
               :points="r.spark"
               color="currentColor"
-              fit
-            />
+              fit />
             <span class="src">
-              <a :href="r.href" target="_blank" rel="noopener noreferrer">{{ r.src }}</a>
+              <a
+                :href="r.href"
+                target="_blank"
+                rel="noopener noreferrer">
+                {{ r.src }}
+              </a>
             </span>
           </div>
         </dl>
       </section>
     </div>
-    <p v-else class="empty">{{ view.loaded ? 'No datapoints could be loaded (offline?).' : 'Loading…' }}</p>
+    <p v-else class="empty">
+      {{
+        view.loaded
+          ? 'No datapoints could be loaded (offline?).'
+          : 'Loading…'
+      }}
+    </p>
   </panel-shell>
 </template>
 
 <script lang="ts">
 import { useApp } from '@/context';
 import { computed, defineComponent } from 'vue';
-import { activeChannel, channelDatapoints } from '@/channels';
-import { DATAPOINT_GROUPS, type DatapointRow } from '@features/datapoints';
+import {
+  activeChannel,
+  channelDatapoints,
+} from '@/channels';
+import {
+  DATAPOINT_GROUPS,
+  type DatapointRow,
+} from '@features/datapoints';
 import { hhmm } from '@core/format';
 import PanelShell from '@components/PanelShell.vue';
 import Sparkline from '@components/Sparkline.vue';
@@ -53,7 +79,9 @@ export default defineComponent({
     const view = computed(() => {
       // The channel picks its cards and their order; they're shown under their group headings.
       const ids = channelDatapoints(activeChannel(app));
-      const rows = ids.map(id => dp.rows.find(r => r.id === id)).filter((r): r is DatapointRow => !!r);
+      const rows = ids
+        .map(id => dp.rows.find(r => r.id === id))
+        .filter((r): r is DatapointRow => !!r);
       const order = [...new Set(rows.map(r => r.group))];
       return {
         groups: order.map(id => ({
@@ -61,7 +89,9 @@ export default defineComponent({
           rows: rows.filter(r => r.group === id),
         })),
         loaded: !!dp.at && !dp.loading,
-        meta: dp.at ? `open data · ${hhmm(dp.at)}` : 'open data',
+        meta: dp.at
+          ? `open data · ${hhmm(dp.at)}`
+          : 'open data',
       };
     });
     return { ui, view };
@@ -119,7 +149,10 @@ export default defineComponent({
 }
 .dp-groups {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(240px, 1fr)
+  );
   gap: 6px 22px;
 }
 .dp-group > header {

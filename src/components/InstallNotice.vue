@@ -1,28 +1,70 @@
 <template>
-  <aside v-if="state.open" class="install no-print" role="dialog" aria-modal="false" aria-labelledby="install-h">
+  <aside
+    v-if="state.open"
+    class="install no-print"
+    role="dialog"
+    aria-modal="false"
+    aria-labelledby="install-h">
     <header>
       <h3 id="install-h">Install PRECOG</h3>
-      <button class="install-x" type="button" aria-label="Not now" title="Not now" @click="later">
-        <svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true">
-          <path d="M2.5 2.5l7 7M9.5 2.5l-7 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+      <button
+        class="install-x"
+        type="button"
+        aria-label="Not now"
+        title="Not now"
+        @click="later">
+        <svg
+          viewBox="0 0 12 12"
+          width="10"
+          height="10"
+          aria-hidden="true">
+          <path
+            d="M2.5 2.5l7 7M9.5 2.5l-7 7"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round" />
         </svg>
       </button>
     </header>
-    <p v-if="state.way === 'prompt'">Keep the situation room one click away: it opens in its own window.</p>
+    <p v-if="state.way === 'prompt'">
+      Keep the situation room one click away: it opens in
+      its own window.
+    </p>
     <!-- prettier-ignore -->
     <p v-else-if="state.way === 'ios'">Add it to your Home Screen: tap <b>Share</b>&nbsp;<svg class="share" viewBox="0 0 16 16" width="13" height="13" aria-label="(the square with an arrow)"><path d="M8 1.5v8M5 4.5l3-3 3 3M4.5 7H3.5v7h9V7h-1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none" /></svg>, then <b>Add to Home Screen</b>.</p>
     <!-- prettier-ignore -->
     <p v-else>Add it to your Dock: in Safari's menu bar, choose <b>File › Add to Dock</b>.</p>
     <div class="install-actions">
-      <button v-if="state.way === 'prompt'" class="btn primary small" type="button" @click="install">Install</button>
-      <button v-else class="btn primary small" type="button" @click="done">Done</button>
-      <button class="btn small" type="button" @click="later">Not now</button>
+      <button
+        v-if="state.way === 'prompt'"
+        class="btn primary small"
+        type="button"
+        @click="install">
+        Install
+      </button>
+      <button
+        v-else
+        class="btn primary small"
+        type="button"
+        @click="done">
+        Done
+      </button>
+      <button
+        class="btn small"
+        type="button"
+        @click="later">
+        Not now
+      </button>
     </div>
   </aside>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, onUnmounted } from 'vue';
+import {
+  defineComponent,
+  onMounted,
+  onUnmounted,
+} from 'vue';
 import { createInstall } from '@features/install';
 
 // PRECOG / Trend Radar · A small notice asking to install PRECOG as an app (see features/install.ts).
@@ -30,7 +72,8 @@ import { createInstall } from '@features/install';
 export default defineComponent({
   name: 'InstallNotice',
   setup() {
-    const { state, start, stop, install, later, done } = createInstall();
+    const { state, start, stop, install, later, done } =
+      createInstall();
     onMounted(start);
     onUnmounted(stop);
     return { state, install, later, done };

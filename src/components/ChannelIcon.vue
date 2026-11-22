@@ -9,17 +9,19 @@
     stroke-width="1.75"
     stroke-linecap="round"
     stroke-linejoin="round"
-    aria-hidden="true"
-  >
+    aria-hidden="true">
     <template v-if="name === 'globe'">
       <circle cx="12" cy="12" r="9" />
-      <path d="M3 12h18M12 3c2.8 3 2.8 15 0 18M12 3c-2.8 3-2.8 15 0 18" />
+      <path
+        d="M3 12h18M12 3c2.8 3 2.8 15 0 18M12 3c-2.8 3-2.8 15 0 18" />
     </template>
     <template v-else-if="name === 'leaf'">
       <path d="M5 20c0-9 6-15 15-15 0 9-6 15-15 15z" />
       <path d="M5 20 14 11" />
     </template>
-    <path v-else-if="name === 'bolt'" d="M13 2 4 14h7l-1 8 9-12h-7z" />
+    <path
+      v-else-if="name === 'bolt'"
+      d="M13 2 4 14h7l-1 8 9-12h-7z" />
     <template v-else-if="name === 'land'">
       <path d="M2 20 9 9l4 6 3-4 6 9z" />
       <circle cx="17" cy="5.5" r="2" />
@@ -29,16 +31,19 @@
       <path d="M5.5 10v10h13V10M10 20v-5.5h4V20" />
     </template>
     <template v-else-if="name === 'cycle'">
-      <path d="M20 12a8 8 0 0 1-14 5.3M4 12a8 8 0 0 1 14-5.3" />
+      <path
+        d="M20 12a8 8 0 0 1-14 5.3M4 12a8 8 0 0 1 14-5.3" />
       <path d="M18 3v3.7h-3.7M6 21v-3.7h3.7" />
     </template>
     <template v-else-if="name === 'bike'">
       <circle cx="5.5" cy="16.5" r="3.5" />
       <circle cx="18.5" cy="16.5" r="3.5" />
-      <path d="M5.5 16.5 9.5 9h6l3 7.5M9.5 9 8 6H6M12 16.5 15.5 9" />
+      <path
+        d="M5.5 16.5 9.5 9h6l3 7.5M9.5 9 8 6H6M12 16.5 15.5 9" />
     </template>
     <template v-else-if="name === 'book'">
-      <path d="M12 6.5C10 5 7 4.5 4 4.5v14c3 0 6 .5 8 2 2-1.5 5-2 8-2v-14c-3 0-6 .5-8 2z" />
+      <path
+        d="M12 6.5C10 5 7 4.5 4 4.5v14c3 0 6 .5 8 2 2-1.5 5-2 8-2v-14c-3 0-6 .5-8 2z" />
       <path d="M12 6.5v14" />
     </template>
     <template v-else-if="name === 'candles'">
@@ -47,16 +52,22 @@
       <rect x="15" y="11" width="4" height="6" rx="1" />
     </template>
     <template v-else-if="name === 'bird'">
-      <path d="M2 9c3-1 6 0 8 3 2-3 5-4 8-3l4-1-3 3c0 4-4 7-9 7-3 0-6-2-8-5" />
+      <path
+        d="M2 9c3-1 6 0 8 3 2-3 5-4 8-3l4-1-3 3c0 4-4 7-9 7-3 0-6-2-8-5" />
       <path d="M10 12 7 6M14 11l3-5" />
     </template>
     <template v-else-if="name === 'people'">
       <circle cx="9" cy="8" r="3" />
       <path d="M3 19c0-3.3 2.7-6 6-6s6 2.7 6 6" />
-      <path d="M16 5.2a3 3 0 0 1 0 5.6M18 13.4c1.8.9 3 2.9 3 5.6" />
+      <path
+        d="M16 5.2a3 3 0 0 1 0 5.6M18 13.4c1.8.9 3 2.9 3 5.6" />
     </template>
-    <path v-else-if="name === 'code'" d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 4l-3 16" />
-    <path v-else d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6l-5.4 2.9 1.2-6-4.5-4.2 6.1-.7z" />
+    <path
+      v-else-if="name === 'code'"
+      d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 4l-3 16" />
+    <path
+      v-else
+      d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6l-5.4 2.9 1.2-6-4.5-4.2 6.1-.7z" />
   </svg>
 </template>
 

@@ -4,15 +4,20 @@
 import { store } from '@core/config';
 
 const KEY = 'precog.github.token';
-export const githubToken = (): string => String(store.get(KEY, '') || '').trim();
+export const githubToken = (): string =>
+  String(store.get(KEY, '') || '').trim();
 export function setGithubToken(t: string): void {
   store.set(KEY, String(t || '').trim());
 }
 export function githubHeaders(): HeadersInit {
   const t = githubToken();
   return t
-    ? { Accept: 'application/vnd.github+json', Authorization: `Bearer ${t}` }
+    ? {
+        Accept: 'application/vnd.github+json',
+        Authorization: `Bearer ${t}`,
+      }
     : { Accept: 'application/vnd.github+json' };
 }
 /** Milliseconds to wait between searches, inside GitHub's per-minute search limit. */
-export const searchGap = (): number => (githubToken() ? 2100 : 6500);
+export const searchGap = (): number =>
+  githubToken() ? 2100 : 6500;

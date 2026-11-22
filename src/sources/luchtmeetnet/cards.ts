@@ -7,7 +7,10 @@ import { getJSON } from '@sources/registry';
 import { parseMeasurements } from './parse';
 
 /** GGD Amsterdam's traffic station on the Van Diemenstraat, by the IJ. */
-export const STATION = { number: 'NL49012', name: 'Van Diemenstraat' };
+export const STATION = {
+  number: 'NL49012',
+  name: 'Van Diemenstraat',
+};
 /** The WHO's guideline for nitrogen dioxide: a 24-hour average of 25 µg/m³. */
 export const WHO_NO2_DAY = 25;
 
@@ -17,7 +20,8 @@ registerCards({
   async load() {
     // Whole hours, so the address (and any cache in front of it) stays the same for the hour.
     const end = Math.ceil(Date.now() / 3600e3) * 3600e3;
-    const iso = (t: number) => new Date(t).toISOString().slice(0, 19) + 'Z';
+    const iso = (t: number) =>
+      new Date(t).toISOString().slice(0, 19) + 'Z';
     const series = parseMeasurements(
       await getJSON(
         `https://api.luchtmeetnet.nl/open_api/measurements?station_number=${STATION.number}&formula=NO2&page=1&order_by=timestamp_measured&order_direction=desc&start=${iso(end - 7 * DAY)}&end=${iso(end)}`,
@@ -25,9 +29,12 @@ registerCards({
     );
     const last = series[series.length - 1];
     // A station that has been silent for a day says nothing about the air now.
-    if (!last || end - last.t > DAY) return [];
+    if (!last || end - last.t > DAY) {
+      return [];
+    }
     const day = series.filter(p => p.t > last.t - DAY);
-    const mean = day.reduce((a, p) => a + p.value, 0) / day.length;
+    const mean =
+      day.reduce((a, p) => a + p.value, 0) / day.length;
     return [
       {
         group: 'nl',

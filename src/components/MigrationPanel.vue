@@ -1,12 +1,22 @@
 <template>
-  <panel-shell id="p-flyway" title="The flyway, north to south" :meta="meta" :index="index">
+  <panel-shell
+    id="p-flyway"
+    title="The flyway, north to south"
+    :meta="meta"
+    :index="index">
     <ul v-if="notes.length" class="fw-notes">
       <li v-for="(n, i) in notes" :key="i">{{ n }}</li>
     </ul>
 
-    <ol class="fw-route" aria-label="Weather radars along the East Atlantic flyway, north to south">
+    <ol
+      class="fw-route"
+      aria-label="Weather radars along the East Atlantic flyway, north to south">
       <template v-for="(s, i) in rows" :key="s.radar">
-        <li v-if="i > 0 && s.to !== rows[i - 1].to" class="fw-gap">{{ gap }}</li>
+        <li
+          v-if="i > 0 && s.to !== rows[i - 1].to"
+          class="fw-gap">
+          {{ gap }}
+        </li>
         <li class="fw-stop" :class="{ 'fw-city': s.near }">
           <div class="fw-line">
             <svg
@@ -15,42 +25,72 @@
               viewBox="0 0 24 24"
               width="20"
               height="20"
-              :style="{ transform: `rotate(${s.heading}deg)` }"
+              :style="{
+                transform: `rotate(${s.heading}deg)`,
+              }"
               role="img"
-              :aria-label="`heading ${s.way}`"
-            >
+              :aria-label="`heading ${s.way}`">
               <path d="M12 3v18M12 3l-6 6M12 3l6 6" />
             </svg>
-            <span v-else class="fw-arrow fw-none" aria-hidden="true">·</span>
+            <span
+              v-else
+              class="fw-arrow fw-none"
+              aria-hidden="true">
+              ·
+            </span>
             <span class="fw-place">
               <b>{{ s.site }}</b>
-              <small>{{ s.where }}{{ s.near ? ` · near ${s.near}` : '' }}</small>
+              <small>
+                {{ s.where
+                }}{{ s.near ? ` · near ${s.near}` : '' }}
+              </small>
             </span>
             <span class="fw-num">{{ s.value }}</span>
           </div>
-          <div class="fw-bar" aria-hidden="true"><i :style="{ width: s.bar + '%' }"></i></div>
+          <div class="fw-bar" aria-hidden="true">
+            <i :style="{ width: s.bar + '%' }"></i>
+          </div>
           <p class="fw-sub">
-            <span v-for="(p, i) in s.parts" :key="i">{{ p }}</span>
-            <span v-if="s.vs.text" :class="'fw-' + s.vs.dir">{{ s.vs.text }}</span>
+            <span v-for="(p, i) in s.parts" :key="i">
+              {{ p }}
+            </span>
+            <span
+              v-if="s.vs.text"
+              :class="'fw-' + s.vs.dir">
+              {{ s.vs.text }}
+            </span>
           </p>
         </li>
       </template>
     </ol>
 
     <p class="fw-foot">
-      Birds crossing each km of a line across their path between sunset and sunrise, measured by weather radars (Aloft,
-      open European radar data). Each radar sees about 100 km around it; files arrive a day or two late. Arrows point
-      where the birds fly.
+      Birds crossing each km of a line across their path
+      between sunset and sunrise, measured by weather radars
+      (Aloft, open European radar data). Each radar sees
+      about 100 km around it; files arrive a day or two
+      late. Arrows point where the birds fly.
     </p>
   </panel-shell>
 </template>
 
 <script lang="ts">
 import { useApp } from '@/context';
-import { computed, defineComponent, onBeforeUnmount, onMounted } from 'vue';
+import {
+  computed,
+  defineComponent,
+  onBeforeUnmount,
+  onMounted,
+} from 'vue';
 import { ago, nf0 } from '@core/format';
 import { compass } from '@sources/aloft';
-import { GAP, createMigration, flywayNotes, perKm, versus } from '@features/migration';
+import {
+  GAP,
+  createMigration,
+  flywayNotes,
+  perKm,
+  versus,
+} from '@features/migration';
 import PanelShell from '@components/PanelShell.vue';
 
 // PRECOG / Trend Radar · Bird migration's flyway: the radars from the North Sea to the Algarve, each with its latest night's
@@ -69,23 +109,47 @@ export default defineComponent({
     onBeforeUnmount(() => flyway.stop());
     const notes = computed(() => flywayNotes(st.stations));
     const rows = computed(() => {
-      const top = Math.max(1, ...st.stations.map(s => s.data?.day.birdsPerKm ?? 0));
+      const top = Math.max(
+        1,
+        ...st.stations.map(
+          s => s.data?.day.birdsPerKm ?? 0,
+        ),
+      );
       return st.stations.map(s => {
         const d = s.data?.day;
         const at = (t: number) =>
-          new Date(t).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: s.tz });
+          new Date(t).toLocaleTimeString('en-GB', {
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZone: s.tz,
+          });
         const date =
-          d && new Date(`${d.day}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+          d &&
+          new Date(`${d.day}T12:00:00Z`).toLocaleDateString(
+            'en-GB',
+            {
+              day: 'numeric',
+              month: 'short',
+            },
+          );
         const parts = d
           ? [
               date!,
               d.heading != null && d.speedKmh != null
                 ? `${compass(d.heading)} at ${nf0.format(d.speedKmh)} km/h`
                 : 'no clear heading',
-              d.heightM != null ? `~${nf0.format(Math.round(d.heightM / 100) * 100)} m up` : '',
-              d.peak.mtr > 0 ? `busiest ${at(d.peak.t)}` : '',
+              d.heightM != null
+                ? `~${nf0.format(Math.round(d.heightM / 100) * 100)} m up`
+                : '',
+              d.peak.mtr > 0
+                ? `busiest ${at(d.peak.t)}`
+                : '',
             ].filter(Boolean)
-          : [s.error ? `not loaded: ${s.error}` : 'reading the radar…'];
+          : [
+              s.error
+                ? `not loaded: ${s.error}`
+                : 'reading the radar…',
+            ];
         return {
           ...s,
           heading: d?.heading ?? null,
@@ -93,11 +157,19 @@ export default defineComponent({
           value: d ? perKm(d.birdsPerKm) : '–',
           bar: d ? (d.birdsPerKm / top) * 100 : 0,
           parts,
-          vs: s.data ? versus(s.data) : { text: '', dir: '' },
+          vs: s.data
+            ? versus(s.data)
+            : { text: '', dir: '' },
         };
       });
     });
-    const meta = computed(() => (st.at ? `checked ${ago(st.at, ui.now)}` : st.loading ? 'reading the radars…' : ''));
+    const meta = computed(() =>
+      st.at
+        ? `checked ${ago(st.at, ui.now)}`
+        : st.loading
+          ? 'reading the radars…'
+          : '',
+    );
     return { notes, rows, meta, gap: GAP };
   },
 });

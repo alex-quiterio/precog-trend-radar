@@ -1,13 +1,25 @@
 // The stream registry: the contract the streams panel relies on.
 import { describe, expect, it } from 'vitest';
-import { registerStream, streamById, streamsFor } from '@sources/streams';
+import {
+  registerStream,
+  streamById,
+  streamsFor,
+} from '@sources/streams';
 
 describe('streams', () => {
-  const base = { load: async () => {}, view: () => ({ rows: [], meta: '', empty: '' }) };
+  const base = {
+    load: async () => {},
+    view: () => ({ rows: [], meta: '', empty: '' }),
+  };
   it('lists a channel’s streams in its order, skipping unknown and unavailable ones', () => {
     registerStream({ id: 'test-a', label: 'A', ...base });
     registerStream({ id: 'test-b', label: 'B', ...base });
-    registerStream({ id: 'test-off', label: 'Off', available: () => false, ...base });
+    registerStream({
+      id: 'test-off',
+      label: 'Off',
+      available: () => false,
+      ...base,
+    });
     expect(
       streamsFor(['test-b', 'nope', 'test-off', 'test-a'], {
         entries: [],
@@ -20,6 +32,12 @@ describe('streams', () => {
     expect(streamById('test-a')?.label).toBe('A');
   });
   it('refuses a stream registered twice', () => {
-    expect(() => registerStream({ id: 'test-a', label: 'A again', ...base })).toThrow(/twice/);
+    expect(() =>
+      registerStream({
+        id: 'test-a',
+        label: 'A again',
+        ...base,
+      }),
+    ).toThrow(/twice/);
   });
 });

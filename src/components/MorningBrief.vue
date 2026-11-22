@@ -1,17 +1,22 @@
 <template>
-  <panel-shell id="p-brief" :title="head.title" :meta="head.meta" :index="index">
+  <panel-shell
+    id="p-brief"
+    :title="head.title"
+    :meta="head.meta"
+    :index="index">
     <ul v-if="b.lines.length" class="brief-list">
       <li v-for="(l, i) in b.lines" :key="i">
         <template v-for="(p, j) in l" :key="j">
-          <template v-if="typeof p === 'string'">{{ p }}</template>
+          <template v-if="typeof p === 'string'">
+            {{ p }}
+          </template>
           <button
             v-else
             class="brief-topic"
             type="button"
             :title="'Chart ' + p.text"
             :aria-label="'Chart ' + p.text"
-            @click="focusTopic(p.key)"
-          >
+            @click="focusTopic(p.key)">
             <topic-dot :color="p.color"></topic-dot>
             {{ p.text }}
           </button>
@@ -21,7 +26,9 @@
     <p v-else class="empty">Waiting for data…</p>
     <div v-if="b.movers.length" class="table-scroll">
       <table class="movers">
-        <caption class="sr-only">Top movers by z-score in this lens</caption>
+        <caption class="sr-only">
+          Top movers by z-score in this lens
+        </caption>
         <thead>
           <tr>
             <th scope="col">Top movers</th>
@@ -37,29 +44,52 @@
             :key="E.key"
             :class="{ partial: partial(E) }"
             :title="
-              partial(E) ? 'A source didn’t answer (often Wikipedia, when busy): no numbers until it does' : undefined
-            "
-          >
+              partial(E)
+                ? 'A source didn’t answer (often Wikipedia, when busy): no numbers until it does'
+                : undefined
+            ">
             <td>
-              <button class="topic" type="button" :title="'Chart ' + E.name" @click="focusTopic(E.key)">
+              <button
+                class="topic"
+                type="button"
+                :title="'Chart ' + E.name"
+                @click="focusTopic(E.key)">
                 <topic-dot :color="E.color"></topic-dot>
                 {{ E.name }}
               </button>
             </td>
-            <td>{{ partial(E) ? '—' : fmtVal(E.stats.latest) }}</td>
             <td>
-              <span class="mbar" aria-hidden="true"><i v-if="!partial(E)" :style="bar(E)"></i></span>
-              {{ partial(E) ? '—' : fmtPct(E.stats.change) }}
+              {{
+                partial(E) ? '—' : fmtVal(E.stats.latest)
+              }}
             </td>
-            <td class="col-z">{{ partial(E) || E.stats.z == null ? '—' : E.stats.z.toFixed(1) }}</td>
+            <td>
+              <span class="mbar" aria-hidden="true">
+                <i v-if="!partial(E)" :style="bar(E)"></i>
+              </span>
+              {{
+                partial(E) ? '—' : fmtPct(E.stats.change)
+              }}
+            </td>
+            <td class="col-z">
+              {{
+                partial(E) || E.stats.z == null
+                  ? '—'
+                  : E.stats.z.toFixed(1)
+              }}
+            </td>
             <td><state-tag :st="E.stats"></state-tag></td>
           </tr>
         </tbody>
       </table>
     </div>
     <div class="brief-actions no-print">
-      <button class="btn" type="button" @click="copy">Copy brief as Markdown</button>
-      <button class="btn" type="button" @click="read">Mark as read</button>
+      <button class="btn" type="button" @click="copy">
+        Copy brief as Markdown
+      </button>
+      <button class="btn" type="button" @click="read">
+        Mark as read
+      </button>
       <span class="muted" role="status">{{ note }}</span>
     </div>
   </panel-shell>
@@ -71,7 +101,12 @@ import { ref, computed, defineComponent } from 'vue';
 import { DAY } from '@core/config';
 import { fmtPct, fmtTime, fmtVal } from '@core/format';
 import { partial } from '@sources/blend';
-import { briefMarkdown, buildBrief, copyText, type Scored } from '@features/brief';
+import {
+  briefMarkdown,
+  buildBrief,
+  copyText,
+  type Scored,
+} from '@features/brief';
 import StateTag from '@components/StateTag.vue';
 import TopicDot from '@components/TopicDot.vue';
 import PanelShell from '@components/PanelShell.vue';
@@ -88,7 +123,9 @@ export default defineComponent({
     const { focusTopic, markRead } = actions;
     const { state } = app;
     const note = ref('');
-    const b = computed(() => buildBrief(app, datapoints.state.facts));
+    const b = computed(() =>
+      buildBrief(app, datapoints.state.facts),
+    );
     const head = computed(() => {
       return {
         title: 'What moved',
@@ -100,12 +137,25 @@ export default defineComponent({
       };
     });
     const bar = (E: Scored) => {
-      const c = Math.max(-100, Math.min(100, E.stats.change ?? 0)),
+      const c = Math.max(
+          -100,
+          Math.min(100, E.stats.change ?? 0),
+        ),
         w = (Math.abs(c) / 100) * 50;
-      return { background: E.color, left: `${c >= 0 ? 50 : 50 - w}%`, width: `${Math.max(w, 1.5)}%` };
+      return {
+        background: E.color,
+        left: `${c >= 0 ? 50 : 50 - w}%`,
+        width: `${Math.max(w, 1.5)}%`,
+      };
     };
     async function copy() {
-      note.value = (await copyText(briefMarkdown(app, datapoints.state, stories.status.data.hn)))
+      note.value = (await copyText(
+        briefMarkdown(
+          app,
+          datapoints.state,
+          stories.status.data.hn,
+        ),
+      ))
         ? 'Copied. Paste into your daily note.'
         : 'Copy failed.';
     }
@@ -113,7 +163,20 @@ export default defineComponent({
       markRead();
       note.value = 'Marked as read.';
     }
-    return { ui, state, b, head, bar, note, copy, read, focusTopic, fmtVal, fmtPct, partial };
+    return {
+      ui,
+      state,
+      b,
+      head,
+      bar,
+      note,
+      copy,
+      read,
+      focusTopic,
+      fmtVal,
+      fmtPct,
+      partial,
+    };
   },
 });
 </script>

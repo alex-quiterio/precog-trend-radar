@@ -7,10 +7,15 @@ describe('Fear & Greed replies', () => {
     const f = parseFearGreed(fng);
     expect(f.label).toBe('Extreme Fear');
     expect(f.series).toHaveLength(8);
-    expect(f.series[7]).toEqual({ t: 1794009600000, value: 25 });
+    expect(f.series[7]).toEqual({
+      t: 1794009600000,
+      value: 25,
+    });
     expect(f.series[0].t).toBeLessThan(f.series[7].t);
   });
   it('refuses a reply without data', () => {
-    expect(() => parseFearGreed({ metadata: { error: 'x' } })).toThrow(/unexpected format/);
+    expect(() =>
+      parseFearGreed({ metadata: { error: 'x' } }),
+    ).toThrow(/unexpected format/);
   });
 });

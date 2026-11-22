@@ -12,13 +12,22 @@ export interface SpeciesCount {
 }
 
 /** species_counts as a list, best first. Records without an id or a count are skipped. */
-export function parseSpeciesCounts(reply: unknown): SpeciesCount[] {
-  return list(at(reply, 'results'), 'iNaturalist', 'results').flatMap(r => {
+export function parseSpeciesCounts(
+  reply: unknown,
+): SpeciesCount[] {
+  return list(
+    at(reply, 'results'),
+    'iNaturalist',
+    'results',
+  ).flatMap(r => {
     const id = num(at(r, 'taxon', 'id')),
       count = num(at(r, 'count')),
       name = str(at(r, 'taxon', 'name'));
-    if (id == null || count == null || !name) return [];
-    const common = str(at(r, 'taxon', 'preferred_common_name')) || name;
+    if (id == null || count == null || !name) {
+      return [];
+    }
+    const common =
+      str(at(r, 'taxon', 'preferred_common_name')) || name;
     return [{ id, name, common, count }];
   });
 }

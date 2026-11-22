@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import posts from './fixtures/wp-posts.json';
 import { topicRegex } from '@sources/registry';
-import { libraryItems, parseWpPosts, readingScore, type ReadingSite } from './parse';
+import {
+  libraryItems,
+  parseWpPosts,
+  readingScore,
+  type ReadingSite,
+} from './parse';
 
 const site: ReadingSite = {
   url: 'https://www.themarginalian.org',
@@ -11,7 +16,12 @@ const site: ReadingSite = {
 
 describe('WordPress replies', () => {
   it('reads posts with their date (UTC), link and plain-text excerpt', () => {
-    const items = parseWpPosts(posts, site, 'posts', 'Essay');
+    const items = parseWpPosts(
+      posts,
+      site,
+      'posts',
+      'Essay',
+    );
     expect(items).toHaveLength(2);
     expect(items[0]).toMatchObject({
       id: 'rd:https://www.themarginalian.org:posts:88362',
@@ -41,8 +51,22 @@ describe('WordPress replies', () => {
     expect(ep.num).toBe(233);
   });
   it('skips posts without a date or link, and refuses a reply that is not a list', () => {
-    expect(parseWpPosts([{ id: 1, title: { rendered: 'x' } }], site, 'posts', 'Essay')).toEqual([]);
-    expect(() => parseWpPosts({ code: 'rest_no_route' }, site, 'posts', 'Essay')).toThrow(/unexpected format/);
+    expect(
+      parseWpPosts(
+        [{ id: 1, title: { rendered: 'x' } }],
+        site,
+        'posts',
+        'Essay',
+      ),
+    ).toEqual([]);
+    expect(() =>
+      parseWpPosts(
+        { code: 'rest_no_route' },
+        site,
+        'posts',
+        'Essay',
+      ),
+    ).toThrow(/unexpected format/);
   });
 });
 
@@ -58,8 +82,12 @@ describe('kept libraries', () => {
       url: 'https://www.campfire-stories.org/kinfolk',
       t: 0,
     });
-    expect(new Set(films.map(f => f.id)).size).toBe(films.length);
-    const forest = films.find(f => f.title === 'Once Upon a Forest')!;
+    expect(new Set(films.map(f => f.id)).size).toBe(
+      films.length,
+    );
+    const forest = films.find(
+      f => f.title === 'Once Upon a Forest',
+    )!;
     expect(readingScore(forest, [/climate/i])).toBe(1);
   });
   it('is empty for a site without one', () => {
@@ -73,8 +101,14 @@ describe('readingScore', () => {
     text: 'rory explains why diesel is tight and what peak oil means.',
   };
   it('weights title hits over text hits', () => {
-    expect(readingScore(post, [topicRegex('Hormuz')])).toBe(3);
-    expect(readingScore(post, [topicRegex('peak oil')])).toBe(1);
-    expect(readingScore(post, [topicRegex('permaculture')])).toBe(0);
+    expect(readingScore(post, [topicRegex('Hormuz')])).toBe(
+      3,
+    );
+    expect(
+      readingScore(post, [topicRegex('peak oil')]),
+    ).toBe(1);
+    expect(
+      readingScore(post, [topicRegex('permaculture')]),
+    ).toBe(0);
   });
 });

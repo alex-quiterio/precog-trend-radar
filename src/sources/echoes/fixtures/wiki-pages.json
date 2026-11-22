@@ -2,12 +2,22 @@
   "batchcomplete": "",
   "query": {
     "redirects": [
-      { "from": "Cryptocurrencies", "to": "Cryptocurrency" },
+      {
+        "from": "Cryptocurrencies",
+        "to": "Cryptocurrency"
+      },
       { "from": "Israel-Gaza war", "to": "Gaza war" },
-      { "from": "2026 United States midterm elections", "to": "2026 United States elections" }
+      {
+        "from": "2026 United States midterm elections",
+        "to": "2026 United States elections"
+      }
     ],
     "pages": {
-      "-1": { "ns": 0, "title": "US midterm elections 2026", "missing": "" },
+      "-1": {
+        "ns": 0,
+        "title": "US midterm elections 2026",
+        "missing": ""
+      },
       "-2": { "ns": 0, "title": "Cop31", "missing": "" },
       "56180153": {
         "pageid": 56180153,

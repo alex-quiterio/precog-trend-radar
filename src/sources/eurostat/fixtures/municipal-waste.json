@@ -34,18 +34,33 @@
   "id": ["freq", "wst_oper", "unit", "geo", "time"],
   "size": [1, 1, 1, 2, 12],
   "dimension": {
-    "freq": { "label": "Time frequency", "category": { "index": { "A": 0 }, "label": { "A": "Annual" } } },
+    "freq": {
+      "label": "Time frequency",
+      "category": {
+        "index": { "A": 0 },
+        "label": { "A": "Annual" }
+      }
+    },
     "wst_oper": {
       "label": "Waste management operations",
-      "category": { "index": { "GEN": 0 }, "label": { "GEN": "Waste generated" } }
+      "category": {
+        "index": { "GEN": 0 },
+        "label": { "GEN": "Waste generated" }
+      }
     },
     "unit": {
       "label": "Unit of measure",
-      "category": { "index": { "KG_HAB": 0 }, "label": { "KG_HAB": "Kilograms per capita" } }
+      "category": {
+        "index": { "KG_HAB": 0 },
+        "label": { "KG_HAB": "Kilograms per capita" }
+      }
     },
     "geo": {
       "label": "Geopolitical entity (reporting)",
-      "category": { "index": { "NL": 0, "PT": 1 }, "label": { "NL": "Netherlands", "PT": "Portugal" } }
+      "category": {
+        "index": { "NL": 0, "PT": 1 },
+        "label": { "NL": "Netherlands", "PT": "Portugal" }
+      }
     },
     "time": {
       "label": "Time",
@@ -86,17 +101,36 @@
     "id": "ENV_WASMUN",
     "agencyId": "ESTAT",
     "version": "1.0",
-    "datastructure": { "id": "ENV_WASMUN", "agencyId": "ESTAT", "version": "41.0" },
+    "datastructure": {
+      "id": "ENV_WASMUN",
+      "agencyId": "ESTAT",
+      "version": "41.0"
+    },
     "annotation": [
-      { "type": "CREATED", "date": "2011-02-17T08:12:14+0100" },
+      {
+        "type": "CREATED",
+        "date": "2011-02-17T08:12:14+0100"
+      },
       {
         "type": "DISSEMINATION_DOI_XML",
         "title": "<adms:identifier xmlns:adms=\"http://www.w3.org/ns/adms#\" xmlns:skos=\"http://www.w3.org/2004/02/skos/core.html\" xmlns:dct=\"http://purl.org/dc/terms/\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"><adms:Identifier rdf:about=\"https://doi.org/10.2908/ENV_WASMUN\"><skos:notation rdf:datatype=\"http://purl.org/spar/datacite/doi\">10.2908/ENV_WASMUN</skos:notation><dct:creator rdf:resource=\"http://publications.europa.eu/resource/authority/corporate-body/ESTAT\"/><dct:issued rdf:datatype=\"http://www.w3.org/2001/XMLSchema#date\">2023-01-23</dct:issued></adms:Identifier></adms:identifier>"
       },
-      { "type": "DISSEMINATION_OBJECT_TYPE", "title": "DATASET" },
-      { "type": "DISSEMINATION_TIMESTAMP_DATA", "date": "2026-10-15T11:00:00+0200" },
-      { "type": "DISSEMINATION_TIMESTAMP_GLOBAL", "date": "2026-11-10T23:00:00+0100" },
-      { "type": "DISSEMINATION_TIMESTAMP_PLANNED", "date": "2026-11-10T23:00:00+0100" },
+      {
+        "type": "DISSEMINATION_OBJECT_TYPE",
+        "title": "DATASET"
+      },
+      {
+        "type": "DISSEMINATION_TIMESTAMP_DATA",
+        "date": "2026-10-15T11:00:00+0200"
+      },
+      {
+        "type": "DISSEMINATION_TIMESTAMP_GLOBAL",
+        "date": "2026-11-10T23:00:00+0100"
+      },
+      {
+        "type": "DISSEMINATION_TIMESTAMP_PLANNED",
+        "date": "2026-11-10T23:00:00+0100"
+      },
       {
         "type": "ESMS_HTML",
         "title": "Explanatory texts (metadata)",
@@ -108,13 +142,36 @@
         "href": "https://ec.europa.eu/eurostat/api/dissemination/files?file=metadata/env_wasmun_esms.sdmx.zip"
       },
       { "type": "OBS_COUNT", "title": "18192" },
-      { "type": "OBS_PERIOD_OVERALL_LATEST", "title": "2024" },
-      { "type": "OBS_PERIOD_OVERALL_OLDEST", "title": "1995" },
+      {
+        "type": "OBS_PERIOD_OVERALL_LATEST",
+        "title": "2024"
+      },
+      {
+        "type": "OBS_PERIOD_OVERALL_OLDEST",
+        "title": "1995"
+      },
       { "type": "SOURCE_INSTITUTIONS", "text": "Eurostat" },
-      { "type": "UPDATE_DATA", "date": "2026-10-15T11:00:00+0200" },
-      { "type": "UPDATE_STRUCTURE", "date": "2026-10-15T11:00:00+0200" }
+      {
+        "type": "UPDATE_DATA",
+        "date": "2026-10-15T11:00:00+0200"
+      },
+      {
+        "type": "UPDATE_STRUCTURE",
+        "date": "2026-10-15T11:00:00+0200"
+      }
     ],
-    "status": { "label": { "p": "provisional", "b": "break in time series" } },
-    "positions-with-no-data": { "freq": [], "wst_oper": [], "unit": [], "geo": [], "time": [] }
+    "status": {
+      "label": {
+        "p": "provisional",
+        "b": "break in time series"
+      }
+    },
+    "positions-with-no-data": {
+      "freq": [],
+      "wst_oper": [],
+      "unit": [],
+      "geo": [],
+      "time": []
+    }
   }
 }

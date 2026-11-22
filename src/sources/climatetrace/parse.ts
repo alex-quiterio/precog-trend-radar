@@ -16,21 +16,29 @@ export interface CountryEmissions {
 }
 
 /** The country-emissions reply. Countries without a total are skipped; a reply that isn't a list throws. */
-export function parseCountryEmissions(reply: unknown): CountryEmissions[] {
-  return list(reply, 'Climate TRACE', 'countries').flatMap(c => {
-    const country = str(at(c, 'country')),
-      co2e = num(at(c, 'emissions', 'co2e_100yr'));
-    if (!/^[A-Z]{3}$/.test(country) || co2e == null) return [];
-    return [
-      {
-        country,
-        rank: num(at(c, 'rank')) ?? null,
-        previousRank: num(at(c, 'previousRank')) ?? null,
-        co2e,
-        world: num(at(c, 'worldEmissions', 'co2e_100yr')) ?? null,
-      },
-    ];
-  });
+export function parseCountryEmissions(
+  reply: unknown,
+): CountryEmissions[] {
+  return list(reply, 'Climate TRACE', 'countries').flatMap(
+    c => {
+      const country = str(at(c, 'country')),
+        co2e = num(at(c, 'emissions', 'co2e_100yr'));
+      if (!/^[A-Z]{3}$/.test(country) || co2e == null) {
+        return [];
+      }
+      return [
+        {
+          country,
+          rank: num(at(c, 'rank')) ?? null,
+          previousRank: num(at(c, 'previousRank')) ?? null,
+          co2e,
+          world:
+            num(at(c, 'worldEmissions', 'co2e_100yr')) ??
+            null,
+        },
+      ];
+    },
+  );
 }
 
 /** A single source of emissions: a plant, an airport, a port. */
@@ -43,14 +51,30 @@ export interface Asset {
 }
 
 /** The first asset in an assets reply (Climate TRACE lists them largest first), or null when there is none. */
-export function parseTopAsset(reply: unknown): Asset | null {
-  const assets = list(at(obj(reply, 'Climate TRACE'), 'assets'), 'Climate TRACE', 'assets');
+export function parseTopAsset(
+  reply: unknown,
+): Asset | null {
+  const assets = list(
+    at(obj(reply, 'Climate TRACE'), 'assets'),
+    'Climate TRACE',
+    'assets',
+  );
   for (const a of assets) {
     const name = str(at(a, 'Name'));
-    const co2e = list(at(a, 'EmissionsSummary'), 'Climate TRACE', 'EmissionsSummary')
+    const co2e = list(
+      at(a, 'EmissionsSummary'),
+      'Climate TRACE',
+      'EmissionsSummary',
+    )
       .filter(e => str(at(e, 'Gas')) === 'co2e_100yr')
-      .reduce((sum: number, e) => sum + (num(at(e, 'EmissionsQuantity')) ?? 0), 0);
-    if (name && co2e > 0) return { name, sector: str(at(a, 'Sector')), co2e };
+      .reduce(
+        (sum: number, e) =>
+          sum + (num(at(e, 'EmissionsQuantity')) ?? 0),
+        0,
+      );
+    if (name && co2e > 0) {
+      return { name, sector: str(at(a, 'Sector')), co2e };
+    }
   }
   return null;
 }

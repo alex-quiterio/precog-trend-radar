@@ -6,11 +6,28 @@ export default defineConfig({
   testDir: 'e2e',
   timeout: 60_000,
   retries: process.env.CI ? 1 : 0,
-  reporter: process.env.CI ? [['list'], ['github']] : 'list',
-  use: { baseURL: 'http://localhost:4173', trace: 'retain-on-failure' },
+  reporter: process.env.CI
+    ? [['list'], ['github']]
+    : 'list',
+  use: {
+    baseURL: 'http://localhost:4173',
+    trace: 'retain-on-failure',
+  },
   projects: [
-    { name: 'phone', use: { ...devices['Pixel 7'], viewport: { width: 375, height: 812 } } },
-    { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 900 } } },
+    {
+      name: 'phone',
+      use: {
+        ...devices['Pixel 7'],
+        viewport: { width: 375, height: 812 },
+      },
+    },
+    {
+      name: 'desktop',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1280, height: 900 },
+      },
+    },
   ],
   webServer: {
     command: 'npx vite preview --port 4173 --strictPort',

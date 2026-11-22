@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import energyzero from './fixtures/energyzero.json';
 import ree from './fixtures/ree-spot.json';
-import { cheapestBlock, parseEnergyZero, parseReeSpot } from './parse';
+import {
+  cheapestBlock,
+  parseEnergyZero,
+  parseReeSpot,
+} from './parse';
 
 const at = (h: number) => Date.UTC(2026, 10, 8, h);
 
@@ -19,9 +23,22 @@ describe('day-ahead power prices', () => {
     expect(p[0].eurKwh).toBeLessThan(0.5);
   });
   it('finds the cheapest block of back-to-back hours from a given hour', () => {
-    const prices = [5, 4, 1, 1, 1, 9, 2, 2, 2].map((c, i) => ({ t: at(i), eurKwh: c / 100 }));
-    expect(cheapestBlock(prices, 3)).toEqual({ start: at(2), end: at(5), avg: 0.01 });
-    expect(cheapestBlock(prices, 3, at(4))).toEqual({ start: at(6), end: at(9), avg: 0.02 });
+    const prices = [5, 4, 1, 1, 1, 9, 2, 2, 2].map(
+      (c, i) => ({
+        t: at(i),
+        eurKwh: c / 100,
+      }),
+    );
+    expect(cheapestBlock(prices, 3)).toEqual({
+      start: at(2),
+      end: at(5),
+      avg: 0.01,
+    });
+    expect(cheapestBlock(prices, 3, at(4))).toEqual({
+      start: at(6),
+      end: at(9),
+      avg: 0.02,
+    });
     expect(cheapestBlock(prices.slice(0, 2), 3)).toBeNull();
   });
   it('never joins hours across a gap in the data', () => {

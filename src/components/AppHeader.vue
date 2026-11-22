@@ -1,5 +1,8 @@
 <template>
-  <header class="topbar" :class="{ busy: view.busy }" :aria-busy="view.busy">
+  <header
+    class="topbar"
+    :class="{ busy: view.busy }"
+    :aria-busy="view.busy">
     <span class="beacon" aria-hidden="true"></span>
     <div class="brand">
       <h1>
@@ -21,14 +24,40 @@
         title="All channels (press /)"
         aria-keyshortcuts="/"
         aria-haspopup="dialog"
-        @click="switcher?.open()"
-      >
-        <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
-          <g fill="none" stroke="currentColor" stroke-width="1.5">
-            <rect x="2" y="2" width="4.5" height="4.5" rx="0.5" />
-            <rect x="9.5" y="2" width="4.5" height="4.5" rx="0.5" />
-            <rect x="2" y="9.5" width="4.5" height="4.5" rx="0.5" />
-            <rect x="9.5" y="9.5" width="4.5" height="4.5" rx="0.5" />
+        @click="switcher?.open()">
+        <svg
+          viewBox="0 0 16 16"
+          width="15"
+          height="15"
+          aria-hidden="true">
+          <g
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5">
+            <rect
+              x="2"
+              y="2"
+              width="4.5"
+              height="4.5"
+              rx="0.5" />
+            <rect
+              x="9.5"
+              y="2"
+              width="4.5"
+              height="4.5"
+              rx="0.5" />
+            <rect
+              x="2"
+              y="9.5"
+              width="4.5"
+              height="4.5"
+              rx="0.5" />
+            <rect
+              x="9.5"
+              y="9.5"
+              width="4.5"
+              height="4.5"
+              rx="0.5" />
           </g>
         </svg>
       </button>
@@ -37,72 +66,117 @@
         type="button"
         :disabled="ui.loading"
         :aria-busy="ui.loading"
-        :aria-label="ui.loading ? 'Loading…' : 'Refresh data now'"
-        :title="ui.loading ? 'Loading…' : 'Refresh data now'"
-        @click="refresh"
-      >
-        <svg class="refresh-icon" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
+        :aria-label="
+          ui.loading ? 'Loading…' : 'Refresh data now'
+        "
+        :title="
+          ui.loading ? 'Loading…' : 'Refresh data now'
+        "
+        @click="refresh">
+        <svg
+          class="refresh-icon"
+          viewBox="0 0 16 16"
+          width="15"
+          height="15"
+          aria-hidden="true">
           <!-- an open circle, three quarters round, with the arrowhead at its end -->
           <path
             d="M13.5 8a5.5 5.5 0 1 1-1.61-3.89"
             stroke="currentColor"
             stroke-width="1.5"
             stroke-linecap="round"
-            fill="none"
-          />
+            fill="none" />
           <path
             d="M12.25 1.75v2.75H9.5"
             stroke="currentColor"
             stroke-width="1.5"
             stroke-linecap="round"
             stroke-linejoin="round"
-            fill="none"
-          />
+            fill="none" />
         </svg>
       </button>
       <button
         class="btn icon set-toggle"
-        :class="{ on: settingsOpen, warn: ui.guardian && ui.guardianState === 'error' }"
+        :class="{
+          on: settingsOpen,
+          warn: ui.guardian && ui.guardianState === 'error',
+        }"
         type="button"
         aria-label="Settings"
         aria-controls="settings"
         :aria-expanded="settingsOpen"
-        :title="ui.guardian && ui.guardianState === 'error' ? 'Settings: ' + ui.guardianNote : 'Settings'"
-        @click="settingsOpen = !settingsOpen"
-      >
-        <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
+        :title="
+          ui.guardian && ui.guardianState === 'error'
+            ? 'Settings: ' + ui.guardianNote
+            : 'Settings'
+        "
+        @click="settingsOpen = !settingsOpen">
+        <svg
+          viewBox="0 0 16 16"
+          width="15"
+          height="15"
+          aria-hidden="true">
           <path
             d="M2 4h7M13 4h1M2 12h1M7 12h7"
             stroke="currentColor"
             stroke-width="1.5"
             stroke-linecap="round"
-            fill="none"
-          />
-          <circle cx="11" cy="4" r="2" stroke="currentColor" stroke-width="1.5" fill="none" />
-          <circle cx="5" cy="12" r="2" stroke="currentColor" stroke-width="1.5" fill="none" />
+            fill="none" />
+          <circle
+            cx="11"
+            cy="4"
+            r="2"
+            stroke="currentColor"
+            stroke-width="1.5"
+            fill="none" />
+          <circle
+            cx="5"
+            cy="12"
+            r="2"
+            stroke="currentColor"
+            stroke-width="1.5"
+            fill="none" />
         </svg>
       </button>
     </div>
-    <settings-bar v-if="settingsOpen" @close="closeSettings"></settings-bar>
+    <settings-bar
+      v-if="settingsOpen"
+      @close="closeSettings"></settings-bar>
     <nav class="channels" aria-label="Channels">
       <template v-for="c in view.list" :key="c.id">
         <button
           type="button"
           class="channel"
           :class="{ on: c.id === view.active }"
-          :aria-current="c.id === view.active ? 'page' : undefined"
-          :aria-label="c.label + (c.heat ? `, ${heatText(c.heat)}` : '')"
-          :aria-keyshortcuts="c.n <= 9 ? String(c.n) : undefined"
+          :aria-current="
+            c.id === view.active ? 'page' : undefined
+          "
+          :aria-label="
+            c.label +
+            (c.heat ? `, ${heatText(c.heat)}` : '')
+          "
+          :aria-keyshortcuts="
+            c.n <= 9 ? String(c.n) : undefined
+          "
           :title="
-            [c.label, c.home ? 'home' : '', heatText(c.heat), c.n <= 9 ? `press ${c.n}` : '']
+            [
+              c.label,
+              c.home ? 'home' : '',
+              heatText(c.heat),
+              c.n <= 9 ? `press ${c.n}` : '',
+            ]
               .filter(Boolean)
               .join(' · ')
           "
-          @click="selectLens(c.lensId)"
-        >
+          @click="selectLens(c.lensId)">
           <channel-icon :name="c.icon"></channel-icon>
           <span class="ch-label">{{ c.label }}</span>
-          <span v-if="c.heat" :class="['heat', c.heat.level]" aria-hidden="true">{{ c.heat.n }}</span>
+          <span
+            v-if="c.heat"
+            :class="['heat', c.heat.level]"
+            aria-hidden="true">
+            {{ c.heat.n }}
+          </span>
         </button>
         <button
           v-if="c.own && c.id === view.active"
@@ -110,10 +184,17 @@
           class="ch-del no-print"
           :aria-label="'Delete channel ' + c.label"
           :title="'Delete channel ' + c.label"
-          @click="removeLens(c.lensId)"
-        >
-          <svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true">
-            <path d="M2.5 2.5l7 7M9.5 2.5l-7 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+          @click="removeLens(c.lensId)">
+          <svg
+            viewBox="0 0 12 12"
+            width="10"
+            height="10"
+            aria-hidden="true">
+            <path
+              d="M2.5 2.5l7 7M9.5 2.5l-7 7"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round" />
           </svg>
         </button>
       </template>
@@ -124,7 +205,12 @@
 
 <script lang="ts">
 import { useApp } from '@/context';
-import { computed, defineComponent, nextTick, ref } from 'vue';
+import {
+  computed,
+  defineComponent,
+  nextTick,
+  ref,
+} from 'vue';
 import { activeChannel, channels } from '@/channels';
 
 import BrandMark from '@components/BrandMark.vue';
@@ -137,9 +223,21 @@ import SettingsBar from '@components/SettingsBar.vue';
 
 export default defineComponent({
   name: 'AppHeader',
-  components: { BrandMark, ChannelIcon, ChannelSwitcher, SettingsBar },
+  components: {
+    BrandMark,
+    ChannelIcon,
+    ChannelSwitcher,
+    SettingsBar,
+  },
   setup() {
-    const { app, live, stories: loader, actions, github, myGithub } = useApp();
+    const {
+      app,
+      live,
+      stories: loader,
+      actions,
+      github,
+      myGithub,
+    } = useApp();
     const ui = app.ui;
     const gh = github.state;
     const me = myGithub.state;
@@ -167,7 +265,11 @@ export default defineComponent({
     const settingsOpen = ref(false);
     function closeSettings() {
       settingsOpen.value = false;
-      nextTick(() => document.querySelector<HTMLElement>('.set-toggle')?.focus());
+      nextTick(() =>
+        document
+          .querySelector<HTMLElement>('.set-toggle')
+          ?.focus(),
+      );
     }
     const switcher = ref<{ open: () => void } | null>(null);
     return {
@@ -220,8 +322,16 @@ export default defineComponent({
     flex-wrap: nowrap;
     overflow-x: auto;
     scrollbar-width: none;
-    -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent);
-    mask-image: linear-gradient(90deg, #000 85%, transparent);
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      #000 85%,
+      transparent
+    );
+    mask-image: linear-gradient(
+      90deg,
+      #000 85%,
+      transparent
+    );
   }
 }
 .channels::-webkit-scrollbar {
@@ -467,13 +577,20 @@ h1 .sub {
   bottom: 0;
   width: 26%;
   left: -26%;
-  background: linear-gradient(90deg, transparent, var(--accent) 30%, var(--accent) 70%, transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--accent) 30%,
+    var(--accent) 70%,
+    transparent
+  );
 }
 .topbar.busy .beacon {
   opacity: 1;
 }
 .topbar.busy .beacon::before {
-  animation: beam 1.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  animation: beam 1.6s cubic-bezier(0.45, 0, 0.55, 1)
+    infinite;
 }
 @keyframes beam {
   0% {
@@ -511,7 +628,9 @@ h1 .sub {
     top: 0;
     padding: 10px 12px 0;
     gap: 8px 12px;
-    grid-template-columns: minmax(0, 1fr) auto; /* the two round buttons sit beside the name */
+    grid-template-columns:
+      minmax(0, 1fr)
+      auto; /* the two round buttons sit beside the name */
   }
   .controls .btn {
     min-height: 28px;
@@ -526,7 +645,8 @@ h1 .sub {
   .controls .btn.icon {
     border-color: transparent;
   }
-  .controls .btn.icon:not([aria-expanded='true']):not(:hover) {
+  .controls
+    .btn.icon:not([aria-expanded='true']):not(:hover) {
     background: transparent;
   }
   .pulse {

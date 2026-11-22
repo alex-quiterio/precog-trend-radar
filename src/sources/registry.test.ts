@@ -1,6 +1,18 @@
 // Matching topics in text: phrases and whole words.
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { getText, HttpError, phrase, topicRegex, withTimeout } from '@sources/registry';
+import {
+  afterEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
+import {
+  getText,
+  HttpError,
+  phrase,
+  topicRegex,
+  withTimeout,
+} from '@sources/registry';
 
 describe('withTimeout', () => {
   const any = AbortSignal.any;
@@ -40,10 +52,22 @@ describe('withTimeout', () => {
 describe('getText', () => {
   afterEach(() => vi.unstubAllGlobals());
   it('answers the body as text, and throws the status of a failed reply', async () => {
-    vi.stubGlobal('fetch', async () => ({ ok: true, status: 200, text: async () => 'a,b\n1,2\n' }));
-    expect(await getText('https://example.org/file.csv')).toBe('a,b\n1,2\n');
-    vi.stubGlobal('fetch', async () => ({ ok: false, status: 404, text: async () => '' }));
-    await expect(getText('https://example.org/file.csv')).rejects.toBeInstanceOf(HttpError);
+    vi.stubGlobal('fetch', async () => ({
+      ok: true,
+      status: 200,
+      text: async () => 'a,b\n1,2\n',
+    }));
+    expect(
+      await getText('https://example.org/file.csv'),
+    ).toBe('a,b\n1,2\n');
+    vi.stubGlobal('fetch', async () => ({
+      ok: false,
+      status: 404,
+      text: async () => '',
+    }));
+    await expect(
+      getText('https://example.org/file.csv'),
+    ).rejects.toBeInstanceOf(HttpError);
   });
 });
 
@@ -51,15 +75,29 @@ describe('phrase', () => {
   it('quotes multi-word topics and leaves query expressions alone', () => {
     expect(phrase('peak oil')).toBe('"peak oil"');
     expect(phrase('Hormuz')).toBe('Hormuz');
-    expect(phrase('(solar OR wind)')).toBe('(solar OR wind)');
+    expect(phrase('(solar OR wind)')).toBe(
+      '(solar OR wind)',
+    );
   });
 });
 
 describe('topicRegex', () => {
   it('matches whole words in any language, ignoring case', () => {
-    expect(topicRegex('AI').test('How AI changes energy')).toBe(true);
-    expect(topicRegex('AI').test('Said the chair')).toBe(false);
-    expect(topicRegex('Wooncoöperatie').test('Een nieuwe wooncoöperatie in Noord')).toBe(true);
-    expect(topicRegex('"peak oil"').test('After Peak Oil, what?')).toBe(true);
+    expect(
+      topicRegex('AI').test('How AI changes energy'),
+    ).toBe(true);
+    expect(topicRegex('AI').test('Said the chair')).toBe(
+      false,
+    );
+    expect(
+      topicRegex('Wooncoöperatie').test(
+        'Een nieuwe wooncoöperatie in Noord',
+      ),
+    ).toBe(true);
+    expect(
+      topicRegex('"peak oil"').test(
+        'After Peak Oil, what?',
+      ),
+    ).toBe(true);
   });
 });

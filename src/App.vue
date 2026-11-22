@@ -2,7 +2,10 @@
   <div class="page">
     <app-header></app-header>
 
-    <section class="channel-hero" :key="view.channel.id" aria-labelledby="ch-title">
+    <section
+      class="channel-hero"
+      :key="view.channel.id"
+      aria-labelledby="ch-title">
       <div>
         <p class="ch-kicker">
           <span class="ch-no">CH {{ view.no }}</span>
@@ -14,25 +17,38 @@
             class="btn small ch-home no-print"
             type="button"
             :aria-pressed="view.home"
-            :title="view.home ? 'PRECOG opens on this channel. Tap to unpin.' : 'Always open PRECOG on this channel'"
-            @click="toggleHome(view.channel.lensId)"
-          >
-            <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+            :title="
+              view.home
+                ? 'PRECOG opens on this channel. Tap to unpin.'
+                : 'Always open PRECOG on this channel'
+            "
+            @click="toggleHome(view.channel.lensId)">
+            <svg
+              viewBox="0 0 16 16"
+              width="12"
+              height="12"
+              aria-hidden="true">
               <path
                 d="M6 1.5h4l-.7 4.2 2.7 2.3H4l2.7-2.3zM8 8v6.5"
                 fill="none"
                 stroke="currentColor"
                 stroke-width="1.5"
                 stroke-linejoin="round"
-                stroke-linecap="round"
-              />
+                stroke-linecap="round" />
             </svg>
             {{ view.home ? 'Home' : 'Make home' }}
           </button>
         </div>
         <p class="ch-desc">{{ view.channel.kicker }}</p>
-        <p v-if="view.channel.links?.length" class="ch-links">
-          <a v-for="l in view.channel.links" :key="l.href" :href="l.href" target="_blank" rel="noopener noreferrer">
+        <p
+          v-if="view.channel.links?.length"
+          class="ch-links">
+          <a
+            v-for="l in view.channel.links"
+            :key="l.href"
+            :href="l.href"
+            target="_blank"
+            rel="noopener noreferrer">
             {{ l.label }} ↗
           </a>
         </p>
@@ -42,7 +58,10 @@
 
     <div class="layout" :key="'l-' + view.channel.id">
       <div class="main">
-        <section v-if="view.channel.prices" class="block" aria-labelledby="b-prices">
+        <section
+          v-if="view.channel.prices"
+          class="block"
+          aria-labelledby="b-prices">
           <h3 id="b-prices" class="block-head">
             <span>{{ view.n('prices') }}</span>
             Prices
@@ -52,28 +71,40 @@
             <gdp-panel :index="1"></gdp-panel>
           </div>
         </section>
-        <section v-if="view.channel.migration" class="block" aria-labelledby="b-flyway">
+        <section
+          v-if="view.channel.migration"
+          class="block"
+          aria-labelledby="b-flyway">
           <h3 id="b-flyway" class="block-head">
             <span>{{ view.n('flyway') }}</span>
             Flyway
           </h3>
           <migration-panel :index="0"></migration-panel>
         </section>
-        <section v-if="view.channel.digest" class="block" aria-labelledby="b-today">
+        <section
+          v-if="view.channel.digest"
+          class="block"
+          aria-labelledby="b-today">
           <h3 id="b-today" class="block-head">
             <span>{{ view.n('today') }}</span>
             Today
           </h3>
           <digest-panel :index="0"></digest-panel>
         </section>
-        <section v-if="view.channel.plots" class="block" aria-labelledby="b-plots">
+        <section
+          v-if="view.channel.plots"
+          class="block"
+          aria-labelledby="b-plots">
           <h3 id="b-plots" class="block-head">
             <span>{{ view.n('plots') }}</span>
             Plots
           </h3>
           <plots-panel :index="0"></plots-panel>
         </section>
-        <section v-if="!view.channel.prices" class="block" aria-labelledby="b-gist">
+        <section
+          v-if="!view.channel.prices"
+          class="block"
+          aria-labelledby="b-gist">
           <h3 id="b-gist" class="block-head">
             <span>{{ view.n('gist') }}</span>
             Gist
@@ -87,11 +118,16 @@
           </h3>
           <div class="stack">
             <!-- A price channel charts real prices above, not attention. -->
-            <signal-panel v-if="!view.channel.prices" :index="1"></signal-panel>
+            <signal-panel
+              v-if="!view.channel.prices"
+              :index="1"></signal-panel>
             <lens-panel :index="2"></lens-panel>
           </div>
         </section>
-        <section v-if="view.channel.github" class="block" aria-labelledby="b-build">
+        <section
+          v-if="view.channel.github"
+          class="block"
+          aria-labelledby="b-build">
           <h3 id="b-build" class="block-head">
             <span>{{ view.n('build') }}</span>
             Builders
@@ -101,7 +137,9 @@
             <git-hub-me-panel :index="4"></git-hub-me-panel>
           </div>
         </section>
-        <section class="block streams-block" aria-labelledby="b-streams">
+        <section
+          class="block streams-block"
+          aria-labelledby="b-streams">
           <h3 id="b-streams" class="block-head">
             <span>{{ view.n('streams') }}</span>
             Streams
@@ -128,9 +166,11 @@
     </div>
 
     <footer class="foot">
-      PRECOG tracks topics, never people · Wikipedia · The Guardian · Hacker News · Manifold · GitHub · ECB · Eurostat ·
-      IPMA · Open-Meteo · NOAA · NSIDC · DGEG · CoinGecko · EIA · alternative.me · World Bank · Climate TRACE · Aloft ·
-      iNaturalist
+      PRECOG tracks topics, never people · Wikipedia · The
+      Guardian · Hacker News · Manifold · GitHub · ECB ·
+      Eurostat · IPMA · Open-Meteo · NOAA · NSIDC · DGEG ·
+      CoinGecko · EIA · alternative.me · World Bank ·
+      Climate TRACE · Aloft · iNaturalist
     </footer>
     <install-notice></install-notice>
   </div>
@@ -139,7 +179,11 @@
 <script lang="ts">
 import { useApp } from '@/context';
 import { computed, defineComponent } from 'vue';
-import { activeChannel, channelDatapoints, channels } from '@/channels';
+import {
+  activeChannel,
+  channelDatapoints,
+  channels,
+} from '@/channels';
 import AppHeader from '@components/AppHeader.vue';
 import InstallNotice from '@components/InstallNotice.vue';
 import MorningBrief from '@components/MorningBrief.vue';
@@ -182,7 +226,9 @@ export default defineComponent({
     const ui = app.ui;
     const view = computed(() => {
       const channel = activeChannel(app);
-      const i = channels(app).findIndex(c => c.id === channel.id);
+      const i = channels(app).findIndex(
+        c => c.id === channel.id,
+      );
       // The main column's sections, numbered in the order they show.
       const blocks = [
         channel.prices && 'prices',
@@ -195,13 +241,21 @@ export default defineComponent({
         'streams',
       ].filter(Boolean);
       return {
-        n: (b: string) => String(blocks.indexOf(b) + 1).padStart(2, '0'),
+        n: (b: string) =>
+          String(blocks.indexOf(b) + 1).padStart(2, '0'),
         channel,
         no: String(i + 1).padStart(2, '0'),
         title: app.activeLens()?.name || channel.label,
         home: app.state.homeLens === channel.lensId,
         side: channelDatapoints(channel).length > 0,
-        updated: new Date(ui.now).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' }),
+        updated: new Date(ui.now).toLocaleDateString(
+          undefined,
+          {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+          },
+        ),
       };
     });
     return { ui, view, toggleHome: actions.toggleHome };

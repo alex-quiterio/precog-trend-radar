@@ -1,10 +1,22 @@
 // The stream loader with fake streams: which stream loads, errors, and a newer load cancelling an older one.
 import { describe, expect, it } from 'vitest';
 import { createStoryLoader } from '@features/stories';
-import type { Stream, StreamContext } from '@sources/streams';
+import type {
+  Stream,
+  StreamContext,
+} from '@sources/streams';
 
-const ctx: StreamContext = { entries: [], scopeKeys: new Set(), scope: 'lens', now: 0, keys: { guardian: false } };
-const stream = (id: string, load: Stream['load']): Stream => ({
+const ctx: StreamContext = {
+  entries: [],
+  scopeKeys: new Set(),
+  scope: 'lens',
+  now: 0,
+  keys: { guardian: false },
+};
+const stream = (
+  id: string,
+  load: Stream['load'],
+): Stream => ({
   id,
   label: id,
   load,
@@ -23,7 +35,10 @@ function setup(streams: Stream[], current = 'b') {
 
 describe('the stream loader', () => {
   it('switches to the channel’s first stream when the current one isn’t shown', async () => {
-    const { loader, now } = setup([stream('a', async () => {})], 'gone');
+    const { loader, now } = setup(
+      [stream('a', async () => {})],
+      'gone',
+    );
     await loader.load();
     expect(now.current).toBe('a');
     expect(loader.status.at.a).toBeGreaterThan(0);
@@ -33,7 +48,9 @@ describe('the stream loader', () => {
     let fail = true;
     const { loader } = setup([
       stream('b', async () => {
-        if (fail) throw new Error('HTTP 429');
+        if (fail) {
+          throw new Error('HTTP 429');
+        }
       }),
     ]);
     await loader.load();
@@ -50,10 +67,15 @@ describe('the stream loader', () => {
         (_ctx, signal) =>
           new Promise<void>((resolve, reject) => {
             calls++;
-            const t = setTimeout(resolve, calls === 1 ? 50 : 5);
+            const t = setTimeout(
+              resolve,
+              calls === 1 ? 50 : 5,
+            );
             signal.addEventListener('abort', () => {
               clearTimeout(t);
-              reject(new DOMException('aborted', 'AbortError'));
+              reject(
+                new DOMException('aborted', 'AbortError'),
+              );
             });
           }),
       ),
@@ -72,10 +94,18 @@ describe('the stream loader', () => {
       'b',
       (_ctx, signal) =>
         new Promise<void>((resolve, reject) => {
-          release = () => (signal.aborted ? reject(new DOMException('aborted', 'AbortError')) : resolve());
+          release = () =>
+            signal.aborted
+              ? reject(
+                  new DOMException('aborted', 'AbortError'),
+                )
+              : resolve();
         }),
     );
-    const { loader, now } = setup([slow, stream('a', async () => {})]);
+    const { loader, now } = setup([
+      slow,
+      stream('a', async () => {}),
+    ]);
     const first = loader.load();
     expect(loader.status.loading.b).toBe(true);
     now.current = 'a'; // to another tab: its load cancels b's…
@@ -92,7 +122,16 @@ describe('the stream loader', () => {
         'b',
         (_ctx, signal) =>
           new Promise<void>((resolve, reject) => {
-            releases.push(() => (signal.aborted ? reject(new DOMException('aborted', 'AbortError')) : resolve()));
+            releases.push(() =>
+              signal.aborted
+                ? reject(
+                    new DOMException(
+                      'aborted',
+                      'AbortError',
+                    ),
+                  )
+                : resolve(),
+            );
           }),
       ),
     ]);
@@ -116,7 +155,10 @@ describe('the stream loader', () => {
       b = setup([s]);
     await a.loader.load();
     expect(seen).toEqual([['first']]); // the partial result, shown before the load finished
-    expect(a.loader.status.data.b).toEqual(['first', 'second']);
+    expect(a.loader.status.data.b).toEqual([
+      'first',
+      'second',
+    ]);
     expect(b.loader.status.data.b).toBeUndefined(); // another app's loader has its own data
   });
 });

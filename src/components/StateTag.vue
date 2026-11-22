@@ -9,7 +9,9 @@ import { tagOf } from '@components/helpers';
 
 export default defineComponent({
   name: 'StateTag',
-  props: { st: Object as PropType<Pick<Stats, 'z'> | null> },
+  props: {
+    st: Object as PropType<Pick<Stats, 'z'> | null>,
+  },
   computed: {
     t() {
       return tagOf(this.st);

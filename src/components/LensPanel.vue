@@ -1,13 +1,16 @@
 <template>
-  <panel-shell id="p-watch" title="Topics" :meta="view.meta" :index="index">
+  <panel-shell
+    id="p-watch"
+    title="Topics"
+    :meta="view.meta"
+    :index="index">
     <template #controls>
       <button
         v-if="view.own && view.lens"
         class="btn small no-print"
         type="button"
         :aria-label="'Delete channel ' + view.lens.name"
-        @click="removeLens(view.lens.id)"
-      >
+        @click="removeLens(view.lens.id)">
         Delete channel
       </button>
     </template>
@@ -16,61 +19,113 @@
         v-for="E in view.list"
         :key="E.key"
         class="chip"
-        :class="{ sel: view.sel === E, pinned: view.hot && hotOf(E)?.pinned }"
-      >
-        <button class="name" type="button" :aria-pressed="view.sel === E" :title="chipTitle(E)" @click="select(E.key)">
+        :class="{
+          sel: view.sel === E,
+          pinned: view.hot && hotOf(E)?.pinned,
+        }">
+        <button
+          class="name"
+          type="button"
+          :aria-pressed="view.sel === E"
+          :title="chipTitle(E)"
+          @click="select(E.key)">
           <topic-dot :color="E.color"></topic-dot>
           {{ E.name }}
-          <span v-if="view.hot && isNew(E)" class="hot-new">new</span>
+          <span v-if="view.hot && isNew(E)" class="hot-new">
+            new
+          </span>
         </button>
         <button
           v-if="view.hot"
           class="pin no-print"
           type="button"
           :aria-pressed="!!hotOf(E)?.pinned"
-          :aria-label="(hotOf(E)?.pinned ? 'Unpin ' : 'Pin ') + E.name"
-          :title="hotOf(E)?.pinned ? 'Pinned: it stays. Click to let it go.' : 'Pin: keep it here'"
-          @click="togglePin(E.key)"
-        >
-          <svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true">
+          :aria-label="
+            (hotOf(E)?.pinned ? 'Unpin ' : 'Pin ') + E.name
+          "
+          :title="
+            hotOf(E)?.pinned
+              ? 'Pinned: it stays. Click to let it go.'
+              : 'Pin: keep it here'
+          "
+          @click="togglePin(E.key)">
+          <svg
+            viewBox="0 0 12 12"
+            width="11"
+            height="11"
+            aria-hidden="true">
             <path
               d="M4.5 1.5h3l-.5 3 2 1.5v1H3v-1l2-1.5zM6 7v3.5"
               stroke="currentColor"
               stroke-width="1.2"
               stroke-linejoin="round"
-              :fill="hotOf(E)?.pinned ? 'currentColor' : 'none'"
-            />
+              :fill="
+                hotOf(E)?.pinned ? 'currentColor' : 'none'
+              " />
           </svg>
         </button>
-        <button class="x" type="button" :aria-label="'Remove ' + E.name" @click="removeTopic(E.key)">×</button>
+        <button
+          class="x"
+          type="button"
+          :aria-label="'Remove ' + E.name"
+          @click="removeTopic(E.key)">
+          ×
+        </button>
       </span>
-      <form v-if="!view.full" class="add-form" autocomplete="off" @submit.prevent="submitTopic">
-        <label class="sr-only" for="add-input">Add a topic to {{ view.lens ? view.lens.name : '' }}</label>
+      <form
+        v-if="!view.full"
+        class="add-form"
+        autocomplete="off"
+        @submit.prevent="submitTopic">
+        <label class="sr-only" for="add-input">
+          Add a topic to
+          {{ view.lens ? view.lens.name : '' }}
+        </label>
         <input
           id="add-input"
           ref="addInput"
           v-model="newTopic"
           type="text"
           maxlength="120"
-          placeholder="+ topic  (or: Name | wiki: Title | q: query)"
-        />
+          placeholder="+ topic  (or: Name | wiki: Title | q: query)" />
       </form>
     </div>
     <p v-if="view.hot && view.echo" class="hot-why">
-      <span v-for="e in view.echo.tags" :key="e.id" class="echo" :title="e.title">{{ e.label }}</span>
+      <span
+        v-for="e in view.echo.tags"
+        :key="e.id"
+        class="echo"
+        :title="e.title">
+        {{ e.label }}
+      </span>
       <span class="why">{{ view.echo.why }}</span>
     </p>
-    <p class="watch-msg" :class="{ err: ui.watchErr }" role="status">{{ ui.watchMsg }}</p>
+    <p
+      class="watch-msg"
+      :class="{ err: ui.watchErr }"
+      role="status">
+      {{ ui.watchMsg }}
+    </p>
   </panel-shell>
 </template>
 
 <script lang="ts">
 import { useApp } from '@/context';
-import { ref, computed, watch, nextTick, defineComponent } from 'vue';
+import {
+  ref,
+  computed,
+  watch,
+  nextTick,
+  defineComponent,
+} from 'vue';
 import { isBuiltInLens } from '@/channels';
 import { MAX_TOPICS } from '@core/config';
 import type { Entry } from '@/types';
-import { ECHO_LABEL, type Echo, dayOf } from '@features/hot-topics';
+import {
+  ECHO_LABEL,
+  type Echo,
+  dayOf,
+} from '@features/hot-topics';
 import TopicDot from '@components/TopicDot.vue';
 import PanelShell from '@components/PanelShell.vue';
 
@@ -86,9 +141,17 @@ export default defineComponent({
   setup() {
     const { app, actions, hot } = useApp();
     const ui = app.ui;
-    const { addTopic, removeLens, removeTopic, select, togglePin } = actions;
-    const hotOf = (E: Entry) => hot.for(E.lensId)?.pickOf(E.name);
-    const isNew = (E: Entry) => !!hot.for(E.lensId)?.isNew(hotOf(E), dayOf(ui.now));
+    const {
+      addTopic,
+      removeLens,
+      removeTopic,
+      select,
+      togglePin,
+    } = actions;
+    const hotOf = (E: Entry) =>
+      hot.for(E.lensId)?.pickOf(E.name);
+    const isNew = (E: Entry) =>
+      !!hot.for(E.lensId)?.isNew(hotOf(E), dayOf(ui.now));
     const SHORT: Record<Echo, string> = {
       news: 'In the news',
       read: 'Most read',
@@ -111,7 +174,11 @@ export default defineComponent({
       return {
         hot: isHot,
         echo: p && {
-          tags: p.echoes.map(e => ({ id: e, label: SHORT[e], title: ECHO_LABEL[e] })),
+          tags: p.echoes.map(e => ({
+            id: e,
+            label: SHORT[e],
+            title: ECHO_LABEL[e],
+          })),
           why:
             p.why ||
             (p.echoes.includes('news')
@@ -137,12 +204,19 @@ export default defineComponent({
       };
     });
     const chipTitle = (E: Entry) =>
-      [E.def.wiki && `Wikipedia: ${E.def.wiki}`, E.def.q && `search: ${E.def.q}`].filter(Boolean).join(' · ');
+      [
+        E.def.wiki && `Wikipedia: ${E.def.wiki}`,
+        E.def.q && `search: ${E.def.q}`,
+      ]
+        .filter(Boolean)
+        .join(' · ');
     function submitTopic() {
       if (addTopic(newTopic.value)) {
         newTopic.value = '';
         nextTick(() => addInput.value?.focus());
-      } else addInput.value?.select();
+      } else {
+        addInput.value?.select();
+      }
     }
     watch(
       () => ui.focusAdd,

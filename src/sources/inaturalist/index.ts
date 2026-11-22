@@ -2,7 +2,10 @@
 // Keyless and browser-readable (about 60 requests a minute allowed); each place is asked twice an hour at most.
 import { DAY, MIN } from '@core/config';
 import { getJSON } from '@sources/registry';
-import { parseSpeciesCounts, type SpeciesCount } from './parse';
+import {
+  parseSpeciesCounts,
+  type SpeciesCount,
+} from './parse';
 export * from './parse';
 
 /** A circle around a city: where its sightings count. */
@@ -35,22 +38,54 @@ export interface Sightings {
   before: Set<number>;
 }
 
-const cache = new Map<string, { at: number; s: Sightings }>();
-const day = (t: number) => new Date(t).toISOString().slice(0, 10);
+const cache = new Map<
+  string,
+  { at: number; s: Sightings }
+>();
+const day = (t: number) =>
+  new Date(t).toISOString().slice(0, 10);
 
 /** Birds (taxon 3) recorded around a place, this week against last week. */
-export async function birdSightings(p: Place, signal: AbortSignal, now = Date.now()): Promise<Sightings> {
+export async function birdSightings(
+  p: Place,
+  signal: AbortSignal,
+  now = Date.now(),
+): Promise<Sightings> {
   const hit = cache.get(p.name);
-  if (hit && now - hit.at < 30 * MIN) return hit.s;
-  const url = (taxa: string, d1: number, d2: number, n: number) =>
+  if (hit && now - hit.at < 30 * MIN) {
+    return hit.s;
+  }
+  const url = (
+    taxa: string,
+    d1: number,
+    d2: number,
+    n: number,
+  ) =>
     `https://api.inaturalist.org/v1/observations/species_counts?taxon_id=${taxa}&lat=${p.lat}&lng=${p.lng}&radius=${p.radius}` +
     `&d1=${day(d1)}&d2=${day(d2)}&per_page=${n}&locale=en`;
   const [week, before, mine] = await Promise.all([
-    getJSON(url('3', now - 6 * DAY, now, 40), signal).then(parseSpeciesCounts),
-    getJSON(url('3', now - 13 * DAY, now - 7 * DAY, 200), signal).then(parseSpeciesCounts),
-    getJSON(url(Object.keys(WATCHED).join(','), now - 6 * DAY, now, 20), signal).then(parseSpeciesCounts),
+    getJSON(url('3', now - 6 * DAY, now, 40), signal).then(
+      parseSpeciesCounts,
+    ),
+    getJSON(
+      url('3', now - 13 * DAY, now - 7 * DAY, 200),
+      signal,
+    ).then(parseSpeciesCounts),
+    getJSON(
+      url(
+        Object.keys(WATCHED).join(','),
+        now - 6 * DAY,
+        now,
+        20,
+      ),
+      signal,
+    ).then(parseSpeciesCounts),
   ]);
-  const s = { week, before: new Set(before.map(b => b.id)), mine };
+  const s = {
+    week,
+    before: new Set(before.map(b => b.id)),
+    mine,
+  };
   cache.set(p.name, { at: now, s });
   return s;
 }

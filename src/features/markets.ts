@@ -9,10 +9,18 @@ import { HOUR, MIN, store } from '@core/config';
 import { errorText, isAbort } from '@core/errors';
 import type { SeriesPoint } from '@/types';
 import { getJSON } from '@sources/registry';
-import { type CoinQuote, type CryptoGlobal, parseCoinMarkets, parseGlobal } from '@sources/coingecko/parse';
+import {
+  type CoinQuote,
+  type CryptoGlobal,
+  parseCoinMarkets,
+  parseGlobal,
+} from '@sources/coingecko/parse';
 import { parseEcbSeries } from '@sources/ecb/parse';
 import { parseSpotPrices } from '@sources/eia/parse';
-import { type FearGreed, parseFearGreed } from '@sources/feargreed/parse';
+import {
+  type FearGreed,
+  parseFearGreed,
+} from '@sources/feargreed/parse';
 
 const DAY = 24 * HOUR;
 
@@ -47,14 +55,30 @@ export interface TileGroup {
 /** CoinGecko ids, by group: [id, name, what is priced]. */
 export const STOCKS: [string, string, string][] = [
   ['sp500-xstock', 'S&P 500', 'SPY ETF share, tokenized'],
-  ['nasdaq-xstock', 'Nasdaq-100', 'QQQ ETF share, tokenized'],
+  [
+    'nasdaq-xstock',
+    'Nasdaq-100',
+    'QQQ ETF share, tokenized',
+  ],
   ['nvidia-xstock', 'Nvidia', 'NVDA share, tokenized'],
-  ['microsoft-xstock', 'Microsoft', 'MSFT share, tokenized'],
+  [
+    'microsoft-xstock',
+    'Microsoft',
+    'MSFT share, tokenized',
+  ],
   ['alphabet-xstock', 'Alphabet', 'GOOGL share, tokenized'],
 ];
 export const AI_TOKENS: [string, string, string][] = [
-  ['bittensor', 'Bittensor', 'TAO: decentralized AI training'],
-  ['render-token', 'Render', 'RENDER: GPU rendering and AI compute'],
+  [
+    'bittensor',
+    'Bittensor',
+    'TAO: decentralized AI training',
+  ],
+  [
+    'render-token',
+    'Render',
+    'RENDER: GPU rendering and AI compute',
+  ],
   ['near', 'NEAR', 'NEAR: a chain pitched at AI agents'],
 ];
 export const CRYPTO: [string, string, string][] = [
@@ -62,8 +86,15 @@ export const CRYPTO: [string, string, string][] = [
   ['ethereum', 'Ethereum', 'ETH'],
   ['solana', 'Solana', 'SOL'],
 ];
-export const GOLD: [string, string, string][] = [['pax-gold', 'Gold', '$ a troy ounce (PAX Gold)']];
-const COIN_IDS = [...STOCKS, ...AI_TOKENS, ...CRYPTO, ...GOLD].map(c => c[0]);
+export const GOLD: [string, string, string][] = [
+  ['pax-gold', 'Gold', '$ a troy ounce (PAX Gold)'],
+];
+const COIN_IDS = [
+  ...STOCKS,
+  ...AI_TOKENS,
+  ...CRYPTO,
+  ...GOLD,
+].map(c => c[0]);
 /** ECB currency codes, quoted per euro. */
 export const FX = ['USD', 'GBP', 'JPY', 'CNY', 'CHF'];
 const FX_NAME: Record<string, string> = {
@@ -76,10 +107,19 @@ const FX_NAME: Record<string, string> = {
 
 // --- Numbers -------------------------------------------------------------
 /** The % move from the last point at or before `ago` ms earlier to the latest, or null. */
-export function moveOver(series: SeriesPoint[], ago: number): number | null {
+export function moveOver(
+  series: SeriesPoint[],
+  ago: number,
+): number | null {
   const last = series[series.length - 1];
-  const before = last && [...series].reverse().find(p => p.t <= last.t - ago + HOUR);
-  return before && before.value ? ((last.value - before.value) / before.value) * 100 : null;
+  const before =
+    last &&
+    [...series]
+      .reverse()
+      .find(p => p.t <= last.t - ago + HOUR);
+  return before && before.value
+    ? ((last.value - before.value) / before.value) * 100
+    : null;
 }
 /** The last `days` of a series. */
 const lastDays = (s: SeriesPoint[], days: number) => {
@@ -87,11 +127,20 @@ const lastDays = (s: SeriesPoint[], days: number) => {
   return s.filter(p => p.t > end - days * DAY);
 };
 const usd = (v: number) =>
-  v >= 1000 ? '$' + Math.round(v).toLocaleString('en-US') : v >= 1 ? '$' + v.toFixed(2) : '$' + v.toPrecision(3);
-const bigUsd = (v: number) => (v >= 1e12 ? `$${(v / 1e12).toFixed(2)}T` : `$${(v / 1e9).toFixed(1)}B`);
+  v >= 1000
+    ? '$' + Math.round(v).toLocaleString('en-US')
+    : v >= 1
+      ? '$' + v.toFixed(2)
+      : '$' + v.toPrecision(3);
+const bigUsd = (v: number) =>
+  v >= 1e12
+    ? `$${(v / 1e12).toFixed(2)}T`
+    : `$${(v / 1e9).toFixed(1)}B`;
 /** "+2.4%", "−0.8%", "±0%". Markets write numbers one way (a decimal point), like the dollar prices beside them. */
 export const pct = (p: number | null): string =>
-  p == null ? '–' : `${p > 0.05 ? '+' : p < -0.05 ? '−' : '±'}${Math.abs(p).toFixed(1)}%`;
+  p == null
+    ? '–'
+    : `${p > 0.05 ? '+' : p < -0.05 ? '−' : '±'}${Math.abs(p).toFixed(1)}%`;
 /** "+2.4% in a week and −1.0% in a month", for the moves that are known; '' for none. */
 const moves = (parts: [number | null, string][]): string =>
   parts
@@ -99,7 +148,11 @@ const moves = (parts: [number | null, string][]): string =>
     .map(([p, when]) => `${pct(p)} ${when}`)
     .join(' and ');
 
-function coinTile(q: CoinQuote, name: string, what: string): Tile {
+function coinTile(
+  q: CoinQuote,
+  name: string,
+  what: string,
+): Tile {
   const prices = q.spark.map(p => p.value);
   return {
     key: q.id,
@@ -116,7 +169,13 @@ function coinTile(q: CoinQuote, name: string, what: string): Tile {
     asOf: q.updated,
   };
 }
-function seriesTile(key: string, name: string, what: string, s: SeriesPoint[], fmt: (v: number) => string): Tile {
+function seriesTile(
+  key: string,
+  name: string,
+  what: string,
+  s: SeriesPoint[],
+  fmt: (v: number) => string,
+): Tile {
   const last = s[s.length - 1];
   const shown = lastDays(s, 14);
   const vals = shown.map(p => p.value);
@@ -125,7 +184,12 @@ function seriesTile(key: string, name: string, what: string, s: SeriesPoint[], f
     name,
     what,
     price: last ? fmt(last.value) : '–',
-    d1: s.length > 1 ? ((last.value - s[s.length - 2].value) / s[s.length - 2].value) * 100 : null,
+    d1:
+      s.length > 1
+        ? ((last.value - s[s.length - 2].value) /
+            s[s.length - 2].value) *
+          100
+        : null,
     w1: moveOver(s, 7 * DAY),
     m1: moveOver(s, 30 * DAY),
     spark: shown,
@@ -145,26 +209,49 @@ export interface MarketData {
   fx: Map<string, SeriesPoint[]>;
 }
 /** The euro against each currency, and the dollar against the yen (from the two euro rates). */
-export function fxSeries(fx: Map<string, SeriesPoint[]>): [string, string, string, SeriesPoint[]][] {
-  const out: [string, string, string, SeriesPoint[]][] = FX.flatMap(c => {
-    const s = fx.get(c);
-    return s?.length
-      ? [[`eur-${c}`, `€ → ${FX_NAME[c]}`, `${c} per euro, ECB`, s] as [string, string, string, SeriesPoint[]]]
-      : [];
-  });
+export function fxSeries(
+  fx: Map<string, SeriesPoint[]>,
+): [string, string, string, SeriesPoint[]][] {
+  const out: [string, string, string, SeriesPoint[]][] =
+    FX.flatMap(c => {
+      const s = fx.get(c);
+      return s?.length
+        ? [
+            [
+              `eur-${c}`,
+              `€ → ${FX_NAME[c]}`,
+              `${c} per euro, ECB`,
+              s,
+            ] as [string, string, string, SeriesPoint[]],
+          ]
+        : [];
+    });
   const usdS = fx.get('USD'),
     jpy = fx.get('JPY');
   if (usdS?.length && jpy?.length) {
     const byT = new Map(usdS.map(p => [p.t, p.value]));
-    const cross = jpy.flatMap(p => (byT.get(p.t) ? [{ t: p.t, value: p.value / byT.get(p.t)! }] : []));
-    out.push(['usd-jpy', '$ → yen', 'JPY per dollar, from ECB rates', cross]);
+    const cross = jpy.flatMap(p =>
+      byT.get(p.t)
+        ? [{ t: p.t, value: p.value / byT.get(p.t)! }]
+        : [],
+    );
+    out.push([
+      'usd-jpy',
+      '$ → yen',
+      'JPY per dollar, from ECB rates',
+      cross,
+    ]);
   }
   return out;
 }
 export function boardOf(m: MarketData): TileGroup[] {
   const byId = new Map(m.quotes.map(q => [q.id, q]));
   const coins = (list: [string, string, string][]) =>
-    list.flatMap(([id, name, what]) => (byId.get(id) ? [coinTile(byId.get(id)!, name, what)] : []));
+    list.flatMap(([id, name, what]) =>
+      byId.get(id)
+        ? [coinTile(byId.get(id)!, name, what)]
+        : [],
+    );
   const oil = (
     [
       ['RBRTE', 'Brent crude'],
@@ -172,36 +259,100 @@ export function boardOf(m: MarketData): TileGroup[] {
     ] as const
   ).flatMap(([id, name]) =>
     m.oil.get(id)?.length
-      ? [seriesTile(id, name, '$ a barrel, spot (EIA)', m.oil.get(id)!, v => `$${v.toFixed(2)}`)]
+      ? [
+          seriesTile(
+            id,
+            name,
+            '$ a barrel, spot (EIA)',
+            m.oil.get(id)!,
+            v => `$${v.toFixed(2)}`,
+          ),
+        ]
       : [],
   );
   const fx = fxSeries(m.fx).map(([key, name, what, s]) =>
-    seriesTile(key, name, what, s, v => (v >= 20 ? v.toFixed(2) : v.toFixed(4))),
+    seriesTile(key, name, what, s, v =>
+      v >= 20 ? v.toFixed(2) : v.toFixed(4),
+    ),
   );
   return [
-    { id: 'energy', label: 'Energy', hint: 'Oil, spot', tiles: oil },
-    { id: 'stocks', label: 'Stocks & AI', hint: 'US indices and AI leaders', tiles: coins(STOCKS) },
-    { id: 'ai', label: 'AI tokens', hint: 'Crypto networks for AI', tiles: coins(AI_TOKENS) },
-    { id: 'crypto', label: 'Crypto', hint: 'The big three', tiles: coins(CRYPTO) },
-    { id: 'gold', label: 'Gold', hint: 'The old safe haven', tiles: coins(GOLD) },
-    { id: 'fx', label: 'Currencies', hint: 'ECB reference rates', tiles: fx },
+    {
+      id: 'energy',
+      label: 'Energy',
+      hint: 'Oil, spot',
+      tiles: oil,
+    },
+    {
+      id: 'stocks',
+      label: 'Stocks & AI',
+      hint: 'US indices and AI leaders',
+      tiles: coins(STOCKS),
+    },
+    {
+      id: 'ai',
+      label: 'AI tokens',
+      hint: 'Crypto networks for AI',
+      tiles: coins(AI_TOKENS),
+    },
+    {
+      id: 'crypto',
+      label: 'Crypto',
+      hint: 'The big three',
+      tiles: coins(CRYPTO),
+    },
+    {
+      id: 'gold',
+      label: 'Gold',
+      hint: 'The old safe haven',
+      tiles: coins(GOLD),
+    },
+    {
+      id: 'fx',
+      label: 'Currencies',
+      hint: 'ECB reference rates',
+      tiles: fx,
+    },
   ].filter(g => g.tiles.length);
 }
 
 // --- Takeaways -------------------------------------------------------------
-const way = (p: number | null, up: string, down: string, flat: string) =>
-  p == null ? flat : p >= 0.5 ? up : p <= -0.5 ? down : flat;
-const shortDay = (t: number) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+const way = (
+  p: number | null,
+  up: string,
+  down: string,
+  flat: string,
+) =>
+  p == null
+    ? flat
+    : p >= 0.5
+      ? up
+      : p <= -0.5
+        ? down
+        : flat;
+const shortDay = (t: number) =>
+  new Date(t).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+  });
 /**
  * " This month it rose most against the yen (+1.2%) and fell most against the franc (−1.8%)." Only a real rise
  * (0.5% or more) is called one, and only a real fall; '' when the euro barely moved against any of them.
  */
-function monthFx(best?: { c: string; m: number | null }, worst?: { c: string; m: number | null }): string {
+function monthFx(
+  best?: { c: string; m: number | null },
+  worst?: { c: string; m: number | null },
+): string {
   const parts = [
-    best && best.m! >= 0.5 ? `rose most against the ${FX_NAME[best.c]} (${pct(best.m)})` : '',
-    worst && worst.m! <= -0.5 ? `fell most against the ${FX_NAME[worst.c]} (${pct(worst.m)})` : '',
+    best && best.m! >= 0.5
+      ? `rose most against the ${FX_NAME[best.c]} (${pct(best.m)})`
+      : '',
+    worst && worst.m! <= -0.5
+      ? `fell most against the ${FX_NAME[worst.c]} (${pct(worst.m)})`
+      : '',
   ].filter(Boolean);
-  return parts.length ? ` This month it ${parts.join(' and ')}.` : '';
+  return parts.length
+    ? ` This month it ${parts.join(' and ')}.`
+    : '';
 }
 /** A few plain sentences from the numbers: what moved, by how much. Facts only. */
 export function takeaways(m: MarketData): string[] {
@@ -223,18 +374,29 @@ export function takeaways(m: MarketData): string[] {
     ndx = q('nasdaq-xstock');
   if (spx) {
     const leaders = STOCKS.slice(2)
-      .map(([id, name]) => ({ name, w: q(id)?.ch7 ?? null }))
+      .map(([id, name]) => ({
+        name,
+        w: q(id)?.ch7 ?? null,
+      }))
       .filter(x => x.w != null)
       .sort((a, b) => Math.abs(b.w!) - Math.abs(a.w!));
     out.push(
       `US stocks ${way(spx.ch7, 'rose', 'fell', 'were flat')} this week: S&P 500 ${pct(spx.ch7)}${ndx ? `, Nasdaq-100 ${pct(ndx.ch7)}` : ''}.` +
-        (leaders[0] ? ` Of the AI leaders, ${leaders[0].name} moved most (${pct(leaders[0].w)}).` : ''),
+        (leaders[0]
+          ? ` Of the AI leaders, ${leaders[0].name} moved most (${pct(leaders[0].w)}).`
+          : ''),
     );
   }
-  const ai = AI_TOKENS.map(([id, name]) => ({ name, w: q(id)?.ch7 ?? null })).filter(x => x.w != null);
+  const ai = AI_TOKENS.map(([id, name]) => ({
+    name,
+    w: q(id)?.ch7 ?? null,
+  })).filter(x => x.w != null);
   if (ai.length) {
-    const avg = ai.reduce((a, b) => a + b.w!, 0) / ai.length;
-    const most = [...ai].sort((a, b) => Math.abs(b.w!) - Math.abs(a.w!))[0];
+    const avg =
+      ai.reduce((a, b) => a + b.w!, 0) / ai.length;
+    const most = [...ai].sort(
+      (a, b) => Math.abs(b.w!) - Math.abs(a.w!),
+    )[0];
     out.push(
       `AI tokens ${way(avg, 'rose', 'fell', 'were flat')} this week (${pct(avg)} on average); ${most.name} moved most (${pct(most.w)}).`,
     );
@@ -242,20 +404,30 @@ export function takeaways(m: MarketData): string[] {
   const btc = q('bitcoin');
   if (btc || m.global) {
     const parts: string[] = [];
-    if (m.global)
+    if (m.global) {
       parts.push(
         `crypto is worth ${bigUsd(m.global.cap)}${m.global.ch24 != null ? ` (${pct(m.global.ch24)} in a day)` : ''}${m.global.btc != null ? `, ${m.global.btc.toFixed(1)}% of it Bitcoin` : ''}`,
       );
-    if (btc) parts.push(`Bitcoin is ${usd(btc.price)} (${pct(btc.ch7)} this week)`);
+    }
+    if (btc) {
+      parts.push(
+        `Bitcoin is ${usd(btc.price)} (${pct(btc.ch7)} this week)`,
+      );
+    }
     const f = m.fng?.series;
     if (f?.length) {
       const now = f[f.length - 1],
-        weekAgo = [...f].reverse().find(p => p.t <= now.t - 7 * DAY + HOUR);
+        weekAgo = [...f]
+          .reverse()
+          .find(p => p.t <= now.t - 7 * DAY + HOUR);
       parts.push(
         `sentiment reads ${m.fng!.label} (${now.value}${weekAgo ? `, from ${weekAgo.value} a week ago` : ''})`,
       );
     }
-    out.push(parts.join('; ').replace(/^./, c => c.toUpperCase()) + '.');
+    out.push(
+      parts.join('; ').replace(/^./, c => c.toUpperCase()) +
+        '.',
+    );
   }
   const gold = q('pax-gold');
   if (gold) {
@@ -263,15 +435,33 @@ export function takeaways(m: MarketData): string[] {
       [gold.ch7, 'this week'],
       [gold.ch30, 'in a month'],
     ]);
-    out.push(`Gold is ${usd(gold.price)} an ounce${mv ? `, ${mv}` : ''}.`);
+    out.push(
+      `Gold is ${usd(gold.price)} an ounce${mv ? `, ${mv}` : ''}.`,
+    );
   }
-  if (spx && btc && gold && (spx.ch7 ?? 0) < -0.5 && (btc.ch7 ?? 0) < -0.5 && (gold.ch7 ?? 0) > 0.5)
-    out.push('Taken together, a risk-off week: stocks and crypto down, gold up.');
-  const fx = fxSeries(m.fx).filter(([k]) => k.startsWith('eur-'));
+  if (
+    spx &&
+    btc &&
+    gold &&
+    (spx.ch7 ?? 0) < -0.5 &&
+    (btc.ch7 ?? 0) < -0.5 &&
+    (gold.ch7 ?? 0) > 0.5
+  ) {
+    out.push(
+      'Taken together, a risk-off week: stocks and crypto down, gold up.',
+    );
+  }
+  const fx = fxSeries(m.fx).filter(([k]) =>
+    k.startsWith('eur-'),
+  );
   const usdS = m.fx.get('USD');
   if (usdS?.length && fx.length) {
     const moves = fx
-      .map(([key, name, , s]) => ({ c: key.slice(4).toUpperCase(), name, m: moveOver(s, 30 * DAY) }))
+      .map(([key, name, , s]) => ({
+        c: key.slice(4).toUpperCase(),
+        name,
+        m: moveOver(s, 30 * DAY),
+      }))
       .filter(x => x.m != null)
       .sort((a, b) => b.m! - a.m!);
     const best = moves[0],
@@ -287,20 +477,33 @@ export function takeaways(m: MarketData): string[] {
 
 // --- Loading -------------------------------------------------------------
 /** A reply kept in storage for `ttl` ms, so reopening the channel doesn't call again. */
-async function cached(key: string, ttl: number, url: string, signal: AbortSignal): Promise<unknown> {
-  const c = store.get<{ at: number; v: unknown } | null>(key, null);
-  if (c && Date.now() - c.at < ttl) return c.v;
+async function cached(
+  key: string,
+  ttl: number,
+  url: string,
+  signal: AbortSignal,
+): Promise<unknown> {
+  const c = store.get<{ at: number; v: unknown } | null>(
+    key,
+    null,
+  );
+  if (c && Date.now() - c.at < ttl) {
+    return c.v;
+  }
   try {
     const v = await getJSON(url, signal);
     store.set(key, { at: Date.now(), v });
     return v;
   } catch (e) {
     // Rate-limited or offline: an older reply beats none.
-    if (c && !isAbort(e)) return c.v;
+    if (c && !isAbort(e)) {
+      return c.v;
+    }
     throw e;
   }
 }
-const ymd = (t: number) => new Date(t).toISOString().slice(0, 10);
+const ymd = (t: number) =>
+  new Date(t).toISOString().slice(0, 10);
 
 export function createMarkets() {
   const state = reactive({
@@ -317,73 +520,94 @@ export function createMarkets() {
     const { signal } = ac;
     state.loading = true;
     const errors: string[] = [];
-    const part = async <T>(label: string, run: () => Promise<T>, fallback: T): Promise<T> => {
+    const part = async <T>(
+      label: string,
+      run: () => Promise<T>,
+      fallback: T,
+    ): Promise<T> => {
       try {
         return await run();
       } catch (e) {
-        if (!isAbort(e)) errors.push(`${label}: ${errorText(e)}`);
+        if (!isAbort(e)) {
+          errors.push(`${label}: ${errorText(e)}`);
+        }
         return fallback;
       }
     };
     const now = Date.now();
-    const [quotes, global, fng, oil, fx] = await Promise.all([
-      part(
-        'Prices (CoinGecko)',
-        async () =>
-          parseCoinMarkets(
-            await cached(
-              'precog.mkt.coins.v1',
-              10 * MIN,
-              `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${COIN_IDS.join(',')}&sparkline=true&price_change_percentage=24h,7d,30d`,
-              signal,
+    const [quotes, global, fng, oil, fx] =
+      await Promise.all([
+        part(
+          'Prices (CoinGecko)',
+          async () =>
+            parseCoinMarkets(
+              await cached(
+                'precog.mkt.coins.v1',
+                10 * MIN,
+                `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${COIN_IDS.join(',')}&sparkline=true&price_change_percentage=24h,7d,30d`,
+                signal,
+              ),
             ),
-          ),
-        [] as CoinQuote[],
-      ),
-      part(
-        'Crypto market (CoinGecko)',
-        async () =>
-          parseGlobal(
-            await cached('precog.mkt.global.v1', 10 * MIN, 'https://api.coingecko.com/api/v3/global', signal),
-          ),
-        null,
-      ),
-      part(
-        'Fear & Greed',
-        async () =>
-          parseFearGreed(await cached('precog.mkt.fng.v1', HOUR, 'https://api.alternative.me/fng/?limit=31', signal)),
-        null,
-      ),
-      part(
-        'Oil (EIA)',
-        async () =>
-          parseSpotPrices(
-            await cached(
-              'precog.mkt.oil.v1',
-              6 * HOUR,
-              // EIA's public demo key: plenty for one call every few hours.
-              `https://api.eia.gov/v2/petroleum/pri/spt/data/?api_key=DEMO_KEY&frequency=daily&data[0]=value&facets[series][]=RBRTE&facets[series][]=RWTC&start=${ymd(now - 45 * DAY)}&sort[0][column]=period&sort[0][direction]=desc&length=80`,
-              signal,
+          [] as CoinQuote[],
+        ),
+        part(
+          'Crypto market (CoinGecko)',
+          async () =>
+            parseGlobal(
+              await cached(
+                'precog.mkt.global.v1',
+                10 * MIN,
+                'https://api.coingecko.com/api/v3/global',
+                signal,
+              ),
             ),
-          ),
-        new Map<string, SeriesPoint[]>(),
-      ),
-      part(
-        'Currencies (ECB)',
-        async () =>
-          parseEcbSeries(
-            await cached(
-              'precog.mkt.fx.v1',
-              6 * HOUR,
-              `https://data-api.ecb.europa.eu/service/data/EXR/D.${FX.join('+')}.EUR.SP00.A?format=jsondata&lastNObservations=30`,
-              signal,
+          null,
+        ),
+        part(
+          'Fear & Greed',
+          async () =>
+            parseFearGreed(
+              await cached(
+                'precog.mkt.fng.v1',
+                HOUR,
+                'https://api.alternative.me/fng/?limit=31',
+                signal,
+              ),
             ),
-            1,
-          ),
-        new Map<string, SeriesPoint[]>(),
-      ),
-    ]);
-    if (signal.aborted) return;
+          null,
+        ),
+        part(
+          'Oil (EIA)',
+          async () =>
+            parseSpotPrices(
+              await cached(
+                'precog.mkt.oil.v1',
+                6 * HOUR,
+                // EIA's public demo key: plenty for one call every few hours.
+                `https://api.eia.gov/v2/petroleum/pri/spt/data/?api_key=DEMO_KEY&frequency=daily&data[0]=value&facets[series][]=RBRTE&facets[series][]=RWTC&start=${ymd(now - 45 * DAY)}&sort[0][column]=period&sort[0][direction]=desc&length=80`,
+                signal,
+              ),
+            ),
+          new Map<string, SeriesPoint[]>(),
+        ),
+        part(
+          'Currencies (ECB)',
+          async () =>
+            parseEcbSeries(
+              await cached(
+                'precog.mkt.fx.v1',
+                6 * HOUR,
+                `https://data-api.ecb.europa.eu/service/data/EXR/D.${FX.join('+')}.EUR.SP00.A?format=jsondata&lastNObservations=30`,
+                signal,
+              ),
+              1,
+            ),
+          new Map<string, SeriesPoint[]>(),
+        ),
+      ]);
+    if (signal.aborted) {
+      return;
+    }
     state.data = { quotes, global, fng, oil, fx };
     state.errors = errors;
     state.at = Date.now();

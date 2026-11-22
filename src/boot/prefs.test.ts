@@ -17,7 +17,11 @@ describe('restore', () => {
     const { state, ui } = ctx.app;
     expect(ui.theme).toBe('dark');
     expect(state.activeLens).toBe(state.lenses[0].id);
-    expect(state).toMatchObject({ storySrc: 'reading', storyScope: 'lens', selectedByLens: {} });
+    expect(state).toMatchObject({
+      storySrc: 'reading',
+      storyScope: 'lens',
+      selectedByLens: {},
+    });
   });
   it('brings back the last theme, channel, topic, stream and scope', () => {
     store.set(LS.prefs, {
@@ -38,28 +42,52 @@ describe('restore', () => {
     });
   });
   it('opens on your home channel, whichever channel you looked at last', () => {
-    store.set(LS.prefs, { activeLens: 'markets', homeLens: 'portugal' });
+    store.set(LS.prefs, {
+      activeLens: 'markets',
+      homeLens: 'portugal',
+    });
     const ctx = createContext();
     restore(ctx);
-    expect(ctx.app.state).toMatchObject({ activeLens: 'portugal', homeLens: 'portugal' });
+    expect(ctx.app.state).toMatchObject({
+      activeLens: 'portugal',
+      homeLens: 'portugal',
+    });
   });
   it('reopens the last channel when the home channel no longer exists', () => {
-    store.set(LS.prefs, { activeLens: 'markets', homeLens: 'gone-for-good' });
+    store.set(LS.prefs, {
+      activeLens: 'markets',
+      homeLens: 'gone-for-good',
+    });
     const ctx = createContext();
     restore(ctx);
-    expect(ctx.app.state).toMatchObject({ activeLens: 'markets', homeLens: null });
+    expect(ctx.app.state).toMatchObject({
+      activeLens: 'markets',
+      homeLens: null,
+    });
   });
   it('follows a channel that was renamed: The Great Simplification is now The Great Turning', () => {
-    store.set(LS.prefs, { activeLens: 'tgs', selectedByLens: { tgs: 'Peak oil', world: 'NATO' } });
+    store.set(LS.prefs, {
+      activeLens: 'tgs',
+      selectedByLens: { tgs: 'Peak oil', world: 'NATO' },
+    });
     const ctx = createContext();
     restore(ctx);
     expect(ctx.app.state).toMatchObject({
       activeLens: 'turning',
-      selectedByLens: { turning: 'Peak oil', world: 'NATO' },
+      selectedByLens: {
+        turning: 'Peak oil',
+        world: 'NATO',
+      },
     });
   });
   it('falls back to defaults for anything unusable', () => {
-    store.set(LS.prefs, { theme: 'neon', activeLens: 'gone', selectedByLens: 'x', storySrc: 3, storyScope: 'all' });
+    store.set(LS.prefs, {
+      theme: 'neon',
+      activeLens: 'gone',
+      selectedByLens: 'x',
+      storySrc: 3,
+      storyScope: 'all',
+    });
     const ctx = createContext();
     restore(ctx);
     expect(ctx.app.ui.theme).toBe('dark');
@@ -75,15 +103,26 @@ describe('restore', () => {
     store.set('precog.github.token', 'ghp_x');
     const ctx = createContext();
     restore(ctx);
-    expect(ctx.app.ui).toMatchObject({ guardian: true, ghToken: true });
+    expect(ctx.app.ui).toMatchObject({
+      guardian: true,
+      ghToken: true,
+    });
   });
   it('drops caches older versions wrote, and keeps the rest', () => {
-    ['precog.gdelt.x', 'precog.reading.v1.a', 'precog.guardian.v1.b', 'precog.tgs.c', 'precog.rss.d'].forEach(k =>
-      mem.set(k, '1'),
-    );
+    [
+      'precog.gdelt.x',
+      'precog.reading.v1.a',
+      'precog.guardian.v1.b',
+      'precog.tgs.c',
+      'precog.rss.d',
+    ].forEach(k => mem.set(k, '1'));
     mem.set('precog.reading.v3.https://example.org', '{}');
     restore(createContext());
-    expect([...mem.keys()].filter(k => OLD_CACHES.test(k))).toEqual([]);
-    expect(mem.has('precog.reading.v3.https://example.org')).toBe(true);
+    expect(
+      [...mem.keys()].filter(k => OLD_CACHES.test(k)),
+    ).toEqual([]);
+    expect(
+      mem.has('precog.reading.v3.https://example.org'),
+    ).toBe(true);
   });
 });

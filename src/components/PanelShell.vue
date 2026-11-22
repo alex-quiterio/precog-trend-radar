@@ -1,5 +1,9 @@
 <template>
-  <section class="panel" :id="id" :aria-labelledby="'h-' + id" :style="{ '--i': index }">
+  <section
+    class="panel"
+    :id="id"
+    :aria-labelledby="'h-' + id"
+    :style="{ '--i': index }">
     <div class="panel-head">
       <h3 :id="'h-' + id">{{ title }}</h3>
       <slot name="controls"></slot>
@@ -16,7 +20,12 @@ import { defineComponent } from 'vue';
 
 export default defineComponent({
   name: 'PanelShell',
-  props: { id: String, title: String, meta: String, index: { type: Number, default: 0 } },
+  props: {
+    id: String,
+    title: String,
+    meta: String,
+    index: { type: Number, default: 0 },
+  },
 });
 </script>
 

@@ -10,7 +10,8 @@ export const periodStart = (t: string): number =>
         : t + '-01',
   );
 /** "2026-09": the UTC month of a time. */
-export const month = (t: number): string => new Date(t).toISOString().slice(0, 7);
+export const month = (t: number): string =>
+  new Date(t).toISOString().slice(0, 7);
 /** "2026-Q3": the UTC quarter of a time. */
 export const quarter = (t: number): string =>
   `${new Date(t).getUTCFullYear()}-Q${Math.floor(new Date(t).getUTCMonth() / 3) + 1}`;

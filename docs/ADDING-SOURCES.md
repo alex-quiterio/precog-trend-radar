@@ -63,11 +63,19 @@ An adapter returns attention points (one value per day) for one topic. Example: 
 import { at, list, num, str } from '@sources/shape';
 
 /** npm's downloads range reply as daily points. Days without a count are skipped. */
-export function parseDownloads(reply: unknown): { t: string; value: number }[] {
-  return list(at(reply, 'downloads'), 'npm', 'downloads').flatMap(d => {
+export function parseDownloads(
+  reply: unknown,
+): { t: string; value: number }[] {
+  return list(
+    at(reply, 'downloads'),
+    'npm',
+    'downloads',
+  ).flatMap(d => {
     const day = str(at(d, 'day')),
       value = num(at(d, 'downloads'));
-    return /^\d{4}-\d{2}-\d{2}$/.test(day) && value != null ? [{ t: `${day}T00:00:00Z`, value }] : [];
+    return /^\d{4}-\d{2}-\d{2}$/.test(day) && value != null
+      ? [{ t: `${day}T00:00:00Z`, value }]
+      : [];
   });
 }
 ```
@@ -76,7 +84,11 @@ export function parseDownloads(reply: unknown): { t: string; value: number }[] {
 
 ```ts
 // PRECOG / Trend Radar · npm downloads per day for packages named after the topic.
-import { SKIP, getJSON, registerAdapter } from '@sources/registry';
+import {
+  SKIP,
+  getJSON,
+  registerAdapter,
+} from '@sources/registry';
 import { parseDownloads } from './parse';
 export * from './parse';
 
@@ -88,7 +100,8 @@ registerAdapter({
   weight: 0.2, // its share in the blend
   minMean: 1, // below this daily mean the source counts as sparse and gets less weight
   async fetch(topic, { signal, query }) {
-    if (!/^[a-z0-9-]+$/i.test(query.q)) return SKIP(topic, 'not an npm package name');
+    if (!/^[a-z0-9-]+$/i.test(query.q))
+      return SKIP(topic, 'not an npm package name');
     const reply = await getJSON(
       `https://api.npmjs.org/downloads/range/last-month/${encodeURIComponent(query.q)}`,
       signal,
@@ -134,7 +147,9 @@ A card is a number with a label, a source line and an optional small chart. Exam
    registerCards({
      id: 'ecb-deposit-rate',
      async load() {
-       const { value, since } = parseEcbLatest(await getJSON('https://data-api.ecb.europa.eu/…'));
+       const { value, since } = parseEcbLatest(
+         await getJSON('https://data-api.ecb.europa.eu/…'),
+       );
        return [
          {
            group: 'ea', // which heading it sits under: 'pt', 'nl', 'ea' or 'planet'
@@ -181,18 +196,31 @@ one: `manifold/stream.ts` (a keyless search API) or `reading/stream.ts` (a list 
        return searchPapers(ctx.entries, signal, show);
      },
      view(ctx, data, at) {
-       const list = [...(data?.values() ?? [])].filter(p => inScope(p.topics, ctx).length);
+       const list = [...(data?.values() ?? [])].filter(
+         p => inScope(p.topics, ctx).length,
+       );
        return {
          rows: list.slice(0, 12).map(p => ({
            id: p.id,
            title: p.title,
            url: p.url,
            topics: p.topics, // the panel shows up to two in scope as chips
-           meta: [{ text: p.journal, cls: 'site' }, when(p.t, ctx.now)], // labels under the title
-           side: { big: String(p.citations), unit: 'cites', note: 'Crossref' }, // the figure on the right
+           meta: [
+             { text: p.journal, cls: 'site' },
+             when(p.t, ctx.now),
+           ], // labels under the title
+           side: {
+             big: String(p.citations),
+             unit: 'cites',
+             note: 'Crossref',
+           }, // the figure on the right
            bar: 100, // 0–100
          })),
-         meta: checked(at, 'papers naming your topics', ctx.now),
+         meta: checked(
+           at,
+           'papers naming your topics',
+           ctx.now,
+         ),
          empty: 'No recent papers name these topics.',
        };
      },
@@ -219,10 +247,15 @@ import { parseDownloads } from './parse';
 
 describe('npm replies', () => {
   it('reads daily downloads', () => {
-    expect(parseDownloads(downloads)[0]).toEqual({ t: '2026-10-07T00:00:00Z', value: 1234 });
+    expect(parseDownloads(downloads)[0]).toEqual({
+      t: '2026-10-07T00:00:00Z',
+      value: 1234,
+    });
   });
   it('refuses a reply without downloads (e.g. an error object)', () => {
-    expect(() => parseDownloads({ error: 'package not found' })).toThrow(/unexpected format/);
+    expect(() =>
+      parseDownloads({ error: 'package not found' }),
+    ).toThrow(/unexpected format/);
   });
 });
 ```

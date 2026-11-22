@@ -1,23 +1,52 @@
 // PRECOG / Trend Radar · Wikipedia: reading pageview and title replies.
-import { ShapeError, at, list, listOr, num, obj, objOr, str } from '@sources/shape';
+import {
+  ShapeError,
+  at,
+  list,
+  listOr,
+  num,
+  obj,
+  objOr,
+  str,
+} from '@sources/shape';
 
 /** Wikimedia's per-article pageviews reply as daily points. Days without a count are skipped. */
-export function parsePageviews(reply: unknown): { t: string; value: number }[] {
+export function parsePageviews(
+  reply: unknown,
+): { t: string; value: number }[] {
   return listOr(at(reply, 'items')).flatMap(it => {
     const ts = str(at(it, 'timestamp')),
       views = num(at(it, 'views'));
-    if (!/^\d{8}/.test(ts) || views == null) return [];
-    return [{ t: `${ts.slice(0, 4)}-${ts.slice(4, 6)}-${ts.slice(6, 8)}T00:00:00Z`, value: views }];
+    if (!/^\d{8}/.test(ts) || views == null) {
+      return [];
+    }
+    return [
+      {
+        t: `${ts.slice(0, 4)}-${ts.slice(4, 6)}-${ts.slice(6, 8)}T00:00:00Z`,
+        value: views,
+      },
+    ];
   });
 }
 /** The article a title query lands on (following redirects), or null when it is missing or invalid. */
-export function parseTitleQuery(reply: unknown): string | null {
-  const page = objOr(Object.values(objOr(at(reply, 'query', 'pages')))[0]);
-  return page.title && !('missing' in page) && !('invalid' in page) ? str(page.title) || null : null;
+export function parseTitleQuery(
+  reply: unknown,
+): string | null {
+  const page = objOr(
+    Object.values(objOr(at(reply, 'query', 'pages')))[0],
+  );
+  return page.title &&
+    !('missing' in page) &&
+    !('invalid' in page)
+    ? str(page.title) || null
+    : null;
 }
 /** The first title of an opensearch reply ([query, [titles], …]), or null. */
-export const parseOpenSearch = (reply: unknown): string | null =>
-  str(listOr(list(reply, 'Wikipedia search')[1])[0]) || null;
+export const parseOpenSearch = (
+  reply: unknown,
+): string | null =>
+  str(listOr(list(reply, 'Wikipedia search')[1])[0]) ||
+  null;
 
 /** An article's summary: its one-line description and its lead paragraph. */
 export interface WikiSummary {
@@ -31,8 +60,15 @@ export function parseSummary(reply: unknown): WikiSummary {
   const r = obj(reply, 'Wikipedia summary');
   const title = str(r.title),
     extract = str(r.extract).trim();
-  if (str(r.type) && str(r.type) !== 'standard') throw new ShapeError('Wikipedia summary', `a ${str(r.type)} page`);
-  if (!title || !extract) throw new ShapeError('Wikipedia summary', 'no extract');
+  if (str(r.type) && str(r.type) !== 'standard') {
+    throw new ShapeError(
+      'Wikipedia summary',
+      `a ${str(r.type)} page`,
+    );
+  }
+  if (!title || !extract) {
+    throw new ShapeError('Wikipedia summary', 'no extract');
+  }
   return {
     title,
     description: str(r.description),
@@ -66,17 +102,27 @@ export const plainText = (html: string): string =>
     .replace(/\s+/g, ' ')
     .trim();
 /** The "In the news" stories of Wikipedia's featured feed. Stories without text are skipped. */
-export const parseNewsStories = (reply: unknown): NewsStory[] =>
+export const parseNewsStories = (
+  reply: unknown,
+): NewsStory[] =>
   listOr(at(reply, 'news')).flatMap(s => {
     const html = str(at(s, 'story'));
     const text = plainText(html);
-    if (!text) return [];
+    if (!text) {
+      return [];
+    }
     return [
       {
         text,
-        day: /^\s*<!--\s*([^>]*?)\s*-->/.exec(html)?.[1] ?? '',
+        day:
+          /^\s*<!--\s*([^>]*?)\s*-->/.exec(html)?.[1] ?? '',
         links: listOr(at(s, 'links'))
-          .map(l => (str(at(l, 'normalizedtitle')) || str(at(l, 'title'))).replace(/_/g, ' '))
+          .map(l =>
+            (
+              str(at(l, 'normalizedtitle')) ||
+              str(at(l, 'title'))
+            ).replace(/_/g, ' '),
+          )
           .filter(Boolean),
       },
     ];
@@ -84,12 +130,18 @@ export const parseNewsStories = (reply: unknown): NewsStory[] =>
 
 /** The first sentences of a lead, up to about `max` characters (whole sentences when they fit). */
 export function lead(extract: string, max = 240): string {
-  const sentences = extract.match(/[^.!?]+(?:[.!?]+(?=\s|$)|$)/g) ?? [extract];
+  const sentences = extract.match(
+    /[^.!?]+(?:[.!?]+(?=\s|$)|$)/g,
+  ) ?? [extract];
   let out = '';
   for (const s of sentences) {
-    if (out && (out + s).length > max) break;
+    if (out && (out + s).length > max) {
+      break;
+    }
     out += s;
   }
   out = out.trim();
-  return out.length <= max ? out : out.slice(0, max - 1).replace(/\s+\S*$/, '') + '…';
+  return out.length <= max
+    ? out
+    : out.slice(0, max - 1).replace(/\s+\S*$/, '') + '…';
 }

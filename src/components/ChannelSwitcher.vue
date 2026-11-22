@@ -1,9 +1,19 @@
 <template>
-  <dialog ref="dlg" class="switcher-dlg" aria-labelledby="sw-h" @close="onClose" @click.self="close">
-    <form method="dialog" class="sw-box" @submit.prevent="pick(shown[cur])">
+  <dialog
+    ref="dlg"
+    class="switcher-dlg"
+    aria-labelledby="sw-h"
+    @close="onClose"
+    @click.self="close">
+    <form
+      method="dialog"
+      class="sw-box"
+      @submit.prevent="pick(shown[cur])">
       <header>
         <h3 id="sw-h">Channels</h3>
-        <span class="sw-hint">type to find · ↑ ↓ · Enter</span>
+        <span class="sw-hint">
+          type to find · ↑ ↓ · Enter
+        </span>
       </header>
       <input
         ref="input"
@@ -15,12 +25,17 @@
         autocomplete="off"
         role="combobox"
         aria-controls="sw-list"
-        :aria-activedescendant="shown[cur] ? 'sw-' + shown[cur].id : undefined"
+        :aria-activedescendant="
+          shown[cur] ? 'sw-' + shown[cur].id : undefined
+        "
         aria-expanded="true"
         @keydown.down.prevent="move(1)"
-        @keydown.up.prevent="move(-1)"
-      />
-      <ul id="sw-list" class="sw-list" role="listbox" aria-label="Channels">
+        @keydown.up.prevent="move(-1)" />
+      <ul
+        id="sw-list"
+        class="sw-list"
+        role="listbox"
+        aria-label="Channels">
         <li
           v-for="(c, i) in shown"
           :id="'sw-' + c.id"
@@ -29,29 +44,50 @@
           :aria-selected="i === cur"
           :class="{ cur: i === cur, on: c.id === active }"
           @click="pick(c)"
-          @mousemove="cur = i"
-        >
-          <span class="sw-no" aria-hidden="true">{{ c.n <= 9 ? c.n : '' }}</span>
+          @mousemove="cur = i">
+          <span class="sw-no" aria-hidden="true">
+            {{ c.n <= 9 ? c.n : '' }}
+          </span>
           <channel-icon :name="c.icon"></channel-icon>
           <span class="sw-text">
             <span class="sw-name">
               {{ c.label }}
-              <span v-if="c.lensId === home" class="sw-home">home</span>
+              <span
+                v-if="c.lensId === home"
+                class="sw-home">
+                home
+              </span>
             </span>
             <span class="sw-kicker">{{ c.kicker }}</span>
           </span>
-          <span v-if="c.heat" :class="['sw-heat', c.heat.level]">{{ heatText(c.heat) }}</span>
+          <span
+            v-if="c.heat"
+            :class="['sw-heat', c.heat.level]">
+            {{ heatText(c.heat) }}
+          </span>
         </li>
-        <li v-if="!shown.length" class="sw-none">No channel matches “{{ q }}”.</li>
+        <li v-if="!shown.length" class="sw-none">
+          No channel matches “{{ q }}”.
+        </li>
       </ul>
     </form>
   </dialog>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, nextTick, ref, watch } from 'vue';
+import {
+  computed,
+  defineComponent,
+  nextTick,
+  ref,
+  watch,
+} from 'vue';
 import { useApp } from '@/context';
-import { channels, activeChannel, type Channel } from '@/channels';
+import {
+  channels,
+  activeChannel,
+  type Channel,
+} from '@/channels';
 import { heatText } from '@components/helpers';
 import ChannelIcon from './ChannelIcon.vue';
 
@@ -68,22 +104,40 @@ export default defineComponent({
     const q = ref('');
     const cur = ref(0);
     const all = computed(() =>
-      channels(app).map((c, i) => ({ ...c, n: i + 1, heat: actions.lensHeat(app.lensById(c.lensId)) })),
+      channels(app).map((c, i) => ({
+        ...c,
+        n: i + 1,
+        heat: actions.lensHeat(app.lensById(c.lensId)),
+      })),
     );
     const shown = computed(() => {
       const s = q.value.trim().toLowerCase();
-      return s ? all.value.filter(c => `${c.label} ${c.kicker}`.toLowerCase().includes(s)) : all.value;
+      return s
+        ? all.value.filter(c =>
+            `${c.label} ${c.kicker}`
+              .toLowerCase()
+              .includes(s),
+          )
+        : all.value;
     });
     watch(shown, () => (cur.value = 0));
     function open(): void {
-      if (!dlg.value || dlg.value.open) return;
+      if (!dlg.value || dlg.value.open) {
+        return;
+      }
       q.value = '';
-      const at = all.value.findIndex(c => c.id === activeChannel(app).id);
+      const at = all.value.findIndex(
+        c => c.id === activeChannel(app).id,
+      );
       cur.value = Math.max(0, at);
       dlg.value.showModal();
       nextTick(() => {
         input.value?.focus();
-        document.getElementById('sw-' + shown.value[cur.value]?.id)?.scrollIntoView({ block: 'nearest' });
+        document
+          .getElementById(
+            'sw-' + shown.value[cur.value]?.id,
+          )
+          ?.scrollIntoView({ block: 'nearest' });
       });
     }
     function close(): void {
@@ -91,18 +145,27 @@ export default defineComponent({
     }
     function move(d: number): void {
       const n = shown.value.length;
-      if (!n) return;
+      if (!n) {
+        return;
+      }
       cur.value = (cur.value + d + n) % n;
-      document.getElementById('sw-' + shown.value[cur.value].id)?.scrollIntoView({ block: 'nearest' });
+      document
+        .getElementById('sw-' + shown.value[cur.value].id)
+        ?.scrollIntoView({ block: 'nearest' });
     }
     function pick(c: Channel | undefined): void {
-      if (!c) return;
+      if (!c) {
+        return;
+      }
       actions.selectLens(c.lensId);
       close();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     // Focus goes back to the button that opened it.
-    const onClose = () => document.querySelector<HTMLElement>('.sw-toggle')?.focus();
+    const onClose = () =>
+      document
+        .querySelector<HTMLElement>('.sw-toggle')
+        ?.focus();
     return {
       dlg,
       input,

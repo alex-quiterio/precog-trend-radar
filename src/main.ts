@@ -14,7 +14,10 @@ import { installLifecycle } from '@/boot/lifecycle';
 import { restore } from '@/boot/prefs';
 import { installShortcuts } from '@/boot/shortcuts';
 import { registerServiceWorker } from '@features/install';
-import { activeChannel, channelDatapoints } from '@/channels';
+import {
+  activeChannel,
+  channelDatapoints,
+} from '@/channels';
 import { contextPlugin, createContext } from '@/context';
 import { HOUR } from '@core/config';
 import { startClock } from '@core/ui-store';
@@ -28,11 +31,17 @@ ctx.live.start(); // also loads the stream on screen
 // Topics picked once a day (World, Alt Amsterdam, The Great Turning); new topics are fetched straight away.
 // The channel on screen picks first; the others a little later, once the screen has settled, so a cold start
 // doesn't ask Wikipedia about every pool at once.
-const reloadIf = (changed: boolean) => void (changed && ctx.live.load());
+const reloadIf = (changed: boolean) =>
+  void (changed && ctx.live.load());
 function pickHot(): void {
   const onScreen = ctx.hot.for(ctx.app.state.activeLens);
-  void (onScreen ? onScreen.refresh() : Promise.resolve(false)).then(reloadIf);
-  setTimeout(() => void ctx.hot.refresh().then(reloadIf), 20_000);
+  void (
+    onScreen ? onScreen.refresh() : Promise.resolve(false)
+  ).then(reloadIf);
+  setTimeout(
+    () => void ctx.hot.refresh().then(reloadIf),
+    20_000,
+  );
 }
 pickHot();
 setInterval(pickHot, HOUR); // a no-op until the day changes
@@ -43,14 +52,19 @@ watch(
 );
 // GitHub's panels load only on its channel (its API allows 60 calls an hour without a token).
 const loadGitHub = () => {
-  if (!activeChannel(ctx.app).github) return;
+  if (!activeChannel(ctx.app).github) {
+    return;
+  }
   void ctx.github.load();
   void ctx.myGithub.load();
 };
 loadGitHub();
 watch(() => ctx.app.state.activeLens, loadGitHub);
 // Open data: only the cards the channel on screen shows, then each channel's as it opens (refreshed hourly).
-const loadCards = () => void ctx.datapoints.load(channelDatapoints(activeChannel(ctx.app)));
+const loadCards = () =>
+  void ctx.datapoints.load(
+    channelDatapoints(activeChannel(ctx.app)),
+  );
 loadCards();
 watch(() => ctx.app.state.activeLens, loadCards);
 setInterval(loadCards, HOUR);

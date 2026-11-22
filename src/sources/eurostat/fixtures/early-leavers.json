@@ -30,24 +30,65 @@
     "22": 6.6,
     "23": 6.1
   },
-  "status": { "0": "b", "5": "b", "7": "b", "12": "b", "19": "b" },
-  "id": ["freq", "sex", "wstatus", "age", "unit", "geo", "time"],
+  "status": {
+    "0": "b",
+    "5": "b",
+    "7": "b",
+    "12": "b",
+    "19": "b"
+  },
+  "id": [
+    "freq",
+    "sex",
+    "wstatus",
+    "age",
+    "unit",
+    "geo",
+    "time"
+  ],
   "size": [1, 1, 1, 1, 1, 2, 12],
   "dimension": {
-    "freq": { "label": "Time frequency", "category": { "index": { "A": 0 }, "label": { "A": "Annual" } } },
-    "sex": { "label": "Sex", "category": { "index": { "T": 0 }, "label": { "T": "Total" } } },
+    "freq": {
+      "label": "Time frequency",
+      "category": {
+        "index": { "A": 0 },
+        "label": { "A": "Annual" }
+      }
+    },
+    "sex": {
+      "label": "Sex",
+      "category": {
+        "index": { "T": 0 },
+        "label": { "T": "Total" }
+      }
+    },
     "wstatus": {
       "label": "Labour force and employment status",
-      "category": { "index": { "POP": 0 }, "label": { "POP": "Population" } }
+      "category": {
+        "index": { "POP": 0 },
+        "label": { "POP": "Population" }
+      }
     },
     "age": {
       "label": "Age class",
-      "category": { "index": { "Y18-24": 0 }, "label": { "Y18-24": "From 18 to 24 years" } }
+      "category": {
+        "index": { "Y18-24": 0 },
+        "label": { "Y18-24": "From 18 to 24 years" }
+      }
     },
-    "unit": { "label": "Unit of measure", "category": { "index": { "PC": 0 }, "label": { "PC": "Percentage" } } },
+    "unit": {
+      "label": "Unit of measure",
+      "category": {
+        "index": { "PC": 0 },
+        "label": { "PC": "Percentage" }
+      }
+    },
     "geo": {
       "label": "Geopolitical entity (reporting)",
-      "category": { "index": { "NL": 0, "PT": 1 }, "label": { "NL": "Netherlands", "PT": "Portugal" } }
+      "category": {
+        "index": { "NL": 0, "PT": 1 },
+        "label": { "NL": "Netherlands", "PT": "Portugal" }
+      }
     },
     "time": {
       "label": "Time",
@@ -88,17 +129,36 @@
     "id": "EDAT_LFSE_14",
     "agencyId": "ESTAT",
     "version": "1.0",
-    "datastructure": { "id": "EDAT_LFSE_14", "agencyId": "ESTAT", "version": "50.0" },
+    "datastructure": {
+      "id": "EDAT_LFSE_14",
+      "agencyId": "ESTAT",
+      "version": "50.0"
+    },
     "annotation": [
-      { "type": "CREATED", "date": "2010-09-14T15:27:37+0200" },
+      {
+        "type": "CREATED",
+        "date": "2010-09-14T15:27:37+0200"
+      },
       {
         "type": "DISSEMINATION_DOI_XML",
         "title": "<adms:identifier xmlns:adms=\"http://www.w3.org/ns/adms#\" xmlns:skos=\"http://www.w3.org/2004/02/skos/core.html\" xmlns:dct=\"http://purl.org/dc/terms/\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"><adms:Identifier rdf:about=\"https://doi.org/10.2908/EDAT_LFSE_14\"><skos:notation rdf:datatype=\"http://purl.org/spar/datacite/doi\">10.2908/EDAT_LFSE_14</skos:notation><dct:creator rdf:resource=\"http://publications.europa.eu/resource/authority/corporate-body/ESTAT\"/><dct:issued rdf:datatype=\"http://www.w3.org/2001/XMLSchema#date\">2023-01-19</dct:issued></adms:Identifier></adms:identifier>"
       },
-      { "type": "DISSEMINATION_OBJECT_TYPE", "title": "DATASET" },
-      { "type": "DISSEMINATION_TIMESTAMP_DATA", "date": "2026-10-30T23:00:00+0100" },
-      { "type": "DISSEMINATION_TIMESTAMP_GLOBAL", "date": "2026-10-30T23:00:00+0100" },
-      { "type": "DISSEMINATION_TIMESTAMP_PLANNED", "date": "2026-10-30T23:00:00+0100" },
+      {
+        "type": "DISSEMINATION_OBJECT_TYPE",
+        "title": "DATASET"
+      },
+      {
+        "type": "DISSEMINATION_TIMESTAMP_DATA",
+        "date": "2026-10-30T23:00:00+0100"
+      },
+      {
+        "type": "DISSEMINATION_TIMESTAMP_GLOBAL",
+        "date": "2026-10-30T23:00:00+0100"
+      },
+      {
+        "type": "DISSEMINATION_TIMESTAMP_PLANNED",
+        "date": "2026-10-30T23:00:00+0100"
+      },
       {
         "type": "ESMS_HTML",
         "title": "Explanatory texts (metadata)",
@@ -110,13 +170,33 @@
         "href": "https://ec.europa.eu/eurostat/api/dissemination/files?file=metadata/edat1_esms.sdmx.zip"
       },
       { "type": "OBS_COUNT", "title": "11220" },
-      { "type": "OBS_PERIOD_OVERALL_LATEST", "title": "2025" },
-      { "type": "OBS_PERIOD_OVERALL_OLDEST", "title": "1992" },
+      {
+        "type": "OBS_PERIOD_OVERALL_LATEST",
+        "title": "2025"
+      },
+      {
+        "type": "OBS_PERIOD_OVERALL_OLDEST",
+        "title": "1992"
+      },
       { "type": "SOURCE_INSTITUTIONS", "text": "Eurostat" },
-      { "type": "UPDATE_DATA", "date": "2026-10-30T23:00:00+0100" },
-      { "type": "UPDATE_STRUCTURE", "date": "2026-04-16T23:00:00+0200" }
+      {
+        "type": "UPDATE_DATA",
+        "date": "2026-10-30T23:00:00+0100"
+      },
+      {
+        "type": "UPDATE_STRUCTURE",
+        "date": "2026-04-16T23:00:00+0200"
+      }
     ],
     "status": { "label": { "b": "break in time series" } },
-    "positions-with-no-data": { "freq": [], "sex": [], "wstatus": [], "age": [], "unit": [], "geo": [], "time": [] }
+    "positions-with-no-data": {
+      "freq": [],
+      "sex": [],
+      "wstatus": [],
+      "age": [],
+      "unit": [],
+      "geo": [],
+      "time": []
+    }
   }
 }

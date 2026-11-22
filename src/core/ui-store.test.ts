@@ -1,5 +1,11 @@
 // UI state: one per app, with a clock that ticks every minute.
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import {
+  afterEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 import { createUi, startClock } from './ui-store';
 
 afterEach(() => vi.useRealTimers());
@@ -7,7 +13,13 @@ afterEach(() => vi.useRealTimers());
 describe('UI state', () => {
   it('starts dark, idle, with no keys set', () => {
     const ui = createUi();
-    expect(ui).toMatchObject({ theme: 'dark', loading: false, offline: false, guardian: false, ghToken: false });
+    expect(ui).toMatchObject({
+      theme: 'dark',
+      loading: false,
+      offline: false,
+      guardian: false,
+      ghToken: false,
+    });
   });
   it('is per app, never shared', () => {
     const a = createUi(),

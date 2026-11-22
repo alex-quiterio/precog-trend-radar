@@ -2,7 +2,10 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { memoryBackend, useBackend } from '@core/storage';
 import { fakeFetch } from '@sources/fake-fetch';
-import { streamById, type StreamContext } from '@sources/streams';
+import {
+  streamById,
+  type StreamContext,
+} from '@sources/streams';
 import { createAppStore } from '@/state';
 import type { Entry } from '@/types';
 import type { ForecastMatch } from './stream';
@@ -24,9 +27,16 @@ const ctx = (entries: Entry[]): StreamContext => ({
   now: NOW,
   keys: { guardian: false },
 });
-const byName = (name: string) => world.find(E => E.name === name)!;
+const byName = (name: string) =>
+  world.find(E => E.name === name)!;
 const forecasts = () => streamById('forecasts')!;
-const market = (id: string, question: string, vol: number, prob = 0.4, bettors = 50) => ({
+const market = (
+  id: string,
+  question: string,
+  vol: number,
+  prob = 0.4,
+  bettors = 50,
+) => ({
   id,
   question,
   url: `https://manifold.markets/x/${id}`,
@@ -38,7 +48,12 @@ const market = (id: string, question: string, vol: number, prob = 0.4, bettors =
 fakeFetch(url =>
   url.searchParams.get('term') === 'NATO'
     ? [
-        market('a', 'Will NATO add a member by 2028?', 10, 0.25),
+        market(
+          'a',
+          'Will NATO add a member by 2028?',
+          10,
+          0.25,
+        ),
         market('b', 'Will Natalie win?', 99),
         market('c', 'NATO summit held in 2027?', 300),
       ]
@@ -47,17 +62,34 @@ fakeFetch(url =>
 
 describe('the Forecasts stream', () => {
   it('keeps only markets whose question names the topic as a whole word', async () => {
-    const data = (await forecasts().load(ctx([byName('NATO')]), signal, () => {})) as Map<string, ForecastMatch>;
-    expect([...data.values()].map(f => f.question).sort()).toEqual([
+    const data = (await forecasts().load(
+      ctx([byName('NATO')]),
+      signal,
+      () => {},
+    )) as Map<string, ForecastMatch>;
+    expect(
+      [...data.values()].map(f => f.question).sort(),
+    ).toEqual([
       'NATO summit held in 2027?',
       'Will NATO add a member by 2028?',
     ]);
   });
   it('lists the most traded first, with the crowd’s probability', async () => {
-    const data = await forecasts().load(ctx([byName('NATO')]), signal, () => {});
-    const rows = forecasts().view(ctx([byName('NATO')]), data, NOW).rows;
+    const data = await forecasts().load(
+      ctx([byName('NATO')]),
+      signal,
+      () => {},
+    );
+    const rows = forecasts().view(
+      ctx([byName('NATO')]),
+      data,
+      NOW,
+    ).rows;
     expect(rows.map(r => r.id)).toEqual(['mf:c', 'mf:a']);
-    expect(rows[1]).toMatchObject({ side: { big: '25%', unit: 'yes' }, bar: 25 });
+    expect(rows[1]).toMatchObject({
+      side: { big: '25%', unit: 'yes' },
+      bar: 25,
+    });
     expect(rows[1].meta[0]).toMatch(/50 forecasters$/);
   });
 });

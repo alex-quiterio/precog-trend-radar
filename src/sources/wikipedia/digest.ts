@@ -15,13 +15,32 @@
 // Each also says how far the topic's attention moved in a week, like a digest's trending terms, and links
 // to a week of coverage. Calls: the day's feed (one, cached for the day) and one summary per topic (cached).
 import { DAY, LS, store } from '@core/config';
-import { pool, queryOf, topicRegex, topicTerms } from '@sources/registry';
+import {
+  pool,
+  queryOf,
+  topicRegex,
+  topicTerms,
+} from '@sources/registry';
 import { guardianArticles } from '@sources/guardian';
-import { loadReading, type ReadingItem, type ReadingSite } from '@sources/reading';
+import {
+  loadReading,
+  type ReadingItem,
+  type ReadingSite,
+} from '@sources/reading';
 import type { Entry } from '@/types';
 import { partial } from '@sources/blend';
-import { getWikiJSON, resolveWikiTitle, wikiFailure } from './index';
-import { type NewsStory, type WikiSummary, lead, parseNewsStories, parseSummary } from './parse';
+import {
+  getWikiJSON,
+  resolveWikiTitle,
+  wikiFailure,
+} from './index';
+import {
+  type NewsStory,
+  type WikiSummary,
+  lead,
+  parseNewsStories,
+  parseSummary,
+} from './parse';
 
 /** What a topic's row is made of. */
 export interface TopicStory {
@@ -34,25 +53,49 @@ export interface TopicStory {
 }
 export type DigestData = Map<string, TopicStory>;
 
-const ymd = (t: number) => new Date(t).toISOString().slice(0, 10);
+const ymd = (t: number) =>
+  new Date(t).toISOString().slice(0, 10);
 
 /** Today's "In the news" stories (English Wikipedia), cached for the day. Empty when the feed can't be read. */
-async function newsStories(signal: AbortSignal, now = Date.now()): Promise<NewsStory[]> {
+async function newsStories(
+  signal: AbortSignal,
+  now = Date.now(),
+): Promise<NewsStory[]> {
   const day = ymd(now);
-  const cached = store.get<{ day: string; stories: NewsStory[] } | null>(LS.wikiNews, null);
-  if (cached?.day === day && Array.isArray(cached.stories)) return cached.stories;
+  const cached = store.get<{
+    day: string;
+    stories: NewsStory[];
+  } | null>(LS.wikiNews, null);
+  if (
+    cached?.day === day &&
+    Array.isArray(cached.stories)
+  ) {
+    return cached.stories;
+  }
   const stories = parseNewsStories(
-    await getWikiJSON(`https://en.wikipedia.org/api/rest_v1/feed/featured/${day.replace(/-/g, '/')}`, signal),
+    await getWikiJSON(
+      `https://en.wikipedia.org/api/rest_v1/feed/featured/${day.replace(/-/g, '/')}`,
+      signal,
+    ),
   );
   store.set(LS.wikiNews, { day, stories });
   return stories;
 }
 /** An article's summary, cached for the day. */
-async function summaryOf(title: string, lang: string, signal: AbortSignal, now = Date.now()) {
+async function summaryOf(
+  title: string,
+  lang: string,
+  signal: AbortSignal,
+  now = Date.now(),
+) {
   const day = ymd(now),
     ck = `${lang}:${title}`;
-  const cache = store.get<Record<string, { day: string; s: WikiSummary }>>(LS.wikiSummaries, {});
-  if (cache[ck]?.day === day) return cache[ck].s;
+  const cache = store.get<
+    Record<string, { day: string; s: WikiSummary }>
+  >(LS.wikiSummaries, {});
+  if (cache[ck]?.day === day) {
+    return cache[ck].s;
+  }
   const s = parseSummary(
     await getWikiJSON(
       `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title.replace(/ /g, '_'))}`,
@@ -60,15 +103,29 @@ async function summaryOf(title: string, lang: string, signal: AbortSignal, now =
     ),
   );
   // Only today's entries are kept, so the cache never grows past a day's topics.
-  const fresh = Object.fromEntries(Object.entries(cache).filter(([, v]) => v?.day === day));
-  store.set(LS.wikiSummaries, { ...fresh, [ck]: { day, s } });
+  const fresh = Object.fromEntries(
+    Object.entries(cache).filter(([, v]) => v?.day === day),
+  );
+  store.set(LS.wikiSummaries, {
+    ...fresh,
+    [ck]: { day, s },
+  });
   return s;
 }
 
 /** The "In the news" story about a topic: one linking its article, or naming it in its text. */
-export function storyFor(stories: NewsStory[], title: string, q: string): NewsStory | null {
-  const re = q.replace(/\s/g, '').length >= 4 ? topicRegex(q) : null;
-  return stories.find(s => s.links.includes(title)) ?? (re && stories.find(s => re.test(s.text))) ?? null;
+export function storyFor(
+  stories: NewsStory[],
+  title: string,
+  q: string,
+): NewsStory | null {
+  const re =
+    q.replace(/\s/g, '').length >= 4 ? topicRegex(q) : null;
+  return (
+    stories.find(s => s.links.includes(title)) ??
+    (re && stories.find(s => re.test(s.text))) ??
+    null
+  );
 }
 
 /** Where a scoped channel's stories come from: its sites, and how many days a post stays fresh. */
@@ -77,21 +134,41 @@ export interface StoryScope {
   days: number;
 }
 /** The newest post naming a topic in its title (in any of its names, Portuguese too) from the last `days`. */
-export function postFor(posts: ReadingItem[], E: Entry, now = Date.now(), days = 2): ReadingItem | null {
+export function postFor(
+  posts: ReadingItem[],
+  E: Entry,
+  now = Date.now(),
+  days = 2,
+): ReadingItem | null {
   const res = topicTerms(E).map(topicRegex);
   return (
-    posts.filter(p => now - p.t < days * DAY && res.some(re => re.test(p.title))).sort((a, b) => b.t - a.t)[0] ?? null
+    posts
+      .filter(
+        p =>
+          now - p.t < days * DAY &&
+          res.some(re => re.test(p.title)),
+      )
+      .sort((a, b) => b.t - a.t)[0] ?? null
   );
 }
 /** The newest posts from these sites in the last `days`, leaving out the ones in `skip` (already a topic's story). */
-export function latestPosts(posts: ReadingItem[], skip: Set<string>, now = Date.now(), days = 2, n = 4): ReadingItem[] {
+export function latestPosts(
+  posts: ReadingItem[],
+  skip: Set<string>,
+  now = Date.now(),
+  days = 2,
+  n = 4,
+): ReadingItem[] {
   return posts
     .filter(p => now - p.t < days * DAY && !skip.has(p.url))
     .sort((a, b) => b.t - a.t)
     .slice(0, n);
 }
 /** These sites' posts (from the Reading cache when fresh); none when they can't be read. */
-export const sitePosts = (sites: ReadingSite[], signal: AbortSignal): Promise<ReadingItem[]> =>
+export const sitePosts = (
+  sites: ReadingSite[],
+  signal: AbortSignal,
+): Promise<ReadingItem[]> =>
   sites.length
     ? loadReading(signal, sites).then(
         r => r.items,
@@ -100,11 +177,19 @@ export const sitePosts = (sites: ReadingSite[], signal: AbortSignal): Promise<Re
     : Promise.resolve([]);
 
 /** How far a topic's attention moved in a week: the latest point against the one 7 days before (%), or null. */
-export function weekChange(series: Entry['liveSeries']): number | null {
+export function weekChange(
+  series: Entry['liveSeries'],
+): number | null {
   const last = series[series.length - 1];
-  if (!last) return null;
-  const before = [...series].reverse().find(p => p.t <= last.t - 7 * DAY + DAY / 2);
-  return before && before.value > 0 ? ((last.value - before.value) / before.value) * 100 : null;
+  if (!last) {
+    return null;
+  }
+  const before = [...series]
+    .reverse()
+    .find(p => p.t <= last.t - 7 * DAY + DAY / 2);
+  return before && before.value > 0
+    ? ((last.value - before.value) / before.value) * 100
+    : null;
 }
 /** A week of news coverage of a topic, as a search a reader can open. */
 const coverageUrl = (q: string) =>
@@ -129,7 +214,12 @@ export interface DigestItem {
   week: number | null;
   coverage: string;
   /** A headline's second telling: the "In the news" story on the same topic, when there is one. */
-  also?: { text: string; url: string; source: string; t: number | null } | null;
+  also?: {
+    text: string;
+    url: string;
+    source: string;
+    t: number | null;
+  } | null;
 }
 /** The Guardian's articles on a topic from the last two days, newest first (from the trend fetch's cache). */
 const freshGuardian = (E: Entry, now: number) =>
@@ -140,7 +230,12 @@ const freshGuardian = (E: Entry, now: number) =>
  * The newest Guardian articles naming any of these topics in the last two days, as headlines for the list under
  * the stories, leaving out the ones in `skip` (already told). Empty without a Guardian key (nothing is cached).
  */
-export function guardianLatest(entries: Entry[], skip: Set<string>, now = Date.now(), n = 4): ReadingItem[] {
+export function guardianLatest(
+  entries: Entry[],
+  skip: Set<string>,
+  now = Date.now(),
+  n = 4,
+): ReadingItem[] {
   const seen = new Set(skip);
   return entries
     .flatMap(E => freshGuardian(E, now))
@@ -173,16 +268,31 @@ export function digestItems(
   return entries
     .flatMap(E => {
       const s = data?.get(E.key);
-      if (!s) return [];
+      if (!s) {
+        return [];
+      }
       const fresh = scope
         ? s.post && now - s.post.t < scope.days * DAY
-          ? { title: s.post.title, url: s.post.url, t: s.post.t, source: s.post.site }
+          ? {
+              title: s.post.title,
+              url: s.post.url,
+              t: s.post.t,
+              source: s.post.site,
+            }
           : undefined
-        : freshGuardian(E, now).map(a => ({ title: a.title, url: a.url, t: a.t, source: 'The Guardian' }))[0];
+        : freshGuardian(E, now).map(a => ({
+            title: a.title,
+            url: a.url,
+            t: a.t,
+            source: 'The Guardian',
+          }))[0];
       const base = {
         key: E.key,
         wiki: s.summary.url,
-        now: partial(E) ? null : (E.liveSeries[E.liveSeries.length - 1]?.value ?? null),
+        now: partial(E)
+          ? null
+          : (E.liveSeries[E.liveSeries.length - 1]?.value ??
+            null),
         // A topic whose main source failed shows no move, rather than a fall to zero that didn't happen.
         week: partial(E) ? null : weekChange(E.liveSeries),
         coverage: coverageUrl(queryOf(E).q),
@@ -210,14 +320,20 @@ export function digestItems(
           : {
               ...base,
               kind: 'quiet',
-              text: s.summary.description || lead(s.summary.extract, 140),
+              text:
+                s.summary.description ||
+                lead(s.summary.extract, 140),
               url: s.summary.url,
               source: '',
               t: null,
             };
       return [item];
     })
-    .sort((a, b) => RANK[a.kind] - RANK[b.kind] || Math.abs(b.week ?? 0) - Math.abs(a.week ?? 0));
+    .sort(
+      (a, b) =>
+        RANK[a.kind] - RANK[b.kind] ||
+        Math.abs(b.week ?? 0) - Math.abs(a.week ?? 0),
+    );
 }
 
 /**
@@ -232,27 +348,49 @@ export async function loadDigest(
 ): Promise<DigestData> {
   const map: DigestData = new Map();
   const [stories, posts] = await Promise.all([
-    scope ? ([] as NewsStory[]) : newsStories(signal).catch(() => [] as NewsStory[]),
-    scope ? sitePosts(scope.sites, signal) : ([] as ReadingItem[]),
+    scope
+      ? ([] as NewsStory[])
+      : newsStories(signal).catch(() => [] as NewsStory[]),
+    scope
+      ? sitePosts(scope.sites, signal)
+      : ([] as ReadingItem[]),
   ]);
   const failed: string[] = [],
     errors: unknown[] = [];
   await pool(entries, 4, async E => {
     try {
       const lang = E.lang || 'en';
-      const known = typeof E.meta.wikiTitle === 'string' ? E.meta.wikiTitle : '';
-      const title = known || (await resolveWikiTitle(E.def.wiki || E.name, signal, lang));
+      const known =
+        typeof E.meta.wikiTitle === 'string'
+          ? E.meta.wikiTitle
+          : '';
+      const title =
+        known ||
+        (await resolveWikiTitle(
+          E.def.wiki || E.name,
+          signal,
+          lang,
+        ));
       const summary = await summaryOf(title, lang, signal);
-      const news = lang === 'en' ? storyFor(stories, summary.title, queryOf(E).q) : null;
-      const post = scope ? postFor(posts, E, Date.now(), scope.days) : null;
+      const news =
+        lang === 'en'
+          ? storyFor(stories, summary.title, queryOf(E).q)
+          : null;
+      const post = scope
+        ? postFor(posts, E, Date.now(), scope.days)
+        : null;
       map.set(E.key, { key: E.key, summary, news, post });
       show(new Map(map));
     } catch (e) {
-      if (signal.aborted) throw e;
+      if (signal.aborted) {
+        throw e;
+      }
       failed.push(E.name);
       errors.push(e);
     }
   });
-  if (!map.size && failed.length) throw new Error(wikiFailure(failed, errors));
+  if (!map.size && failed.length) {
+    throw new Error(wikiFailure(failed, errors));
+  }
   return map;
 }

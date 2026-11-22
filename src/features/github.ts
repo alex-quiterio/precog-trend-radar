@@ -5,8 +5,17 @@ import { reactive } from 'vue';
 import { errorText, isAbort } from '@core/errors';
 import type { Entry } from '@/types';
 import { DAY, HOUR, sleep, store } from '@core/config';
-import { githubHeaders, githubToken, searchGap } from '@sources/github/auth';
-import { HttpError, getJSON, phrase, queryOf } from '@sources/registry';
+import {
+  githubHeaders,
+  githubToken,
+  searchGap,
+} from '@sources/github/auth';
+import {
+  HttpError,
+  getJSON,
+  phrase,
+  queryOf,
+} from '@sources/registry';
 import { parseRepoSearch } from '@sources/github/parse';
 import type { AppStore } from '@/state';
 
@@ -35,37 +44,65 @@ const TTL = 12 * HOUR;
 const CACHE = 'precog.github.v1.';
 
 // One queue for the whole page: GitHub's search limit is per browser, so every search waits its turn here.
-const queue = { last: 0, chain: Promise.resolve() as Promise<unknown> };
-function search(url: string, signal: AbortSignal): Promise<unknown> {
+const queue = {
+  last: 0,
+  chain: Promise.resolve() as Promise<unknown>,
+};
+function search(
+  url: string,
+  signal: AbortSignal,
+): Promise<unknown> {
   const run = queue.chain.then(async () => {
     const wait = queue.last + searchGap() - Date.now();
-    if (wait > 0) await sleep(wait);
-    if (signal.aborted) throw new DOMException('aborted', 'AbortError');
+    if (wait > 0) {
+      await sleep(wait);
+    }
+    if (signal.aborted) {
+      throw new DOMException('aborted', 'AbortError');
+    }
     queue.last = Date.now();
     return getJSON(url, signal, githubHeaders());
   });
   queue.chain = run.catch(() => {});
   return run;
 }
-const ymd = (t: number) => new Date(t).toISOString().slice(0, 10);
+const ymd = (t: number) =>
+  new Date(t).toISOString().slice(0, 10);
 
 type Cached = Omit<GhTopic, 'key' | 'name' | 'color'>;
-async function topicStats(E: Entry, signal: AbortSignal): Promise<Cached> {
+async function topicStats(
+  E: Entry,
+  signal: AbortSignal,
+): Promise<Cached> {
   const q = phrase(queryOf(E).q);
   const ck = CACHE + q.toLowerCase();
-  const c = store.get<{ at: number; v: Cached } | null>(ck, null);
-  if (c && Date.now() - c.at < TTL) return c.v;
+  const c = store.get<{ at: number; v: Cached } | null>(
+    ck,
+    null,
+  );
+  if (c && Date.now() - c.at < TTL) {
+    return c.v;
+  }
   const today = Date.now(),
     from = today - PERIOD * DAY,
     prev = from - PERIOD * DAY;
-  const base = 'https://api.github.com/search/repositories?per_page=30&sort=stars&order=desc&q=';
+  const base =
+    'https://api.github.com/search/repositories?per_page=30&sort=stars&order=desc&q=';
   const recent = parseRepoSearch(
-    await search(base + encodeURIComponent(`${q} created:${ymd(from)}..${ymd(today)}`), signal),
+    await search(
+      base +
+        encodeURIComponent(
+          `${q} created:${ymd(from)}..${ymd(today)}`,
+        ),
+      signal,
+    ),
   );
   const older = parseRepoSearch(
     await search(
       'https://api.github.com/search/repositories?per_page=1&q=' +
-        encodeURIComponent(`${q} created:${ymd(prev)}..${ymd(from - DAY)}`),
+        encodeURIComponent(
+          `${q} created:${ymd(prev)}..${ymd(from - DAY)}`,
+        ),
       signal,
     ),
   );
@@ -73,16 +110,23 @@ async function topicStats(E: Entry, signal: AbortSignal): Promise<Cached> {
     before = older.total;
   const top: GhRepo[] = recent.repos
     .filter(r => r.stars > 0 && Number.isFinite(r.created))
-    .map(({ name, url, desc, stars, language, created }) => ({
-      name,
-      url,
-      desc,
-      stars,
-      language,
-      created,
-      pace: stars / Math.max(1, (today - created) / DAY),
-    }));
-  const v: Cached = { now, before, growth: before > 0 ? (now - before) / before : null, top };
+    .map(
+      ({ name, url, desc, stars, language, created }) => ({
+        name,
+        url,
+        desc,
+        stars,
+        language,
+        created,
+        pace: stars / Math.max(1, (today - created) / DAY),
+      }),
+    );
+  const v: Cached = {
+    now,
+    before,
+    growth: before > 0 ? (now - before) / before : null,
+    top,
+  };
   store.set(ck, { at: Date.now(), v });
   return v;
 }
@@ -102,27 +146,62 @@ export function createGitHub(app: AppStore) {
   /** Loads GitHub stats for the active lens's topics; cached topics appear at once, the rest fill in. */
   async function load(force = false): Promise<void> {
     const lens = app.activeLens();
-    if (!lens) return;
-    if (!force && gh.lensId === lens.id && (gh.loading || Date.now() - gh.at < TTL)) return;
-    if (abort) abort.abort();
+    if (!lens) {
+      return;
+    }
+    if (
+      !force &&
+      gh.lensId === lens.id &&
+      (gh.loading || Date.now() - gh.at < TTL)
+    ) {
+      return;
+    }
+    if (abort) {
+      abort.abort();
+    }
     abort = new AbortController();
     const { signal } = abort;
     const entries = app.entriesOf(lens);
-    Object.assign(gh, { lensId: lens.id, topics: [], loading: true, done: 0, total: entries.length, error: null });
+    Object.assign(gh, {
+      lensId: lens.id,
+      topics: [],
+      loading: true,
+      done: 0,
+      total: entries.length,
+      error: null,
+    });
     for (const E of entries) {
       try {
         const v = await topicStats(E, signal);
-        if (signal.aborted) return;
-        gh.topics = [...gh.topics, { key: E.key, name: E.name, color: E.color, ...v }];
+        if (signal.aborted) {
+          return;
+        }
+        gh.topics = [
+          ...gh.topics,
+          {
+            key: E.key,
+            name: E.name,
+            color: E.color,
+            ...v,
+          },
+        ];
       } catch (e) {
-        if (isAbort(e)) return;
+        if (isAbort(e)) {
+          return;
+        }
         gh.error =
-          e instanceof HttpError && (e.status === 403 || e.status === 429)
+          e instanceof HttpError &&
+          (e.status === 403 || e.status === 429)
             ? githubToken()
               ? 'GitHub search limit reached; the rest fills in on the next refresh'
               : 'GitHub search limit reached; add a GitHub token (Your GitHub → Token) for 3× the speed'
             : errorText(e);
-        if (e instanceof HttpError && (e.status === 403 || e.status === 429)) break;
+        if (
+          e instanceof HttpError &&
+          (e.status === 403 || e.status === 429)
+        ) {
+          break;
+        }
       }
       gh.done++;
     }
@@ -134,7 +213,10 @@ export function createGitHub(app: AppStore) {
 export type GitHub = ReturnType<typeof createGitHub>;
 
 /** Repos across the lens, ranked by stars per day since creation (what's rising, not what's old). */
-export function risingRepos(topics: GhTopic[], n = 8): (GhRepo & { topic: GhTopic })[] {
+export function risingRepos(
+  topics: GhTopic[],
+  n = 8,
+): (GhRepo & { topic: GhTopic })[] {
   const seen = new Set<string>();
   return topics
     .flatMap(t => t.top.map(r => ({ ...r, topic: t })))
@@ -143,19 +225,36 @@ export function risingRepos(topics: GhTopic[], n = 8): (GhRepo & { topic: GhTopi
     .slice(0, n);
 }
 /** Language share among the leading new repos of every topic; repos with no language and the long tail fold into "Other". */
-export function languageMix(topics: GhTopic[], n = 6): { lang: string; count: number; share: number }[] {
+export function languageMix(
+  topics: GhTopic[],
+  n = 6,
+): { lang: string; count: number; share: number }[] {
   const counts = new Map<string, number>();
   let other = 0;
   topics.forEach(t =>
     t.top.forEach(r => {
-      if (r.language) counts.set(r.language, (counts.get(r.language) || 0) + 1);
-      else other++;
+      if (r.language) {
+        counts.set(
+          r.language,
+          (counts.get(r.language) || 0) + 1,
+        );
+      } else {
+        other++;
+      }
     }),
   );
-  const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+  const sorted = [...counts.entries()].sort(
+    (a, b) => b[1] - a[1],
+  );
   other += sorted.slice(n).reduce((a, [, c]) => a + c, 0);
   const rows = sorted.slice(0, n);
-  if (other) rows.push(['Other', other]);
+  if (other) {
+    rows.push(['Other', other]);
+  }
   const total = rows.reduce((a, [, c]) => a + c, 0) || 1;
-  return rows.map(([lang, count]) => ({ lang, count, share: count / total }));
+  return rows.map(([lang, count]) => ({
+    lang,
+    count,
+    share: count / total,
+  }));
 }

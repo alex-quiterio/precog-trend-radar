@@ -1,16 +1,27 @@
 <template>
-  <panel-shell id="p-markets" title="Prices" :meta="meta" :index="index">
+  <panel-shell
+    id="p-markets"
+    title="Prices"
+    :meta="meta"
+    :index="index">
     <ul v-if="notes.length" class="mk-notes">
       <li v-for="(n, i) in notes" :key="i">{{ n }}</li>
     </ul>
 
-    <section v-for="g in groups" :key="g.id" class="mk-group" :aria-label="g.label">
+    <section
+      v-for="g in groups"
+      :key="g.id"
+      class="mk-group"
+      :aria-label="g.label">
       <h4 class="mk-head">
         {{ g.label }}
         <span>{{ g.hint }}</span>
       </h4>
       <div class="mk-grid">
-        <article v-for="t in g.tiles" :key="t.key" class="mk-tile">
+        <article
+          v-for="t in g.tiles"
+          :key="t.key"
+          class="mk-tile">
           <header>
             <b>{{ t.name }}</b>
             <small>{{ t.what }}</small>
@@ -22,8 +33,13 @@
               <small>wk</small>
             </span>
           </div>
-          <sparkline :points="t.spark" :color="color(t.w1)" fit></sparkline>
-          <div class="mk-range" :title="`Low and high over ${t.span}`">
+          <sparkline
+            :points="t.spark"
+            :color="color(t.w1)"
+            fit></sparkline>
+          <div
+            class="mk-range"
+            :title="`Low and high over ${t.span}`">
             <span>{{ t.low }} – {{ t.high }}</span>
             <span class="mk-span">{{ t.span }}</span>
           </div>
@@ -49,12 +65,17 @@
             <div class="mk-moves">
               <span>
                 1D
-                <i :class="dir(global.ch24)">{{ pct(global.ch24) }}</i>
+                <i :class="dir(global.ch24)">
+                  {{ pct(global.ch24) }}
+                </i>
               </span>
             </div>
             <div class="mk-dom">
-              <span class="mk-bar"><i :style="{ width: global.btc + '%' }"></i></span>
-              Bitcoin {{ global.btcText }} · Ether {{ global.ethText }}
+              <span class="mk-bar">
+                <i :style="{ width: global.btc + '%' }"></i>
+              </span>
+              Bitcoin {{ global.btcText }} · Ether
+              {{ global.ethText }}
             </div>
           </article>
           <article v-if="fng" class="mk-tile mk-stat">
@@ -66,7 +87,10 @@
               {{ fng.now }}
               <span class="mk-w">{{ fng.label }}</span>
             </div>
-            <sparkline :points="fng.series" color="var(--accent-2)" fit></sparkline>
+            <sparkline
+              :points="fng.series"
+              color="var(--accent-2)"
+              fit></sparkline>
             <div class="mk-range">
               <span>30 days</span>
               <span>a week ago {{ fng.weekAgo }}</span>
@@ -76,25 +100,44 @@
       </div>
     </section>
 
-    <ul v-if="!groups.length && st.loading" class="mk-wait" aria-label="Loading prices">
+    <ul
+      v-if="!groups.length && st.loading"
+      class="mk-wait"
+      aria-label="Loading prices">
       <li v-for="n in 4" :key="n"></li>
     </ul>
-    <p v-else-if="!groups.length" class="mk-empty">No prices could be read just now.</p>
-    <p v-if="st.errors.length" class="mk-err">Not loaded: {{ st.errors.join(' · ') }}</p>
+    <p v-else-if="!groups.length" class="mk-empty">
+      No prices could be read just now.
+    </p>
+    <p v-if="st.errors.length" class="mk-err">
+      Not loaded: {{ st.errors.join(' · ') }}
+    </p>
     <p class="mk-foot">
-      Real prices in US dollars unless noted. US shares and indices are priced through tokenized shares (xStocks), which
-      trade around the clock and track the listed price; oil is EIA's daily spot price, a few days behind. Facts, not
-      advice.
+      Real prices in US dollars unless noted. US shares and
+      indices are priced through tokenized shares (xStocks),
+      which trade around the clock and track the listed
+      price; oil is EIA's daily spot price, a few days
+      behind. Facts, not advice.
     </p>
   </panel-shell>
 </template>
 
 <script lang="ts">
 import { useApp } from '@/context';
-import { computed, defineComponent, onBeforeUnmount, onMounted } from 'vue';
+import {
+  computed,
+  defineComponent,
+  onBeforeUnmount,
+  onMounted,
+} from 'vue';
 import { MIN } from '@core/config';
 import { ago } from '@core/format';
-import { boardOf, createMarkets, pct, takeaways } from '@features/markets';
+import {
+  boardOf,
+  createMarkets,
+  pct,
+  takeaways,
+} from '@features/markets';
 import PanelShell from '@components/PanelShell.vue';
 import Sparkline from '@components/Sparkline.vue';
 
@@ -114,40 +157,91 @@ export default defineComponent({
     onMounted(() => {
       void markets.load();
       timer = setInterval(() => {
-        if (document.visibilityState === 'visible') void markets.load();
+        if (document.visibilityState === 'visible') {
+          void markets.load();
+        }
       }, 10 * MIN);
     });
     onBeforeUnmount(() => {
       clearInterval(timer);
       markets.stop();
     });
-    const groups = computed(() => (st.data ? boardOf(st.data) : []));
-    const notes = computed(() => (st.data ? takeaways(st.data) : []));
+    const groups = computed(() =>
+      st.data ? boardOf(st.data) : [],
+    );
+    const notes = computed(() =>
+      st.data ? takeaways(st.data) : [],
+    );
     const global = computed(() => {
       const g = st.data?.global;
-      if (!g) return null;
+      if (!g) {
+        return null;
+      }
       return {
-        cap: g.cap >= 1e12 ? `$${(g.cap / 1e12).toFixed(2)}T` : `$${(g.cap / 1e9).toFixed(0)}B`,
+        cap:
+          g.cap >= 1e12
+            ? `$${(g.cap / 1e12).toFixed(2)}T`
+            : `$${(g.cap / 1e9).toFixed(0)}B`,
         ch24: g.ch24,
         btc: g.btc ?? 0,
-        btcText: g.btc == null ? '–' : `${g.btc.toFixed(1)}%`,
-        ethText: g.eth == null ? '–' : `${g.eth.toFixed(1)}%`,
+        btcText:
+          g.btc == null ? '–' : `${g.btc.toFixed(1)}%`,
+        ethText:
+          g.eth == null ? '–' : `${g.eth.toFixed(1)}%`,
       };
     });
     const fng = computed(() => {
       const f = st.data?.fng;
       const s = f?.series ?? [];
       const last = s[s.length - 1];
-      if (!f || !last) return null;
-      const week = [...s].reverse().find(p => p.t <= last.t - 7 * 864e5 + 36e5);
-      return { now: last.value, label: f.label, series: s, weekAgo: week?.value ?? '–' };
+      if (!f || !last) {
+        return null;
+      }
+      const week = [...s]
+        .reverse()
+        .find(p => p.t <= last.t - 7 * 864e5 + 36e5);
+      return {
+        now: last.value,
+        label: f.label,
+        series: s,
+        weekAgo: week?.value ?? '–',
+      };
     });
-    const dir = (p: number | null) => (p == null ? '' : p >= 0.05 ? 'up' : p <= -0.05 ? 'down' : '');
-    const color = (p: number | null) => ((p ?? 0) >= 0 ? 'var(--accent)' : 'var(--ink-2)');
+    const dir = (p: number | null) =>
+      p == null
+        ? ''
+        : p >= 0.05
+          ? 'up'
+          : p <= -0.05
+            ? 'down'
+            : '';
+    const color = (p: number | null) =>
+      (p ?? 0) >= 0 ? 'var(--accent)' : 'var(--ink-2)';
     const asOf = (t: number) =>
-      t ? (ui.now - t < 2 * 864e5 ? ago(t, ui.now) : new Date(t).toISOString().slice(0, 10)) : '';
-    const meta = computed(() => (st.at ? `checked ${ago(st.at, ui.now)}` : st.loading ? 'reading…' : ''));
-    return { st, groups, notes, global, fng, pct, dir, color, asOf, meta };
+      t
+        ? ui.now - t < 2 * 864e5
+          ? ago(t, ui.now)
+          : new Date(t).toISOString().slice(0, 10)
+        : '';
+    const meta = computed(() =>
+      st.at
+        ? `checked ${ago(st.at, ui.now)}`
+        : st.loading
+          ? 'reading…'
+          : '',
+    );
+    return {
+      st,
+      groups,
+      notes,
+      global,
+      fng,
+      pct,
+      dir,
+      color,
+      asOf,
+      meta,
+    };
   },
 });
 </script>
@@ -190,7 +284,10 @@ export default defineComponent({
 }
 .mk-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(180px, 1fr)
+  );
   gap: 10px;
 }
 .mk-tile {
@@ -285,7 +382,10 @@ export default defineComponent({
 }
 .mk-wait {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(180px, 1fr)
+  );
   gap: 10px;
   margin: 0;
   padding: 0;

@@ -7,11 +7,15 @@ describe('isAbort', () => {
     const e = new Error('stop');
     e.name = 'AbortError';
     expect(isAbort(e)).toBe(true);
-    expect(isAbort(new DOMException('stop', 'AbortError'))).toBe(true);
+    expect(
+      isAbort(new DOMException('stop', 'AbortError')),
+    ).toBe(true);
   });
   it('is false for anything else', () => {
     expect(isAbort(new Error('HTTP 500'))).toBe(false);
-    expect(isAbort(new DOMException('slow', 'TimeoutError'))).toBe(false);
+    expect(
+      isAbort(new DOMException('slow', 'TimeoutError')),
+    ).toBe(false);
     expect(isAbort('AbortError')).toBe(false);
     expect(isAbort(null)).toBe(false);
   });
@@ -19,7 +23,9 @@ describe('isAbort', () => {
 
 describe('errorText', () => {
   it('gives the message of an error, or the thrown value as text', () => {
-    expect(errorText(new Error('HTTP 429'))).toBe('HTTP 429');
+    expect(errorText(new Error('HTTP 429'))).toBe(
+      'HTTP 429',
+    );
     expect(errorText('offline')).toBe('offline');
     expect(errorText(42)).toBe('42');
   });

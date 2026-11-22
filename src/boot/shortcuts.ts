@@ -6,11 +6,22 @@ import type { AppContext } from '@/context';
 /** What a key press does, or null for nothing (so the browser keeps it). */
 export function shortcut(
   { app, actions }: Pick<AppContext, 'app' | 'actions'>,
-  e: Pick<KeyboardEvent, 'key' | 'altKey' | 'ctrlKey' | 'metaKey' | 'shiftKey'>,
+  e: Pick<
+    KeyboardEvent,
+    'key' | 'altKey' | 'ctrlKey' | 'metaKey' | 'shiftKey'
+  >,
   target: Element | null,
 ): (() => void) | null {
-  if (e.altKey || e.ctrlKey || e.metaKey) return null;
-  if (target?.closest('input, textarea, select, [contenteditable], dialog, .grip')) return null;
+  if (e.altKey || e.ctrlKey || e.metaKey) {
+    return null;
+  }
+  if (
+    target?.closest(
+      'input, textarea, select, [contenteditable], dialog, .grip',
+    )
+  ) {
+    return null;
+  }
   if (/^[1-9]$/.test(e.key) && !e.shiftKey) {
     const c = channels(app)[+e.key - 1];
     return c
@@ -20,17 +31,39 @@ export function shortcut(
         }
       : null;
   }
-  if (e.key === '/') return () => document.querySelector<HTMLElement>('.sw-toggle')?.click();
-  if (e.key === '[' || e.key === ']') return () => actions.shiftLens(e.key === ']' ? 1 : -1);
-  if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !e.shiftKey && !target?.closest('.table-scroll'))
-    return () => actions.shiftTopic(e.key === 'ArrowRight' ? 1 : -1);
+  if (e.key === '/') {
+    return () =>
+      document
+        .querySelector<HTMLElement>('.sw-toggle')
+        ?.click();
+  }
+  if (e.key === '[' || e.key === ']') {
+    return () => actions.shiftLens(e.key === ']' ? 1 : -1);
+  }
+  if (
+    (e.key === 'ArrowLeft' || e.key === 'ArrowRight') &&
+    !e.shiftKey &&
+    !target?.closest('.table-scroll')
+  ) {
+    return () =>
+      actions.shiftTopic(e.key === 'ArrowRight' ? 1 : -1);
+  }
   return null;
 }
 /** Listens for the shortcuts. Returns a function that stops listening. */
-export function installShortcuts(ctx: AppContext, doc: Document = document): () => void {
+export function installShortcuts(
+  ctx: AppContext,
+  doc: Document = document,
+): () => void {
   const onKey = (e: KeyboardEvent) => {
-    const run = shortcut(ctx, e, e.target instanceof Element ? e.target : doc.body);
-    if (!run) return;
+    const run = shortcut(
+      ctx,
+      e,
+      e.target instanceof Element ? e.target : doc.body,
+    );
+    if (!run) {
+      return;
+    }
     e.preventDefault();
     run();
   };

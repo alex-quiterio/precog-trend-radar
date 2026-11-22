@@ -2,40 +2,79 @@
 import { describe, expect, it } from 'vitest';
 import { fakeFetch, fixture } from '@sources/fake-fetch';
 import { ADAPTERS, HttpError } from '@sources/registry';
-import { resolveWikiTitle, wiki, wikiFailure } from './index';
+import {
+  resolveWikiTitle,
+  wiki,
+  wikiFailure,
+} from './index';
 
 const signal = new AbortController().signal;
 const net = fakeFetch(url => {
-  if (url.searchParams.get('action') === 'query') return fixture('wikipedia', 'title-query.json');
-  if (url.searchParams.get('action') === 'opensearch') return fixture('wikipedia', 'opensearch.json');
-  if (url.hostname === 'wikimedia.org') return fixture('wikipedia', 'pageviews.json');
+  if (url.searchParams.get('action') === 'query') {
+    return fixture('wikipedia', 'title-query.json');
+  }
+  if (url.searchParams.get('action') === 'opensearch') {
+    return fixture('wikipedia', 'opensearch.json');
+  }
+  if (url.hostname === 'wikimedia.org') {
+    return fixture('wikipedia', 'pageviews.json');
+  }
   throw new Error('unexpected');
 });
-const saved = JSON.parse(fixture('wikipedia', 'title-query.json'));
-const savedTitle: string = Object.values(saved.query.pages as Record<string, { title: string }>)[0].title;
+const saved = JSON.parse(
+  fixture('wikipedia', 'title-query.json'),
+);
+const savedTitle: string = Object.values(
+  saved.query.pages as Record<string, { title: string }>,
+)[0].title;
 
 describe('resolveWikiTitle', () => {
   it('finds the article, following redirects, and keeps it', async () => {
-    expect(await resolveWikiTitle('degrowth', signal)).toBe(savedTitle);
-    expect(await resolveWikiTitle('degrowth', signal)).toBe(savedTitle);
+    expect(await resolveWikiTitle('degrowth', signal)).toBe(
+      savedTitle,
+    );
+    expect(await resolveWikiTitle('degrowth', signal)).toBe(
+      savedTitle,
+    );
     expect(net.urls).toHaveLength(1);
-    expect(net.urls[0]).toMatch(/^https:\/\/en\.wikipedia\.org\/.*redirects=1/);
+    expect(net.urls[0]).toMatch(
+      /^https:\/\/en\.wikipedia\.org\/.*redirects=1/,
+    );
   });
   it('searches when there is no article by that exact name', async () => {
     net.custom = url =>
-      url.searchParams.get('action') === 'query' ? fixture('wikipedia', 'title-missing.json') : undefined;
-    expect(await resolveWikiTitle('degrowht', signal, 'pt')).toBe(
-      JSON.parse(fixture('wikipedia', 'opensearch.json'))[1][0],
+      url.searchParams.get('action') === 'query'
+        ? fixture('wikipedia', 'title-missing.json')
+        : undefined;
+    expect(
+      await resolveWikiTitle('degrowht', signal, 'pt'),
+    ).toBe(
+      JSON.parse(
+        fixture('wikipedia', 'opensearch.json'),
+      )[1][0],
     );
-    expect(net.urls.map(u => new URL(u).hostname)).toEqual(['pt.wikipedia.org', 'pt.wikipedia.org']);
+    expect(net.urls.map(u => new URL(u).hostname)).toEqual([
+      'pt.wikipedia.org',
+      'pt.wikipedia.org',
+    ]);
   });
   it('refuses when nothing matches, or the closest article is about a person', async () => {
     net.custom = url =>
-      url.searchParams.get('action') === 'query' ? fixture('wikipedia', 'title-missing.json') : ['x', [], [], []];
-    await expect(resolveWikiTitle('qwzx', signal)).rejects.toThrow('no matching Wikipedia article');
+      url.searchParams.get('action') === 'query'
+        ? fixture('wikipedia', 'title-missing.json')
+        : ['x', [], [], []];
+    await expect(
+      resolveWikiTitle('qwzx', signal),
+    ).rejects.toThrow('no matching Wikipedia article');
     net.custom = url =>
-      url.searchParams.get('action') === 'query' ? { query: { pages: { 1: { title: 'Elon Musk' } } } } : undefined;
-    await expect(resolveWikiTitle('musk', signal)).rejects.toThrow(/about a person/);
+      url.searchParams.get('action') === 'query'
+        ? {
+            query: { pages: { 1: { title: 'Elon Musk' } } },
+          }
+        : undefined;
+    await expect(
+      resolveWikiTitle('musk', signal),
+    ).rejects.toThrow(/about a person/);
   });
 });
 
@@ -43,17 +82,34 @@ describe('Wikipedia pageviews', () => {
   it('reads 60 days of the article’s views in the lens language', async () => {
     const r = await ADAPTERS.wikipedia.fetch('Degrowth', {
       signal,
-      query: { name: 'Degrowth', wiki: 'Degrowth', q: 'degrowth', lang: 'nl', country: null },
+      query: {
+        name: 'Degrowth',
+        wiki: 'Degrowth',
+        q: 'degrowth',
+        lang: 'nl',
+        country: null,
+      },
     });
-    const views = net.urls.find(u => u.includes('wikimedia.org'))!;
-    expect(views).toContain('/per-article/nl.wikipedia/all-access/user/');
+    const views = net.urls.find(u =>
+      u.includes('wikimedia.org'),
+    )!;
+    expect(views).toContain(
+      '/per-article/nl.wikipedia/all-access/user/',
+    );
     const [from, to] = views.split('/daily/')[1].split('/');
     expect(
-      (Date.parse(`${to.slice(0, 4)}-${to.slice(4, 6)}-${to.slice(6)}`) -
-        Date.parse(`${from.slice(0, 4)}-${from.slice(4, 6)}-${from.slice(6)}`)) /
+      (Date.parse(
+        `${to.slice(0, 4)}-${to.slice(4, 6)}-${to.slice(6)}`,
+      ) -
+        Date.parse(
+          `${from.slice(0, 4)}-${from.slice(4, 6)}-${from.slice(6)}`,
+        )) /
         864e5,
     ).toBe(59);
-    expect(r.meta).toEqual({ wikiTitle: savedTitle, wikiLang: 'nl' });
+    expect(r.meta).toEqual({
+      wikiTitle: savedTitle,
+      wikiLang: 'nl',
+    });
     expect(r.points.length).toBeGreaterThan(0);
   });
 });
@@ -63,10 +119,17 @@ describe('when Wikipedia is busy', () => {
     wiki.retryMs = 0;
     let refused = 0;
     net.custom = url => {
-      if (url.searchParams.get('action') === 'query' && refused++ === 0) throw new HttpError(429);
+      if (
+        url.searchParams.get('action') === 'query' &&
+        refused++ === 0
+      ) {
+        throw new HttpError(429);
+      }
       return undefined;
     };
-    expect(await resolveWikiTitle('degrowth', signal)).toBe(savedTitle);
+    expect(await resolveWikiTitle('degrowth', signal)).toBe(
+      savedTitle,
+    );
     expect(net.urls).toHaveLength(2);
   });
   it('gives up after one retry, and says Wikipedia is busy rather than that the article is missing', async () => {
@@ -74,14 +137,26 @@ describe('when Wikipedia is busy', () => {
     net.custom = () => {
       throw new HttpError(429);
     };
-    const e = await resolveWikiTitle('degrowth', signal).catch(x => x);
+    const e = await resolveWikiTitle(
+      'degrowth',
+      signal,
+    ).catch(x => x);
     expect(net.urls).toHaveLength(2);
     expect(wikiFailure(['Degrowth', 'Peak oil'], [e])).toBe(
       'Wikipedia is busy (too many requests) for Degrowth, Peak oil; it will try again on the next refresh',
     );
   });
   it('says an article is missing only when it is, and names any other failure', () => {
-    expect(wikiFailure(['Qwzx'], [new Error('no matching Wikipedia article')])).toBe('no Wikipedia article for Qwzx');
-    expect(wikiFailure(['Degrowth'], [new HttpError(503)])).toBe("Wikipedia didn't answer for Degrowth (HTTP 503)");
+    expect(
+      wikiFailure(
+        ['Qwzx'],
+        [new Error('no matching Wikipedia article')],
+      ),
+    ).toBe('no Wikipedia article for Qwzx');
+    expect(
+      wikiFailure(['Degrowth'], [new HttpError(503)]),
+    ).toBe(
+      "Wikipedia didn't answer for Degrowth (HTTP 503)",
+    );
   });
 });

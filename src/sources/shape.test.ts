@@ -1,6 +1,16 @@
 // Reading API replies safely: a broken reply gives a clear error, never wrong numbers.
 import { describe, expect, it } from 'vitest';
-import { ShapeError, at, isObj, list, listOr, num, obj, objOr, str } from './shape';
+import {
+  ShapeError,
+  at,
+  isObj,
+  list,
+  listOr,
+  num,
+  obj,
+  objOr,
+  str,
+} from './shape';
 
 describe('obj and list', () => {
   it('pass the right shape through', () => {
@@ -10,8 +20,12 @@ describe('obj and list', () => {
     expect(list(l, 'X')).toBe(l);
   });
   it('name the source and what was expected when the shape is wrong', () => {
-    expect(() => obj([], 'ECB', 'series')).toThrow(new ShapeError('ECB', 'series is not an object'));
-    expect(() => list({}, 'IPMA')).toThrow('IPMA answered in an unexpected format (reply is not a list)');
+    expect(() => obj([], 'ECB', 'series')).toThrow(
+      new ShapeError('ECB', 'series is not an object'),
+    );
+    expect(() => list({}, 'IPMA')).toThrow(
+      'IPMA answered in an unexpected format (reply is not a list)',
+    );
     expect(() => obj(null, 'X')).toThrow(ShapeError);
   });
 });
@@ -24,7 +38,13 @@ describe('optional fields', () => {
     expect(listOr([1, 2])).toEqual([1, 2]);
   });
   it('isObj is true for plain objects only', () => {
-    expect([{}, [], null, 'x', 1].map(isObj)).toEqual([true, false, false, false, false]);
+    expect([{}, [], null, 'x', 1].map(isObj)).toEqual([
+      true,
+      false,
+      false,
+      false,
+      false,
+    ]);
   });
 });
 

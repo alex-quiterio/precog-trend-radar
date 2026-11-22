@@ -2,12 +2,22 @@
 import { reactive } from 'vue';
 import { describe, expect, it, vi } from 'vitest';
 import { createLiveLoop, type LoopUi } from '@/live';
-import type { Adapter, AdapterResult, Alert, Entry, Source } from '@/types';
+import type {
+  Adapter,
+  AdapterResult,
+  Alert,
+  Entry,
+  Source,
+} from '@/types';
 
 const DAY = 86400e3;
 const today = Math.floor(Date.now() / DAY) * DAY;
 /** 40 days of a steady count, ending yesterday. */
-const days = (value: number) => Array.from({ length: 40 }, (_, i) => ({ t: today - (40 - i) * DAY, value }));
+const days = (value: number) =>
+  Array.from({ length: 40 }, (_, i) => ({
+    t: today - (40 - i) * DAY,
+    value,
+  }));
 
 function entry(name: string): Entry {
   return reactive({
@@ -29,12 +39,21 @@ function entry(name: string): Entry {
     lastAlert: null,
   }) as Entry;
 }
-const adapter = (id: string, fetch: (topic: string, signal: AbortSignal) => Promise<AdapterResult>): Adapter => ({
+const adapter = (
+  id: string,
+  fetch: (
+    topic: string,
+    signal: AbortSignal,
+  ) => Promise<AdapterResult>,
+): Adapter => ({
   id,
   label: `${id} stories / day`,
   fetch: (topic, ctx) => fetch(topic, ctx.signal),
 });
-function setup(adapters: Adapter[], names = ['Rust', 'Solar']) {
+function setup(
+  adapters: Adapter[],
+  names = ['Rust', 'Solar'],
+) {
   const ui = reactive<LoopUi>({
     status: '',
     pulse: '',
@@ -45,12 +64,24 @@ function setup(adapters: Adapter[], names = ['Rust', 'Solar']) {
     guardianState: 'off',
     guardianNote: '',
   });
-  const state = reactive({ source: 'blend', liveLoaded: false, alerts: [] as Alert[] });
+  const state = reactive({
+    source: 'blend',
+    liveLoaded: false,
+    alerts: [] as Alert[],
+  });
   const entries = names.map(entry);
-  const sources: Record<string, Source> = { blend: { label: 'index', parts: adapters.map(a => a.id), blend: true } };
+  const sources: Record<string, Source> = {
+    blend: {
+      label: 'index',
+      parts: adapters.map(a => a.id),
+      blend: true,
+    },
+  };
   const onLoaded = vi.fn();
   const loop = createLiveLoop({
-    adapters: Object.fromEntries(adapters.map(a => [a.id, a])),
+    adapters: Object.fromEntries(
+      adapters.map(a => [a.id, a]),
+    ),
     sources,
     state,
     ui,
@@ -63,13 +94,21 @@ function setup(adapters: Adapter[], names = ['Rust', 'Solar']) {
 describe('the data loop', () => {
   it('loads every topic from every source, blends them and reports success', async () => {
     const { loop, ui, state, entries, onLoaded } = setup([
-      adapter('a', async () => ({ topic: '', points: days(100) })),
-      adapter('b', async () => ({ topic: '', points: days(10) })),
+      adapter('a', async () => ({
+        topic: '',
+        points: days(100),
+      })),
+      adapter('b', async () => ({
+        topic: '',
+        points: days(10),
+      })),
     ]);
     await loop.load();
     expect(state.liveLoaded).toBe(true);
     expect(ui.loading).toBe(false);
-    expect(ui.status).toMatch(/^Live · updated .* refreshes every 30 min\.$/);
+    expect(ui.status).toMatch(
+      /^Live · updated .* refreshes every 30 min\.$/,
+    );
     expect(onLoaded).toHaveBeenCalledOnce();
     for (const E of entries) {
       expect(E.liveSeries.length).toBeGreaterThan(20);
@@ -79,9 +118,14 @@ describe('the data loop', () => {
 
   it('keeps a topic going when one source fails for it, and says what is missing', async () => {
     const { loop, ui, entries } = setup([
-      adapter('a', async () => ({ topic: '', points: days(100) })),
+      adapter('a', async () => ({
+        topic: '',
+        points: days(100),
+      })),
       adapter('b', async topic => {
-        if (topic === 'Solar') throw new Error('HTTP 503');
+        if (topic === 'Solar') {
+          throw new Error('HTTP 503');
+        }
         return { topic, points: days(10) };
       }),
     ]);
@@ -95,20 +139,37 @@ describe('the data loop', () => {
   });
 
   it('says so when no source can be reached at all', async () => {
-    const { loop, ui, entries } = setup([adapter('a', async () => Promise.reject(new TypeError('Failed to fetch')))]);
+    const { loop, ui, entries } = setup([
+      adapter('a', async () =>
+        Promise.reject(new TypeError('Failed to fetch')),
+      ),
+    ]);
     await loop.load();
-    expect(entries.every(E => E.liveError === 'Failed to fetch')).toBe(true);
+    expect(
+      entries.every(E => E.liveError === 'Failed to fetch'),
+    ).toBe(true);
     expect(ui.offline).toBe(true);
-    expect(ui.status).toMatch(/^Couldn't reach any source \(Failed to fetch\)/);
+    expect(ui.status).toMatch(
+      /^Couldn't reach any source \(Failed to fetch\)/,
+    );
   });
 
   it('shows a skip as a reason, not an error', async () => {
     const { loop, entries } = setup([
-      adapter('a', async () => ({ topic: '', points: days(100) })),
-      adapter('b', async topic => ({ topic, points: [], skip: 'English-only' })),
+      adapter('a', async () => ({
+        topic: '',
+        points: days(100),
+      })),
+      adapter('b', async topic => ({
+        topic,
+        points: [],
+        skip: 'English-only',
+      })),
     ]);
     await loop.load();
-    expect(entries[0].skipped).toEqual({ b: 'English-only' });
+    expect(entries[0].skipped).toEqual({
+      b: 'English-only',
+    });
     expect(entries[0].partErr.b).toBeNull();
     expect(entries[0].liveError).toBeNull();
   });
@@ -121,10 +182,15 @@ describe('the data loop', () => {
           const mine = ++round;
           return new Promise((resolve, reject) => {
             const value = mine === 1 ? 999 : 100;
-            const t = setTimeout(() => resolve({ topic, points: days(value) }), mine === 1 ? 50 : 5);
+            const t = setTimeout(
+              () => resolve({ topic, points: days(value) }),
+              mine === 1 ? 50 : 5,
+            );
             signal.addEventListener('abort', () => {
               clearTimeout(t);
-              reject(new DOMException('aborted', 'AbortError'));
+              reject(
+                new DOMException('aborted', 'AbortError'),
+              );
             });
           });
         }),
@@ -144,7 +210,10 @@ describe('the data loop', () => {
   });
 
   it('ignores refresh while a load is running', async () => {
-    const fetch = vi.fn(async (topic: string) => ({ topic, points: days(5) }));
+    const fetch = vi.fn(async (topic: string) => ({
+      topic,
+      points: days(5),
+    }));
     const { loop } = setup([adapter('a', fetch)], ['Rust']);
     const running = loop.load();
     loop.refresh();
@@ -157,11 +226,18 @@ describe('the data loop', () => {
     let release = () => {};
     const fetch = vi.fn(
       (topic: string) =>
-        new Promise<{ topic: string; points: ReturnType<typeof days> }>(
-          r => (release = () => r({ topic, points: days(5) })),
+        new Promise<{
+          topic: string;
+          points: ReturnType<typeof days>;
+        }>(
+          r =>
+            (release = () => r({ topic, points: days(5) })),
         ),
     );
-    const { loop, ui } = setup([adapter('a', fetch)], ['Rust']);
+    const { loop, ui } = setup(
+      [adapter('a', fetch)],
+      ['Rust'],
+    );
     const running = loop.load();
     expect(ui.loading).toBe(true);
     loop.stop();
@@ -176,8 +252,14 @@ describe('the data loop', () => {
   it('start clears what was there and stop cancels the timer', async () => {
     vi.useFakeTimers();
     try {
-      const fetch = vi.fn(async (topic: string) => ({ topic, points: days(5) }));
-      const { loop, entries, state } = setup([adapter('a', fetch)], ['Rust']);
+      const fetch = vi.fn(async (topic: string) => ({
+        topic,
+        points: days(5),
+      }));
+      const { loop, entries, state } = setup(
+        [adapter('a', fetch)],
+        ['Rust'],
+      );
       entries[0].liveError = 'old';
       loop.start();
       expect(entries[0].liveError).toBeNull();
@@ -195,7 +277,9 @@ describe('the data loop', () => {
 
 describe('the channel on screen first', () => {
   /** Topics in three channels, and a loop that treats channel `screen.lens` as the one on screen. */
-  function channels(fetch: (topic: string) => Promise<AdapterResult>) {
+  function channels(
+    fetch: (topic: string) => Promise<AdapterResult>,
+  ) {
     const ui = reactive<LoopUi>({
       status: '',
       pulse: '',
@@ -206,18 +290,42 @@ describe('the channel on screen first', () => {
       guardianState: 'off',
       guardianNote: '',
     });
-    const state = reactive({ source: 'blend', liveLoaded: false, alerts: [] as Alert[] });
-    const entries = ['a1', 'a2', 'b1', 'b2', 'c1', 'c2', 'c3'].map(n => {
+    const state = reactive({
+      source: 'blend',
+      liveLoaded: false,
+      alerts: [] as Alert[],
+    });
+    const entries = [
+      'a1',
+      'a2',
+      'b1',
+      'b2',
+      'c1',
+      'c2',
+      'c3',
+    ].map(n => {
       const E = entry(n);
       E.lensId = n[0];
       return E;
     });
     const screen = { lens: 'a' };
-    const ready = vi.fn(() => ({ liveLoaded: state.liveLoaded, loading: ui.loading, status: ui.status }));
+    const ready = vi.fn(() => ({
+      liveLoaded: state.liveLoaded,
+      loading: ui.loading,
+      status: ui.status,
+    }));
     const onLoaded = vi.fn();
     const loop = createLiveLoop({
-      adapters: { a: { ...adapter('a', fetch), concurrency: 4 } },
-      sources: { blend: { label: 'index', parts: ['a'], blend: true } },
+      adapters: {
+        a: { ...adapter('a', fetch), concurrency: 4 },
+      },
+      sources: {
+        blend: {
+          label: 'index',
+          parts: ['a'],
+          blend: true,
+        },
+      },
       state,
       ui,
       entries: () => entries,
@@ -226,21 +334,36 @@ describe('the channel on screen first', () => {
       onLoaded,
       backgroundGapMs: 1,
     });
-    return { loop, ui, state, entries, screen, ready, onLoaded };
+    return {
+      loop,
+      ui,
+      state,
+      entries,
+      screen,
+      ready,
+      onLoaded,
+    };
   }
 
   it('loads the channel on screen first, and counts the screen as loaded before the rest are in', async () => {
     const order: string[] = [];
-    const { loop, ready, onLoaded, ui } = channels(async topic => {
-      order.push(topic);
-      await new Promise(r => setTimeout(r, 2));
-      return { topic, points: days(100) };
-    });
+    const { loop, ready, onLoaded, ui } = channels(
+      async topic => {
+        order.push(topic);
+        await new Promise(r => setTimeout(r, 2));
+        return { topic, points: days(100) };
+      },
+    );
     await loop.load();
     expect(order.slice(0, 2).sort()).toEqual(['a1', 'a2']);
     expect(ready).toHaveBeenCalledOnce();
-    expect(ready.mock.results[0].value).toMatchObject({ liveLoaded: true, loading: false });
-    expect(ready.mock.results[0].value.status).toMatch(/Other channels are catching up\.$/);
+    expect(ready.mock.results[0].value).toMatchObject({
+      liveLoaded: true,
+      loading: false,
+    });
+    expect(ready.mock.results[0].value.status).toMatch(
+      /Other channels are catching up\.$/,
+    );
     expect(onLoaded).toHaveBeenCalledOnce(); // once everything is in
     expect(ui.status).not.toContain('catching up');
   });
@@ -250,9 +373,13 @@ describe('the channel on screen first', () => {
       most = 0;
     const { loop } = channels(async topic => {
       const bg = !topic.startsWith('a');
-      if (bg) most = Math.max(most, ++background);
+      if (bg) {
+        most = Math.max(most, ++background);
+      }
       await new Promise(r => setTimeout(r, 2));
-      if (bg) background--;
+      if (bg) {
+        background--;
+      }
       return { topic, points: days(100) };
     });
     await loop.load();
@@ -263,13 +390,19 @@ describe('the channel on screen first', () => {
     const order: string[] = [];
     let release: () => void = () => {};
     const gate = new Promise<void>(r => (release = r));
-    const { loop, ui, state, screen } = channels(async topic => {
-      order.push(topic);
-      if (!topic.startsWith('a')) await gate; // the background waits until we've switched
-      return { topic, points: days(100) };
-    });
+    const { loop, ui, state, screen } = channels(
+      async topic => {
+        order.push(topic);
+        if (!topic.startsWith('a')) {
+          await gate;
+        } // the background waits until we've switched
+        return { topic, points: days(100) };
+      },
+    );
     const running = loop.load();
-    await vi.waitFor(() => expect(state.liveLoaded).toBe(true)); // channel a is in
+    await vi.waitFor(() =>
+      expect(state.liveLoaded).toBe(true),
+    ); // channel a is in
     screen.lens = 'c';
     loop.focus();
     expect(state.liveLoaded).toBe(false);
@@ -277,7 +410,11 @@ describe('the channel on screen first', () => {
     release();
     await running;
     // After the one background request already in flight (b1), channel c comes before the rest of b.
-    expect(order.slice(3, 6).sort()).toEqual(['c1', 'c2', 'c3']);
+    expect(order.slice(3, 6).sort()).toEqual([
+      'c1',
+      'c2',
+      'c3',
+    ]);
     expect(state.liveLoaded).toBe(true);
     expect(ui.loading).toBe(false);
   });

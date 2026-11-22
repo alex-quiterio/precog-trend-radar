@@ -9,13 +9,22 @@ export interface FearGreed {
   label: string;
 }
 export function parseFearGreed(reply: unknown): FearGreed {
-  const rows = list(at(reply, 'data'), 'Fear & Greed', 'data');
+  const rows = list(
+    at(reply, 'data'),
+    'Fear & Greed',
+    'data',
+  );
   const series = rows
     .flatMap(r => {
       const value = num(Number(str(at(r, 'value')) || NaN)),
         t = num(Number(str(at(r, 'timestamp')) || NaN));
-      return value != null && t != null ? [{ t: t * 1000, value }] : [];
+      return value != null && t != null
+        ? [{ t: t * 1000, value }]
+        : [];
     })
     .sort((a, b) => a.t - b.t);
-  return { series, label: str(at(rows[0], 'value_classification')) };
+  return {
+    series,
+    label: str(at(rows[0], 'value_classification')),
+  };
 }

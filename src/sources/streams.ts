@@ -19,7 +19,8 @@ export interface StreamContext {
   keys: { guardian: boolean };
 }
 /** A part of a row's meta line: plain text, or text with a link or a style (`site`, `flag`). */
-export type RowPart = string | { text: string; href?: string; cls?: string };
+export type RowPart =
+  string | { text: string; href?: string; cls?: string };
 /** One item in a stream, ready to draw. */
 export interface StreamRow {
   id: string;
@@ -55,9 +56,17 @@ export interface Stream<T = unknown> {
    * Fetches items for the topics in scope and resolves with them. Call `show` with partial results to show
    * them while the rest load. Throw to show an error; pass `signal` on. The loader keeps the result, per app.
    */
-  load(ctx: StreamContext, signal: AbortSignal, show: (partial: T) => void): Promise<T>;
+  load(
+    ctx: StreamContext,
+    signal: AbortSignal,
+    show: (partial: T) => void,
+  ): Promise<T>;
   /** The rows to show, best first (12 at most), from what `load` returned (undefined before the first load). */
-  view(ctx: StreamContext, data: T | undefined, at: number): StreamView;
+  view(
+    ctx: StreamContext,
+    data: T | undefined,
+    at: number,
+  ): StreamView;
   /** A partial failure in the last result (e.g. one site of several), shown under the rows. */
   warning?(data: T | undefined): string | null;
 }
@@ -65,23 +74,46 @@ export interface Stream<T = unknown> {
 export const STREAMS: Stream[] = [];
 /** Adds a stream. It shows as a tab on every channel that lists its id in `streams`. */
 export function registerStream<T>(s: Stream<T>): void {
-  if (STREAMS.some(x => x.id === s.id)) throw new Error(`Stream “${s.id}” is registered twice`);
+  if (STREAMS.some(x => x.id === s.id)) {
+    throw new Error(`Stream “${s.id}” is registered twice`);
+  }
   // Stored without its item type: a stream only ever gets back the data its own load returned.
   STREAMS.push(s as unknown as Stream);
 }
-export const streamById = (id: string): Stream | undefined => STREAMS.find(s => s.id === id);
+export const streamById = (
+  id: string,
+): Stream | undefined => STREAMS.find(s => s.id === id);
 /** The streams a channel shows, in its order, leaving out unregistered and unavailable ones. */
-export const streamsFor = (ids: string[], ctx: StreamContext): Stream[] =>
-  ids.map(streamById).filter((s): s is Stream => !!s && (s.available?.(ctx) ?? true));
+export const streamsFor = (
+  ids: string[],
+  ctx: StreamContext,
+): Stream[] =>
+  ids
+    .map(streamById)
+    .filter(
+      (s): s is Stream =>
+        !!s && (s.available?.(ctx) ?? true),
+    );
 
 const DAY = 86400e3;
 /** "3 days ago" within a month, then the date. */
 export const when = (t: number, now: number): string =>
   Math.abs(now - t) < 30 * DAY
     ? ago(t, now)
-    : new Date(t).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' });
+    : new Date(t).toLocaleDateString('en-GB', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
 /** "checked 5 minutes ago · …", or '' before the first load. */
-export const checked = (at: number, rest: string, now: number): string =>
+export const checked = (
+  at: number,
+  rest: string,
+  now: number,
+): string =>
   at ? `checked ${ago(at, now)} · ${rest}` : '';
 /** Topic keys of `keys` that are in scope. */
-export const inScope = (keys: string[], ctx: StreamContext): string[] => keys.filter(k => ctx.scopeKeys.has(k));
+export const inScope = (
+  keys: string[],
+  ctx: StreamContext,
+): string[] => keys.filter(k => ctx.scopeKeys.has(k));

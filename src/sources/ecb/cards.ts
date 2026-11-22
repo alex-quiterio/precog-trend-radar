@@ -1,5 +1,9 @@
 // PRECOG / Trend Radar · ECB cards: the deposit rate, and mortgage rates for new house-purchase loans.
-import { type DatapointGroup, type DatapointRow, registerCards } from '@sources/cards';
+import {
+  type DatapointGroup,
+  type DatapointRow,
+  registerCards,
+} from '@sources/cards';
 import { nf2 } from '@core/format';
 import { getJSON } from '@sources/registry';
 import { parseEcbLatest, parseEcbSeries } from './parse';
@@ -43,9 +47,13 @@ registerCards({
     };
     parseEcbSeries(j, 1).forEach((series, code) => {
       const area = AREA[code];
-      if (!area) return;
+      if (!area) {
+        return;
+      }
       const last = series[series.length - 1];
-      if (!last) return;
+      if (!last) {
+        return;
+      }
       rows.push({
         group: area[0],
         id: `mortgage-${area[0]}`,
@@ -70,9 +78,12 @@ registerCards({
     const j = await getJSON(
       'https://data-api.ecb.europa.eu/service/data/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.SR_10Y?format=jsondata&lastNObservations=90',
     );
-    const series = [...parseEcbSeries(j, 0).values()][0] ?? [];
+    const series =
+      [...parseEcbSeries(j, 0).values()][0] ?? [];
     const last = series[series.length - 1];
-    if (!last) return [];
+    if (!last) {
+      return [];
+    }
     return [
       {
         group: 'mkt',

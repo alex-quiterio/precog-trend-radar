@@ -1,11 +1,16 @@
 {
-  "printWidth": 120,
+  "printWidth": 60,
   "singleQuote": true,
   "semi": true,
   "trailingComma": "all",
   "arrowParens": "avoid",
-  "bracketSameLine": false,
+  "bracketSameLine": true,
   "vueIndentScriptAndStyle": false,
   "htmlWhitespaceSensitivity": "ignore",
-  "overrides": [{ "files": "*.md", "options": { "proseWrap": "preserve" } }]
+  "overrides": [
+    {
+      "files": "*.md",
+      "options": { "proseWrap": "preserve" }
+    }
+  ]
 }

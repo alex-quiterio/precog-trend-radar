@@ -1,5 +1,8 @@
 <template>
-  <span class="dot" :style="{ background: color }" aria-hidden="true"></span>
+  <span
+    class="dot"
+    :style="{ background: color }"
+    aria-hidden="true"></span>
 </template>
 
 <script lang="ts">

@@ -2,7 +2,11 @@
   "batchcomplete": "",
   "query": {
     "redirects": [
-      { "from": "COP31 / CMP21 / CMA8", "to": "United Nations Climate Change Conference", "tofragment": "2026" }
+      {
+        "from": "COP31 / CMP21 / CMA8",
+        "to": "United Nations Climate Change Conference",
+        "tofragment": "2026"
+      }
     ],
     "pages": {
       "38755144": {

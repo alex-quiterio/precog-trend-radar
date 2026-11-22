@@ -11,8 +11,9 @@ describe('mentionsPerson', () => {
       'Will the Strait of Hormuz reopen to tanker traffic by December 31?',
       'Will Brent crude close above $120 this year?',
       'Will there be a food shortage related to the closure of the Strait of Hormuz?',
-    ])
+    ]) {
       expect(mentionsPerson(q), q).toBe(false);
+    }
   });
   it('drops questions that name a person', () => {
     for (const q of [
@@ -21,20 +22,30 @@ describe('mentionsPerson', () => {
       'Will Elon Musk step down as CEO?',
       'Will President Lula visit Lisbon?',
       'Will @someone post again?',
-    ])
+    ]) {
       expect(mentionsPerson(q), q).toBe(true);
+    }
   });
 });
 
 describe('searchForecasts', () => {
-  const net = fakeFetch(() => fixture('manifold', 'search-markets.json'));
+  const net = fakeFetch(() =>
+    fixture('manifold', 'search-markets.json'),
+  );
   const signal = new AbortController().signal;
   it('asks for open yes/no markets naming the phrase, and reads them', async () => {
-    const found = await searchForecasts('climate change', signal);
+    const found = await searchForecasts(
+      'climate change',
+      signal,
+    );
     expect(net.urls[0]).toContain('term=climate%20change');
-    expect(net.urls[0]).toContain('filter=open&contractType=BINARY');
+    expect(net.urls[0]).toContain(
+      'filter=open&contractType=BINARY',
+    );
     expect(found.length).toBeGreaterThan(0);
-    expect(found.every(f => f.prob >= 0 && f.prob <= 1)).toBe(true);
+    expect(
+      found.every(f => f.prob >= 0 && f.prob <= 1),
+    ).toBe(true);
   });
   it('keeps a phrase’s markets for half an hour, whatever the case', async () => {
     await searchForecasts('Peak oil', signal);

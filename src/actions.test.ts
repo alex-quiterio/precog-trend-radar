@@ -1,5 +1,12 @@
 // Actions on their own app store, with fake services: no shared state, no network.
-import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+import {
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+  type Mock,
+} from 'vitest';
 import { createActions, parseTopicInput } from '@/actions';
 import { createContext } from '@/context';
 import { memoryBackend, useBackend } from '@core/storage';
@@ -14,7 +21,10 @@ let live: {
   setStatus: Mock<(msg: string) => void>;
   start: Mock<() => void>;
 };
-let stories: { load: Mock<() => Promise<void>>; status: { at: Record<string, number> } };
+let stories: {
+  load: Mock<() => Promise<void>>;
+  status: { at: Record<string, number> };
+};
 let actions: ReturnType<typeof createActions>;
 
 beforeEach(() => {
@@ -29,13 +39,20 @@ beforeEach(() => {
     setStatus: vi.fn(),
     start: vi.fn(),
   };
-  stories = { load: vi.fn(async () => {}), status: { at: {} } };
+  stories = {
+    load: vi.fn(async () => {}),
+    status: { at: {} },
+  };
   actions = createActions(app, { live, stories });
 });
 
 describe('topic input', () => {
   it('reads a name, a Wikipedia title and a query', () => {
-    expect(parseTopicInput('Heat pumps | wiki: Heat pump | q: "air source heat pump"')).toEqual({
+    expect(
+      parseTopicInput(
+        'Heat pumps | wiki: Heat pump | q: "air source heat pump"',
+      ),
+    ).toEqual({
       name: 'Heat pumps',
       slot: -1,
       wiki: 'Heat pump',
@@ -61,7 +78,9 @@ describe('actions', () => {
     expect(app.ui.watchErr).toBe(true);
     expect(app.ui.watchMsg).toMatch(/looks like a person/);
     const lens = app.activeLens()!;
-    expect(actions.addTopic(lens.topics[0].name.toUpperCase())).toBe(false);
+    expect(
+      actions.addTopic(lens.topics[0].name.toUpperCase()),
+    ).toBe(false);
     expect(app.ui.watchMsg).toMatch(/already in/);
     expect(actions.addTopic('One more')).toBe(false); // presets fill all six slots
     expect(app.ui.watchMsg).toMatch(/holds 6 topics/);
@@ -86,9 +105,14 @@ describe('actions', () => {
     actions.select(list[list.length - 1].key);
     actions.shiftTopic(1);
     expect(app.selectedEntry()?.key).toBe(list[0].key);
-    const i = app.state.lenses.findIndex(l => l.id === 'github');
+    const i = app.state.lenses.findIndex(
+      l => l.id === 'github',
+    );
     actions.shiftLens(1);
-    expect(app.state.activeLens).toBe(app.state.lenses[(i + 1) % app.state.lenses.length].id);
+    expect(app.state.activeLens).toBe(
+      app.state.lenses[(i + 1) % app.state.lenses.length]
+        .id,
+    );
   });
 });
 
@@ -109,7 +133,10 @@ describe('home channel', () => {
   it('pins a channel as home and saves it; pinning it again unpins', () => {
     actions.toggleHome('portugal');
     expect(app.state.homeLens).toBe('portugal');
-    expect(store.get<{ homeLens?: string }>(LS.prefs, {}).homeLens).toBe('portugal');
+    expect(
+      store.get<{ homeLens?: string }>(LS.prefs, {})
+        .homeLens,
+    ).toBe('portugal');
     actions.toggleHome('energy'); // another channel becomes home instead
     expect(app.state.homeLens).toBe('energy');
     actions.toggleHome('energy');
@@ -127,7 +154,9 @@ describe('deleting channels', () => {
     expect(app.lensById(id)).toBeTruthy();
     const ask = vi.fn(() => true);
     expect(actions.removeLens(id, ask)).toBe(true);
-    expect(ask).toHaveBeenCalledWith('Delete the channel “Bikes”?');
+    expect(ask).toHaveBeenCalledWith(
+      'Delete the channel “Bikes”?',
+    );
     expect(app.lensById(id)).toBeUndefined();
     expect(app.state.activeLens).toBe('github'); // the last built-in channel, just before it in the bar
     expect(stories.load).toHaveBeenCalled();

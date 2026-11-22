@@ -11,7 +11,9 @@ describe('scope guard', () => {
     'Dr. Jane Smith',
     'Mark Zuckerberg',
     'u/someone',
-  ])('refuses %s', s => expect(looksLikePerson(s)).toBe(true));
+  ])('refuses %s', s =>
+    expect(looksLikePerson(s)).toBe(true),
+  );
   it.each([
     'AI agents',
     'Solid-state batteries',
@@ -21,5 +23,7 @@ describe('scope guard', () => {
     'Circular economy',
     'Habitação',
     'Stikstofcrisis',
-  ])('accepts %s', s => expect(looksLikePerson(s)).toBe(false));
+  ])('accepts %s', s =>
+    expect(looksLikePerson(s)).toBe(false),
+  );
 });

@@ -9,8 +9,15 @@ export interface Backend {
   keys(): string[];
 }
 /** A backend that lives in memory: for tests, and when the browser refuses storage. */
-export function memoryBackend(seed: Record<string, unknown> = {}): Backend & { data: Map<string, string> } {
-  const data = new Map(Object.entries(seed).map(([k, v]) => [k, typeof v === 'string' ? v : JSON.stringify(v)]));
+export function memoryBackend(
+  seed: Record<string, unknown> = {},
+): Backend & { data: Map<string, string> } {
+  const data = new Map(
+    Object.entries(seed).map(([k, v]) => [
+      k,
+      typeof v === 'string' ? v : JSON.stringify(v),
+    ]),
+  );
   return {
     data,
     getItem: k => data.get(k) ?? null,
@@ -53,7 +60,8 @@ export function dropKeys(pattern: RegExp): void {
   }
 }
 // Old cache formats no longer read; dropped first when storage is full.
-const STALE = /^precog\.(reading\.v[12]|guardian\.v1|gdelt)\./;
+const STALE =
+  /^precog\.(reading\.v[12]|guardian\.v1|gdelt)\./;
 
 /** JSON values by key. Reads never throw (they fall back to the default); writes never throw either. */
 export const store = {

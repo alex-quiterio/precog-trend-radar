@@ -1,23 +1,44 @@
 // PRECOG / Trend Radar · Open-Meteo cards: today's weather and air, air pollution now, sun and wind, and soil
 // moisture.
-import { type DatapointGroup, type DatapointRow, registerCards } from '@sources/cards';
+import {
+  type DatapointGroup,
+  type DatapointRow,
+  registerCards,
+} from '@sources/cards';
 import { nf0, nf1, nf2 } from '@core/format';
 import { getJSON } from '@sources/registry';
 import { at, num, str } from '@sources/shape';
-import { meteoColumn, meteoPlaces, meteoTimes } from './parse';
+import {
+  meteoColumn,
+  meteoPlaces,
+  meteoTimes,
+} from './parse';
 
-export const PLACES: [string, number, number, DatapointGroup][] = [
+export const PLACES: [
+  string,
+  number,
+  number,
+  DatapointGroup,
+][] = [
   ['Lisbon', 38.72, -9.14, 'pt'],
   ['Porto', 41.15, -8.61, 'pt'],
   ['Amsterdam', 52.37, 4.9, 'nl'],
 ];
 // Soil moisture cards: [card id, place, latitude, longitude, group].
-export const SOIL_PLACES: [string, string, number, number, DatapointGroup][] = [
+export const SOIL_PLACES: [
+  string,
+  string,
+  number,
+  number,
+  DatapointGroup,
+][] = [
   ['soil-mafra', 'Mafra', 38.94, -9.33, 'pt'],
   ['soil-amsterdam', 'Amsterdam', 52.37, 4.9, 'nl'],
 ];
 /** The European air-quality index in words. */
-export const aqiWord = (v: number | null | undefined): string =>
+export const aqiWord = (
+  v: number | null | undefined,
+): string =>
   v == null
     ? ''
     : v <= 20
@@ -50,10 +71,20 @@ registerCards({
     const W = meteoPlaces(wx),
       A = meteoPlaces(aq);
     PLACES.forEach(([name, , , group], i) => {
-      const tmax = meteoColumn(W[i], 'daily', 'temperature_2m_max')[0],
-        rain = meteoColumn(W[i], 'daily', 'precipitation_sum')[0],
+      const tmax = meteoColumn(
+          W[i],
+          'daily',
+          'temperature_2m_max',
+        )[0],
+        rain = meteoColumn(
+          W[i],
+          'daily',
+          'precipitation_sum',
+        )[0],
         aqi = num(at(A[i], 'current', 'european_aqi'));
-      if (tmax == null) return;
+      if (tmax == null) {
+        return;
+      }
       rows.push({
         group,
         id: `wx-${String(name).toLowerCase()}`,
@@ -82,24 +113,43 @@ registerCards({
     );
     const places = meteoPlaces(j);
     PLACES.forEach(([name, , , group], i) => {
-      const now = (field: string) => num(at(places[i], 'current', field));
+      const now = (field: string) =>
+        num(at(places[i], 'current', field));
       const pm25 = now('pm2_5');
-      if (pm25 == null) return;
+      if (pm25 == null) {
+        return;
+      }
       // The hourly column runs to the end of today: keep the hours up to now.
-      const until = Date.parse(`${str(at(places[i], 'current', 'time'))}Z`);
-      const hourly = meteoColumn(places[i], 'hourly', 'pm2_5');
-      const spark = meteoTimes(places[i], 'hourly').flatMap((t, k) => {
-        const v = hourly[k],
-          ms = Date.parse(`${t}Z`);
-        return v == null || !(ms <= until) ? [] : [{ t: ms, value: v }];
-      });
+      const until = Date.parse(
+        `${str(at(places[i], 'current', 'time'))}Z`,
+      );
+      const hourly = meteoColumn(
+        places[i],
+        'hourly',
+        'pm2_5',
+      );
+      const spark = meteoTimes(places[i], 'hourly').flatMap(
+        (t, k) => {
+          const v = hourly[k],
+            ms = Date.parse(`${t}Z`);
+          return v == null || !(ms <= until)
+            ? []
+            : [{ t: ms, value: v }];
+        },
+      );
       const day = spark.slice(-24);
-      const mean = day.length ? day.reduce((a, p) => a + p.value, 0) / day.length : pm25;
+      const mean = day.length
+        ? day.reduce((a, p) => a + p.value, 0) / day.length
+        : pm25;
       const others = [
         ['NO₂', now('nitrogen_dioxide')],
         ['PM10', now('pm10')],
         ['ozone', now('ozone')],
-      ].flatMap(([label, v]) => (v == null ? [] : [`${label} ${nf0.format(v as number)}`]));
+      ].flatMap(([label, v]) =>
+        v == null
+          ? []
+          : [`${label} ${nf0.format(v as number)}`],
+      );
       rows.push({
         group,
         id: `air-${String(name).toLowerCase()}`,
@@ -135,10 +185,20 @@ registerCards({
       ] as [string, string, DatapointGroup][]
     ).forEach(([id, name, group], i) => {
       const place = meteoPlaces(j)[i];
-      const sun = meteoColumn(place, 'daily', 'shortwave_radiation_sum'),
-        wind = meteoColumn(place, 'daily', 'wind_speed_10m_max'),
+      const sun = meteoColumn(
+          place,
+          'daily',
+          'shortwave_radiation_sum',
+        ),
+        wind = meteoColumn(
+          place,
+          'daily',
+          'wind_speed_10m_max',
+        ),
         n = sun.length;
-      if (!n || sun[n - 1] == null) return;
+      if (!n || sun[n - 1] == null) {
+        return;
+      }
       rows.push({
         group,
         id: `sun-${id}`,
@@ -148,10 +208,14 @@ registerCards({
         src: 'Open-Meteo · chart: last 30 days',
         href: 'https://open-meteo.com/',
         o: 15,
-        spark: meteoTimes(place, 'daily').flatMap((t, k) => {
-          const v = sun[k];
-          return v == null ? [] : [{ t: Date.parse(t), value: v / 3.6 }];
-        }),
+        spark: meteoTimes(place, 'daily').flatMap(
+          (t, k) => {
+            const v = sun[k];
+            return v == null
+              ? []
+              : [{ t: Date.parse(t), value: v / 3.6 }];
+          },
+        ),
       });
     });
     return rows;
@@ -169,10 +233,16 @@ SOIL_PLACES.forEach(([id, name, lat, lon, group], i) =>
         `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=soil_moisture_3_to_9cm&daily=precipitation_sum&past_days=60&forecast_days=1&timezone=UTC`,
       );
       const byDay = new Map<string, number[]>();
-      const soil = meteoColumn(j, 'hourly', 'soil_moisture_3_to_9cm');
+      const soil = meteoColumn(
+        j,
+        'hourly',
+        'soil_moisture_3_to_9cm',
+      );
       meteoTimes(j, 'hourly').forEach((t, k) => {
         const v = soil[k];
-        if (v == null) return;
+        if (v == null) {
+          return;
+        }
         const d = t.slice(0, 10);
         byDay.set(d, [...(byDay.get(d) || []), v]);
       });
@@ -180,13 +250,21 @@ SOIL_PLACES.forEach(([id, name, lat, lon, group], i) =>
         t: Date.parse(d),
         value: vs.reduce((a, b) => a + b, 0) / vs.length,
       }));
-      if (days.length < 31) return rows;
+      if (days.length < 31) {
+        return rows;
+      }
       const now = days[days.length - 1],
         before = days[days.length - 31];
-      const rain = meteoColumn(j, 'daily', 'precipitation_sum')
+      const rain = meteoColumn(
+        j,
+        'daily',
+        'precipitation_sum',
+      )
         .slice(-31, -1)
         .reduce<number>((a, b) => a + (b ?? 0), 0);
-      const change = ((now.value - before.value) / (before.value || 1)) * 100;
+      const change =
+        ((now.value - before.value) / (before.value || 1)) *
+        100;
       rows.push({
         group,
         id,

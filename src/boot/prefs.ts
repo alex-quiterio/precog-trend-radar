@@ -8,13 +8,19 @@ import type { AppContext } from '@/context';
 import type { Prefs } from '@/types';
 
 /** Caches written by earlier versions (GDELT, old Reading and Guardian formats), no longer read. */
-export const OLD_CACHES = /^precog\.(gdelt|reading\.v[12]\.|guardian\.v1\.|tgs\.|rss\.)/;
+export const OLD_CACHES =
+  /^precog\.(gdelt|reading\.v[12]\.|guardian\.v1\.|tgs\.|rss\.)/;
 /** Channels an earlier version shipped under another id, so the last visit's channel and topic follow them. */
-export const RENAMED_LENSES: Record<string, string> = { tgs: 'turning' };
+export const RENAMED_LENSES: Record<string, string> = {
+  tgs: 'turning',
+};
 const renamed = (id: string) => RENAMED_LENSES[id] ?? id;
 
 /** Restores the lenses and the last view from storage; anything unusable falls back to a default. */
-export function restore({ app, actions }: AppContext): void {
+export function restore({
+  app,
+  actions,
+}: AppContext): void {
   const { state, ui } = app;
   dropKeys(OLD_CACHES);
   const prefs = store.get<Partial<Prefs>>(LS.prefs, {});
@@ -23,16 +29,35 @@ export function restore({ app, actions }: AppContext): void {
   ui.guardian = !!guardianKey();
   ui.ghToken = !!githubToken();
   // Your home channel if you pinned one (and it still exists); otherwise the channel you last looked at.
-  const home = typeof prefs.homeLens === 'string' ? renamed(prefs.homeLens) : null;
+  const home =
+    typeof prefs.homeLens === 'string'
+      ? renamed(prefs.homeLens)
+      : null;
   state.homeLens = app.lensById(home) ? home : null;
-  const active = typeof prefs.activeLens === 'string' ? renamed(prefs.activeLens) : null;
-  state.activeLens = state.homeLens || (app.lensById(active) && active) || state.lenses[0]?.id || null;
+  const active =
+    typeof prefs.activeLens === 'string'
+      ? renamed(prefs.activeLens)
+      : null;
+  state.activeLens =
+    state.homeLens ||
+    (app.lensById(active) && active) ||
+    state.lenses[0]?.id ||
+    null;
   state.selectedByLens =
-    prefs.selectedByLens && typeof prefs.selectedByLens === 'object'
-      ? Object.fromEntries(Object.entries(prefs.selectedByLens).map(([id, key]) => [renamed(id), key]))
+    prefs.selectedByLens &&
+    typeof prefs.selectedByLens === 'object'
+      ? Object.fromEntries(
+          Object.entries(prefs.selectedByLens).map(
+            ([id, key]) => [renamed(id), key],
+          ),
+        )
       : {};
   // A stream id; loading the streams switches to the channel's first one if this one isn't shown.
-  state.storySrc = typeof prefs.storySrc === 'string' ? prefs.storySrc : 'reading';
-  state.storyScope = prefs.storyScope === 'topic' ? 'topic' : 'lens';
+  state.storySrc =
+    typeof prefs.storySrc === 'string'
+      ? prefs.storySrc
+      : 'reading';
+  state.storyScope =
+    prefs.storyScope === 'topic' ? 'topic' : 'lens';
   state.prevLook = store.get(LS.look, null);
 }

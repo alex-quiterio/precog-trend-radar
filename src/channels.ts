@@ -2,7 +2,12 @@
 // A channel names its lens (the topics whose attention it charts), the datapoints worth knowing in
 // that context, the streams it shows, and any special views (GitHub). Switching channel switches all of it.
 import type { AppStore } from '@/state';
-import { AMSTERDAM_SITES, NEWS_SITES, PORTUGAL_SITES, TURNING_SITES } from '@sources/reading';
+import {
+  AMSTERDAM_SITES,
+  NEWS_SITES,
+  PORTUGAL_SITES,
+  TURNING_SITES,
+} from '@sources/reading';
 
 export interface StorySources {
   /** Sites (origins) whose posts can be a topic's story when they name it in the title. */
@@ -54,24 +59,36 @@ export interface Channel {
 }
 
 /** A channel's open-data cards. Country channels only ever show their own country's data. */
-export const channelDatapoints = (c: Channel): string[] => c.datapoints;
+export const channelDatapoints = (c: Channel): string[] =>
+  c.datapoints;
 
 const MARGINALIAN = 'https://www.themarginalian.org';
 const DUTCHNEWS = NEWS_SITES[0].url;
-const site = (sites: { url: string; name: string }[], name: string) => sites.find(s => s.name === name)!.url;
+const site = (
+  sites: { url: string; name: string }[],
+  name: string,
+) => sites.find(s => s.name === name)!.url;
 const TGS = site(TURNING_SITES, 'The Great Simplification');
 const TURNING = TURNING_SITES.map(s => s.url);
 // A kept library is undated, so it can't tell a day's story: only the dated sites do.
-const TURNING_DATED = TURNING_SITES.filter(s => !s.library).map(s => s.url);
+const TURNING_DATED = TURNING_SITES.filter(
+  s => !s.library,
+).map(s => s.url);
 
 export const CHANNELS: Channel[] = [
   {
     id: 'world',
     icon: 'globe',
     label: 'World',
-    kicker: 'What the internet is echoing today, what forecasters expect, and the money underneath.',
+    kicker:
+      'What the internet is echoing today, what forecasters expect, and the money underneath.',
     lensId: 'world',
-    datapoints: ['inflation-ea', 'ecb', 'unemployment-ea', 'co2'],
+    datapoints: [
+      'inflation-ea',
+      'ecb',
+      'unemployment-ea',
+      'co2',
+    ],
     streams: ['news', 'forecasts', 'hn', 'reading'],
     digest: true,
   },
@@ -82,31 +99,55 @@ export const CHANNELS: Channel[] = [
     kicker:
       'The shift to a life-sustaining world: the energy and ecology underneath, the local economies being built, and the stories that carry us.',
     lensId: 'turning',
-    datapoints: ['co2', 'seaice', 'ctrace-world', 'ctrace-pt', 'cttop-pt', 'ctrace-nl', 'cttop-nl'],
+    datapoints: [
+      'co2',
+      'seaice',
+      'ctrace-world',
+      'ctrace-pt',
+      'cttop-pt',
+      'ctrace-nl',
+      'cttop-nl',
+    ],
     streams: ['reading', 'news', 'forecasts'],
     sites: TURNING,
     digest: true,
     // Its own voices only. They publish weekly or less, so a story stays fresh for a month.
-    stories: { sites: TURNING_DATED, days: 30, latest: { title: 'New in The Great Turning', sites: TURNING_DATED } },
+    stories: {
+      sites: TURNING_DATED,
+      days: 30,
+      latest: {
+        title: 'New in The Great Turning',
+        sites: TURNING_DATED,
+      },
+    },
   },
   {
     id: 'marginalian',
     icon: 'book',
     label: 'Marginalian',
-    kicker: 'Art, science, poetry and philosophy, matched to what you’re watching.',
+    kicker:
+      'Art, science, poetry and philosophy, matched to what you’re watching.',
     lensId: 'marginalian',
     datapoints: [],
     streams: ['reading'],
     sites: [MARGINALIAN],
     digest: true,
     // Its own essays only. It posts a few times a week, so a story stays fresh for a month.
-    stories: { sites: [MARGINALIAN], days: 30, latest: { title: 'New on The Marginalian', sites: [MARGINALIAN] } },
+    stories: {
+      sites: [MARGINALIAN],
+      days: 30,
+      latest: {
+        title: 'New on The Marginalian',
+        sites: [MARGINALIAN],
+      },
+    },
   },
   {
     id: 'energy',
     icon: 'bolt',
     label: 'Energy & power',
-    kicker: 'What powers the grid, what it costs at home, and today’s sun and wind.',
+    kicker:
+      'What powers the grid, what it costs at home, and today’s sun and wind.',
     lensId: 'energy',
     // When power is cheap first: the one thing here you can act on today.
     datapoints: [
@@ -130,7 +171,8 @@ export const CHANNELS: Channel[] = [
     id: 'portugal',
     icon: 'land',
     label: 'Portugal & land',
-    kicker: 'Fire, water and soil in the interior, and the practices of a rural, closed-loop life.',
+    kicker:
+      'Fire, water and soil in the interior, and the practices of a rural, closed-loop life.',
     lensId: 'portugal',
     datapoints: [
       'fire',
@@ -156,7 +198,10 @@ export const CHANNELS: Channel[] = [
     // Portuguese sources only, matched in Portuguese.
     stories: {
       sites: PORTUGAL_SITES.map(s => s.url),
-      latest: { title: 'Today on the land in Portugal', sites: PORTUGAL_SITES.map(s => s.url) },
+      latest: {
+        title: 'Today on the land in Portugal',
+        sites: PORTUGAL_SITES.map(s => s.url),
+      },
     },
     country: 'pt',
   },
@@ -164,7 +209,8 @@ export const CHANNELS: Channel[] = [
     id: 'housing',
     icon: 'house',
     label: 'Housing',
-    kicker: 'House prices, rents and mortgage rates, Portugal and the Netherlands side by side.',
+    kicker:
+      'House prices, rents and mortgage rates, Portugal and the Netherlands side by side.',
     lensId: 'housing',
     datapoints: [
       'hpi-pt',
@@ -184,7 +230,8 @@ export const CHANNELS: Channel[] = [
     id: 'society',
     icon: 'people',
     label: 'Society',
-    kicker: 'Crime, schooling, work and emissions: how Portugal and the Netherlands are doing, side by side.',
+    kicker:
+      'Crime, schooling, work and emissions: how Portugal and the Netherlands are doing, side by side.',
     lensId: 'society',
     datapoints: [
       'homicide-pt',
@@ -208,16 +255,24 @@ export const CHANNELS: Channel[] = [
     id: 'circular',
     icon: 'cycle',
     label: 'Circular economy',
-    kicker: 'The rules and markets that shape recycling and waste services.',
+    kicker:
+      'The rules and markets that shape recycling and waste services.',
     lensId: 'circular',
-    datapoints: ['ctwaste-pt', 'ctwaste-nl', 'inflation-ea', 'ecb', 'unemployment-ea'],
+    datapoints: [
+      'ctwaste-pt',
+      'ctwaste-nl',
+      'inflation-ea',
+      'ecb',
+      'unemployment-ea',
+    ],
     streams: ['news', 'reading', 'hn', 'forecasts'],
   },
   {
     id: 'amsterdam',
     icon: 'bike',
     label: 'Alt Amsterdam',
-    kicker: 'The cooperative, regenerative city: what is moving in its scene, picked each day.',
+    kicker:
+      'The cooperative, regenerative city: what is moving in its scene, picked each day.',
     lensId: 'amsterdam',
     datapoints: [
       'hpi-nl',
@@ -242,12 +297,25 @@ export const CHANNELS: Channel[] = [
     digest: true,
     // Dutch news, and the scene sites rooted in Amsterdam (Shareable and Resilience are international).
     stories: {
-      sites: [DUTCHNEWS, site(AMSTERDAM_SITES, 'Commons Network'), site(AMSTERDAM_SITES, 'Repair Café')],
-      latest: { title: 'Today in the Netherlands', sites: [DUTCHNEWS] },
+      sites: [
+        DUTCHNEWS,
+        site(AMSTERDAM_SITES, 'Commons Network'),
+        site(AMSTERDAM_SITES, 'Repair Café'),
+      ],
+      latest: {
+        title: 'Today in the Netherlands',
+        sites: [DUTCHNEWS],
+      },
     },
     links: [
-      { label: 'Gatherings this weekend on Hipsy', href: 'https://hipsy.nl/events?period=current_weekend' },
-      { label: 'Workshops', href: 'https://hipsy.nl/events/workshops' },
+      {
+        label: 'Gatherings this weekend on Hipsy',
+        href: 'https://hipsy.nl/events?period=current_weekend',
+      },
+      {
+        label: 'Workshops',
+        href: 'https://hipsy.nl/events/workshops',
+      },
     ],
     country: 'nl',
   },
@@ -255,9 +323,15 @@ export const CHANNELS: Channel[] = [
     id: 'markets',
     icon: 'candles',
     label: 'Markets',
-    kicker: 'Real prices: oil, US stocks and AI leaders, crypto, gold and currencies, and what moved this week.',
+    kicker:
+      'Real prices: oil, US stocks and AI leaders, crypto, gold and currencies, and what moved this week.',
     lensId: 'markets',
-    datapoints: ['yield-ea-10y', 'ecb', 'inflation-ea', 'unemployment-ea'],
+    datapoints: [
+      'yield-ea-10y',
+      'ecb',
+      'inflation-ea',
+      'unemployment-ea',
+    ],
     streams: ['news', 'forecasts', 'hn'],
     prices: true,
     digest: true,
@@ -271,23 +345,41 @@ export const CHANNELS: Channel[] = [
     lensId: 'birds',
     migration: true,
     // Birds crossing near each city, and its weather: wind and rain decide a migration night.
-    datapoints: ['birds-amsterdam', 'wx-amsterdam', 'birds-lisbon', 'wx-lisbon'],
+    datapoints: [
+      'birds-amsterdam',
+      'wx-amsterdam',
+      'birds-lisbon',
+      'wx-lisbon',
+    ],
     // Birds only: no followed sites (they write about other things), and the gist never looks elsewhere.
     streams: ['seen-amsterdam', 'seen-lisbon', 'news'],
     focused: true,
     digest: true,
     links: [
-      { label: 'Trektellen: live counts at watch sites', href: 'https://www.trektellen.org/' },
-      { label: 'eBird: North Holland', href: 'https://ebird.org/region/NL-NH' },
-      { label: 'eBird: Lisbon', href: 'https://ebird.org/region/PT-11' },
-      { label: 'Migration atlas', href: 'https://migrationatlas.org/' },
+      {
+        label: 'Trektellen: live counts at watch sites',
+        href: 'https://www.trektellen.org/',
+      },
+      {
+        label: 'eBird: North Holland',
+        href: 'https://ebird.org/region/NL-NH',
+      },
+      {
+        label: 'eBird: Lisbon',
+        href: 'https://ebird.org/region/PT-11',
+      },
+      {
+        label: 'Migration atlas',
+        href: 'https://migrationatlas.org/',
+      },
     ],
   },
   {
     id: 'github',
     icon: 'code',
     label: 'GitHub',
-    kicker: 'What’s being built, what’s rising, and your own work.',
+    kicker:
+      'What’s being built, what’s rising, and your own work.',
     lensId: 'github',
     datapoints: [],
     streams: ['news', 'hn'],
@@ -309,15 +401,25 @@ export function channels(app: AppStore): Channel[] {
       streams: ['reading', 'forecasts', 'hn'],
       own: true,
     }));
-  return [...CHANNELS.filter(c => app.lensById(c.lensId)), ...own];
+  return [
+    ...CHANNELS.filter(c => app.lensById(c.lensId)),
+    ...own,
+  ];
 }
 /** True for a lens PRECOG ships with (its channel can't be deleted). */
-export const isBuiltInLens = (lensId: string): boolean => CHANNELS.some(c => c.lensId === lensId);
+export const isBuiltInLens = (lensId: string): boolean =>
+  CHANNELS.some(c => c.lensId === lensId);
 /** The channel showing a lens (undefined for none). */
-export const channelOfLens = (app: AppStore, lensId: string): Channel | undefined =>
+export const channelOfLens = (
+  app: AppStore,
+  lensId: string,
+): Channel | undefined =>
   channels(app).find(c => c.lensId === lensId);
 /** The channel on screen: the one whose lens is active. */
 export function activeChannel(app: AppStore): Channel {
   const all = channels(app);
-  return all.find(c => c.lensId === app.state.activeLens) || all[0];
+  return (
+    all.find(c => c.lensId === app.state.activeLens) ||
+    all[0]
+  );
 }

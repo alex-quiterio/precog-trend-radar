@@ -12,16 +12,39 @@ export const AMBIGUOUS_NAMES = new Set(
     ' ',
   ),
 );
-export const TITLES = /^(mr|mrs|ms|miss|mx|dr|prof|sir|dame|lord|lady|president|senator|ceo)\.?\s/i;
+export const TITLES =
+  /^(mr|mrs|ms|miss|mx|dr|prof|sir|dame|lord|lady|president|senator|ceo)\.?\s/i;
 export function looksLikePerson(raw: unknown): boolean {
   const s = String(raw || '').trim();
-  if (!s) return false;
-  if (/^@\w/.test(s) || /\S+@\S+\.\S+/.test(s) || /^(u|user)\/\w/i.test(s)) return true;
-  if (TITLES.test(s)) return true;
+  if (!s) {
+    return false;
+  }
+  if (
+    /^@\w/.test(s) ||
+    /\S+@\S+\.\S+/.test(s) ||
+    /^(u|user)\/\w/i.test(s)
+  ) {
+    return true;
+  }
+  if (TITLES.test(s)) {
+    return true;
+  }
   const words = s.split(/\s+/);
-  if (words.length < 2 || words.length > 3) return false;
-  if (!words.every(w => /^[\p{L}][\p{L}'’.-]*$/u.test(w))) return false;
-  const first = words[0].toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-  if (FIRST_NAMES.has(first)) return true;
-  return words.every(w => /^\p{Lu}\p{Ll}/u.test(w)) && AMBIGUOUS_NAMES.has(first);
+  if (words.length < 2 || words.length > 3) {
+    return false;
+  }
+  if (!words.every(w => /^[\p{L}][\p{L}'’.-]*$/u.test(w))) {
+    return false;
+  }
+  const first = words[0]
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '');
+  if (FIRST_NAMES.has(first)) {
+    return true;
+  }
+  return (
+    words.every(w => /^\p{Lu}\p{Ll}/u.test(w)) &&
+    AMBIGUOUS_NAMES.has(first)
+  );
 }

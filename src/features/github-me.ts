@@ -6,7 +6,11 @@ import { errorText } from '@core/errors';
 import { MIN, store } from '@core/config';
 import { githubHeaders } from '@sources/github/auth';
 import { HttpError, getJSON } from '@sources/registry';
-import { parseActivity, parseUser, parseUserRepos } from '@sources/github/parse';
+import {
+  parseActivity,
+  parseUser,
+  parseUserRepos,
+} from '@sources/github/parse';
 
 const USER_KEY = 'precog.github.user';
 const CACHE = 'precog.github.me.v1.';
@@ -37,9 +41,16 @@ export interface MyStats {
 
 /** Your public GitHub numbers, the username they're for, and how to load them. The app makes one (context.ts). */
 export function createMyGitHub() {
-  const me = reactive({ stats: null as MyStats | null, loading: false, error: null as string | null, at: 0 });
+  const me = reactive({
+    stats: null as MyStats | null,
+    loading: false,
+    error: null as string | null,
+    at: 0,
+  });
   // Held in a ref (and mirrored to storage) so the panel shows a new username straight away.
-  const user = ref<string>(String(store.get(USER_KEY, DEFAULT_USER) || '').trim());
+  const user = ref<string>(
+    String(store.get(USER_KEY, DEFAULT_USER) || '').trim(),
+  );
   function setUser(u: string): void {
     user.value = String(u || '').trim();
     store.set(USER_KEY, user.value);
@@ -51,32 +62,65 @@ export function createMyGitHub() {
       return;
     }
     const ck = CACHE + login.toLowerCase();
-    const c = store.get<{ at: number; stats: MyStats } | null>(ck, null);
+    const c = store.get<{
+      at: number;
+      stats: MyStats;
+    } | null>(ck, null);
     if (!force && c && Date.now() - c.at < 30 * MIN) {
-      Object.assign(me, { stats: c.stats, at: c.at, error: null });
+      Object.assign(me, {
+        stats: c.stats,
+        at: c.at,
+        error: null,
+      });
       return;
     }
     me.loading = true;
     me.error = null;
     try {
       const base = `https://api.github.com/users/${encodeURIComponent(login)}`;
-      const [userReply, repoReply, events] = await Promise.all([
-        getJSON(base, undefined, githubHeaders()),
-        getJSON(`${base}/repos?per_page=100&sort=pushed&type=owner`, undefined, githubHeaders()),
-        getJSON(`${base}/events/public?per_page=100`, undefined, githubHeaders()).catch(() => []),
-      ]);
+      const [userReply, repoReply, events] =
+        await Promise.all([
+          getJSON(base, undefined, githubHeaders()),
+          getJSON(
+            `${base}/repos?per_page=100&sort=pushed&type=owner`,
+            undefined,
+            githubHeaders(),
+          ),
+          getJSON(
+            `${base}/events/public?per_page=100`,
+            undefined,
+            githubHeaders(),
+          ).catch(() => []),
+        ]);
       const user = parseUser(userReply);
-      const own: MyRepo[] = parseUserRepos(repoReply).map(({ name, url, desc, stars, forks, language, pushed }) => ({
-        name,
-        url,
-        desc,
-        stars,
-        forks,
-        language,
-        pushed,
-      }));
+      const own: MyRepo[] = parseUserRepos(repoReply).map(
+        ({
+          name,
+          url,
+          desc,
+          stars,
+          forks,
+          language,
+          pushed,
+        }) => ({
+          name,
+          url,
+          desc,
+          stars,
+          forks,
+          language,
+          pushed,
+        }),
+      );
       const langs = new Map<string, number>();
-      own.forEach(r => r.language && langs.set(r.language, (langs.get(r.language) || 0) + 1));
+      own.forEach(
+        r =>
+          r.language &&
+          langs.set(
+            r.language,
+            (langs.get(r.language) || 0) + 1,
+          ),
+      );
       const { days, pushes } = parseActivity(events);
       const stats: MyStats = {
         ...user,
@@ -85,7 +129,12 @@ export function createMyGitHub() {
           .sort((a, b) => b[1] - a[1])
           .slice(0, 6)
           .map(([lang, count]) => ({ lang, count })),
-        topRepos: [...own].sort((a, b) => b.stars - a.stars || b.pushed - a.pushed).slice(0, 5),
+        topRepos: [...own]
+          .sort(
+            (a, b) =>
+              b.stars - a.stars || b.pushed - a.pushed,
+          )
+          .slice(0, 5),
         recent: own.slice(0, 5),
         activity: days,
         pushes30: pushes,
@@ -99,12 +148,18 @@ export function createMyGitHub() {
           ? `no GitHub user called “${login}”`
           : e instanceof HttpError && e.status === 401
             ? 'GitHub rejected the token; change or remove it'
-            : e instanceof HttpError && (e.status === 403 || e.status === 429)
+            : e instanceof HttpError &&
+                (e.status === 403 || e.status === 429)
               ? 'GitHub rate limit reached; try again in a few minutes, or add a token'
               : errorText(e);
     }
     me.loading = false;
   }
-  return { state: me, user: (): string => user.value, setUser, load };
+  return {
+    state: me,
+    user: (): string => user.value,
+    setUser,
+    load,
+  };
 }
 export type MyGitHub = ReturnType<typeof createMyGitHub>;

@@ -11,13 +11,41 @@ import {
   type DatapointRow,
 } from '@sources/cards';
 
-export type { DatapointFacts, DatapointGroup, DatapointRow };
-export const DATAPOINT_GROUPS: { id: DatapointGroup; label: string; hint: string }[] = [
-  { id: 'pt', label: 'Portugal', hint: 'Land, air, weather, prices, jobs' },
-  { id: 'nl', label: 'Netherlands', hint: 'Land, air, weather, prices, jobs' },
-  { id: 'ea', label: 'Euro area', hint: 'Rates, prices, jobs' },
-  { id: 'mkt', label: 'Markets', hint: 'The euro, bonds, gold, Bitcoin' },
-  { id: 'planet', label: 'Planet', hint: 'The slow numbers' },
+export type {
+  DatapointFacts,
+  DatapointGroup,
+  DatapointRow,
+};
+export const DATAPOINT_GROUPS: {
+  id: DatapointGroup;
+  label: string;
+  hint: string;
+}[] = [
+  {
+    id: 'pt',
+    label: 'Portugal',
+    hint: 'Land, air, weather, prices, jobs',
+  },
+  {
+    id: 'nl',
+    label: 'Netherlands',
+    hint: 'Land, air, weather, prices, jobs',
+  },
+  {
+    id: 'ea',
+    label: 'Euro area',
+    hint: 'Rates, prices, jobs',
+  },
+  {
+    id: 'mkt',
+    label: 'Markets',
+    hint: 'The euro, bonds, gold, Bitcoin',
+  },
+  {
+    id: 'planet',
+    label: 'Planet',
+    hint: 'The slow numbers',
+  },
 ];
 /** How long a loader's cards count as fresh before a channel showing them fetches them again. */
 const FRESH_MS = 60 * 60e3;
@@ -27,7 +55,9 @@ const FRESH_MS = 60 * 60e3;
  * Only the loaders the channel on screen needs are run (see `cards` on each loader); the others run when a
  * channel that shows their cards opens. Cards fetched for one channel stay for the next that shows them.
  */
-export function createDatapoints(loaders: CardLoader[] = CARD_LOADERS) {
+export function createDatapoints(
+  loaders: CardLoader[] = CARD_LOADERS,
+) {
   const state = reactive({
     rows: [] as DatapointRow[],
     facts: {} as DatapointFacts,
@@ -46,22 +76,36 @@ export function createDatapoints(loaders: CardLoader[] = CARD_LOADERS) {
   async function load(ids?: string[]): Promise<void> {
     const now = Date.now();
     const due = loaders.filter(
-      l => (!ids || l.cards.some(c => ids.includes(c))) && now - (ran.get(l.id) ?? -Infinity) >= FRESH_MS,
+      l =>
+        (!ids || l.cards.some(c => ids.includes(c))) &&
+        now - (ran.get(l.id) ?? -Infinity) >= FRESH_MS,
     );
-    if (!due.length) return;
+    if (!due.length) {
+      return;
+    }
     due.forEach(l => ran.set(l.id, now));
     state.loading++;
-    const { rows, facts, failed } = await loadCards(due).finally(() => state.loading--);
+    const { rows, facts, failed } = await loadCards(
+      due,
+    ).finally(() => state.loading--);
     failed.forEach(f => ran.delete(f.id));
     const mine = new Set(due.flatMap(l => l.cards));
     const dueIds = new Set(due.map(l => l.id));
     Object.assign(state, {
-      rows: [...state.rows.filter(r => !mine.has(r.id)), ...rows].sort((a, b) => a.o - b.o),
+      rows: [
+        ...state.rows.filter(r => !mine.has(r.id)),
+        ...rows,
+      ].sort((a, b) => a.o - b.o),
       facts: { ...state.facts, ...facts },
-      failed: [...state.failed.filter(f => !dueIds.has(f.id)), ...failed],
+      failed: [
+        ...state.failed.filter(f => !dueIds.has(f.id)),
+        ...failed,
+      ],
       at: Date.now(),
     });
   }
   return { state, load };
 }
-export type Datapoints = ReturnType<typeof createDatapoints>;
+export type Datapoints = ReturnType<
+  typeof createDatapoints
+>;

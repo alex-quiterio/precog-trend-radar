@@ -4,7 +4,14 @@
 // The state is reactive: views re-render on their own when what they read changes. Series and stats are
 // replaced whole (never edited in place) and marked raw, so hundreds of points don't each become a proxy.
 import { reactive } from 'vue';
-import type { Alert, Entry, Lens, Prefs, SeriesPoint, TopicDef } from '@/types';
+import type {
+  Alert,
+  Entry,
+  Lens,
+  Prefs,
+  SeriesPoint,
+  TopicDef,
+} from '@/types';
 import {
   LS,
   MAX_LENSES,
@@ -23,10 +30,21 @@ import { type Obj, isObj } from '@sources/shape';
 export interface LastLook {
   at: number;
   source: string;
-  items: Record<string, { z: number | null; level: string | null; latest: number }>;
+  items: Record<
+    string,
+    {
+      z: number | null;
+      level: string | null;
+      latest: number;
+    }
+  >;
 }
-export const keyOf = (lensId: string, name: string): string => `${lensId}::${name.toLowerCase()}`;
-export const series = (E: Entry): SeriesPoint[] => E.liveSeries;
+export const keyOf = (
+  lensId: string,
+  name: string,
+): string => `${lensId}::${name.toLowerCase()}`;
+export const series = (E: Entry): SeriesPoint[] =>
+  E.liveSeries;
 
 export function presetLenses(): Lens[] {
   return PRESETS.map(p => ({
@@ -36,7 +54,10 @@ export function presetLenses(): Lens[] {
     lang: 'en',
     country: null,
     topics: p.topics.map((t, slot) => {
-      const [name, o = {}] = t as [string, { wiki?: string; q?: string }?];
+      const [name, o = {}] = t as [
+        string,
+        { wiki?: string; q?: string }?,
+      ];
       return { name, slot, wiki: o.wiki, q: o.q };
     }),
   }));
@@ -57,27 +78,47 @@ const OLD_PRESET_IDS = new Set([
   'amsterdam',
 ]);
 /** A topic read back from storage, if it is usable: a name, a free slot, and nothing that names a person. */
-function storedTopic(t: unknown, used: Set<number>): TopicDef | null {
-  if (!isObj(t) || typeof t.name !== 'string') return null;
-  const slot = t.slot;
-  if (typeof slot !== 'number' || !Number.isInteger(slot) || slot < 0 || slot >= MAX_TOPICS || used.has(slot))
+function storedTopic(
+  t: unknown,
+  used: Set<number>,
+): TopicDef | null {
+  if (!isObj(t) || typeof t.name !== 'string') {
     return null;
-  const wiki = typeof t.wiki === 'string' ? t.wiki : undefined,
+  }
+  const slot = t.slot;
+  if (
+    typeof slot !== 'number' ||
+    !Number.isInteger(slot) ||
+    slot < 0 ||
+    slot >= MAX_TOPICS ||
+    used.has(slot)
+  ) {
+    return null;
+  }
+  const wiki =
+      typeof t.wiki === 'string' ? t.wiki : undefined,
     q = typeof t.q === 'string' ? t.q : undefined;
-  if ([t.name, wiki, q].some(looksLikePerson)) return null;
+  if ([t.name, wiki, q].some(looksLikePerson)) {
+    return null;
+  }
   used.add(slot);
   return { name: t.name, slot, wiki, q };
 }
 /** A lens read back from storage, with its unusable topics dropped. */
 function storedLens(l: Obj): Lens {
   const used = new Set<number>();
-  const lang = typeof l.lang === 'string' && /^[a-z]{2,3}$/.test(l.lang) ? l.lang : 'en';
+  const lang =
+    typeof l.lang === 'string' &&
+    /^[a-z]{2,3}$/.test(l.lang)
+      ? l.lang
+      : 'en';
   return {
     id: String(l.id),
     name: String(l.name || 'Lens'),
     desc: typeof l.desc === 'string' ? l.desc : '',
     lang,
-    country: typeof l.country === 'string' ? l.country : null,
+    country:
+      typeof l.country === 'string' ? l.country : null,
     topics: (Array.isArray(l.topics) ? l.topics : [])
       .map(t => storedTopic(t, used))
       .filter((t): t is TopicDef => !!t)
@@ -109,21 +150,45 @@ export type AppState = ReturnType<typeof initialState>;
 export function createAppStore() {
   const state = initialState();
   const ui = createUi();
-  const lensById = (id: string | null | undefined): Lens | undefined => state.lenses.find(l => l.id === id);
-  const activeLens = (): Lens | null => lensById(state.activeLens) || state.lenses[0] || null;
-  const entriesOf = (lens: Lens | null | undefined): Entry[] =>
-    lens ? lens.topics.map(t => state.rt.get(keyOf(lens.id, t.name))).filter((E): E is Entry => !!E) : [];
-  const allEntries = (): Entry[] => state.lenses.flatMap(entriesOf);
+  const lensById = (
+    id: string | null | undefined,
+  ): Lens | undefined =>
+    state.lenses.find(l => l.id === id);
+  const activeLens = (): Lens | null =>
+    lensById(state.activeLens) || state.lenses[0] || null;
+  const entriesOf = (
+    lens: Lens | null | undefined,
+  ): Entry[] =>
+    lens
+      ? lens.topics
+          .map(t => state.rt.get(keyOf(lens.id, t.name)))
+          .filter((E): E is Entry => !!E)
+      : [];
+  const allEntries = (): Entry[] =>
+    state.lenses.flatMap(entriesOf);
   /** Every topic, the channel on screen first (the data loop fetches in this order). */
   const orderedEntries = (): Entry[] => {
     const a = activeLens();
-    return [...entriesOf(a), ...state.lenses.filter(l => l !== a).flatMap(entriesOf)];
+    return [
+      ...entriesOf(a),
+      ...state.lenses
+        .filter(l => l !== a)
+        .flatMap(entriesOf),
+    ];
   };
   function selectedEntry(): Entry | null {
     const lens = activeLens();
-    if (!lens) return null;
+    if (!lens) {
+      return null;
+    }
     const list = entriesOf(lens);
-    return list.find(E => E.name === state.selectedByLens[lens.id]) || list[0] || null;
+    return (
+      list.find(
+        E => E.name === state.selectedByLens[lens.id],
+      ) ||
+      list[0] ||
+      null
+    );
   }
   function ensureEntry(lens: Lens, def: TopicDef): Entry {
     const key = keyOf(lens.id, def.name);
@@ -157,9 +222,15 @@ export function createAppStore() {
   }
   function syncEntries(): void {
     const keep = new Set<string>();
-    state.lenses.forEach(l => l.topics.forEach(t => keep.add(ensureEntry(l, t).key)));
+    state.lenses.forEach(l =>
+      l.topics.forEach(t =>
+        keep.add(ensureEntry(l, t).key),
+      ),
+    );
     [...state.rt.keys()].forEach(k => {
-      if (!keep.has(k)) state.rt.delete(k);
+      if (!keep.has(k)) {
+        state.rt.delete(k);
+      }
     });
   }
   function saveLenses(): void {
@@ -171,7 +242,12 @@ export function createAppStore() {
         desc: l.desc || '',
         lang: l.lang,
         country: l.country,
-        topics: l.topics.map(({ name, slot, wiki, q }) => ({ name, slot, wiki, q })),
+        topics: l.topics.map(({ name, slot, wiki, q }) => ({
+          name,
+          slot,
+          wiki,
+          q,
+        })),
       })),
     );
   }
@@ -187,20 +263,38 @@ export function createAppStore() {
   }
   function loadLenses(): void {
     const stored = store.get<unknown>(LS.lenses, null);
-    let lenses: Obj[] = Array.isArray(stored) ? stored.filter(isObj) : [],
+    let lenses: Obj[] = Array.isArray(stored)
+        ? stored.filter(isObj)
+        : [],
       upgraded = false;
     if (!lenses.length) {
       lenses = presetLenses() as unknown as Obj[];
-    } else if ((store.get(LS.presetVer, 1) || 1) < PRESET_VERSION) {
-      const own = lenses.filter(l => !OLD_PRESET_IDS.has(String(l.id)) && !PRESETS.some(p => p.id === l.id));
+    } else if (
+      (store.get(LS.presetVer, 1) || 1) < PRESET_VERSION
+    ) {
+      const own = lenses.filter(
+        l =>
+          !OLD_PRESET_IDS.has(String(l.id)) &&
+          !PRESETS.some(p => p.id === l.id),
+      );
       // Topics picked each day (World, Alt Amsterdam: features/hot-topics.ts) keep today's, not the shipped ones.
-      const kept = (l: Obj) => (PICKED_LENSES.includes(String(l.id)) && lenses.find(x => x.id === l.id)) || l;
-      lenses = [...(presetLenses() as unknown as Obj[]).map(kept), ...own];
+      const kept = (l: Obj) =>
+        (PICKED_LENSES.includes(String(l.id)) &&
+          lenses.find(x => x.id === l.id)) ||
+        l;
+      lenses = [
+        ...(presetLenses() as unknown as Obj[]).map(kept),
+        ...own,
+      ];
       upgraded = true;
     }
     store.set(LS.presetVer, PRESET_VERSION);
-    state.lenses = lenses.slice(0, MAX_LENSES).map(storedLens);
-    if (upgraded) saveLenses(); // persist the upgrade now, not on the next edit
+    state.lenses = lenses
+      .slice(0, MAX_LENSES)
+      .map(storedLens);
+    if (upgraded) {
+      saveLenses();
+    } // persist the upgrade now, not on the next edit
     syncEntries();
   }
   return {

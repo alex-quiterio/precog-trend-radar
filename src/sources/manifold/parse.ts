@@ -22,31 +22,60 @@ const SURNAMES = new Set(
 export function mentionsPerson(text: string): boolean {
   // "Will" opens most questions, and the guard would read "Will Russia" as a name.
   const words = String(text)
-    .replace(/^(will|would|does|is|are|can|did|has|have)\s+/i, '')
+    .replace(
+      /^(will|would|does|is|are|can|did|has|have)\s+/i,
+      '',
+    )
     .split(/[\s,;:?!()"“”’'.]+/)
     .filter(Boolean);
   for (let i = 0; i < words.length; i++) {
-    if (/^@\w/.test(words[i]) || SURNAMES.has(words[i].toLowerCase().replace(/'s$/, ''))) return true;
+    if (
+      /^@\w/.test(words[i]) ||
+      SURNAMES.has(
+        words[i].toLowerCase().replace(/'s$/, ''),
+      )
+    ) {
+      return true;
+    }
     for (const n of [2, 3]) {
       const run = words.slice(i, i + n);
-      if (run.length === n && run.every(w => /^\p{Lu}/u.test(w)) && looksLikePerson(run.join(' '))) return true;
+      if (
+        run.length === n &&
+        run.every(w => /^\p{Lu}/u.test(w)) &&
+        looksLikePerson(run.join(' '))
+      ) {
+        return true;
+      }
     }
   }
-  return /\b(President|Senator|Prime Minister|Chancellor|CEO|King|Queen|Pope)\s+\p{Lu}/u.test(text);
+  return /\b(President|Senator|Prime Minister|Chancellor|CEO|King|Queen|Pope)\s+\p{Lu}/u.test(
+    text,
+  );
 }
 
 /**
  * Manifold's search reply as forecasts worth showing: open, resolving after `now`, with a probability,
  * at least 10 forecasters, and a question that names no person.
  */
-export function parseMarkets(reply: unknown, now = Date.now()): Forecast[] {
+export function parseMarkets(
+  reply: unknown,
+  now = Date.now(),
+): Forecast[] {
   return list(reply, 'Manifold').flatMap(m => {
     const prob = num(at(m, 'probability')),
       bettors = num(at(m, 'uniqueBettorCount')) ?? 0,
       closes = num(at(m, 'closeTime')),
       question = str(at(m, 'question')).trim();
-    if (prob == null || bettors < 10 || closes == null || closes <= now || !question || mentionsPerson(question))
+    if (
+      prob == null ||
+      bettors < 10 ||
+      closes == null ||
+      closes <= now ||
+      !question ||
+      mentionsPerson(question)
+    ) {
       return [];
+    }
     return [
       {
         id: 'mf:' + str(at(m, 'id')),

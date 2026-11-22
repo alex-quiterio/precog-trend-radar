@@ -1,26 +1,72 @@
 <template>
-  <panel-shell id="p-digest" title="Today’s stories" :meta="meta" :index="index">
+  <panel-shell
+    id="p-digest"
+    title="Today’s stories"
+    :meta="meta"
+    :index="index">
     <ol v-if="stories.length" class="dg">
-      <li v-for="(d, i) in stories" :key="d.key" class="dg-item" :class="{ lead: i === 0 }">
-        <span class="dg-no" aria-hidden="true">{{ String(i + 1).padStart(2, '0') }}</span>
+      <li
+        v-for="(d, i) in stories"
+        :key="d.key"
+        class="dg-item"
+        :class="{ lead: i === 0 }">
+        <span class="dg-no" aria-hidden="true">
+          {{ String(i + 1).padStart(2, '0') }}
+        </span>
         <div class="dg-body">
           <div class="dg-top">
-            <button type="button" class="dg-topic" :title="'Chart ' + d.E.name" @click="select(d.E.key)">
+            <button
+              type="button"
+              class="dg-topic"
+              :title="'Chart ' + d.E.name"
+              @click="select(d.E.key)">
               <topic-dot :color="d.E.color"></topic-dot>
               {{ d.E.name }}
             </button>
-            <span class="dg-flag">{{ d.source }}{{ d.t ? ' · ' + ago(d.t, ui.now) : '' }}</span>
+            <span class="dg-flag">
+              {{ d.source
+              }}{{ d.t ? ' · ' + ago(d.t, ui.now) : '' }}
+            </span>
             <week-move :d="d"></week-move>
           </div>
-          <a class="dg-text" :href="d.url" target="_blank" rel="noopener noreferrer">{{ d.text }}</a>
+          <a
+            class="dg-text"
+            :href="d.url"
+            target="_blank"
+            rel="noopener noreferrer">
+            {{ d.text }}
+          </a>
           <p v-if="d.also" class="dg-also">
-            <span class="dg-when">{{ d.also.source }}{{ d.also.t ? ' · ' + ago(d.also.t, ui.now) : '' }}</span>
-            <a :href="d.also.url" target="_blank" rel="noopener noreferrer">{{ d.also.text }}</a>
+            <span class="dg-when">
+              {{ d.also.source
+              }}{{
+                d.also.t
+                  ? ' · ' + ago(d.also.t, ui.now)
+                  : ''
+              }}
+            </span>
+            <a
+              :href="d.also.url"
+              target="_blank"
+              rel="noopener noreferrer">
+              {{ d.also.text }}
+            </a>
           </p>
           <div class="dg-foot">
             <span v-if="d.why">{{ d.why }}</span>
-            <a v-if="d.kind === 'headline'" :href="d.wiki" target="_blank" rel="noopener noreferrer">Background ↗</a>
-            <a :href="d.coverage" target="_blank" rel="noopener noreferrer">This week’s coverage ↗</a>
+            <a
+              v-if="d.kind === 'headline'"
+              :href="d.wiki"
+              target="_blank"
+              rel="noopener noreferrer">
+              Background ↗
+            </a>
+            <a
+              :href="d.coverage"
+              target="_blank"
+              rel="noopener noreferrer">
+              This week’s coverage ↗
+            </a>
           </div>
         </div>
       </li>
@@ -30,41 +76,84 @@
       <h4 class="dg-sub">{{ latestTitle }}</h4>
       <ul class="dg dg-latest">
         <li v-for="p in latest" :key="p.id">
-          <a class="dg-head" :href="p.url" target="_blank" rel="noopener noreferrer">{{ p.title }}</a>
-          <span class="dg-when">{{ p.site }} · {{ ago(p.t, ui.now) }}</span>
+          <a
+            class="dg-head"
+            :href="p.url"
+            target="_blank"
+            rel="noopener noreferrer">
+            {{ p.title }}
+          </a>
+          <span class="dg-when">
+            {{ p.site }} · {{ ago(p.t, ui.now) }}
+          </span>
         </li>
       </ul>
     </template>
 
     <template v-if="quiet.length">
-      <h4 class="dg-sub">{{ stories.length ? 'Also moving, no fresh story' : 'Moving, but no fresh story yet' }}</h4>
+      <h4 class="dg-sub">
+        {{
+          stories.length
+            ? 'Also moving, no fresh story'
+            : 'Moving, but no fresh story yet'
+        }}
+      </h4>
       <ul class="dg dg-quiet">
         <li v-for="d in quiet" :key="d.key">
-          <button type="button" class="dg-topic" :title="'Chart ' + d.E.name" @click="select(d.E.key)">
+          <button
+            type="button"
+            class="dg-topic"
+            :title="'Chart ' + d.E.name"
+            @click="select(d.E.key)">
             <topic-dot :color="d.E.color"></topic-dot>
             {{ d.E.name }}
           </button>
-          <a class="dg-what" :href="d.url" target="_blank" rel="noopener noreferrer">{{ d.text }}</a>
+          <a
+            class="dg-what"
+            :href="d.url"
+            target="_blank"
+            rel="noopener noreferrer">
+            {{ d.text }}
+          </a>
           <week-move :d="d"></week-move>
         </li>
       </ul>
     </template>
 
-    <ul v-if="!items.length && loading" class="dg dg-wait" aria-label="Loading today’s stories">
+    <ul
+      v-if="!items.length && loading"
+      class="dg dg-wait"
+      aria-label="Loading today’s stories">
       <li v-for="n in 3" :key="n">
         <i></i>
         <i></i>
       </li>
     </ul>
-    <p v-else-if="!items.length && !latest.length" class="dg-empty">
-      {{ error ? 'Could not load: ' + error : 'No stories for these topics yet.' }}
+    <p
+      v-else-if="!items.length && !latest.length"
+      class="dg-empty">
+      {{
+        error
+          ? 'Could not load: ' + error
+          : 'No stories for these topics yet.'
+      }}
     </p>
   </panel-shell>
 </template>
 
 <script lang="ts">
 import { useApp } from '@/context';
-import { computed, defineComponent, h, onBeforeUnmount, onMounted, ref, shallowRef, watch, type PropType } from 'vue';
+import {
+  computed,
+  defineComponent,
+  h,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  shallowRef,
+  watch,
+  type PropType,
+} from 'vue';
 import { errorText, isAbort } from '@core/errors';
 import { ago, nf0 } from '@core/format';
 import {
@@ -77,7 +166,10 @@ import {
   loadDigest,
   sitePosts,
 } from '@sources/wikipedia/digest';
-import { type ReadingItem, siteByUrl } from '@sources/reading';
+import {
+  type ReadingItem,
+  siteByUrl,
+} from '@sources/reading';
 import { activeChannel } from '@/channels';
 import PanelShell from '@components/PanelShell.vue';
 import TopicDot from '@components/TopicDot.vue';
@@ -87,21 +179,33 @@ import TopicDot from '@components/TopicDot.vue';
 // topics whose attention moved without a fresh story get one quiet line saying what they are. Each says how
 // far its attention moved in a week and, on World, why it was picked.
 
-const signedPct = (p: number): string => `${p >= 0 ? '+' : '−'}${nf0.format(Math.abs(p))}%`;
+const signedPct = (p: number): string =>
+  `${p >= 0 ? '+' : '−'}${nf0.format(Math.abs(p))}%`;
 /** A topic's move in a week: ▲ +120% this week. */
 const WeekMove = defineComponent({
   name: 'WeekMove',
-  props: { d: { type: Object as PropType<DigestItem>, required: true } },
+  props: {
+    d: {
+      type: Object as PropType<DigestItem>,
+      required: true,
+    },
+  },
   setup: props => () =>
     props.d.week == null
       ? null
       : h(
           'span',
           {
-            class: ['dg-week', props.d.week >= 0 ? 'up' : 'down'],
+            class: [
+              'dg-week',
+              props.d.week >= 0 ? 'up' : 'down',
+            ],
             title: `Attention now ${props.d.now == null ? '–' : Math.round(props.d.now)} (100 = its 30-day norm), ${signedPct(props.d.week)} on a week ago`,
           },
-          [`${props.d.week >= 0 ? '▲' : '▼'} ${signedPct(props.d.week)} `, h('small', 'week')],
+          [
+            `${props.d.week >= 0 ? '▲' : '▼'} ${signedPct(props.d.week)} `,
+            h('small', 'week'),
+          ],
         ),
 });
 
@@ -115,11 +219,14 @@ export default defineComponent({
     const data = shallowRef<DigestData>();
     const posts = shallowRef<ReadingItem[]>([]);
     const channel = computed(() => activeChannel(app));
-    const toSites = (urls: string[]) => urls.map(siteByUrl).filter(s => !!s);
+    const toSites = (urls: string[]) =>
+      urls.map(siteByUrl).filter(s => !!s);
     /** The channel's own story sources, if it scopes its stories (see `stories` in channels.ts). */
     const scope = (): StoryScope | undefined => {
       const st = channel.value.stories;
-      return st ? { sites: toSites(st.sites), days: st.days ?? 2 } : undefined;
+      return st
+        ? { sites: toSites(st.sites), days: st.days ?? 2 }
+        : undefined;
     };
     const loading = ref(false),
       error = ref(''),
@@ -133,28 +240,38 @@ export default defineComponent({
       loading.value = true;
       try {
         const sc = scope();
-        const latestSites = toSites(channel.value.stories?.latest?.sites ?? []);
+        const latestSites = toSites(
+          channel.value.stories?.latest?.sites ?? [],
+        );
         posts.value = [];
         const [out, latest] = await Promise.all([
           loadDigest(
             entries(),
             ac.signal,
             partial => {
-              if (!ac.signal.aborted) data.value = partial;
+              if (!ac.signal.aborted) {
+                data.value = partial;
+              }
             },
             sc,
           ),
           sitePosts(latestSites, ac.signal),
         ]);
-        if (ac.signal.aborted) return;
+        if (ac.signal.aborted) {
+          return;
+        }
         posts.value = latest;
         data.value = out;
         error.value = '';
         at.value = Date.now();
       } catch (e) {
-        if (!isAbort(e) && !ac.signal.aborted) error.value = errorText(e);
+        if (!isAbort(e) && !ac.signal.aborted) {
+          error.value = errorText(e);
+        }
       } finally {
-        if (abort === ac) loading.value = false;
+        if (abort === ac) {
+          loading.value = false;
+        }
       }
     }
     // Reload when the channel's topics change (World picks new ones each morning).
@@ -170,29 +287,68 @@ export default defineComponent({
     const items = computed(() => {
       const list = entries();
       const byKey = new Map(list.map(E => [E.key, E]));
-      return digestItems(list, data.value, ui.now, scope()).map(d => {
+      return digestItems(
+        list,
+        data.value,
+        ui.now,
+        scope(),
+      ).map(d => {
         const E = byKey.get(d.key)!;
         const pick = hot.for(E.lensId)?.pickOf(E.name);
-        return { ...d, E, why: pick?.why && pick.echoes.length ? `Picked for: ${pick.why}` : '' };
+        return {
+          ...d,
+          E,
+          why:
+            pick?.why && pick.echoes.length
+              ? `Picked for: ${pick.why}`
+              : '',
+        };
       });
     });
-    const meta = computed(() => (at.value ? `checked ${ago(at.value, ui.now)}` : loading.value ? 'reading…' : ''));
+    const meta = computed(() =>
+      at.value
+        ? `checked ${ago(at.value, ui.now)}`
+        : loading.value
+          ? 'reading…'
+          : '',
+    );
     const latest = computed(() => {
       const st = channel.value.stories;
-      const told = new Set(items.value.flatMap(d => (d.kind === 'quiet' ? [] : [d.url, d.also?.url ?? ''])));
+      const told = new Set(
+        items.value.flatMap(d =>
+          d.kind === 'quiet'
+            ? []
+            : [d.url, d.also?.url ?? ''],
+        ),
+      );
       // The world's channels list the Guardian's newest on their topics (only with a key: nothing is cached without).
-      if (!st) return guardianLatest(entries(), told, ui.now);
-      return st.latest ? latestPosts(posts.value, told, ui.now, st.days ?? 2) : [];
+      if (!st) {
+        return guardianLatest(entries(), told, ui.now);
+      }
+      return st.latest
+        ? latestPosts(
+            posts.value,
+            told,
+            ui.now,
+            st.days ?? 2,
+          )
+        : [];
     });
     return {
       ui,
       items,
       latest,
       latestTitle: computed(() =>
-        channel.value.stories ? (channel.value.stories.latest?.title ?? '') : 'Today in the Guardian',
+        channel.value.stories
+          ? (channel.value.stories.latest?.title ?? '')
+          : 'Today in the Guardian',
       ),
-      stories: computed(() => items.value.filter(d => d.kind !== 'quiet')),
-      quiet: computed(() => items.value.filter(d => d.kind === 'quiet')),
+      stories: computed(() =>
+        items.value.filter(d => d.kind !== 'quiet'),
+      ),
+      quiet: computed(() =>
+        items.value.filter(d => d.kind === 'quiet'),
+      ),
       loading,
       error,
       meta,
